@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\backend",
+    "\\backend\\API"
   ],
-  "SelectedNode": "\\backend.sln",
+  "SelectedNode": "\\backend\\API\\Program.cs",
   "PreviewInSolutionExplorer": false
 }
