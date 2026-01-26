@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +8,7 @@ using Projet.Infrastructure.Persistence;
 using Projet.Infrastructure.Services;
 using ProjectManagerAPI.API.Middleware;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,13 +89,23 @@ builder.Services.AddControllers()
     });
 
 
+
+// Swagger configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddLogging();
+
 
 var app = builder.Build();
 
 
+
 if (app.Environment.IsDevelopment())
 {
+    // Swagger UI only in Development
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

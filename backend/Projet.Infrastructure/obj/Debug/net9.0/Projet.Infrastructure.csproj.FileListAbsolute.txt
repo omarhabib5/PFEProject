@@ -16,3 +16,7 @@ c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\refint\Projet.Infrastructure.dll
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\Projet.Infrastructure.pdb
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\ref\Projet.Infrastructure.dll
+C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\bin\Debug\net9.0\Projet.Infrastructure.runtimeconfig.json
+C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\EFCoreSqlServerNetTopologySuite.cs
+C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\EFCoreSqlServerHierarchyId.cs
+C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Infrastructure\obj\Debug\net9.0\Projet.Infrastructure.genruntimeconfig.cache
