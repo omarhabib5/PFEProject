@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace Projet.Domain.Command
+namespace Projet.Domain.Command.Project
 {
     public class DeleteProjectCommand : IRequest<Unit>
     {

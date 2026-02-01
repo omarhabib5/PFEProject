@@ -4,9 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Projet.Domain.Handler
+namespace Projet.Domain.Model
 {
-    internal class DeleteProjectCommandHandler
+    public enum State
     {
+        pending,
+        todo,
+        inProgress,
+        done,
+        validated
     }
 }

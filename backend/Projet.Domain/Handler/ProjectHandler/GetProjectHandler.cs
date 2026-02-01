@@ -8,9 +8,9 @@ using Projet.Domain.Interface;
 using Projet.Domain.Model;
 using Projet.Domain.Querie;
 
-namespace Projet.Domain.Handler
+namespace Projet.Domain.Handler.ProjectHandler
 {
-    public class GetProjectByIdHandler : IRequestHandler<GetProjectByIdQuery, ProjectModel>
+    public class GetProjectByIdHandler : IRequestHandler<GetProjectByIdQuery, Project>
     {
         private readonly IApplicationDbSet context;
 
@@ -19,7 +19,7 @@ namespace Projet.Domain.Handler
             this.context = context;
         }
 
-        public async Task<ProjectModel> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Project> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
         {
             var project = context.Projects.FirstOrDefault(p => p.id == request.Id);
             
@@ -32,7 +32,7 @@ namespace Projet.Domain.Handler
         }
     }
 
-    public class GetAllProjectsHandler : IRequestHandler<GetAllProjectsQuery, List<ProjectModel>>
+    public class GetAllProjectsHandler : IRequestHandler<GetAllProjectsQuery, List<Project>>
     {
         private readonly IApplicationDbSet context;
 
@@ -41,7 +41,7 @@ namespace Projet.Domain.Handler
             this.context = context;
         }
 
-        public async Task<List<ProjectModel>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
+        public async Task<List<Project>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
         {
             return context.Projects.ToList();
         }

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using Projet.Domain.Command;
+using Projet.Domain.Command.Project;
 using Projet.Domain.Interface;
 using Projet.Domain.Model;
 
-namespace Projet.Domain.Handler
+namespace Projet.Domain.Handler.ProjectHandler
 {
     public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, Guid>
     {
@@ -21,7 +21,7 @@ namespace Projet.Domain.Handler
 
         public async Task<Guid> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
-            var project = new ProjectModel
+            var project = new Project
             {
                 id = Guid.NewGuid(),
                 name = request.Name,

@@ -4,37 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using Projet.Domain.Command;
 using Projet.Domain.Interface;
+using Projet.Domain.Command.Project;
 
-namespace Projet.Domain.Handler
+namespace Projet.Domain.Handler.ProjectHandler
 {
-    public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand, Unit>
+    internal class DeleteProjectCommandHandler:IRequestHandler<DeleteProjectCommand,Unit>
     {
         private readonly IApplicationDbSet context;
 
-        public UpdateProjectCommandHandler(IApplicationDbSet context)
+        public DeleteProjectCommandHandler(IApplicationDbSet context)
         {
             this.context = context;
         }
-
-        public async Task<Unit> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
         {
             var project = context.Projects.FirstOrDefault(p => p.id == request.id);
-            
             if (project == null)
             {
                 throw new KeyNotFoundException($"Project with ID {request.id} not found.");
             }
-
-            project.name = request.Name;
-            project.description = request.Description;
-            project.startDate = request.StartDate;
-            project.endDate = request.EndDate;
-            project.status = request.Status;
-
+            context.Projects.Remove(project);
             await context.SaveChangesAsync(cancellationToken);
-
             return Unit.Value;
         }
     }
