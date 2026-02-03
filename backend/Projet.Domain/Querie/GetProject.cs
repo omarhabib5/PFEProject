@@ -8,17 +8,17 @@ using Projet.Domain.Model;
 
 namespace Projet.Domain.Querie
 {
-    public class GetProjectByIdQuery : IRequest<ProjectModel>
+    public class GetProjectByIdQuery : IRequest<Project>
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
-        public GetProjectByIdQuery(Guid id)
+        public GetProjectByIdQuery(int id)
         {
             Id = id;
         }
     }
 
-    public class GetAllProjectsQuery : IRequest<List<ProjectModel>>
+    public class GetAllProjectsQuery : IRequest<List<Project>>
     {
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Projet.Domain.Interface;
 using Projet.Domain.Model;
@@ -21,7 +22,7 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<Project> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
         {
-            var project = context.Projects.FirstOrDefault(p => p.id == request.Id);
+            var project = await context.Projects.FirstOrDefaultAsync(p => p.id == request.Id);
             
             if (project == null)
             {
@@ -43,7 +44,7 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<List<Project>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
         {
-            return context.Projects.ToList();
+            return await context.Projects.ToListAsync();
         }
     }
 }

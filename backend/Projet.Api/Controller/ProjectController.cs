@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command;
+using Projet.Domain.Command.Project;
 using Projet.Domain.Querie;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
@@ -46,11 +47,11 @@ namespace Projet.Api.Controller
         public async Task<IActionResult> Create([FromBody] CreateProjectCommand command)
         {
             var projectId = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = projectId }, new { id = projectId });
+            return CreatedAtAction(nameof(GetById), new { id = projectId }, new { message="projet creer", id = projectId });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProjectCommand command)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProjectCommand command)
         {
             try
             {
@@ -65,7 +66,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {

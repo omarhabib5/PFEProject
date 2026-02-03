@@ -10,7 +10,7 @@ using Projet.Domain.Model;
 
 namespace Projet.Domain.Handler.ProjectHandler
 {
-    public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, Guid>
+    public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, int>
     {
         private readonly IApplicationDbSet context;
 
@@ -19,17 +19,19 @@ namespace Projet.Domain.Handler.ProjectHandler
             this.context = context;
         }
 
-        public async Task<Guid> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
             var project = new Project
             {
-                id = Guid.NewGuid(),
+                
                 name = request.Name,
                 description = request.Description,
                 startDate = request.StartDate,
                 endDate = request.EndDate,
-                status = "Active",
-                createdBy = "System"
+                estimatedDuration = request.EstimatedDuration,
+                projectState = request.ProjectState,
+                ServiceId = request.ServiceId,
+                TeamId = request.TeamId
             };
 
             context.Projects.Add(project);

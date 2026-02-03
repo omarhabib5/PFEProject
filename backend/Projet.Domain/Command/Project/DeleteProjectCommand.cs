@@ -9,9 +9,9 @@ namespace Projet.Domain.Command.Project
 {
     public class DeleteProjectCommand : IRequest<Unit>
     {
-        public Guid id { get; set; }
+        public int id { get; set; }
 
-        public DeleteProjectCommand(Guid id)
+        public DeleteProjectCommand(int id)
         {
             this.id = id;
         }

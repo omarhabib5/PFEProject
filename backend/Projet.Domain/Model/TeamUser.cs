@@ -12,8 +12,8 @@ namespace Projet.Domain.Model
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LeftAt { get; set; }
 
-        public Guid UserId { get; set; }
-        public Guid TeamId { get; set; }
+        public int UserId { get; set; }
+        public int  TeamId { get; set; }
 
 
         public virtual User User { get; set; }

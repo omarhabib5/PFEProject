@@ -24,13 +24,14 @@ namespace Projet.Domain.Handler.TaskHandler
                 throw new KeyNotFoundException($"Task with ID {request.id} not found.");
             }
 
-            task.title = request.title;
+            task.Name = request.Name;
             task.description = request.description;
-            task.statue = request.statue;
-            task.Priority = request.Priority;
-            task.EstimationHours = request.EstimationHours;
-            task.ticketID = request.ticketID;
-            task.AssingnedToUserID = request.AssingnedToUserID;
+            task.EstimationDuration = request.EstimationDuration;
+            task.StartDate = request.StartDate;
+            task.EndDate = request.EndDate;
+            task.taskState = request.taskState;
+            task.complexity = request.complexity;
+            task.UserStoryId = request.UserStoryId;
 
             await _context.SaveChangesAsync(cancellationToken);
 

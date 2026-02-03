@@ -17,13 +17,14 @@ namespace Projet.Domain.Handler.TaskHandler
         {
             var task = new Model.Task
             {
-                title = request.title,
+                Name = request.Name,
                 description = request.description,
-                statue = request.statue,
-                Priority = request.Priority,
-                EstimationHours = request.EstimationHours,
-                ticketID = request.ticketID,
-                AssingnedToUserID = request.AssingnedToUserID
+                EstimationDuration = request.EstimationDuration,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                taskState = request.taskState,
+                complexity = request.complexity,
+                UserStoryId = request.UserStoryId
             };
 
             _context.Tasks.Add(task);

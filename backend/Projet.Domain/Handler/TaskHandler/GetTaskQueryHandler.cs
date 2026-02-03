@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Interface;
-using Projet.Domain.Querie.Ticket;
+using Projet.Domain.Querie.Task;
 
 namespace Projet.Domain.Handler.TaskHandler
 {
@@ -20,7 +20,7 @@ namespace Projet.Domain.Handler.TaskHandler
         }
     }
 
-    public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskByIdQuery, Model.Task>
+    public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskById, Model.Task>
     {
         private readonly IApplicationDbSet _context;
 
@@ -29,14 +29,14 @@ namespace Projet.Domain.Handler.TaskHandler
             _context = context;
         }
 
-        public async Task<Model.Task> Handle(GetTaskByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Model.Task> Handle(GetTaskById request, CancellationToken cancellationToken)
         {
             var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.id == request.Id, cancellationToken);
+                .FirstOrDefaultAsync(t => t.id == request.id, cancellationToken);
 
             if (task == null)
             {
-                throw new KeyNotFoundException($"Task with ID {request.Id} not found.");
+                throw new KeyNotFoundException($"Task with ID {request.id} not found.");
             }
 
             return task;

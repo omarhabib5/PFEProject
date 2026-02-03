@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Interface;
 using Projet.Domain.Model;
@@ -15,19 +11,91 @@ namespace Projet.Application.Context
         {
         }
 
-        public DbSet<ProjectModel> Projects { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<Domain.Model.Task> Tasks { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Team> Teams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ProjectModel>(entity =>
+         
+            modelBuilder.Entity<Project>(entity =>
             {
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.description).HasMaxLength(1000);
-                entity.Property(e => e.status).HasMaxLength(50);
-                entity.Property(e => e.createdBy).HasMaxLength(100);
+                
+                entity.HasOne(e => e.Service)
+                    .WithMany()
+                    .HasForeignKey(e => e.ServiceId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasOne(e => e.Team)
+                    .WithMany()
+                    .HasForeignKey(e => e.TeamId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+           
+            modelBuilder.Entity<Domain.Model.Task>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.description).HasMaxLength(1000);
+                
+                entity.HasOne(e => e.UserStory)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserStoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+           
+            modelBuilder.Entity<Service>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.name).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<Team>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.name).IsRequired().HasMaxLength(200);
+            });
+
+          
+            modelBuilder.Entity<Sprint>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Description);
+                
+                
+                entity.HasOne(e => e.Project)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+          
+            modelBuilder.Entity<UserStory>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.name).IsRequired();
+                entity.Property(e => e.description);
+                
+              
+                entity.HasOne(e => e.Sprint)
+                    .WithMany()
+                    .HasForeignKey(e => e.SprintId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                
+                entity.HasOne(e => e.Project)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
