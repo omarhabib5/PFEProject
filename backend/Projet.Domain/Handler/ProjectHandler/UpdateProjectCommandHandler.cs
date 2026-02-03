@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Projet.Domain.Command;
 using Projet.Domain.Interface;
@@ -20,18 +21,34 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<Unit> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
         {
-            var project = context.Projects.FirstOrDefault(p => p.id == request.id);
+            var project = await context.Projects.FirstOrDefaultAsync(p => p.id == request.id);
             
             if (project == null)
             {
                 throw new KeyNotFoundException($"Project with ID {request.id} not found.");
             }
 
+            var serviceExists = await context.Services.AnyAsync(s => s.id == request.ServiceId, cancellationToken);
+            if (!serviceExists)
+            {
+                throw new KeyNotFoundException($"Service with ID {request.ServiceId} not found.");
+            }
+
+              
+            var teamExists = await context.Teams.AnyAsync(t => t.id == request.TeamId, cancellationToken);
+            if (!teamExists)
+            {
+                throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+            }
+
             project.name = request.Name;
             project.description = request.Description;
             project.startDate = request.StartDate;
             project.endDate = request.EndDate;
-            project.status = request.Status;
+            project.estimatedDuration = request.EstimatedDuration;
+            project.projectState = request.ProjectState;
+            project.ServiceId = request.ServiceId;
+            project.TeamId = request.TeamId;
 
             await context.SaveChangesAsync(cancellationToken);
 
