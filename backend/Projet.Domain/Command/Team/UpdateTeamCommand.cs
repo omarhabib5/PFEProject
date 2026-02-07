@@ -6,5 +6,6 @@ namespace Projet.Domain.Command.Team
     {
         public int id { get; set; }
         public string name { get; set; }
+        public int ServiceId { get; set; }
     }
 }

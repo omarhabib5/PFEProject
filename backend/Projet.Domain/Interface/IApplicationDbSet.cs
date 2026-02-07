@@ -11,7 +11,9 @@ namespace Projet.Domain.Interface
         DbSet<Model.Task> Tasks { get; }
         DbSet<Service> Services { get; }
         DbSet<Team> Teams { get; }
-      
+        DbSet<TeamUser> TeamUser { get; }
+        DbSet<User> Users { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        DbSet<T> Set<T>() where T : class;
     }
 }

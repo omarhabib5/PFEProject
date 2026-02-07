@@ -22,7 +22,7 @@ namespace Projet.Domain.Handler.ProjectHandler
         public async Task<Unit> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
         {
             var project = await context.Projects.FirstOrDefaultAsync(p => p.id == request.id);
-            
+
             if (project == null)
             {
                 throw new KeyNotFoundException($"Project with ID {request.id} not found.");
@@ -34,11 +34,17 @@ namespace Projet.Domain.Handler.ProjectHandler
                 throw new KeyNotFoundException($"Service with ID {request.ServiceId} not found.");
             }
 
-              
             var teamExists = await context.Teams.AnyAsync(t => t.id == request.TeamId, cancellationToken);
             if (!teamExists)
             {
                 throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+            }
+
+            // Validate that ProjectManagerId exists
+            var projectManagerExists = await context.Users.AnyAsync(u => u.Id == request.ProjectManagerId, cancellationToken);
+            if (!projectManagerExists)
+            {
+                throw new KeyNotFoundException($"User (Project Manager) with ID {request.ProjectManagerId} not found.");
             }
 
             project.name = request.Name;
@@ -49,6 +55,7 @@ namespace Projet.Domain.Handler.ProjectHandler
             project.projectState = request.ProjectState;
             project.ServiceId = request.ServiceId;
             project.TeamId = request.TeamId;
+            project.ProjectManagerId = request.ProjectManagerId;
 
             await context.SaveChangesAsync(cancellationToken);
 

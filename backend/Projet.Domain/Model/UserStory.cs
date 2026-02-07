@@ -19,5 +19,7 @@ namespace Projet.Domain.Model
         public virtual Sprint Sprint { get; set; }
         public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
+
+        public virtual ICollection<Task> Tasks { get; set; }
     }
 }

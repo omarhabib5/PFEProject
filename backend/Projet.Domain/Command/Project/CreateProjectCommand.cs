@@ -12,7 +12,8 @@ namespace Projet.Domain.Command.Project
         public DateTime EndDate { get; set; }
         public int EstimatedDuration { get; set; }
         public State ProjectState { get; set; }
-        public int ServiceId { get; set; }
-        public int TeamId { get; set; }
+        public int? ServiceId { get; set; }
+        public int? TeamId { get; set; }
+        public int ProjectManagerId { get; set; }
     }
 }

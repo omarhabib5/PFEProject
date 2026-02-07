@@ -8,6 +8,9 @@ namespace Projet.Domain.Model
 {
     public class TeamUser
     {
+        
+        public int Id { get; set; }  
+        
         public Role role { get; set; }
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LeftAt { get; set; }

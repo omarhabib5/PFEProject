@@ -18,7 +18,13 @@ namespace Projet.Domain.Model
         public int complexity { get; set; }
 
         public int UserStoryId { get; set; }
+        public int? SprintId { get; set; }
+
+        public virtual Sprint Sprint { get; set; }
         public virtual UserStory UserStory { get; set; }
+
+        public int? AssignedToId { get; set; }
+        public virtual User AssignedTo { get; set; }
 
 
     }

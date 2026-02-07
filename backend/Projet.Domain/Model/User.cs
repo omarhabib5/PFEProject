@@ -14,6 +14,10 @@ namespace Projet.Domain.Model
         public string Email { get; set; }
         public string Password { get; set; }
         public string token { get; set; }
-        public string role { get; set; }
+        public UserRole role { get; set; }
+
+        public virtual ICollection<TeamUser> TeamUsers { get; set; }
+        public virtual ICollection<Project> ManagedProjects { get; set; }
+        public virtual ICollection<Task> AssignedTasks { get; set; }
     }
 }

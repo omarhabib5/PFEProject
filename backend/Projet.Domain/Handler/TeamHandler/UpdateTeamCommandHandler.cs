@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Command.Team;
 using Projet.Domain.Interface;
 
@@ -19,10 +20,18 @@ namespace Projet.Domain.Handler.TeamHandler
             
             if (team == null)
             {
-                throw new Exception($"Team with id {request.id} not found");
+                throw new KeyNotFoundException($"Team with id {request.id} not found");
+            }
+
+          
+            var serviceExists = await _context.Services.AnyAsync(s => s.id == request.ServiceId, cancellationToken);
+            if (!serviceExists)
+            {
+                throw new KeyNotFoundException($"Service with ID {request.ServiceId} not found.");
             }
 
             team.name = request.name;
+            team.ServiceId = request.ServiceId; 
 
             await _context.SaveChangesAsync(cancellationToken);
 

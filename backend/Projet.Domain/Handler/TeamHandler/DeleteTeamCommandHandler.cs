@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Command.Team;
 using Projet.Domain.Interface;
+using Projet.Domain.Model;
 
 namespace Projet.Domain.Handler.TeamHandler
 {
@@ -28,6 +29,10 @@ namespace Projet.Domain.Handler.TeamHandler
             {
                 throw new InvalidOperationException($"Cannot delete Team with id {request.id} because it is referenced by one or more Projects. Please reassign or delete the Projects first.");
             }
+            var hasTeamUsers = await _context.TeamUser.AnyAsync(tu => tu.TeamId == request.id, cancellationToken);
+                if (hasTeamUsers){
+                    throw new InvalidOperationException($"Cannot delete Team with id {request.id} because it has assigned users.");
+}
             _context.Teams.Remove(team);
             await _context.SaveChangesAsync(cancellationToken);
 

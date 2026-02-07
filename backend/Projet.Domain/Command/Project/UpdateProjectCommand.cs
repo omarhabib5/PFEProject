@@ -15,5 +15,6 @@ namespace Projet.Domain.Command
         public State ProjectState { get; set; }
         public int ServiceId { get; set; }
         public int TeamId { get; set; }
+        public int ProjectManagerId { get; set; }
     }
 }

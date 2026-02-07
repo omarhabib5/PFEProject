@@ -10,5 +10,9 @@ namespace Projet.Domain.Model
     {
         public int id { get; set; }
         public string name { get; set; }
+        public int ServiceId { get; set; }  
+        public virtual Service Service { get; set; }
+        public virtual ICollection<TeamUser> TeamUsers { get; set; }
+        public virtual ICollection<Project> Projects { get; set; }
     }
 }

@@ -15,10 +15,19 @@ namespace Projet.Domain.Model
         public DateTime endDate { get; set; }
         public int estimatedDuration { get; set; }
         public State projectState { get; set; }
-        public int ServiceId { get; set; }
+        public UserRole Role { get; set; }
+        public int? ServiceId { get; set; }
         public virtual Service Service { get; set; }
-        public int TeamId { get; set; }
+
+        public int ProjectManagerId { get; set; }
+        public virtual User ProjectManager { get; set; }
+
+        public int? TeamId { get; set; }
         public virtual Team Team { get; set; }
+
+        public virtual ICollection<Sprint> Sprints { get; set; }
+        public virtual ICollection<UserStory> UserStories { get; set; }
+
 
 
     }
