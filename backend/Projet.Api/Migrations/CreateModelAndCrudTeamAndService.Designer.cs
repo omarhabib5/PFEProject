@@ -12,8 +12,8 @@ using Projet.Application.Context;
 namespace Projet.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260203084928_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260206092816_InitialCreateWithOptionalFields")]
+    partial class InitialCreateWithOptionalFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,10 +33,16 @@ namespace Projet.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("ProjectManagerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeamId")
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeamId")
                         .HasColumnType("int");
 
                     b.Property<string>("description")
@@ -63,6 +69,8 @@ namespace Projet.Api.Migrations
 
                     b.HasKey("id");
 
+                    b.HasIndex("ProjectManagerId");
+
                     b.HasIndex("ServiceId");
 
                     b.HasIndex("TeamId");
@@ -78,12 +86,17 @@ namespace Projet.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
+                    b.Property<int?>("ResponsibleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("id");
+
+                    b.HasIndex("ResponsibleId");
 
                     b.ToTable("Services");
                 });
@@ -134,6 +147,9 @@ namespace Projet.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
+                    b.Property<int?>("AssignedToId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -144,6 +160,9 @@ namespace Projet.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("SprintId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -164,6 +183,10 @@ namespace Projet.Api.Migrations
 
                     b.HasKey("id");
 
+                    b.HasIndex("AssignedToId");
+
+                    b.HasIndex("SprintId");
+
                     b.HasIndex("UserStoryId");
 
                     b.ToTable("Tasks");
@@ -177,6 +200,9 @@ namespace Projet.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
                     b.Property<string>("name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -184,7 +210,82 @@ namespace Projet.Api.Migrations
 
                     b.HasKey("id");
 
+                    b.HasIndex("ServiceId");
+
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.TeamUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LeftAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId", "TeamId");
+
+                    b.ToTable("TeamUser");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Serviceid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Serviceid");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
@@ -232,27 +333,42 @@ namespace Projet.Api.Migrations
 
             modelBuilder.Entity("Projet.Domain.Model.Project", b =>
                 {
-                    b.HasOne("Projet.Domain.Model.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
+                    b.HasOne("Projet.Domain.Model.User", "ProjectManager")
+                        .WithMany("ManagedProjects")
+                        .HasForeignKey("ProjectManagerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Projet.Domain.Model.Service", "Service")
+                        .WithMany("Projects")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Projet.Domain.Model.Team", "Team")
-                        .WithMany()
+                        .WithMany("Projects")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ProjectManager");
 
                     b.Navigation("Service");
 
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("Projet.Domain.Model.Service", b =>
+                {
+                    b.HasOne("Projet.Domain.Model.User", "Responsible")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleId");
+
+                    b.Navigation("Responsible");
+                });
+
             modelBuilder.Entity("Projet.Domain.Model.Sprint", b =>
                 {
                     b.HasOne("Projet.Domain.Model.Project", "Project")
-                        .WithMany()
+                        .WithMany("Sprints")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -262,25 +378,76 @@ namespace Projet.Api.Migrations
 
             modelBuilder.Entity("Projet.Domain.Model.Task", b =>
                 {
+                    b.HasOne("Projet.Domain.Model.User", "AssignedTo")
+                        .WithMany("AssignedTasks")
+                        .HasForeignKey("AssignedToId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Projet.Domain.Model.Sprint", "Sprint")
+                        .WithMany("Tasks")
+                        .HasForeignKey("SprintId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Projet.Domain.Model.UserStory", "UserStory")
-                        .WithMany()
+                        .WithMany("Tasks")
                         .HasForeignKey("UserStoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("AssignedTo");
+
+                    b.Navigation("Sprint");
+
                     b.Navigation("UserStory");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.Team", b =>
+                {
+                    b.HasOne("Projet.Domain.Model.Service", "Service")
+                        .WithMany("Teams")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.TeamUser", b =>
+                {
+                    b.HasOne("Projet.Domain.Model.Team", "team")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Projet.Domain.Model.User", "User")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("team");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.User", b =>
+                {
+                    b.HasOne("Projet.Domain.Model.Service", null)
+                        .WithMany("Members")
+                        .HasForeignKey("Serviceid");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
                 {
                     b.HasOne("Projet.Domain.Model.Project", "Project")
-                        .WithMany()
+                        .WithMany("UserStories")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Projet.Domain.Model.Sprint", "Sprint")
-                        .WithMany()
+                        .WithMany("UserStories")
                         .HasForeignKey("SprintId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -288,6 +455,50 @@ namespace Projet.Api.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("Sprint");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.Project", b =>
+                {
+                    b.Navigation("Sprints");
+
+                    b.Navigation("UserStories");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.Service", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Projects");
+
+                    b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.Sprint", b =>
+                {
+                    b.Navigation("Tasks");
+
+                    b.Navigation("UserStories");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.Team", b =>
+                {
+                    b.Navigation("Projects");
+
+                    b.Navigation("TeamUsers");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.User", b =>
+                {
+                    b.Navigation("AssignedTasks");
+
+                    b.Navigation("ManagedProjects");
+
+                    b.Navigation("TeamUsers");
+                });
+
+            modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
+                {
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }
