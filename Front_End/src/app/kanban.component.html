@@ -1,3 +1,14 @@
+<header class="kanban-header">
+    <div>
+        <h1>Kanban Board</h1>
+        <p>Track your tasks and progress</p>
+    </div>
+    <div class="kanban-actions">
+        <a class="ghost-button" routerLink="/profile">Profile</a>
+        <button type="button" class="primary-button" (click)="logout()">Logout</button>
+    </div>
+</header>
+
 <div class="board" cdkDropListGroup>
     <section class="board-column" *ngFor="let column of columns; trackBy: trackById">
         <header class="board-header">

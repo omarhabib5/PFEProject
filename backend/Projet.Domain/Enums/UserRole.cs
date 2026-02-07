@@ -12,7 +12,9 @@ namespace Projet.Domain.Enums
         ScrumMaster=2,
         Developer= 3,
         Tester= 4,
-        Observer= 5
+        Observer= 5,
+        ProjectManager = 6,
+        TeamLead = 7
     }
     public static class UserRoleExtensions
     {
@@ -25,16 +27,18 @@ namespace Projet.Domain.Enums
                 UserRole.Developer => "Developer",
                 UserRole.Tester => "Tester",
                 UserRole.Observer => "Observer",
+                UserRole.ProjectManager => "Project Manager",
+                UserRole.TeamLead => "Team Lead",
                 _ => "Unknown Role"
             };
         }
         public static bool CanModifyProject(this UserRole role)
         {
-            return role == UserRole.ProdectOwner || role == UserRole.ScrumMaster;
+            return role == UserRole.ProdectOwner || role == UserRole.ScrumMaster || role == UserRole.ProjectManager || role == UserRole.TeamLead;
         }
         public static bool CanManageTasks(this UserRole role)
         {
-            return role == UserRole.ProdectOwner || role == UserRole.ScrumMaster || role == UserRole.Developer;
+            return role == UserRole.ProdectOwner || role == UserRole.ScrumMaster || role == UserRole.Developer || role == UserRole.ProjectManager || role == UserRole.TeamLead;
         }
         public static bool CanViewReports(this UserRole role)
         {

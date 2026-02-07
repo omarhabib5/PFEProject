@@ -7,6 +7,52 @@
 	padding: 24px;
 }
 
+.kanban-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.kanban-header h1 {
+	margin: 0;
+	font-size: 24px;
+}
+
+.kanban-header p {
+	margin: 4px 0 0;
+	color: #5b667b;
+	font-size: 13px;
+}
+
+.kanban-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.primary-button,
+.ghost-button {
+	border-radius: 10px;
+	padding: 8px 14px;
+	font-size: 13px;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.primary-button {
+	border: none;
+	background: #2563eb;
+	color: #ffffff;
+}
+
+.ghost-button {
+	border: 1px solid #c7d2fe;
+	color: #2563eb;
+	background: #ffffff;
+}
+
 .board {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

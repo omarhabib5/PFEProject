@@ -1,20 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import {
   CdkDragDrop,
   DragDropModule,
   moveItemInArray,
   transferArrayItem
 } from '@angular/cdk/drag-drop';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-kanban',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, RouterModule],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.css'
 })
 export class KanbanComponent {
+  constructor(private auth: AuthService, private router: Router) {}
+
   columns: BoardColumn[] = [
     {
       id: 'todo',
@@ -79,6 +83,13 @@ export class KanbanComponent {
 
   trackByTask(_: number, task: string): string {
     return task;
+  }
+
+  logout(): void {
+    this.auth.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
   }
 }
 

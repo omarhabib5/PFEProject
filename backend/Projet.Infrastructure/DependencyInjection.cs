@@ -13,6 +13,7 @@ namespace Projet.Infrastructure.Services
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
 
             return services;
         }

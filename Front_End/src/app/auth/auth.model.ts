@@ -22,13 +22,42 @@ export interface RegisterRequest {
   role: UserRole;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface UpdateProfileImageRequest {
+  imageUrl: string;
+}
+
 export interface AuthResponse {
-  accessToken: string;
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  role: string;
+  roleDisplayName: string;
+  profileImageUrl: string;
+  token: string;
   refreshToken: string;
-  user: {
-    id: string;
-    email: string;
-    fullName?: string;
-    role?: string;
-  };
+  tokenExpiry: string;
+  isEmailConfirmed: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  role: string;
+  roleDisplayName: string;
+  profileImageUrl?: string;
+  createdAt: string;
+  updatedAt?: string | null;
+  lastLoginAt?: string | null;
+  isEmailConfirmed: boolean;
 }

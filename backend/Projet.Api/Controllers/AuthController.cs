@@ -6,6 +6,7 @@ using Projet.Application.DTOs.Auth;
 using Projet.Application.Queries.Auth;
 using System.Security.Claims;
 using static Projet.Application.DTOs.Auth.LoginCommand;
+using Projet.Application.Commands.Auth;
 
 namespace Projet.Api.Controllers
 {
@@ -117,6 +118,29 @@ namespace Projet.Api.Controllers
             {
                 _logger.LogError(ex, "Erreur lors de la déconnexion");
                 return BadRequest(new { message = "Erreur lors de la déconnexion" });
+            }
+        }
+
+        [HttpPost("create-user")]
+        [Authorize(Roles = "ProdectOwner")]
+        [ProducesResponseType(typeof(CreateEmployeeResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateUser([FromBody] CreateEmployeeRequest request)
+        {
+            try
+            {
+                var result = await _mediator.Send(new CreateEmployeeCommand(request));
+                return StatusCode(StatusCodes.Status201Created, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning("Employee creation failed: {Message}", ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating employee");
+                return BadRequest(new { message = "Une erreur est survenue" });
             }
         }
 
