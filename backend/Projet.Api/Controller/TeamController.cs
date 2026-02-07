@@ -1,11 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command.Team;
+using Projet.Domain.Command.TeamUser;
 using Projet.Domain.Querie.Team;
+using Projet.Domain.Querie.TeamUser;
 
 namespace Projet.Api.Controller
 {
-    [Route("api/[controller]")]
+    [Route("api/teams")]
     [ApiController]
     public class TeamController : ControllerBase
     {
@@ -15,6 +17,8 @@ namespace Projet.Api.Controller
         {
             _mediator = mediator;
         }
+
+        #region Team CRUD Operations
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -40,8 +44,15 @@ namespace Projet.Api.Controller
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTeamCommand command)
         {
-            var teamId = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = teamId }, new { id = teamId });
+            try
+            {
+                var teamId = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetById), new { id = teamId }, new { id = teamId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -57,7 +68,7 @@ namespace Projet.Api.Controller
                 await _mediator.Send(command);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
@@ -71,10 +82,99 @@ namespace Projet.Api.Controller
                 await _mediator.Send(new DeleteTeamCommand { id = id });
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Team Members Management
+
+        // GET: api/teams/{teamId}/members
+        [HttpGet("{teamId}/members")]
+        public async Task<IActionResult> GetMembers(int teamId)
+        {
+            var members = await _mediator.Send(new GetTeamUserByTeamIdQuery { TeamId = teamId });
+            return Ok(members);
+        }
+
+        // GET: api/teams/{teamId}/members/leaders
+        [HttpGet("{teamId}/members/leaders")]
+        public async Task<IActionResult> GetLeaders(int teamId)
+        {
+            var leaders = await _mediator.Send(new GetProjectLeaderQuery { TeamId = teamId });
+            return Ok(leaders);
+        }
+
+        // GET: api/teams/{teamId}/members/employees
+        [HttpGet("{teamId}/members/employees")]
+        public async Task<IActionResult> GetEmployees(int teamId)
+        {
+            var employees = await _mediator.Send(new GetEmployeeQuery { TeamId = teamId });
+            return Ok(employees);
+        }
+
+        // POST: api/teams/{teamId}/members
+        [HttpPost("{teamId}/members")]
+        public async Task<IActionResult> AddMember(int teamId, [FromBody] CreateTeamUserCommand command)
+        {
+            // Ensure teamId from route matches command
+            command.TeamId = teamId;
+
+            try
+            {
+                var memberId = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetMembers), new { teamId }, new { id = memberId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+        // PUT: api/teams/{teamId}/members/{memberId}/role
+        [HttpPut("{teamId}/members/{memberId}/role")]
+        public async Task<IActionResult> UpdateMemberRole(int teamId, int memberId, [FromBody] UpdateTeamUserCommand command)
+        {
+            // Ensure memberId from route matches command
+            command.Id = memberId;
+
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        // DELETE: api/teams/{teamId}/members/{memberId}
+        [HttpDelete("{teamId}/members/{memberId}")]
+        public async Task<IActionResult> RemoveMember(int teamId, int memberId)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteTeamUserCommand(memberId));
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }
