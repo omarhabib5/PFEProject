@@ -17,13 +17,28 @@ namespace Projet.Domain.Handler.ServiceHandler
         public async Task<Unit> Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
         {
             var service = await _context.Services.FindAsync(new object[] { request.id }, cancellationToken);
-            
+
             if (service == null)
             {
-                throw new Exception($"Service with id {request.id} not found");
+                throw new KeyNotFoundException($"Service with id {request.id} not found");
+            }
+
+            if (request.ResponsibleId.HasValue)
+            {
+                if (request.ResponsibleId.Value <= 0)
+                {
+                    throw new ArgumentException($"ResponsibleId must be a positive value. Received: {request.ResponsibleId.Value}");
+                }
+                
+                var userExists = await _context.Users.AnyAsync(u => u.Id == request.ResponsibleId.Value, cancellationToken);
+                if (!userExists)
+                {
+                    throw new KeyNotFoundException($"User with ID {request.ResponsibleId.Value} not found.");
+                }
             }
 
             service.name = request.name;
+            service.ResponsibleId = request.ResponsibleId;
 
             await _context.SaveChangesAsync(cancellationToken);
 
