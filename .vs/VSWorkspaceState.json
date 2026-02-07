@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\Projet.Api",
+    "\\backend\\Projet.Application",
+    "\\backend\\Projet.Domain",
+    "\\backend\\Projet.Infrastructure"
+  ],
+  "SelectedNode": "\\backend\\backend.sln",
+  "PreviewInSolutionExplorer": false
+}

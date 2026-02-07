@@ -5,8 +5,6 @@ c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.AssemblyInfo.cs
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.csproj.CoreCompileInputs.cache
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.MvcApplicationPartsAssemblyInfo.cache
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.RazorAssemblyInfo.cache
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.RazorAssemblyInfo.cs
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.sourcelink.json
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\bin\Debug\net9.0\appsettings.Development.json
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\bin\Debug\net9.0\appsettings.json
@@ -79,9 +77,7 @@ c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\rjimswa.dswa.cache.json
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\scopedcss\Pages\Shared\_Layout.cshtml.rz.scp.css
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\scopedcss\bundle\Projet.Api.styles.css
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\scopedcss\projectbundle\Projet.Api.bundle.scp.css
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\3to9doaqsg-{0}-b9sayid5wm-b9sayid5wm.gz
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\i80y59krsf-{0}-61n19gt1b8-61n19gt1b8.gz
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\v1k0rwn7gh-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
@@ -144,8 +140,6 @@ c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\vspdfw5w2u-{0}-muycvpuwrr-muycvpuwrr.gz
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\opuxs5xp8f-{0}-87fc7y1x7t-87fc7y1x7t.gz
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\trdzv2lfln-{0}-mlv21k5csn-mlv21k5csn.gz
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\fsf4fwxyvp-{0}-43kewl262i-43kewl262i.gz
-c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\compressed\icloadeeb5-{0}-43kewl262i-43kewl262i.gz
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.build.json
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.build.json.cache
 c:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.development.json
