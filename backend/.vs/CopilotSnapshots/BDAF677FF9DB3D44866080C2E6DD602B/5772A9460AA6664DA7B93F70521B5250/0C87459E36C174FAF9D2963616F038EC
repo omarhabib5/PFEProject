@@ -1,0 +1,10 @@
+﻿using MediatR;
+using Projet.Domain.Model;
+
+namespace Projet.Domain.Querie.Auth
+{
+    public class GetCurrentUserQuery : IRequest<User?>
+    {
+        public int UserId { get; set; }
+    }
+}

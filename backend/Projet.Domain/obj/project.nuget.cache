@@ -1,8 +1,27 @@
 {
   "version": 2,
-  "dgSpecHash": "9r6oNSFSrMc=",
+  "dgSpecHash": "dAG4Oted9FQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\RAYEN\\.nuget\\packages\\mediatr\\14.0.0\\mediatr.14.0.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.12\\microsoft.entityframeworkcore.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.12\\microsoft.entityframeworkcore.abstractions.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\9.0.12\\microsoft.entityframeworkcore.analyzers.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\9.0.12\\microsoft.extensions.caching.abstractions.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.caching.memory\\9.0.12\\microsoft.extensions.caching.memory.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\9.0.12\\microsoft.extensions.dependencyinjection.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.0\\microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.logging\\9.0.12\\microsoft.extensions.logging.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.0\\microsoft.extensions.logging.abstractions.10.0.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.options\\9.0.12\\microsoft.extensions.options.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.extensions.primitives\\9.0.12\\microsoft.extensions.primitives.9.0.12.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.14.0\\microsoft.identitymodel.abstractions.8.14.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.identitymodel.jsonwebtokens\\8.14.0\\microsoft.identitymodel.jsonwebtokens.8.14.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.identitymodel.logging\\8.14.0\\microsoft.identitymodel.logging.8.14.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.14.0\\microsoft.identitymodel.tokens.8.14.0.nupkg.sha512",
+    "C:\\Users\\RAYEN\\.nuget\\packages\\system.diagnostics.diagnosticsource\\10.0.0\\system.diagnostics.diagnosticsource.10.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

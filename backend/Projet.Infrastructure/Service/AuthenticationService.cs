@@ -1,0 +1,205 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Projet.Domain.comment;
+using Projet.Domain.Interface;
+using Projet.Domain.Model;
+
+namespace Projet.Infrastructure.Service
+{
+    public class AuthenticationService : IAuthenticationService
+    {
+        private readonly IApplicationDbSet _context;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly JwtSettings _jwtSettings;
+
+        public AuthenticationService(
+            IApplicationDbSet context,
+            IPasswordHasher passwordHasher,
+            IJwtTokenService jwtTokenService,
+            IRefreshTokenRepository refreshTokenRepository,
+            IOptions<JwtSettings> jwtSettings)
+        {
+            _context = context;
+            _passwordHasher = passwordHasher;
+            _jwtTokenService = jwtTokenService;
+            _refreshTokenRepository = refreshTokenRepository;
+            _jwtSettings = jwtSettings.Value;
+        }
+
+        public async System.Threading.Tasks.Task<AuthResponse> RegisterAsync(
+            string email,
+            string password,
+            string firstName,
+            string lastName,
+            string role,
+            CancellationToken cancellationToken = default)
+        {
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("User with this email already exists");
+            }
+
+            if (!Enum.TryParse<UserRole>(role, true, out var userRole))
+            {
+                throw new InvalidOperationException($"Invalid role '{role}'. Valid roles are: Admin, ServiceManager, ProjectManager, Employee");
+            }
+
+            var user = new User
+            {
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                PasswordHash = _passwordHasher.HashPassword(password),
+                role = userRole,
+                IsEmailVerified = false,
+                FailedLoginAttempts = 0
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var accessToken = _jwtTokenService.GenerateAccessToken(user);
+            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+            return new AuthResponse
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.role.ToString(),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                RefreshTokenExpiresAt = refreshTokenEntity.ExpiresAt
+            };
+        }
+
+        public async System.Threading.Tasks.Task<AuthResponse> LoginAsync(
+            string email,
+            string password,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Invalid email or password");
+            }
+
+            if (user.IsLockedOut())
+            {
+                throw new UnauthorizedAccessException($"Account is locked until {user.LockoutEnd}");
+            }
+
+            if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
+            {
+                user.IncrementFailedLoginAttempts();
+                await _context.SaveChangesAsync(cancellationToken);
+                throw new UnauthorizedAccessException("Invalid email or password");
+            }
+
+            user.UpdateLastLogin();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var accessToken = _jwtTokenService.GenerateAccessToken(user);
+            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+            return new AuthResponse
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.role.ToString(),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                RefreshTokenExpiresAt = refreshTokenEntity.ExpiresAt
+            };
+        }
+
+        public async System.Threading.Tasks.Task<AuthResponse> RefreshTokenAsync(
+            string refreshToken,
+            CancellationToken cancellationToken = default)
+        {
+            var storedToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
+
+            if (storedToken == null || !storedToken.IsActive)
+            {
+                throw new UnauthorizedAccessException("Invalid or expired refresh token");
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == storedToken.UserId, cancellationToken);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User not found");
+            }
+
+            await _refreshTokenRepository.RevokeAsync(refreshToken, "Replaced by new token", cancellationToken);
+
+            var newAccessToken = _jwtTokenService.GenerateAccessToken(user);
+            var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+
+            var newRefreshTokenEntity = new RefreshToken
+            {
+                Token = newRefreshToken,
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            storedToken.ReplacedByToken = newRefreshToken;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _refreshTokenRepository.CreateAsync(newRefreshTokenEntity, cancellationToken);
+
+            return new AuthResponse
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.role.ToString(),
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                RefreshTokenExpiresAt = newRefreshTokenEntity.ExpiresAt
+            };
+        }
+
+        public async System.Threading.Tasks.Task<bool> LogoutAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            await _refreshTokenRepository.RevokeAllByUserIdAsync(userId, "User logout", cancellationToken);
+            return true;
+        }
+    }
+}

@@ -1,42 +1,53 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.OpenApi;
+using System.Reflection;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Projet.Application;
-using Projet.Infrastructure.Persistence;
-using Projet.Infrastructure.Services;
-using ProjectManagerAPI.API.Middleware;
-using System.Text;
-
+using Microsoft.OpenApi.Models;
+using Projet.Api.Middlware;
+using Projet.Application.Context;
+using Projet.Domain.comment;
+using Projet.Domain.Interface;
+using Projet.Infrastructure.Repository;
+using Projet.Infrastructure.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuration CORS
-builder.Services.AddCors(options =>
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(c =>
 {
-    options.AddPolicy("AllowAngularApp", policy =>
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Projet API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-    b => b.MigrationsAssembly("Projet.Infrastructure")));
-
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
-// 3. Configuration JWT
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSettings);
-
-var secretKey = jwtSettings["Secret"] ??
-    throw new InvalidOperationException("JWT Secret non configuré");
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -45,83 +56,63 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-    options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
         ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
         ClockSkew = TimeSpan.Zero
     };
 });
 
+builder.Services.AddAuthorization();
 
-builder.Services.AddAuthorization(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("Projet.Api")));
+
+builder.Services.AddScoped<IApplicationDbSet>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Load("Projet.Domain")));
+
+builder.Services.AddCors(options =>
 {
-    options.AddPolicy("RequireProductOwner", policy =>
-        policy.RequireRole("ProductOwner"));
-
-    options.AddPolicy("RequireScrumMaster", policy =>
-        policy.RequireRole("ScrumMaster", "ProductOwner"));
-
-    options.AddPolicy("RequireTeamMember", policy =>
-        policy.RequireRole("DevelopmentTeam", "ScrumMaster", "ProductOwner"));
-
-    options.AddPolicy("RequireStakeholder", policy =>
-        policy.RequireRole("Stakeholder", "DevelopmentTeam", "ScrumMaster", "ProductOwner"));
-});
-
-
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices();
-
-
-builder.Services.AddHttpContextAccessor();
-
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
-
-
-
-// Swagger configuration
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddLogging();
-
+});
 
 var app = builder.Build();
 
-
-
 if (app.Environment.IsDevelopment())
 {
-    // Swagger UI only in Development
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.EnsureCreatedAsync();
 }
-
-app.UseHttpsRedirection();
-app.UseCors("AllowAngularApp");
-
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
 

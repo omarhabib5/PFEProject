@@ -1,0 +1,94 @@
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Projet.Domain.Command.Auth;
+using Projet.Domain.comment;
+using Projet.Domain.Interface;
+using Projet.Domain.Model;
+
+namespace Projet.Domain.Handler.Auth
+{
+    public class CreateEmployeeHandler : IRequestHandler<CreateEmployeeCommand, AuthResponse>
+    {
+        private readonly IApplicationDbSet _context;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly JwtSettings _jwtSettings;
+
+        public CreateEmployeeHandler(
+            IApplicationDbSet context,
+            IPasswordHasher passwordHasher,
+            IJwtTokenService jwtTokenService,
+            IRefreshTokenRepository refreshTokenRepository,
+            Microsoft.Extensions.Options.IOptions<JwtSettings> jwtSettings)
+        {
+            _context = context;
+            _passwordHasher = passwordHasher;
+            _jwtTokenService = jwtTokenService;
+            _refreshTokenRepository = refreshTokenRepository;
+            _jwtSettings = jwtSettings.Value;
+        }
+
+        public async System.Threading.Tasks.Task<AuthResponse> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
+        {
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("User with this email already exists");
+            }
+
+            if (request.ServiceId.HasValue)
+            {
+                var serviceExists = await _context.Services
+                    .AnyAsync(s => s.id == request.ServiceId.Value, cancellationToken);
+
+                if (!serviceExists)
+                {
+                    throw new KeyNotFoundException($"Service with ID {request.ServiceId} not found");
+                }
+            }
+
+            var employee = new User
+            {
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PasswordHash = _passwordHasher.HashPassword(request.Password),
+                role = UserRole.Employee,
+                IsEmailVerified = false,
+                FailedLoginAttempts = 0
+            };
+
+            _context.Users.Add(employee);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var accessToken = _jwtTokenService.GenerateAccessToken(employee);
+            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                UserId = employee.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+            return new AuthResponse
+            {
+                UserId = employee.Id,
+                Email = employee.Email,
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                Role = employee.role.ToString(),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                AccessTokenExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                RefreshTokenExpiresAt = refreshTokenEntity.ExpiresAt
+            };
+        }
+    }
+}

@@ -1,0 +1,1068 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\EMAIL_SETUP_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:EMAIL_SETUP_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\auth\\createemployeecommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\auth\\createemployeecommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\createemployeehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\createemployeehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\logincommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\logincommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\comment\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\comment\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\auth\\logincommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\auth\\logincommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\createemployeerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\createemployeerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\auth\\logoutcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\auth\\logoutcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\controller\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\controller\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\model\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\comment\\jwtsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\comment\\jwtsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\model\\refreshtoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\refreshtoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\middlware\\errorhandlingmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\middlware\\errorhandlingmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\middlware\\jwtmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\middlware\\jwtmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\projet.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\projet.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\service\\datetimeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\service\\datetimeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\service\\jwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\service\\jwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\service\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\service\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\refreshtokenrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\refreshtokenrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\authresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\authresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\dtos\\auth\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\dtos\\auth\\registerrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\projet.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\projet.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\projet.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\projet.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\iauthenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\iauthenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\irefreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\irefreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\ijwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\ijwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\ipasswordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\ipasswordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\getcurrentuserqueryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\getcurrentuserqueryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\logoutcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\logoutcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\refreshtokencommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\refreshtokencommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\auth\\refreshtokencommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\auth\\refreshtokencommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\userhandler\\getallusershandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\userhandler\\getallusershandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\user\\updateusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\user\\updateusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\userhandler\\getuserbyidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\userhandler\\getuserbyidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\userhandler\\deleteuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\userhandler\\deleteuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\userhandler\\updateuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\userhandler\\updateuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\userhandler\\createuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\userhandler\\createuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\user\\deleteusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\user\\deleteusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\user\\createusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\user\\createusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\handler\\auth\\registercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\auth\\registercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\querie\\auth\\getcurrentuserquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\auth\\getcurrentuserquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\command\\auth\\registercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\auth\\registercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\querie\\user\\getuserbyidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\user\\getuserbyidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\querie\\user\\getallusersquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\user\\getallusersquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.api\\controller\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\controller\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\iapplicationdbset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\iapplicationdbset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.application\\context\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\context\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\projet.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\projet.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\service\\authenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\service\\authenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\repository\\refreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\repository\\refreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\JWT_AUTHENTICATION_IMPLEMENTATION.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:JWT_AUTHENTICATION_IMPLEMENTATION.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\interface\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\utilities\\passwordgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\utilities\\passwordgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.infrastructure\\service\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{33354B1E-177A-44CC-9C2F-62A6B315AC56}|Projet.Infrastructure\\Projet.Infrastructure.csproj|solutionrelative:projet.infrastructure\\service\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\hamza\\documents\\github\\pfeproject\\pfeproject-omar2\\backend\\projet.domain\\utilities\\passwordgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\utilities\\passwordgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 11,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "PasswordGenerator.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Utilities\\PasswordGenerator.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Utilities\\PasswordGenerator.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Utilities\\PasswordGenerator.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Utilities\\PasswordGenerator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:23:25.669Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "IEmailService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IEmailService.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IEmailService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IEmailService.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IEmailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:23:11.563Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CreateEmployeeCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:00:07.382Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\appsettings.json",
+              "RelativeDocumentMoniker": "Projet.Api\\appsettings.json",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\appsettings.json*",
+              "RelativeToolTip": "Projet.Api\\appsettings.json*",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAmwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-09T09:29:28.663Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "EMAIL_SETUP_GUIDE.md",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\EMAIL_SETUP_GUIDE.md",
+              "RelativeDocumentMoniker": "EMAIL_SETUP_GUIDE.md",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\EMAIL_SETUP_GUIDE.md",
+              "RelativeToolTip": "EMAIL_SETUP_GUIDE.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAKYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-09T10:26:37.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "EmailService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\EmailService.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\EmailService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\EmailService.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Service\\EmailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:23:46.564Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "PasswordGenerator.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Utilities\\PasswordGenerator.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Utilities\\PasswordGenerator.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Utilities\\PasswordGenerator.cs",
+              "RelativeToolTip": "Projet.Domain\\Utilities\\PasswordGenerator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:25:54.874Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "LoginCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\LoginCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\LoginCommandHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\LoginCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\LoginCommandHandler.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:22:39.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AuthResponse.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\comment\\AuthResponse.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\comment\\AuthResponse.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\comment\\AuthResponse.cs",
+              "RelativeToolTip": "Projet.Domain\\comment\\AuthResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAIAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:14:46.499Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "LoginCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\LoginCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\LoginCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\LoginCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Auth\\LoginCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:21:19.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CreateEmployeeHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\CreateEmployeeHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\CreateEmployeeHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\CreateEmployeeHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\CreateEmployeeHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADQAAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:00:27.466Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CreateEmployeeRequest.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\CreateEmployeeRequest.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\CreateEmployeeRequest.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\CreateEmployeeRequest.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\CreateEmployeeRequest.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAewAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T10:02:43.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "Projet.Infrastructure",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Projet.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Projet.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Projet.Infrastructure.csproj",
+              "RelativeToolTip": "Projet.Infrastructure\\Projet.Infrastructure.csproj",
+              "ViewState": "AgIAABIAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-09T09:27:01.34Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "AuthenticationService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\AuthenticationService.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\AuthenticationService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\AuthenticationService.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Service\\AuthenticationService.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAIBJwM0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:27:50.241Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "LogoutCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:46:25.827Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "RefreshTokenRepository.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Repository\\RefreshTokenRepository.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Repository\\RefreshTokenRepository.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Repository\\RefreshTokenRepository.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Repository\\RefreshTokenRepository.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAMBUwEEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:27:50.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\User.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\User.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\User.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\User.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAEwBMAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T07:43:01.801Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "UserRole.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\UserRole.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\UserRole.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\UserRole.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\UserRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:43:05.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Controller\\AuthController.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Controller\\AuthController.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Controller\\AuthController.cs",
+              "RelativeToolTip": "Projet.Api\\Controller\\AuthController.cs",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAAwAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:19:53.244Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Program.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Program.cs",
+              "RelativeToolTip": "Projet.Api\\Program.cs",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAQwAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:28:47.74Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "JWT_AUTHENTICATION_IMPLEMENTATION.md",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\JWT_AUTHENTICATION_IMPLEMENTATION.md",
+              "RelativeDocumentMoniker": "JWT_AUTHENTICATION_IMPLEMENTATION.md",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\JWT_AUTHENTICATION_IMPLEMENTATION.md",
+              "RelativeToolTip": "JWT_AUTHENTICATION_IMPLEMENTATION.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-02-09T09:32:26.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\Context\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\Context\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\Context\\ApplicationDbContext.cs",
+              "RelativeToolTip": "Projet.Application\\Context\\ApplicationDbContext.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAEBUwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:26:51.024Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "IApplicationDbSet.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAABYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:26:50.915Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ErrorHandlingMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Middlware\\ErrorHandlingMiddleware.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Middlware\\ErrorHandlingMiddleware.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Middlware\\ErrorHandlingMiddleware.cs",
+              "RelativeToolTip": "Projet.Api\\Middlware\\ErrorHandlingMiddleware.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:20:42.015Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "JwtMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Middlware\\JwtMiddleware.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Middlware\\JwtMiddleware.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Middlware\\JwtMiddleware.cs",
+              "RelativeToolTip": "Projet.Api\\Middlware\\JwtMiddleware.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:20:30.523Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "RefreshToken.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\RefreshToken.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\RefreshToken.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Model\\RefreshToken.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\RefreshToken.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:45:26.576Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "JwtSetting.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\comment\\JwtSetting.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\comment\\JwtSetting.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\comment\\JwtSetting.cs",
+              "RelativeToolTip": "Projet.Domain\\comment\\JwtSetting.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:14:29.976Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "DateTimeService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\DateTimeService.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\DateTimeService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\DateTimeService.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Service\\DateTimeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:19:12.735Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "JwtTokenService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\JwtTokenService.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\JwtTokenService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\JwtTokenService.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Service\\JwtTokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:18:57.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "PasswordHasher.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\PasswordHasher.cs",
+              "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\PasswordHasher.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Infrastructure\\Service\\PasswordHasher.cs",
+              "RelativeToolTip": "Projet.Infrastructure\\Service\\PasswordHasher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:18:27.768Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Projet.Api",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Projet.Api.csproj",
+              "RelativeDocumentMoniker": "Projet.Api\\Projet.Api.csproj",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Projet.Api.csproj",
+              "RelativeToolTip": "Projet.Api\\Projet.Api.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-09T09:17:28.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "UserDto.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\UserDto.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\UserDto.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\UserDto.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\UserDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:16:42.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "RefreshTokenRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\RefreshTokenRequestDto.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\RefreshTokenRequestDto.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\RefreshTokenRequestDto.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\RefreshTokenRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:16:29.488Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "AuthResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\AuthResponseDto.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\AuthResponseDto.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\AuthResponseDto.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\AuthResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:16:17.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "LoginRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\LoginRequestDto.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\LoginRequestDto.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\LoginRequestDto.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\LoginRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:16:07.085Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "RegisterRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\RegisterRequestDto.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\DTOs\\Auth\\RegisterRequestDto.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\DTOs\\Auth\\RegisterRequestDto.cs",
+              "RelativeToolTip": "Projet.Application\\DTOs\\Auth\\RegisterRequestDto.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAhwAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T09:15:57.027Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "Projet.Application",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\Projet.Application.csproj",
+              "RelativeDocumentMoniker": "Projet.Application\\Projet.Application.csproj",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Application\\Projet.Application.csproj",
+              "RelativeToolTip": "Projet.Application\\Projet.Application.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-09T09:15:25.045Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Projet.Domain",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Projet.Domain.csproj",
+              "RelativeDocumentMoniker": "Projet.Domain\\Projet.Domain.csproj",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Projet.Domain.csproj",
+              "RelativeToolTip": "Projet.Domain\\Projet.Domain.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-09T09:14:01.905Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "IAuthenticationService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IAuthenticationService.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IAuthenticationService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IAuthenticationService.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IAuthenticationService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:50:03.084Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "IRefreshTokenRepository.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IRefreshTokenRepository.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IRefreshTokenRepository.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IRefreshTokenRepository.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IRefreshTokenRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:49:52.334Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "IJwtTokenService.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IJwtTokenService.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IJwtTokenService.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IJwtTokenService.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IJwtTokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:49:41.532Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "IPasswordHasher.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IPasswordHasher.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IPasswordHasher.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Interface\\IPasswordHasher.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IPasswordHasher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:49:30.485Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "GetCurrentUserQueryHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\GetCurrentUserQueryHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\GetCurrentUserQueryHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\GetCurrentUserQueryHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\GetCurrentUserQueryHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:48:08.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "LogoutCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\LogoutCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\LogoutCommandHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\LogoutCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\LogoutCommandHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:47:56.446Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "RefreshTokenCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\RefreshTokenCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\RefreshTokenCommandHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\RefreshTokenCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\RefreshTokenCommandHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:47:41.42Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "RefreshTokenCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\RefreshTokenCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\RefreshTokenCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\RefreshTokenCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Auth\\RefreshTokenCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:46:05.402Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Controller\\UserController.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Controller\\UserController.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Api\\Controller\\UserController.cs",
+              "RelativeToolTip": "Projet.Api\\Controller\\UserController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:36:59.895Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "GetAllUsersQuery.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\User\\GetAllUsersQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\User\\GetAllUsersQuery.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\User\\GetAllUsersQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\User\\GetAllUsersQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:36:15.712Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "GetUserByIdQuery.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\User\\GetUserByIdQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\User\\GetUserByIdQuery.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\User\\GetUserByIdQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\User\\GetUserByIdQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:36:15.654Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "GetAllUsersHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\GetAllUsersHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\GetAllUsersHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\GetAllUsersHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserHandler\\GetAllUsersHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:28:18.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "UpdateUserCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\UpdateUserCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\User\\UpdateUserCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\UpdateUserCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\User\\UpdateUserCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:26:28.207Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "GetUserByIdHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\GetUserByIdHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\GetUserByIdHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\GetUserByIdHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserHandler\\GetUserByIdHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:28:44.165Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "DeleteUserHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\DeleteUserHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\DeleteUserHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\DeleteUserHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserHandler\\DeleteUserHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:27:51.627Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "UpdateUserHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\UpdateUserHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\UpdateUserHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\UpdateUserHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserHandler\\UpdateUserHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:27:35.924Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "CreateUserHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:27:19.017Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "DeleteUserCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\DeleteUserCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\User\\DeleteUserCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\DeleteUserCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\User\\DeleteUserCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:26:45.628Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "CreateUserCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\CreateUserCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\User\\CreateUserCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\User\\CreateUserCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\User\\CreateUserCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:26:13.81Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "RegisterCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\RegisterCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Auth\\RegisterCommandHandler.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Handler\\Auth\\RegisterCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Auth\\RegisterCommandHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:22:51.271Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "GetCurrentUserQuery.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\Auth\\GetCurrentUserQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\Auth\\GetCurrentUserQuery.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Querie\\Auth\\GetCurrentUserQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\Auth\\GetCurrentUserQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:22:01.141Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "RegisterCommand.cs",
+              "DocumentMoniker": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\RegisterCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\RegisterCommand.cs",
+              "ToolTip": "C:\\Users\\hamza\\Documents\\GitHub\\PFEProject\\PFEProject-omar2\\backend\\Projet.Domain\\Command\\Auth\\RegisterCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Auth\\RegisterCommand.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAowAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T08:21:35.465Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

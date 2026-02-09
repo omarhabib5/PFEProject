@@ -54,17 +54,9 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
-            "FluentValidation": {
+            "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[12.1.1, )"
-            },
-            "MediatR": {
-              "target": "Package",
-              "version": "[14.0.0, )"
-            },
-            "Microsoft.Extensions.Logging": {
-              "target": "Package",
-              "version": "[10.0.2, )"
+              "version": "[9.0.12, )"
             }
           },
           "imports": [
@@ -132,6 +124,16 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "MediatR": {
+              "target": "Package",
+              "version": "[14.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.12, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
