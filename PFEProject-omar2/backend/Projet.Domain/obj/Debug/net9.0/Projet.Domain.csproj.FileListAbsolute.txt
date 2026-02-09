@@ -1,0 +1,13 @@
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.deps.json
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.dll
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.pdb
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.csproj.AssemblyReference.cache
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.AssemblyInfoInputs.cache
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.AssemblyInfo.cs
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.sourcelink.json
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.dll
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\refint\Projet.Domain.dll
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.pdb
+C:\Users\hamza\Documents\GitHub\PFEProject\PFEProject-omar2\backend\Projet.Domain\obj\Debug\net9.0\ref\Projet.Domain.dll
