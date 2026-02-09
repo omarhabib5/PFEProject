@@ -1,0 +1,6 @@
+﻿namespace Projet.Api.Controller
+{
+    public class AuthController
+    {
+    }
+}

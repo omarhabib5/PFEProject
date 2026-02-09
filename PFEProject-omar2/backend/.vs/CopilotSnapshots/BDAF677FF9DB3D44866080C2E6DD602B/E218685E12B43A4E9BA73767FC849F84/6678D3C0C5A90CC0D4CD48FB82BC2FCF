@@ -1,0 +1,27 @@
+﻿{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ProjectDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "JwtSettings": {
+    "Secret": "YourSuperSecretKeyThatIsAtLeast32CharactersLong!",
+    "Issuer": "ProjetApi",
+    "Audience": "ProjetClient",
+    "AccessTokenExpirationMinutes": 60,
+    "RefreshTokenExpirationDays": 7
+  },
+  "EmailSettings": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "Company HR Department",
+    "Username": "your-email@gmail.com",
+    "Password": "your-app-password"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

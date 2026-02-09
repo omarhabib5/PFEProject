@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Projet.Domain.Model
+{
+   public class User
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string PasswordHash { get; private set; } = string.Empty;
+        public string PasswordSalt { get; private set; } = string.Empty;
+        public string token { get; set; }
+        public UserRole role { get; set; }
+        public string? ProfileImageUrl { get; private set; }
+        public bool IsEmailVerified { get; private set; }
+        public DateTime? EmailVerifiedAt { get; private set; }
+        public DateTime? LastLoginAt { get; private set; }
+        public int FailedLoginAttempts { get; private set; }
+        public DateTime? LockoutEnd { get; private set; }
+        public virtual ICollection<TeamUser> TeamUsers { get; set; }
+        public virtual ICollection<Project> ManagedProjects { get; set; }
+        public virtual ICollection<Task> AssignedTasks { get; set; }
+    }
+}

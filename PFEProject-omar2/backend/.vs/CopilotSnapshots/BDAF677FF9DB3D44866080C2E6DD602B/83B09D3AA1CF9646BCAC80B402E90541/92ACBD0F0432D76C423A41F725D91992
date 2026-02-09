@@ -1,0 +1,14 @@
+﻿using MediatR;
+
+namespace Projet.Domain.Model.User
+{
+    public class GetUserByIdQueri : IRequest<Model.User?>
+    {
+        public int Id { get; set; }
+
+        public GetUserByIdQueri(int id)
+        {
+            Id = id;
+        }
+    }
+}

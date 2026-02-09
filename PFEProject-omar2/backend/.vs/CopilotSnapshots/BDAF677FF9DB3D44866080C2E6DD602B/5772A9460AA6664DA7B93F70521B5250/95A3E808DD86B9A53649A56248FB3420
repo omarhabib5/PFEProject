@@ -1,0 +1,6 @@
+﻿namespace Projet.Api.Middlware
+{
+    public class ErrorHandlingMiddleware
+    {
+    }
+}

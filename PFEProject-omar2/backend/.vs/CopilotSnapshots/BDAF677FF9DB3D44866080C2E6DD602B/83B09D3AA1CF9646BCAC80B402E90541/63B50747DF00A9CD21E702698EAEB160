@@ -1,0 +1,8 @@
+﻿using MediatR;
+
+namespace Projet.Domain.Model.User
+{
+    public class GetAllUserQueri : IRequest<List<Model.User>>
+    {
+    }
+}
