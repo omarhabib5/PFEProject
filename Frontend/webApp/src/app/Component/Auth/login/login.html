@@ -1,0 +1,23 @@
+<div class="login-shell">
+  <div class="login-card">
+    <h2>Login</h2>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label>
+        Email
+        <input formControlName="email" type="email" placeholder="email@example.com" [disabled]="isLoading" />
+      </label>
+      <label>
+        Password
+        <input formControlName="password" type="password" placeholder="Password" [disabled]="isLoading" />
+      </label>
+      <label class="checkbox-row">
+        <input formControlName="rememberMe" type="checkbox" [disabled]="isLoading" />
+        Remember me
+      </label>
+      <button type="submit" [disabled]="form.invalid || isLoading">
+        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  </div>
+</div>
