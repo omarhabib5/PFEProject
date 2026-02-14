@@ -5,6 +5,6 @@ namespace Projet.Domain.Querie.Task
 {
     public class GetTaskById : IRequest<Model.Task>
     {
-        public int id { get; set; }
+        public int Id { get; set; }
     }
 }

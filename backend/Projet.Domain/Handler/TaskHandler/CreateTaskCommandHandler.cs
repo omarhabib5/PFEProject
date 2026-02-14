@@ -1,3 +1,4 @@
+using System;
 using MediatR;
 using Projet.Domain.Command.TaskCRUD;
 using Projet.Domain.Interface;
@@ -17,20 +18,23 @@ namespace Projet.Domain.Handler.TaskHandler
         {
             var task = new Model.Task
             {
-                Name = request.Name,
-                description = request.description,
-                EstimationDuration = request.EstimationDuration,
+                Title = request.Title,
+                Description = request.Description,
+                EstimatedHours = request.EstimatedHours,
+                Status = request.Status,
+                Complexity = request.Complexity,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                taskState = request.taskState,
-                complexity = request.complexity,
-                UserStoryId = request.UserStoryId
+                UserStoryId = request.UserStoryId,
+                AssignedToId = request.AssignedToId,
+                SprintId = request.SprintId,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return task.id;
+            return task.Id;
         }
     }
 }

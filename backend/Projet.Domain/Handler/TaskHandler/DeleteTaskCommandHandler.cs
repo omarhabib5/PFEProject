@@ -17,11 +17,11 @@ namespace Projet.Domain.Handler.TaskHandler
         public async Task<Unit> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
         {
             var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.id == request.id, cancellationToken);
+                .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
 
             if (task == null)
             {
-                throw new KeyNotFoundException($"Task with ID {request.id} not found.");
+                throw new KeyNotFoundException($"Task with ID {request.Id} not found.");
             }
 
             _context.Tasks.Remove(task);

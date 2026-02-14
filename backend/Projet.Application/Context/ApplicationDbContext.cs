@@ -18,7 +18,9 @@ namespace Projet.Application.Context
         public DbSet<TeamUser> TeamUser { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<UserStory> UserStories { get; set; }
 
+        public DbSet<Sprint> Sprints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -49,9 +51,9 @@ namespace Projet.Application.Context
 
             modelBuilder.Entity<Domain.Model.Task>(entity =>
             {
-                entity.HasKey(e => e.id);
-                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.description).HasMaxLength(1000);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
 
                 entity.HasOne(e => e.UserStory)
                     .WithMany(us => us.Tasks)
@@ -140,9 +142,9 @@ namespace Projet.Application.Context
 
             modelBuilder.Entity<UserStory>(entity =>
             {
-                entity.HasKey(e => e.id);
-                entity.Property(e => e.name).IsRequired();
-                entity.Property(e => e.description);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired();
+                entity.Property(e => e.Description);
 
 
                 entity.HasOne(e => e.Sprint)

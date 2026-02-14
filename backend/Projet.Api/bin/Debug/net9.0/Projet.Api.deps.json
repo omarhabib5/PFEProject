@@ -1005,6 +1005,7 @@
       },
       "Projet.Application/1.0.0": {
         "dependencies": {
+          "MediatR": "14.0.0",
           "Microsoft.EntityFrameworkCore": "9.0.12",
           "Projet.Domain": "1.0.0"
         },

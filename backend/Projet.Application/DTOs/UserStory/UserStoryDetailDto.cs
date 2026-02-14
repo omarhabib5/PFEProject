@@ -1,0 +1,23 @@
+﻿using Projet.Domain.Model;
+
+namespace Projet.Application.DTOs.UserStory
+{
+    public class UserStoryDetailDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string AcceptanceCriteria { get; set; } = string.Empty;
+        public int StoryPoints { get; set; }
+        public int Priority { get; set; }
+        public State Status { get; set; }
+        public int SprintId { get; set; }
+        public int? AssignedToId { get; set; }
+        public string? AssignedToName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public int TaskCount { get; set; }
+        public int CompletedTaskCount { get; set; }
+        public List<TaskDto> Tasks { get; set; } = new();
+    }
+}

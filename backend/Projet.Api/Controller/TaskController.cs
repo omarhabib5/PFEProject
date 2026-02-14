@@ -29,7 +29,7 @@ namespace Projet.Api.Controller
         {
             try
             {
-                var query = new GetTaskById { id = id };
+                var query = new GetTaskById { Id = id };
                 var task = await _mediator.Send(query);
                 return Ok(task);
             }
@@ -49,7 +49,7 @@ namespace Projet.Api.Controller
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskCommand command)
         {
-            if (id != command.id)
+            if (id != command.Id)
             {
                 return BadRequest(new { message = "ID in URL does not match ID in request body." });
             }
@@ -70,7 +70,7 @@ namespace Projet.Api.Controller
         {
             try
             {
-                var command = new DeleteTaskCommand { id = id };
+                var command = new DeleteTaskCommand { Id = id };
                 await _mediator.Send(command);
                 return NoContent();
             }
