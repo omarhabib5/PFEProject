@@ -134,7 +134,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -166,15 +166,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "GetUserStoriesBySprintHandler.cs",
-              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
-              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
-              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
-              "RelativeToolTip": "Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-14T13:14:59.622Z"
+              "DocumentIndex": 0,
+              "Title": "Projet.Domain.csproj",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
+              "RelativeDocumentMoniker": "Projet.Domain\\Projet.Domain.csproj",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
+              "RelativeToolTip": "Projet.Domain\\Projet.Domain.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-12T18:27:38Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -202,16 +203,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Projet.Domain.csproj",
-              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
-              "RelativeDocumentMoniker": "Projet.Domain\\Projet.Domain.csproj",
-              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
-              "RelativeToolTip": "Projet.Domain\\Projet.Domain.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-02-12T18:27:38Z",
-              "EditorCaption": ""
+              "DocumentIndex": 21,
+              "Title": "GetUserStoriesBySprintHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-14T13:14:59.622Z"
             },
             {
               "$type": "Document",

@@ -1,1 +1,92 @@
-<p>task-manager works!</p>
+<div class="task-manager">
+    <div class="header">
+        <h1>Gestion des tâches</h1>
+        <button class="btn-reset" type="button" (click)="startCreate()">Nouvelle tâche</button>
+    </div>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+
+    <div class="content-grid">
+        <div class="card">
+            <h2>{{ editMode ? 'Modifier la tâche' : 'Créer une tâche' }}</h2>
+
+            <div class="form-group">
+                <label>Titre</label>
+                <input [(ngModel)]="formModel.title" type="text" />
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea [(ngModel)]="formModel.description" rows="3"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Heures estimées</label>
+                    <input [(ngModel)]="formModel.estimatedHours" type="number" min="1" />
+                </div>
+                <div class="form-group">
+                    <label>Complexité</label>
+                    <input [(ngModel)]="formModel.complexity" type="number" min="1" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Statut</label>
+                    <select [(ngModel)]="formModel.status">
+                        <option *ngFor="let option of statusOptions" [ngValue]="option.value">{{ option.label }}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>User Story ID</label>
+                    <input [(ngModel)]="formModel.userStoryId" type="number" min="1"
+                        [readonly]="selectedUserStoryId !== null" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date début</label>
+                    <input [(ngModel)]="formModel.startDate" type="date" />
+                </div>
+                <div class="form-group">
+                    <label>Date fin</label>
+                    <input [(ngModel)]="formModel.endDate" type="date" />
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn-primary" (click)="saveTask()" [disabled]="saving">
+                    {{ saving ? 'Enregistrement...' : (editMode ? 'Mettre à jour' : 'Créer') }}
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Liste des tâches</h2>
+
+            <div *ngIf="loading">Chargement...</div>
+
+            <div *ngIf="!loading && tasks.length === 0" class="empty-state">
+                Aucune tâche disponible.
+            </div>
+
+            <div *ngIf="!loading && tasks.length > 0" class="task-list">
+                <div class="task-item" *ngFor="let task of tasks" (click)="openTask(task)">
+                    <div class="task-item-head">
+                        <h3>{{ task.title }}</h3>
+                        <span class="status">{{ getStatusLabel(task.status) }}</span>
+                    </div>
+                    <p>{{ task.description }}</p>
+                    <div class="meta">
+                        <span>US #{{ task.userStoryId }}</span>
+                        <span>{{ task.estimatedHours }}h</span>
+                    </div>
+                    <button class="btn-link" type="button" (click)="startEdit(task, $event)">Modifier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

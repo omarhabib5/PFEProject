@@ -1,1 +1,171 @@
-<p>user-story-view works!</p>
+<div class="userstory-view">
+    <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement de la user story...</p>
+    </div>
+    <div *ngIf="error" class="error-container">
+        <div class="error-icon">⚠️</div>
+        <p>{{ error }}</p>
+        <button class="btn-retry" (click)="loadUserStory(userStory?.id || '')">Réessayer</button>
+    </div>
+    <div *ngIf="!loading && !error && userStory" class="view-content">
+        <div class="view-header">
+            <div class="header-left">
+                <button class="btn-back" (click)="goBack()">
+                    ← Retour
+                </button>
+                <div class="header-info">
+                    <h1>{{ userStory.title }}</h1>
+                    <div class="header-badges">
+                        <span [class]="'status-badge ' + getStatusClass(userStory.status)">
+                            {{ getStatusIcon(userStory.status) }} {{ getStatusLabel(userStory.status) }}
+                        </span>
+                        <span class="priority-badge">
+                            Priorité: {{ getPriorityLabel(userStory.priority) }}
+                        </span>
+                        <span class="points-badge">
+                            📊 {{ userStory.storyPoints }} points
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-edit" (click)="editUserStory()">
+                    ✏️ Modifier
+                </button>
+            </div>
+        </div>
+        <div class="content-grid">
+
+            <div class="left-column">
+
+                <div class="card">
+                    <h2 class="card-title">📝 Description</h2>
+                    <p class="description-text">{{ userStory.description }}</p>
+                </div>
+
+
+                <div class="card">
+                    <h2 class="card-title">✓ Critères d'acceptation</h2>
+                    <div class="criteria-content">
+                        <pre class="criteria-text">{{ userStory.acceptanceCriteria }}</pre>
+                    </div>
+                </div>
+
+
+                <div class="card">
+                    <h2 class="card-title">🔄 Changer le statut</h2>
+                    <div class="status-buttons">
+                        <button *ngFor="let status of statuses" [class]="'status-btn ' + getStatusClass(status.value)"
+                            [class.active]="userStory.status === status.value" (click)="changeStatus(status.value)"
+                            [disabled]="userStory.status === status.value">
+                            {{ status.icon }} {{ status.label }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="right-column">
+
+                <div class="card">
+                    <h2 class="card-title">ℹ️ Informations</h2>
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <span class="metadata-label">Assigné à:</span>
+                            <span class="metadata-value">{{ userStory.assignedToName || 'Non assigné' }}</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Créé le:</span>
+                            <span class="metadata-value">{{ userStory.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                        </div>
+                        <div class="metadata-item" *ngIf="userStory.updatedAt">
+                            <span class="metadata-label">Modifié le:</span>
+                            <span class="metadata-value">{{ userStory.updatedAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card">
+                    <h2 class="card-title">📈 Progression</h2>
+                    <div class="progress-info">
+                        <div class="progress-stat">
+                            <span class="stat-label">Tâches terminées</span>
+                            <span class="stat-value">{{ getCompletedTasksCount() }} / {{ userStory.tasks.length
+                                }}</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" [style.width.%]="getCompletionPercentage()"
+                                    [class.complete]="getCompletionPercentage() === 100"></div>
+                            </div>
+                            <span class="progress-percentage">{{ getCompletionPercentage() }}%</span>
+                        </div>
+                        <div class="hours-info">
+                            <div class="hours-item">
+                                <span class="hours-label">Estimé:</span>
+                                <span class="hours-value">{{ getTotalEstimatedHours() }}h</span>
+                            </div>
+                            <div class="hours-item">
+                                <span class="hours-label">Réel:</span>
+                                <span class="hours-value">{{ getTotalActualHours() }}h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="tasks-section">
+            <div class="section-header">
+                <h2>✅ Tâches ({{ userStory.tasks.length }})</h2>
+                <button class="btn-add-task" (click)="createTask()">
+                    + Ajouter une tâche
+                </button>
+            </div>
+
+            <div *ngIf="userStory.tasks.length === 0" class="empty-tasks">
+                <p>Aucune tâche pour cette user story</p>
+                <button class="btn-create-task" (click)="createTask()">
+                    Créer la première tâche
+                </button>
+            </div>
+
+            <div class="tasks-grid" *ngIf="userStory.tasks.length > 0">
+                <div *ngFor="let task of userStory.tasks" class="task-card" (click)="viewTask(task.id)">
+                    <div class="task-header">
+                        <h3 class="task-title">{{ task.title }}</h3>
+                        <span [class]="'task-status ' + getStatusClass(task.status)">
+                            {{ getStatusIcon(task.status) }}
+                        </span>
+                    </div>
+                    <p class="task-description">{{ task.description }}</p>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="icon">⏱️</span>
+                            <span>{{ task.estimatedHours }}h estimé</span>
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="icon">✓</span>
+                            <span>{{ task.actualHours }}h réel</span>
+                        </div>
+                        <div class="task-meta-item" *ngIf="task.assignedToName">
+                            <span class="icon">👤</span>
+                            <span>{{ task.assignedToName }}</span>
+                        </div>
+                    </div>
+                    <div class="task-status-change">
+                        <select class="status-select" [value]="task.status" (change)="onTaskStatusChange(task, $event)"
+                            (click)="$event.stopPropagation()">
+                            <option *ngFor="let status of statuses" [value]="status.value">
+                                {{ status.icon }} {{ status.label }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

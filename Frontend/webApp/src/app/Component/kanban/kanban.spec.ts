@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Kanban } from './kanban';
+import { Kanban } from '../kanban/kanban';
 
 describe('Kanban', () => {
   let component: Kanban;
