@@ -18,8 +18,8 @@ namespace Projet.Domain.Handler.TeamUser
         {
             return await _context.Set<Model.TeamUser>()
                 .Include(tu => tu.User)
-                .Include(tu => tu.team)
                 .Where(tu => tu.TeamId == request.TeamId && tu.LeftAt == null)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
     }

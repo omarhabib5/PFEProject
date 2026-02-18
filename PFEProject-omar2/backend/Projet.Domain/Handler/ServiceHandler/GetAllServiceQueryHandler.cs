@@ -16,7 +16,9 @@ namespace Projet.Domain.Handler.ServiceHandler
 
         public async Task<List<Model.Service>> Handle(GetAllServiceQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Services.ToListAsync(cancellationToken);
+            return await _context.Services
+                .Include(s => s.Responsible)
+                .ToListAsync(cancellationToken);
         }
     }
 }

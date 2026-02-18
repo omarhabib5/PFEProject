@@ -17,6 +17,7 @@ namespace Projet.Application.Context
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamUser> TeamUser { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Sprint> Sprints { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -96,10 +97,30 @@ namespace Projet.Application.Context
 
                 entity.HasIndex(e => e.Email).IsUnique();
 
+                entity.HasOne(e => e.Service)
+                    .WithMany(s => s.Members)
+                    .HasForeignKey(e => e.Serviceid)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 entity.HasMany(e => e.RefreshTokens)
                     .WithOne(rt => rt.User)
                     .HasForeignKey(rt => rt.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.ManagedProjects)
+                    .WithOne(p => p.ProjectManager)
+                    .HasForeignKey(p => p.ProjectManagerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.AssignedTasks)
+                    .WithOne(t => t.AssignedTo)
+                    .HasForeignKey(t => t.AssignedToId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.ManagedServices)
+                    .WithOne(s => s.Responsible)
+                    .HasForeignKey(s => s.ResponsibleId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<RefreshToken>(entity =>
@@ -122,6 +143,11 @@ namespace Projet.Application.Context
             {
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.name).IsRequired().HasMaxLength(200);
+
+                entity.HasOne(e => e.Service)
+                    .WithMany(s => s.Teams)
+                    .HasForeignKey(e => e.ServiceId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
 
@@ -153,6 +179,18 @@ namespace Projet.Application.Context
 
                 entity.HasOne(e => e.Project)
                     .WithMany(p => p.UserStories)
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Sprint>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+
+                entity.HasOne(e => e.Project)
+                    .WithMany(p => p.Sprints)
                     .HasForeignKey(e => e.ProjectId)
                     .OnDelete(DeleteBehavior.Restrict);
             });

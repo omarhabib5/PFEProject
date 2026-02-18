@@ -13,6 +13,7 @@ namespace Projet.Domain.Interface
         DbSet<Team> Teams { get; }
         DbSet<TeamUser> TeamUser { get; }
         DbSet<User> Users { get; }
+        DbSet<Sprint> Sprints { get; }
         DbSet<RefreshToken> RefreshTokens { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DbSet<T> Set<T>() where T : class;

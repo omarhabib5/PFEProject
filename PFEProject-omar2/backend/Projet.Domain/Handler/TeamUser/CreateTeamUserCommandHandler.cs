@@ -16,33 +16,50 @@ namespace Projet.Domain.Handler.TeamUser
 
         public async Task<int> Handle(CreateTeamUserCommand request, CancellationToken cancellationToken)
         {
-            // Validate that User exists
+         
+            if (!request.TeamId.HasValue)
+            {
+                throw new ArgumentException("TeamId is required.");
+            }
+
+           
             var userExists = await _context.Users.AnyAsync(u => u.Id == request.UserId, cancellationToken);
             if (!userExists)
             {
                 throw new KeyNotFoundException($"User with ID {request.UserId} not found.");
             }
 
-            // Validate that Team exists
-            var teamExists = await _context.Teams.AnyAsync(t => t.id == request.TeamId, cancellationToken);
+          
+            var teamExists = await _context.Teams.AnyAsync(t => t.id == request.TeamId.Value, cancellationToken);
             if (!teamExists)
             {
-                throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+                throw new KeyNotFoundException($"Team with ID {request.TeamId.Value} not found.");
             }
 
-            // Check if TeamUser already exists
             var existingTeamUser = await _context.Set<Model.TeamUser>()
-                .FirstOrDefaultAsync(tu => tu.UserId == request.UserId && tu.TeamId == request.TeamId && tu.LeftAt == null, cancellationToken);
+                .FirstOrDefaultAsync(tu => tu.UserId == request.UserId && tu.TeamId == request.TeamId.Value && tu.LeftAt == null, cancellationToken);
 
             if (existingTeamUser != null)
             {
-                throw new InvalidOperationException($"User {request.UserId} is already a member of Team {request.TeamId}.");
+                throw new InvalidOperationException($"User {request.UserId} is already a member of Team {request.TeamId.Value}.");
+            }
+
+           
+            if (request.role == Model.Role.ProjectLeader)
+            {
+                var existingLeader = await _context.Set<Model.TeamUser>()
+                    .AnyAsync(tu => tu.TeamId == request.TeamId.Value && tu.role == Model.Role.ProjectLeader && tu.LeftAt == null, cancellationToken);
+
+                if (existingLeader)
+                {
+                    throw new InvalidOperationException($"Team {request.TeamId.Value} already has a Project Leader. Only one leader is allowed per team.");
+                }
             }
 
             var teamUser = new Model.TeamUser
             {
                 UserId = request.UserId,
-                TeamId = request.TeamId,
+                TeamId = request.TeamId.Value,
                 role = request.role,
                 JoinedAt = DateTime.UtcNow
             };

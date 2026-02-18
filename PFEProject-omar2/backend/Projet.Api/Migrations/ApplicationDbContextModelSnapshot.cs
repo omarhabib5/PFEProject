@@ -33,9 +33,6 @@ namespace Projet.Api.Migrations
                     b.Property<int>("ProjectManagerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ServiceId")
                         .HasColumnType("int");
 
@@ -149,11 +146,13 @@ namespace Projet.Api.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
@@ -174,7 +173,7 @@ namespace Projet.Api.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Sprint");
+                    b.ToTable("Sprints");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.Task", b =>
@@ -431,8 +430,9 @@ namespace Projet.Api.Migrations
             modelBuilder.Entity("Projet.Domain.Model.Service", b =>
                 {
                     b.HasOne("Projet.Domain.Model.User", "Responsible")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleId");
+                        .WithMany("ManagedServices")
+                        .HasForeignKey("ResponsibleId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Responsible");
                 });
@@ -478,7 +478,7 @@ namespace Projet.Api.Migrations
                     b.HasOne("Projet.Domain.Model.Service", "Service")
                         .WithMany("Teams")
                         .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Service");
@@ -505,9 +505,12 @@ namespace Projet.Api.Migrations
 
             modelBuilder.Entity("Projet.Domain.Model.User", b =>
                 {
-                    b.HasOne("Projet.Domain.Model.Service", null)
+                    b.HasOne("Projet.Domain.Model.Service", "Service")
                         .WithMany("Members")
-                        .HasForeignKey("Serviceid");
+                        .HasForeignKey("Serviceid")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
@@ -564,6 +567,8 @@ namespace Projet.Api.Migrations
                     b.Navigation("AssignedTasks");
 
                     b.Navigation("ManagedProjects");
+
+                    b.Navigation("ManagedServices");
 
                     b.Navigation("RefreshTokens");
 

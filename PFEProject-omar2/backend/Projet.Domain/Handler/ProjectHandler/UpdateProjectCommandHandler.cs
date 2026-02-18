@@ -40,7 +40,7 @@ namespace Projet.Domain.Handler.ProjectHandler
                 throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
             }
 
-            // Validate that ProjectManagerId exists
+            
             var projectManagerExists = await context.Users.AnyAsync(u => u.Id == request.ProjectManagerId, cancellationToken);
             if (!projectManagerExists)
             {

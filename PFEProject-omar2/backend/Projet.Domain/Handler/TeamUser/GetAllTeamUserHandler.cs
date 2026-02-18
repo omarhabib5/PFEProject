@@ -18,7 +18,7 @@ namespace Projet.Domain.Handler.TeamUser
         {
             return await _context.Set<Model.TeamUser>()
                 .Include(tu => tu.User)
-                .Include(tu => tu.team)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
     }
