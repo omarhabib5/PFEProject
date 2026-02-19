@@ -5051,11 +5051,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Projet.Api.csproj",
+      "projectUniqueName": "c:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Projet.Api.csproj",
       "projectName": "Projet.Api",
-      "projectPath": "C:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Projet.Api.csproj",
+      "projectPath": "c:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Projet.Api.csproj",
       "packagesPath": "C:\\Users\\RAYEN\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\obj\\",
+      "outputPath": "c:\\Users\\RAYEN\\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

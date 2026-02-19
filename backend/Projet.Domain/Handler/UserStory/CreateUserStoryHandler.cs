@@ -1,16 +1,18 @@
 using System;
 using MediatR;
-using Projet.Application.Context;
+using Microsoft.EntityFrameworkCore;
+
 using Projet.Domain.Command.UserStory;
 using Projet.Domain.Model;
+using Projet.Domain.Interface;
 
-namespace Projet.Application.Handler.UserStory;
+namespace Projet.Domain.Handler.UserStory;
 
 public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, int>
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbSet _context;
 
-    public CreateUserStoryHandler(ApplicationDbContext context)
+    public CreateUserStoryHandler(IApplicationDbSet context)
     {
         _context = context;
     }

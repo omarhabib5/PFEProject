@@ -1,10 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Projet.Application.DTOs.UserStory;
-using Projet.Application.Querie.UserStory;
 using Projet.Domain.Command.UserStory;
+using Projet.Domain.Querie.UserStory;
 using System.Security.Claims;
+using CreateUserStoryRequest = Projet.Application.DTOs.UserStory.CreateUserStoryRequest;
+using UserStoryDto = Projet.Application.DTOs.UserStory.UserStoryDto;
+using UserStoryDetailDto = Projet.Application.DTOs.UserStory.UserStoryDetailDto;
+using UserStoryTaskDto = Projet.Application.DTOs.UserStory.TaskDto;
+using UpdateUserStoryRequest = Projet.Application.DTOs.UserStory.UpdateUserStoryRequest;
+using UpdateUserStoryStatusRequest = Projet.Application.DTOs.UserStory.UpdateUserStoryStatusRequest;
 
 namespace Projet.Api.Controller;
 
@@ -31,7 +36,28 @@ public class UserStoryController : ControllerBase
     {
         var query = new GetUserStoriesBySprintQuery { SprintId = sprintId };
         var result = await _mediator.Send(query);
-        return Ok(result);
+
+        var mapped = result.Select(x => new UserStoryDto
+        {
+            Id = x.Id,
+            Title = x.Title,
+            Description = x.Description,
+            AcceptanceCriteria = x.AcceptanceCriteria,
+            StoryPoints = x.StoryPoints,
+            Priority = x.Priority,
+            Status = x.Status,
+            SprintId = x.SprintId,
+            AssignedToId = x.AssignedToId,
+            AssignedToName = x.AssignedTo != null
+                ? $"{x.AssignedTo.FirstName} {x.AssignedTo.LastName}"
+                : null,
+            TaskCount = x.Tasks.Count,
+            CompletedTaskCount = x.Tasks.Count(t => t.Status == Projet.Domain.Model.State.done),
+            CreatedAt = x.CreatedAt,
+            UpdatedAt = x.UpdatedAt
+        }).ToList();
+
+        return Ok(mapped);
     }
 
     [HttpGet("{id:int}")]
@@ -39,7 +65,44 @@ public class UserStoryController : ControllerBase
     {
         var query = new GetUserStoryByIdQuery { Id = id };
         var result = await _mediator.Send(query);
-        return Ok(result);
+
+        var mapped = new UserStoryDetailDto
+        {
+            Id = result.Id,
+            Title = result.Title,
+            Description = result.Description,
+            AcceptanceCriteria = result.AcceptanceCriteria ?? string.Empty,
+            StoryPoints = result.StoryPoints,
+            Priority = result.Priority,
+            Status = result.Status,
+            SprintId = result.SprintId,
+            AssignedToId = result.AssignedToId,
+            AssignedToName = result.AssignedTo != null
+                ? $"{result.AssignedTo.FirstName} {result.AssignedTo.LastName}"
+                : null,
+            CreatedAt = result.CreatedAt,
+            UpdatedAt = result.UpdatedAt,
+            TaskCount = result.Tasks.Count,
+            CompletedTaskCount = result.Tasks.Count(t => t.Status == Projet.Domain.Model.State.done),
+            Tasks = result.Tasks.Select(t => new UserStoryTaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                Status = t.Status,
+                EstimatedHours = t.EstimatedHours,
+                ActualHours = t.ActualHours,
+                UserStoryId = t.UserStoryId,
+                AssignedToId = t.AssignedToId,
+                AssignedToName = t.AssignedTo != null
+                    ? $"{t.AssignedTo.FirstName} {t.AssignedTo.LastName}"
+                    : null,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt
+            }).ToList()
+        };
+
+        return Ok(mapped);
     }
 
     [HttpPost]

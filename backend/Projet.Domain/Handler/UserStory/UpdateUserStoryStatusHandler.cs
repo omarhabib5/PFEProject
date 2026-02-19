@@ -1,15 +1,15 @@
 using System;
 using MediatR;
-using Projet.Application.Context;
 using Projet.Domain.Command.UserStory;
+using Projet.Domain.Interface;
 
-namespace Projet.Application.Handler.UserStory;
+namespace Projet.Domain.Handler.UserStory;
 
 public class UpdateUserStoryStatusHandler : IRequestHandler<UpdateUserStoryStatusCommand, Unit>
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbSet _context;
 
-    public UpdateUserStoryStatusHandler(ApplicationDbContext context)
+    public UpdateUserStoryStatusHandler(IApplicationDbSet context)
     {
         _context = context;
     }

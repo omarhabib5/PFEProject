@@ -1,15 +1,17 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Projet.Application.Context;
 using Projet.Domain.Command.UserStory;
+using Projet.Domain.Interface;
+using Projet.Domain.Model;
 
-namespace Projet.Application.Handler.UserStory;
+
+namespace Projet.Domain.Handler.UserStory;
 
 public class DeleteUserStoryHandler : IRequestHandler<DeleteUserStoryCommand, Unit>
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbSet _context;
 
-    public DeleteUserStoryHandler(ApplicationDbContext context)
+    public DeleteUserStoryHandler(IApplicationDbSet context)
     {
         _context = context;
     }

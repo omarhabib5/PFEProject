@@ -9,12 +9,15 @@ namespace Projet.Domain.Interface
     {
         DbSet<Project> Projects { get; }
         DbSet<Model.Task> Tasks { get; }
+        DbSet<UserStory> UserStories { get; }
+        DbSet<Sprint> Sprints { get; }
         DbSet<Service> Services { get; }
         DbSet<Team> Teams { get; }
         DbSet<TeamUser> TeamUser { get; }
         DbSet<User> Users { get; }
         DbSet<RefreshToken> RefreshTokens { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
         DbSet<T> Set<T>() where T : class;
     }
 }
