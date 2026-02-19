@@ -479,4 +479,3 @@ C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.pdb
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.genruntimeconfig.cache
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\ref\Projet.Api.dll
-C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
