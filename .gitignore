@@ -1,0 +1,42 @@
+# Visual Studio cache/options
+.vs/
+.vscode/
+*.sln.iml
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+bin/
+obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+
+# IDE
+*.user
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node/Angular
+node_modules/
+dist/
+.angular/
+*.tgz
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.local

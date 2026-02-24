@@ -1,1 +1,194 @@
-<p>task-manager works!</p>
+<div class="max-w-7xl mx-auto p-5">
+	<div class="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
+		<h1 class="text-3xl font-bold text-gray-800">Task Kanban Management</h1>
+		<button
+			class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+			(click)="toggleCreateTaskForm()"
+			[disabled]="loading"
+		>
+			<span *ngIf="!showCreateTaskForm">+ Add Task</span>
+			<span *ngIf="showCreateTaskForm && !isEditMode">Cancel</span>
+			<span *ngIf="showCreateTaskForm && isEditMode">Cancel Edit</span>
+		</button>
+	</div>
+
+	<div class="p-4 mb-5 bg-green-100 text-green-800 border border-green-200 rounded-lg" *ngIf="successMessage">
+		{{ successMessage }}
+	</div>
+
+	<div class="p-4 mb-5 bg-red-100 text-red-800 border border-red-200 rounded-lg relative" *ngIf="error">
+		{{ error }}
+		<button class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-red-800" (click)="error = null">×</button>
+	</div>
+
+	<div class="bg-gray-50 p-6 rounded-lg mb-8 shadow-sm" *ngIf="showCreateTaskForm">
+		<h2 class="text-xl font-semibold text-gray-800 mb-5">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+
+		<form (ngSubmit)="isEditMode ? updateTask() : createTask()">
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+				<div class="mb-5">
+					<label for="taskName" class="block mb-2 text-gray-700 font-medium">Task Name *</label>
+					<input
+						id="taskName"
+						type="text"
+						[(ngModel)]="newTask.name"
+						name="taskName"
+						required
+						placeholder="Enter task name"
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+						[disabled]="loading"
+					>
+				</div>
+
+				<div class="mb-5">
+					<label for="taskUserStory" class="block mb-2 text-gray-700 font-medium">User Story *</label>
+					<select
+						id="taskUserStory"
+						[(ngModel)]="newTask.userStoryId"
+						name="taskUserStory"
+						required
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+						[disabled]="loading"
+					>
+						<option [value]="0" disabled>Select user story</option>
+						<option *ngFor="let us of userStories" [value]="us.id">{{ us.name }}</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="mb-5">
+				<label for="taskDescription" class="block mb-2 text-gray-700 font-medium">Description</label>
+				<textarea
+					id="taskDescription"
+					[(ngModel)]="newTask.description"
+					name="taskDescription"
+					rows="3"
+					placeholder="Enter task description"
+					class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+					[disabled]="loading"
+				></textarea>
+			</div>
+
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+				<div class="mb-5">
+					<label for="taskStartDate" class="block mb-2 text-gray-700 font-medium">Start Date *</label>
+					<input
+						id="taskStartDate"
+						type="date"
+						[(ngModel)]="newTask.startDate"
+						(ngModelChange)="onTaskDatesChange()"
+						name="taskStartDate"
+						required
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+						[disabled]="loading"
+					>
+				</div>
+
+				<div class="mb-5">
+					<label for="taskEndDate" class="block mb-2 text-gray-700 font-medium">End Date *</label>
+					<input
+						id="taskEndDate"
+						type="date"
+						[(ngModel)]="newTask.endDate"
+						(ngModelChange)="onTaskDatesChange()"
+						name="taskEndDate"
+						required
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+						[disabled]="loading"
+					>
+				</div>
+
+				<div class="mb-5">
+					<label for="taskDuration" class="block mb-2 text-gray-700 font-medium">Duration (days)</label>
+					<input
+						id="taskDuration"
+						type="number"
+						[(ngModel)]="newTask.estimationDuration"
+						name="taskDuration"
+						readonly
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm bg-gray-100"
+					>
+				</div>
+
+				<div class="mb-5">
+					<label for="taskComplexity" class="block mb-2 text-gray-700 font-medium">Complexity (1-5) *</label>
+					<input
+						id="taskComplexity"
+						type="number"
+						[(ngModel)]="newTask.complexity"
+						name="taskComplexity"
+						min="1"
+						max="5"
+						required
+						class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+						[disabled]="loading"
+					>
+				</div>
+			</div>
+
+			<div class="mb-5 md:w-1/2">
+				<label for="taskState" class="block mb-2 text-gray-700 font-medium">State *</label>
+				<select
+					id="taskState"
+					[(ngModel)]="newTask.taskState"
+					name="taskState"
+					required
+					class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+					[disabled]="loading"
+				>
+					<option *ngFor="let state of stateOptions" [ngValue]="state.value">{{ state.label }}</option>
+				</select>
+			</div>
+
+			<div class="flex gap-2.5 mt-5">
+				<button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed" [disabled]="loading">
+					{{ isEditMode ? 'Update Task' : 'Create Task' }}
+				</button>
+				<button type="button" class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="toggleCreateTaskForm()" [disabled]="loading">
+					Cancel
+				</button>
+			</div>
+		</form>
+	</div>
+
+	<div class="flex justify-center items-center py-20" *ngIf="loading">
+		<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+	</div>
+
+	<div class="kanban-board" *ngIf="!loading">
+		<div class="kanban-column" *ngFor="let columnState of orderedStates" (dragover)="onAllowDrop($event)" (drop)="onDropToState($event, columnState)">
+			<div class="kanban-column-header">
+				<h3>{{ getStateLabel(columnState) }}</h3>
+				<span class="kanban-count">{{ getTasksByState(columnState).length }}</span>
+			</div>
+
+			<div class="kanban-card" *ngFor="let task of getTasksByState(columnState); trackBy: trackByTaskId" draggable="true" (dragstart)="onDragStart(task)" (dragend)="onDragEnd()">
+				<div class="flex justify-between items-start gap-2">
+					<h4 class="font-semibold text-gray-900">{{ task.name }}</h4>
+					<span class="text-xs px-2 py-1 rounded bg-indigo-100 text-indigo-700">C{{ task.complexity }}</span>
+				</div>
+
+				<p class="text-sm text-gray-600 mt-2" *ngIf="task.description">
+					{{ task.description.length > 80 ? (task.description | slice:0:80) + '...' : task.description }}
+				</p>
+
+				<div class="text-xs text-gray-500 mt-3 space-y-1">
+					<p><strong>User Story:</strong> {{ getUserStoryName(task.userStoryId) }}</p>
+					<p><strong>Sprint:</strong> {{ getSprintName(task.sprintId) }}</p>
+					<p><strong>Duration:</strong> {{ task.estimationDuration }} day(s)</p>
+				</div>
+
+				<div class="card-actions mt-4">
+					<button class="btn-light" (click)="moveToPrevious(task)" [disabled]="!canMovePrevious(task)">←</button>
+					<button class="btn-light" (click)="moveToNext(task)" [disabled]="!canMoveNext(task)">→</button>
+					<button class="btn-edit" (click)="startEditTask(task)">Edit</button>
+					<button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
+				</div>
+			</div>
+
+			<div class="empty-column" *ngIf="getTasksByState(columnState).length === 0">
+				No tasks in this state
+			</div>
+		</div>
+	</div>
+</div>
