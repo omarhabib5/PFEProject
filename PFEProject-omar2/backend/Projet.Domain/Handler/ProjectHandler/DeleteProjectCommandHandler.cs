@@ -24,7 +24,11 @@ namespace Projet.Domain.Handler.ProjectHandler
             {
                 throw new KeyNotFoundException($"Project with ID {request.id} not found.");
             }
+            var sprints = context.Sprints.Where(s => s.ProjectId == project.id);
+            context.Sprints.RemoveRange(sprints);
             context.Projects.Remove(project);
+
+            
             await context.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }

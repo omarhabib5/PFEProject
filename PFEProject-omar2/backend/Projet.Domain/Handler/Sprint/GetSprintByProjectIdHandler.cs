@@ -15,7 +15,7 @@ namespace Projet.Domain.Handler.Sprint
             this.context = context;
         }
         public async Task<List<Model.Sprint>> Handle(Querie.Sprint.GetSprintByProjectIdQuery request, CancellationToken cancellationToken)
-        {
+        { 
             var sprints = context.Sprints.Where(s => s.ProjectId == request.ProjectId).ToList();
             return sprints;
         }

@@ -21,6 +21,13 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<Unit> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
         {
+            if (request.EndDate <= request.StartDate)
+            {
+                throw new InvalidOperationException("End date must be after start date.");
+            }
+
+            var estimatedDuration = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+
             var project = await context.Projects.FirstOrDefaultAsync(p => p.id == request.id);
 
             if (project == null)
@@ -51,7 +58,7 @@ namespace Projet.Domain.Handler.ProjectHandler
             project.description = request.Description;
             project.startDate = request.StartDate;
             project.endDate = request.EndDate;
-            project.estimatedDuration = request.EstimatedDuration;
+            project.estimatedDuration = estimatedDuration;
             project.projectState = request.ProjectState;
             project.ServiceId = request.ServiceId;
             project.TeamId = request.TeamId;

@@ -18,6 +18,9 @@ namespace Projet.Domain.Handler.ServiceHandler
         {
             return await _context.Services
                 .Include(s => s.Responsible)
+                .Include(s => s.Members)
+                .Include(s => s.Teams)
+                .Include(s => s.Projects)
                 .ToListAsync(cancellationToken);
         }
     }

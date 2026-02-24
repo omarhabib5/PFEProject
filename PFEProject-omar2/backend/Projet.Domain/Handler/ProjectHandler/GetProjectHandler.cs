@@ -22,7 +22,12 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<Project> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
         {
-            var project = await context.Projects.FirstOrDefaultAsync(p => p.id == request.Id);
+            var project = await context.Projects
+                .Include(p => p.ProjectManager)
+                .Include(p => p.Team)
+                .Include(p => p.Sprints)
+                .Include(p => p.UserStories)
+                .FirstOrDefaultAsync(p => p.id == request.Id);
             
             if (project == null)
             {
@@ -44,7 +49,13 @@ namespace Projet.Domain.Handler.ProjectHandler
 
         public async Task<List<Project>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
         {
-            return await context.Projects.ToListAsync();
+            return await context.Projects
+                .Include(p => p.ProjectManager)
+                .Include(p => p.Team)
+                  
+                .Include(p => p.Sprints)
+                .Include(p => p.UserStories)
+                .ToListAsync() ;
         }
     }
 }

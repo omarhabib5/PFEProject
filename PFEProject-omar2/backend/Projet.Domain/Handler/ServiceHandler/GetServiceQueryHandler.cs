@@ -18,6 +18,9 @@ namespace Projet.Domain.Handler.ServiceHandler
         {
             var service = await _context.Services
                 .Include(s => s.Responsible)
+                .Include(s => s.Members)
+                .Include(s => s.Teams)
+                .Include(s => s.Projects)
                 .FirstOrDefaultAsync(s => s.id == request.id, cancellationToken);
             
             if (service == null)

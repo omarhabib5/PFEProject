@@ -20,6 +20,13 @@ namespace Projet.Domain.Handler.Sprint
 
         public async Task<Unit> Handle(UpdateSprintCommand request,CancellationToken cancellationToken)
         {
+            if (request.EndDate <= request.StartDate)
+            {
+                throw new InvalidOperationException("End date must be after start date.");
+            }
+
+            var estimatedDuration = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+
             var sprint = context.Sprints.Find(request.id);
             if (sprint == null)
             {
@@ -27,7 +34,7 @@ namespace Projet.Domain.Handler.Sprint
             }
             sprint.Name = request.Name;
             sprint.Description = request.Description;
-            sprint.estimatedDuration = request.EstimatedDuration;
+            sprint.estimatedDuration = estimatedDuration;
             sprint.startDate = request.StartDate;
             sprint.endDate = request.EndDate;
             sprint.ProjectId = request.ProjectId;
