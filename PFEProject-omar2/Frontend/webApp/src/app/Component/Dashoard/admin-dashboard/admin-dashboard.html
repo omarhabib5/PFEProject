@@ -1,1 +1,300 @@
-<p>admin-dashboard works!</p>
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="logo">TaskFlow Pro</h1>
+      <p class="tagline">Gestion de Projets</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="setActiveTab('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a class="nav-item" [class.active]="activeTab === 'service'" (click)="setActiveTab('service')">
+        <span class="nav-icon">🏢</span>
+        <span class="nav-text">Service</span>
+      </a>
+      <a class="nav-item" [class.active]="activeTab === 'calendrier'" (click)="setActiveTab('calendrier')">
+        <span class="nav-icon">📅</span>
+        <span class="nav-text">Calendrier</span>
+      </a>
+      <a class="nav-item" [class.active]="activeTab === 'utilisateur'" (click)="setActiveTab('utilisateur')">
+        <span class="nav-icon"></span>
+        <span class="nav-text">Utilisateur</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="nav-item" (click)="logout()">
+        <span class="nav-icon"></span>
+        <span class="nav-text">D�connexion</span>
+      </a>
+    </div>
+  </aside>
+
+
+  <main class="main-content">
+ 
+    <header class="header">
+      <div class="header-left">
+        <h2 class="page-title">{{ activeTab === 'dashboard' ? 'Tableau de Bord' : activeTab === 'service' ? 'Gestion des Services' : activeTab === 'calendrier' ? 'Calendrier' : 'Gestion des Utilisateurs' }}</h2>
+        <p class="page-date">{{ currentDate }}</p>
+      </div>
+      <div class="header-right">
+        <div class="notifications">
+          <span class="notification-icon"></span>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="user-profile">
+          <div class="user-avatar"></div>
+          <div class="user-info">
+            <div class="user-name">{{ userName }}</div>
+            <div class="user-role">{{ userRole }}</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+   
+    <div class="content-area">
+         
+      <div *ngIf="activeTab === 'dashboard'" class="dashboard-view">
+        <div class="welcome-section">
+          <h3>Bienvenue sur votre espace d'administration</h3>
+          <p>Utilisez la barre latérale pour naviguer entre les différentes sections</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">📊category</div>
+            <div class="stat-info">
+              <h4>Total Services</h4>
+              <p class="stat-value">{{ services.length }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">👥</div>
+            <div class="stat-info">
+              <h4>Total Utilisateurs</h4>
+              <p class="stat-value">{{ users.length }}</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">📁</div>
+            <div class="stat-info">
+              <h4>Projets Actifs</h4>
+              <p class="stat-value">12</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">✅</div>
+            <div class="stat-info">
+              <h4>Tâches Complétées</h4>
+              <p class="stat-value">85%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  
+      <div *ngIf="activeTab === 'service'" class="service-view">
+   
+        <div class="filter-bar">
+          <div class="search-service">
+            <span class="search-icon"></span>
+            <input 
+              type="text" 
+              placeholder="Rechercher un service..." 
+              class="service-search-input"
+              [(ngModel)]="searchTerm"
+              (input)="filterServices()"
+            />
+          </div>
+          <select class="status-filter" [(ngModel)]="selectedStatus" (change)="filterServices()">
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+          </select>
+          <button class="btn-new-service" (click)="showNewServiceForm = true">
+            <span>+</span> Nouveau service
+          </button>
+        </div>
+
+        <div *ngIf="showNewServiceForm" class="service-form-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Cr�er un nouveau service</h3>
+              <button class="close-btn" (click)="cancelNewService()"></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Nom du service</label>
+                <input type="text" [(ngModel)]="newService.name" class="form-input" placeholder="Ex: D�veloppement">
+              </div>
+              <div class="form-group">
+                <label>Responsable</label>
+                <select [(ngModel)]="newService.responsibleId" class="form-input">
+                  <option [value]="undefined">S�lectionner un responsable</option>
+                  <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-cancel" (click)="cancelNewService()">Annuler</button>
+              <button class="btn-submit" (click)="createService()">Cr�er</button>
+            </div>
+          </div>
+        </div>
+
+     
+        <div *ngIf="loading" class="loading-state">
+          <p>Chargement des services...</p>
+        </div>
+
+       
+        <div *ngIf="!loading" class="services-grid">
+          <div *ngFor="let service of filteredServices" class="service-card">
+     
+            <div class="card-header">
+              <div class="service-icon" [style.background]="'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">🏢</div>
+              <div class="card-status">
+                <span class="status-badge active">Actif</span>
+                <div class="card-actions">
+                  <button class="btn-icon" (click)="editService(service)" title="Modifier">✏️</button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(service.id)" title="Supprimer">🗑️</button>
+                </div>
+              </div>
+            </div>
+
+          
+            <div class="service-info">
+              <h3 class="service-name">{{ service.name }}</h3>
+              <p class="service-description">
+                Service de {{ service.name.toLowerCase() }}
+              </p>
+            </div>
+
+     
+            <div class="service-stats">
+              <div class="stat-item">
+                <span class="stat-icon"></span>
+                <span class="stat-value">{{ service.members?.length || 0 }} membres</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon"></span>
+                <span class="stat-value">{{ service.projects?.length || 0 }} projets</span>
+              </div>
+            </div>
+
+         
+            <div class="service-manager">
+              <span class="manager-label">Chef de service:</span>
+              <span class="manager-name" *ngIf="service.responsible">
+                {{ service.responsible.firstName }} {{ service.responsible.lastName }}
+              </span>
+              <span class="manager-name" *ngIf="!service.responsible" style="font-style: italic; color: #999;">Non assigné</span>
+            </div>
+
+          
+            <div class="team-members">
+              <div class="members-header">
+                <span class="members-label">Membres de l'équipe</span>
+                <span class="members-count">{{ service.members?.length || 0 }} total</span>
+              </div>
+              <div class="members-avatars">
+                <div 
+                  *ngFor="let member of service.members?.slice(0, 3)" 
+                  class="member-avatar"
+                  [title]="member.firstName + ' ' + member.lastName"
+                >
+                  {{ getInitials(member.firstName, member.lastName) }}
+                </div>
+                <div *ngIf="(service.members?.length || 0) > 3" class="member-avatar more">
+                  +{{ (service.members?.length || 0) - 3 }}
+                </div>
+              </div>
+            </div>
+
+          
+            <button class="btn-view-projects" (click)="viewProjects(service.id)">
+              Voir les projets <span class="arrow"></span>
+            </button>
+          </div>
+
+      
+          <div *ngIf="filteredServices.length === 0" class="empty-state">
+            <p>Aucun service trouv�</p>
+          </div>
+        </div>
+      
+        <div *ngIf="showEditServiceForm" class="service-form-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Modifier le service</h3>
+              <button class="close-btn" (click)="cancelEditService()">×</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Nom du service</label>
+                <input type="text" [(ngModel)]="editingService.name" class="form-input" placeholder="Ex: Développement">
+              </div>
+              <div class="form-group">
+                <label>Responsable</label>
+                <select [(ngModel)]="editingService.responsibleId" class="form-input">
+                  <option [value]="undefined">Sélectionner un responsable</option>
+                  <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-cancel" (click)="cancelEditService()">Annuler</button>
+              <button class="btn-submit" (click)="updateService()">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+
+        
+        <div *ngIf="showDeleteConfirm" class="service-form-modal">
+          <div class="modal-content modal-small">
+            <div class="modal-header">
+              <h3>Confirmer la suppression</h3>
+              <button class="close-btn" (click)="cancelDelete()">×</button>
+            </div>
+            <div class="modal-body">
+              <p class="delete-message">⚠️ Êtes-vous sûr de vouloir supprimer ce service ? Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+              <button class="btn-submit btn-danger" (click)="deleteService()">Supprimer</button>
+            </div>
+          </div>
+        </div>      </div>
+
+   
+      <div *ngIf="activeTab === 'calendrier'" class="calendrier-view">
+        <div class="placeholder-content">
+          <div class="placeholder-icon"></div>
+          <h3>Calendrier</h3>
+          <p>Le module calendrier sera bientôt disponible</p>
+        </div>
+      </div>
+
+     
+      <div *ngIf="activeTab === 'utilisateur'" class="utilisateur-view">
+        <div class="users-grid">
+          <div *ngFor="let user of users" class="user-card">
+            <div class="user-card-avatar">
+              {{ getInitials(user.firstName, user.lastName) }}
+            </div>
+            <div class="user-card-info">
+              <h4>{{ user.firstName }} {{ user.lastName }}</h4>
+              <p class="user-email">{{ user.email }}</p>
+              <p class="user-role-tag">{{ user.role || 'Utilisateur' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
