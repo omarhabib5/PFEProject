@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService, project, CreateProjectDto, UpdateProjectDto, State } from '../Service/ProjectService';
-import { TeamService, Team } from '../../Team/Service/TeamService';
+import { TeamService, Team, TeamUser } from '../../Team/Service/TeamService';
 import { ServiceService, Service } from '../../Team/Service/ServiceService';
 import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
 
@@ -17,12 +18,16 @@ export class ProjectManager implements OnInit {
   private teamService = inject(TeamService);
   private serviceService = inject(ServiceService);
   private userService = inject(UserApiService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   
   projects: project[] = [];
+  allProjects: project[] = [];
   teams: Team[] = [];
   services: Service[] = [];
   users: UserDto[] = [];
+  selectedServiceFilter: number | null = null;
 
   
   loading = false;
@@ -30,10 +35,18 @@ export class ProjectManager implements OnInit {
   isEditMode = false;
   editingProjectId: number | null = null;
   selectedProject: project | null = null;
+  selectedProjectMembers: UserDto[] = [];
+  detailTab: 'overview' | 'stories' | 'sprints' = 'overview';
+  currentDateLabel = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
   error: string | null = null;
   successMessage: string | null = null;
 
-  // Form model with string dates for HTML inputs
+ 
   newProject: any = {
     name: '',
     description: '',
@@ -57,6 +70,17 @@ export class ProjectManager implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const serviceIdParam = params.get('serviceId');
+      this.selectedServiceFilter = serviceIdParam ? Number(serviceIdParam) : null;
+
+      if (this.selectedServiceFilter && !Number.isNaN(this.selectedServiceFilter)) {
+        this.newProject.serviceId = this.selectedServiceFilter;
+      }
+
+      this.applyServiceFilter();
+    });
+
     this.loadProjects();
     this.loadTeams();
     this.loadServices();
@@ -67,7 +91,8 @@ export class ProjectManager implements OnInit {
     this.loading = true;
     this.projectService.getAllProjects().subscribe({
       next: (data) => {
-        this.projects = data;
+        this.allProjects = data;
+        this.applyServiceFilter();
         this.loading = false;
             this.cdr.detectChanges();
       },
@@ -76,6 +101,15 @@ export class ProjectManager implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private applyServiceFilter(): void {
+    if (this.selectedServiceFilter === null || Number.isNaN(this.selectedServiceFilter)) {
+      this.projects = [...this.allProjects];
+      return;
+    }
+
+    this.projects = this.allProjects.filter((item) => Number(item.serviceId ?? -1) === this.selectedServiceFilter);
   }
 
   loadTeams(): void {
@@ -233,10 +267,22 @@ export class ProjectManager implements OnInit {
 
   viewProjectDetails(project: project): void {
     this.selectedProject = project;
+    this.detailTab = 'overview';
+    this.loadSelectedProjectMembers(project);
   }
 
   backToProjectsList(): void {
     this.selectedProject = null;
+    this.selectedProjectMembers = [];
+  }
+
+  setDetailTab(tab: 'overview' | 'stories' | 'sprints'): void {
+    this.detailTab = tab;
+  }
+
+  openKanbanBoard(): void {
+    const projectId = this.selectedProject?.id;
+    this.router.navigate(['/kanban'], { queryParams: projectId ? { projectId } : {} });
   }
 
   validateForm(): boolean {
@@ -296,8 +342,128 @@ export class ProjectManager implements OnInit {
     return user ? `${user.firstName} ${user.lastName}` : 'Unknown';
   }
 
+  getStateLabel(state: State): string {
+    const labels: Record<number, string> = {
+      [State.pending]: 'En attente',
+      [State.todo]: 'À faire',
+      [State.inProgress]: 'Actif',
+      [State.done]: 'Terminé',
+      [State.validated]: 'Validé'
+    };
+
+    return labels[Number(state)] ?? 'Inconnu';
+  }
+
+  getProjectProgress(project: project): number {
+    const state = Number(project.projectState);
+    const progressMap: Record<number, number> = {
+      [State.pending]: 10,
+      [State.todo]: 30,
+      [State.inProgress]: 65,
+      [State.done]: 100,
+      [State.validated]: 100
+    };
+
+    return progressMap[state] ?? 0;
+  }
+
+  getMemberInitials(user: UserDto): string {
+    const first = (user.firstName || '').charAt(0);
+    const last = (user.lastName || '').charAt(0);
+    return `${first}${last}`.toUpperCase() || 'U';
+  }
+
+  getProjectUserStoriesCount(project: project): number {
+    return project.userStories?.length ?? 0;
+  }
+
+  getProjectSprintsCount(project: project): number {
+    return project.sprints?.length ?? 0;
+  }
+
+  getProjectTasksCount(project: project): number {
+    const stories = (project.userStories ?? []) as Array<{ tasks?: unknown[] }>;
+    const totalTasks = stories.reduce((count, story) => count + (story.tasks?.length ?? 0), 0);
+    if (totalTasks > 0) {
+      return totalTasks;
+    }
+
+    return project.userStories?.length ?? 0;
+  }
+
+  getProjectMembersCount(project: project): number {
+    if (this.selectedProject?.id === project.id) {
+      const uniqueIds = new Set<number>();
+      this.selectedProjectMembers.forEach((member) => uniqueIds.add(member.id));
+
+      const manager = this.users.find((item) => item.id === project.projectManagerId);
+      if (manager) {
+        uniqueIds.add(manager.id);
+      }
+
+      if (uniqueIds.size > 0) {
+        return uniqueIds.size;
+      }
+    }
+
+    return project.projectManagerId ? 1 : 0;
+  }
+
+  getStatusBadgeClasses(state: State): string {
+    const value = Number(state);
+    if (value === State.done || value === State.validated) {
+      return 'text-green-700 bg-green-100';
+    }
+
+    if (value === State.inProgress) {
+      return 'text-blue-700 bg-blue-100';
+    }
+
+    if (value === State.todo) {
+      return 'text-amber-700 bg-amber-100';
+    }
+
+    return 'text-slate-700 bg-slate-100';
+  }
+
+  private loadSelectedProjectMembers(project: project): void {
+    if (!project.teamId) {
+      const manager = this.users.find((item) => item.id === project.projectManagerId);
+      this.selectedProjectMembers = manager ? [manager] : [];
+      return;
+    }
+
+    this.teamService.getMembersByTeamId(project.teamId).subscribe({
+      next: (members: TeamUser[]) => {
+        const mappedMembers = members
+          .map((member) => {
+            if (member.user) {
+              return {
+                id: member.user.id,
+                firstName: member.user.firstName,
+                lastName: member.user.lastName,
+                email: member.user.email,
+                role: member.user.role?.toString()
+              } as UserDto;
+            }
+
+            const fallback = this.users.find((item) => item.id === member.userId);
+            return fallback ?? null;
+          })
+          .filter((item): item is UserDto => item !== null);
+
+        this.selectedProjectMembers = mappedMembers;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        const manager = this.users.find((item) => item.id === project.projectManagerId);
+        this.selectedProjectMembers = manager ? [manager] : [];
+      }
+    });
+  }
+
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString();
+    return new Date(date).toLocaleDateString('fr-FR');
   }
 
   formatDateForInput(date: Date): string {
