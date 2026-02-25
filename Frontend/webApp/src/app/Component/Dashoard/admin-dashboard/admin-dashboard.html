@@ -204,7 +204,8 @@
                 </form>
 
                 <form class="user-form" *ngIf="showEditUserForm" (ngSubmit)="updateUser()">
-                    <input type="text" [(ngModel)]="editUser.firstName" name="editFirstName" placeholder="Prénom" required />
+                    <input type="text" [(ngModel)]="editUser.firstName" name="editFirstName" placeholder="Prénom"
+                        required />
                     <input type="text" [(ngModel)]="editUser.lastName" name="editLastName" placeholder="Nom" required />
                     <input type="email" [(ngModel)]="editUser.email" name="editEmail" placeholder="Email" required />
                     <select [(ngModel)]="editUser.role" name="editRole" required>
