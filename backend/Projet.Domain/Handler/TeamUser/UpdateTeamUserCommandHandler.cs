@@ -22,6 +22,16 @@ namespace Projet.Domain.Handler.TeamUser
             {
                 throw new KeyNotFoundException($"TeamUser with ID {request.Id} not found.");
             }
+            if (request.role == Model.Role.ProjectLeader && teamUser.role != Model.Role.ProjectLeader)
+            {
+                var existingLeader = await _context.Set<Model.TeamUser>()
+                    .AnyAsync(tu => tu.TeamId == teamUser.TeamId && tu.role == Model.Role.ProjectLeader && tu.LeftAt == null && tu.Id != request.Id, cancellationToken);
+
+                if (existingLeader)
+                {
+                    throw new InvalidOperationException($"Team {teamUser.TeamId} already has a Project Leader. Only one leader is allowed per team.");
+                }
+            }
 
             teamUser.role = request.role;
             teamUser.LeftAt = request.LeftAt;

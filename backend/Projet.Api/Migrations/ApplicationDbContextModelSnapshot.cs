@@ -33,9 +33,6 @@ namespace Projet.Api.Migrations
                     b.Property<int>("ProjectManagerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ServiceId")
                         .HasColumnType("int");
 
@@ -174,30 +171,39 @@ namespace Projet.Api.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Sprint");
+                    b.ToTable("Sprints");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.Task", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ActualHours")
+                        .HasColumnType("int");
 
                     b.Property<int?>("AssignedToId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Complexity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EstimationDuration")
+                    b.Property<int>("EstimatedHours")
                         .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int?>("SprintId")
                         .HasColumnType("int");
@@ -205,21 +211,21 @@ namespace Projet.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("UserStoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("complexity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("taskState")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("AssignedToId");
 
@@ -351,14 +357,36 @@ namespace Projet.Api.Migrations
 
             modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AcceptanceCriteria")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("AssignedToId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("EstimatedDuration")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
@@ -369,27 +397,30 @@ namespace Projet.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserStoryState")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<string>("description")
+                    b.Property<int>("StoryPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("estimatedDuration")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.HasKey("id");
+                    b.HasIndex("AssignedToId");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("SprintId");
 
-                    b.ToTable("UserStory");
+                    b.ToTable("UserStories");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.Project", b =>
@@ -431,8 +462,9 @@ namespace Projet.Api.Migrations
             modelBuilder.Entity("Projet.Domain.Model.Service", b =>
                 {
                     b.HasOne("Projet.Domain.Model.User", "Responsible")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleId");
+                        .WithMany("ManagedServices")
+                        .HasForeignKey("ResponsibleId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Responsible");
                 });
@@ -505,13 +537,26 @@ namespace Projet.Api.Migrations
 
             modelBuilder.Entity("Projet.Domain.Model.User", b =>
                 {
-                    b.HasOne("Projet.Domain.Model.Service", null)
+                    b.HasOne("Projet.Domain.Model.Service", "Service")
                         .WithMany("Members")
-                        .HasForeignKey("Serviceid");
+                        .HasForeignKey("Serviceid")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Projet.Domain.Model.UserStory", b =>
                 {
+                    b.HasOne("Projet.Domain.Model.User", "AssignedTo")
+                        .WithMany()
+                        .HasForeignKey("AssignedToId");
+
+                    b.HasOne("Projet.Domain.Model.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Projet.Domain.Model.Project", "Project")
                         .WithMany("UserStories")
                         .HasForeignKey("ProjectId")
@@ -523,6 +568,10 @@ namespace Projet.Api.Migrations
                         .HasForeignKey("SprintId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("AssignedTo");
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("Project");
 
@@ -564,6 +613,8 @@ namespace Projet.Api.Migrations
                     b.Navigation("AssignedTasks");
 
                     b.Navigation("ManagedProjects");
+
+                    b.Navigation("ManagedServices");
 
                     b.Navigation("RefreshTokens");
 

@@ -23,11 +23,10 @@ namespace Projet.Domain.Handler.TeamUser
                 throw new KeyNotFoundException($"User with ID {request.UserId} not found.");
             }
 
-            // Validate that Team exists
-            var teamExists = await _context.Teams.AnyAsync(t => t.id == request.TeamId, cancellationToken);
+            var teamExists = await _context.Teams.AnyAsync(t => t.id == request.TeamId.Value, cancellationToken);
             if (!teamExists)
             {
-                throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+                throw new KeyNotFoundException($"Team with ID {request.TeamId.Value} not found.");
             }
 
             // Check if TeamUser already exists
@@ -42,7 +41,7 @@ namespace Projet.Domain.Handler.TeamUser
             var teamUser = new Model.TeamUser
             {
                 UserId = request.UserId,
-                TeamId = request.TeamId,
+                TeamId = request.TeamId.Value,
                 role = request.role,
                 JoinedAt = DateTime.UtcNow
             };

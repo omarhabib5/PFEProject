@@ -1,1 +1,235 @@
-<p>admin-dashboard works!</p>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>TaskFlow Pro</h2>
+            <p>Gestion de Projets</p>
+        </div>
+
+        <button class="menu-item" [class.active]="activeTab === 'dashboard'" (click)="setActiveTab('dashboard')">
+            <span>▦</span> Tableau de bord
+        </button>
+        <button class="menu-item" [class.active]="activeTab === 'projects'" (click)="setActiveTab('projects')">
+            <span>🗂</span> Projets
+        </button>
+        <button class="menu-item" [class.active]="activeTab === 'calendar'" (click)="setActiveTab('calendar')">
+            <span>📅</span> Calendrier
+        </button>
+        <button class="menu-item" [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">
+            <span>👥</span> Utilisateurs
+        </button>
+        <button class="menu-item" (click)="openKanbanBoard()">
+            <span>📌</span> Kanban
+        </button>
+
+        <div class="sidebar-bottom">
+            <button class="menu-item" (click)="logout()"><span>⎋</span> Déconnexion</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <div>
+                <h1>
+                    {{ activeTab === 'dashboard' ? 'Tableau de bord' : activeTab === 'projects' ? 'Gestion des Projets'
+                    : activeTab === 'calendar' ? 'Calendrier' : 'Utilisateurs' }}
+                </h1>
+                <p>{{ currentDate }}</p>
+            </div>
+
+            <div class="topbar-right">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()" placeholder="Rechercher..." />
+                <div class="notif">🔔<span>{{ unreadNotifications }}</span></div>
+                <div class="profile">
+                    <strong>{{ userName }}</strong>
+                    <small>{{ userRole }}</small>
+                </div>
+            </div>
+        </header>
+
+        <section class="page" *ngIf="activeTab === 'dashboard'">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📁</div>
+                    <div>
+                        <strong>{{ activeProjects }}</strong>
+                        <p>Projets actifs</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div>
+                        <strong>{{ completedTasks }}</strong>
+                        <p>Tâches terminées</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⏳</div>
+                    <div>
+                        <strong>{{ inProgressTasks }}</strong>
+                        <p>En cours</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">❗</div>
+                    <div>
+                        <strong>{{ urgentTasks }}</strong>
+                        <p>Tâches urgentes</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="card">
+                    <h3>Répartition des tâches</h3>
+                    <canvas id="tasksPieChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>Tâches par priorité</h3>
+                    <canvas id="priorityBarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card full-card">
+                <h3>Progression des projets</h3>
+                <canvas id="projectProgressChart"></canvas>
+            </div>
+
+            <div class="bottom-grid">
+                <div class="card">
+                    <div class="title-row">
+                        <h3>Projets récents</h3>
+                        <button type="button" (click)="setActiveTab('projects')">Voir tout</button>
+                    </div>
+                    <div class="line-item" *ngFor="let project of recentProjects">
+                        <div class="line-main">
+                            <strong>{{ project.name }}</strong>
+                            <span>{{ project.progress }}%</span>
+                        </div>
+                        <small>{{ project.membersLabel }}</small>
+                        <div class="progress">
+                            <div class="fill" [style.width.%]="project.progress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Équipe active</h3>
+                    <div class="line-item" *ngFor="let member of activeTeam">
+                        <div class="line-main">
+                            <strong>{{ member.firstName }} {{ member.lastName }}</strong>
+                            <span class="badge">{{ getRoleDisplay(member.role) }}</span>
+                        </div>
+                        <small>{{ member.email }}</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" *ngIf="activeTab === 'projects'">
+            <div class="toolbar">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()"
+                    placeholder="Rechercher un projet..." />
+                <select [(ngModel)]="selectedStatus" (change)="filterProjects()">
+                    <option value="all">Tous les statuts</option>
+                    <option value="active">Actif</option>
+                    <option value="todo">À faire</option>
+                    <option value="done">Terminé</option>
+                    <option value="pending">En attente</option>
+                </select>
+                <button type="button" class="btn-secondary" (click)="exportProjects()">Exporter</button>
+                <button type="button" class="btn-primary" (click)="goToProjectManager()">+ Nouveau projet</button>
+            </div>
+
+            <div class="project-grid">
+                <article class="project-card" *ngFor="let project of filteredProjectCards">
+                    <div class="project-head">
+                        <h4>{{ project.name }}</h4>
+                        <span class="status" [ngClass]="project.statusClass">{{ project.statusLabel }}</span>
+                    </div>
+                    <p>{{ project.description }}</p>
+                    <small>{{ project.membersLabel }}</small>
+                    <small>Échéance: {{ project.dueDate }}</small>
+                    <div class="progress">
+                        <div class="fill" [style.width.%]="project.progress"></div>
+                    </div>
+                    <div class="project-foot">
+                        <span>{{ project.taskSummary }}</span>
+                        <button type="button" (click)="viewProject(project.id)">Voir détails →</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="page" *ngIf="activeTab === 'calendar'">
+            <div class="card">
+                <div class="title-row">
+                    <button type="button" (click)="prevMonth()">‹</button>
+                    <h3>{{ calendarTitle }}</h3>
+                    <button type="button" (click)="nextMonth()">›</button>
+                </div>
+
+                <div class="calendar-head">
+                    <span>Dim</span><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span>
+                </div>
+                <div class="calendar-grid">
+                    <div class="day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth">
+                        <span>{{ cell.date.getDate() }}</span>
+                        <div class="dot" *ngIf="hasProjectOnDate(cell.date)"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" *ngIf="activeTab === 'users'">
+            <div class="card user-form-card">
+                <div class="title-row">
+                    <h3>Ajouter un utilisateur</h3>
+                    <button type="button" (click)="toggleAddUserForm()">{{ showAddUserForm ? 'Fermer' : 'Nouveau'
+                        }}</button>
+                </div>
+
+                <div class="user-message error" *ngIf="userFormError">{{ userFormError }}</div>
+                <div class="user-message success" *ngIf="userFormSuccess">{{ userFormSuccess }}</div>
+
+                <form class="user-form" *ngIf="showAddUserForm" (ngSubmit)="createUser()">
+                    <input type="text" [(ngModel)]="newUser.firstName" name="firstName" placeholder="Prénom" required />
+                    <input type="text" [(ngModel)]="newUser.lastName" name="lastName" placeholder="Nom" required />
+                    <input type="email" [(ngModel)]="newUser.email" name="email" placeholder="Email" required />
+                    <select [(ngModel)]="newUser.role" name="role" required>
+                        <option *ngFor="let role of userRoleOptions" [ngValue]="role.value">{{ role.label }}</option>
+                    </select>
+                    <button type="submit" class="btn-primary" [disabled]="userFormLoading">
+                        {{ userFormLoading ? 'Création...' : 'Créer et envoyer email' }}
+                    </button>
+                </form>
+
+                <form class="user-form" *ngIf="showEditUserForm" (ngSubmit)="updateUser()">
+                    <input type="text" [(ngModel)]="editUser.firstName" name="editFirstName" placeholder="Prénom" required />
+                    <input type="text" [(ngModel)]="editUser.lastName" name="editLastName" placeholder="Nom" required />
+                    <input type="email" [(ngModel)]="editUser.email" name="editEmail" placeholder="Email" required />
+                    <select [(ngModel)]="editUser.role" name="editRole" required>
+                        <option *ngFor="let role of userRoleOptions" [ngValue]="role.value">{{ role.label }}</option>
+                    </select>
+                    <button type="submit" class="btn-primary" [disabled]="userFormLoading">
+                        {{ userFormLoading ? 'Modification...' : 'Modifier utilisateur' }}
+                    </button>
+                    <button type="button" class="btn-secondary" (click)="cancelEditUser()">Annuler</button>
+                </form>
+            </div>
+
+            <div class="project-grid user-grid">
+                <article class="project-card" *ngFor="let user of users">
+                    <div class="avatar">{{ getUserInitials(user) }}</div>
+                    <h4>{{ user.firstName }} {{ user.lastName }}</h4>
+                    <small>{{ user.email }}</small>
+                    <span class="badge">{{ getRoleDisplay(user.role) }}</span>
+                    <div class="user-actions">
+                        <button type="button" class="btn-secondary" (click)="startEditUser(user)">Modifier</button>
+                        <button type="button" class="btn-danger" (click)="deleteUser(user)">Supprimer</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+    </main>
+</div>

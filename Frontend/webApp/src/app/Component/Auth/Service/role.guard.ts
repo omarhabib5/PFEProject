@@ -14,16 +14,13 @@ export class RoleGuard {
       case 'admin':
       case '1':
         return '/AdminDashboard';
-      case 'chefprojet':
-      case 'chef de projet':
+      case 'projectmanager':
       case '2':
         return '/ChefProjetDashboard';
       case 'employee':
-      case 'employé':
       case '3':
         return '/EmployeeDashboard';
-      case 'responsableservice':
-      case 'responsable service':
+      case 'servicemanager':
       case '4':
         return '/ResponsableServiceDashboard';
       default:

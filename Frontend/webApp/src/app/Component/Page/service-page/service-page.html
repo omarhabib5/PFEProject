@@ -1,1 +1,230 @@
-<p>service-page works!</p>
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+  
+  
+    <div class="mb-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Services</h1>
+          <p class="mt-2 text-sm text-gray-600">Manage your organization's services</p>
+        </div>
+        <button 
+          (click)="openAddForm()"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Service
+        </button>
+      </div>
+    </div>
+
+  
+    <div *ngIf="error" class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+      <div class="flex">
+        <div class="shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ error }}</p>
+        </div>
+        <div class="ml-auto pl-3">
+          <button (click)="error = null" class="inline-flex text-red-400 hover:text-red-600">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+   
+    <div *ngIf="showAddForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Add New Service</h3>
+          <form (ngSubmit)="createService()">
+            <div class="mb-4">
+              <label for="serviceName" class="block text-sm font-medium text-gray-700 mb-2">Service Name *</label>
+              <input
+                type="text"
+                id="serviceName"
+                [(ngModel)]="newService.name"
+                name="serviceName"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter service name">
+            </div>
+            <div class="mb-6">
+              <label for="responsibleId" class="block text-sm font-medium text-gray-700 mb-2">Responsible User (Optional)</label>
+              <select
+                id="responsibleId"
+                [(ngModel)]="newService.responsibleId"
+                name="responsibleId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <option [ngValue]="undefined">-- Select a user --</option>
+                <option *ngFor="let user of users" [ngValue]="user.id">
+                  {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+                </option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                (click)="closeAddForm()"
+                class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                Create Service
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+   
+    <div *ngIf="showEditForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Service</h3>
+          <form (ngSubmit)="updateService()">
+            <div class="mb-4">
+              <label for="editServiceName" class="block text-sm font-medium text-gray-700 mb-2">Service Name *</label>
+              <input
+                type="text"
+                id="editServiceName"
+                [(ngModel)]="editingService.name"
+                name="editServiceName"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter service name">
+            </div>
+            <div class="mb-6">
+              <label for="editResponsibleId" class="block text-sm font-medium text-gray-700 mb-2">Responsible User (Optional)</label>
+              <select
+                id="editResponsibleId"
+                [(ngModel)]="editingService.responsibleId"
+                name="editResponsibleId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <option [ngValue]="undefined">-- Select a user --</option>
+                <option *ngFor="let user of users" [ngValue]="user.id">
+                  {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+                </option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                (click)="closeEditForm()"
+                class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                Update Service
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+   
+    <div *ngIf="loading && !showAddForm && !showEditForm" class="flex flex-col justify-center items-center py-16">
+      <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600"></div>
+      <p class="mt-4 text-sm text-gray-600">Loading services...</p>
+    </div>
+
+   
+    <div *ngIf="!loading && services.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let service of services" class="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="shrink-0 h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                <span class="text-indigo-600 font-semibold text-lg">{{ getInitials(service.name) }}</span>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-lg font-medium text-gray-900">{{ service.name }}</h3>
+                <p class="text-sm text-gray-500">ID: {{ service.id }}</p>
+              </div>
+            </div>
+          </div>
+
+         
+          <div class="mb-4">
+            <div *ngIf="service.responsible" class="text-sm text-gray-600">
+              <span class="font-medium">Responsible:</span> {{ service.responsible.firstName }} {{ service.responsible.lastName }}
+            </div>
+            <div *ngIf="!service.responsible" class="text-sm text-gray-400 italic">
+              No responsible assigned
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-200">
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-gray-900">{{ service.members?.length || 0 }}</p>
+              <p class="text-xs text-gray-500">Members</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-gray-900">{{ service.teams?.length || 0 }}</p>
+              <p class="text-xs text-gray-500">Teams</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-gray-900">{{ service.projects?.length || 0 }}</p>
+              <p class="text-xs text-gray-500">Projects</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-2 pt-4 border-t border-gray-200">
+            <button
+              (click)="openEditForm(service)"
+              class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              Edit
+            </button>
+            <button
+              (click)="deleteService(service.id)"
+              class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div *ngIf="!loading && services.length === 0" class="text-center py-16 bg-white rounded-lg shadow-sm">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No services</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating a new service.</p>
+      <div class="mt-6">
+        <button
+          (click)="openAddForm()"
+          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Service
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

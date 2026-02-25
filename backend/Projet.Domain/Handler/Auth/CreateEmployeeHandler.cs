@@ -62,7 +62,7 @@ namespace Projet.Domain.Handler.Auth
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PasswordHash = _passwordHasher.HashPassword(generatedPassword),
-                role = UserRole.Employee,
+                role = request.Role,
                 IsEmailVerified = false,
                 FailedLoginAttempts = 0
             };

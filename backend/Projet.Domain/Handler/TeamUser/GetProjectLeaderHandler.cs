@@ -21,8 +21,8 @@ namespace Projet.Domain.Handler.TeamUser
                 .Include(tu => tu.User)
                 .Include(tu => tu.team)
                 .Where(tu => tu.TeamId == request.TeamId 
-                    && tu.role == Role.PrjectLeader 
-                    && tu.LeftAt == null)
+                    && tu.role == Role.ProjectLeader
+                    && tu.LeftAt == null).AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
     }

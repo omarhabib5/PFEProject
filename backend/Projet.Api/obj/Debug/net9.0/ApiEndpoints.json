@@ -242,6 +242,101 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "GetAll",
+    "RelativePath": "api/Sprint",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "Create",
+    "RelativePath": "api/Sprint",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "command",
+        "Type": "Projet.Domain.Command.Sprint.CreateSprintCommand",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "GetById",
+    "RelativePath": "api/Sprint/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "Update",
+    "RelativePath": "api/Sprint/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "command",
+        "Type": "Projet.Domain.Command.Sprint.UpdateSprintCommand",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "Delete",
+    "RelativePath": "api/Sprint/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Projet.Api.Controller.SprintController",
+    "Method": "GetByProjectId",
+    "RelativePath": "api/Sprint/project/{projectId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Projet.Api.Controller.TaskController",
     "Method": "GetAll",
     "RelativePath": "api/Task",

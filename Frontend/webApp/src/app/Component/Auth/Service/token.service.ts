@@ -76,8 +76,49 @@ export class TokenService {
     localStorage.removeItem(this.refreshKey);
     localStorage.removeItem(this.userKey);
   }
+
+  isTokenExpired(token?: string | null): boolean {
+    const jwtToken = token ?? this.getAccessToken();
+    if (!jwtToken) {
+      return true;
+    }
+
+    const payload = this.parseTokenPayload(jwtToken);
+    if (!payload || typeof payload['exp'] !== 'number') {
+      return true;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    return payload['exp'] <= now;
+  }
+
+  private parseTokenPayload(token: string): Record<string, any> | null {
+    if (!this.isBrowser) {
+      return null;
+    }
+
+    try {
+      const payloadPart = token.split('.')[1];
+      if (!payloadPart) {
+        return null;
+      }
+
+      const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(normalized)
+          .split('')
+          .map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .join('')
+      );
+
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  }
   
   isAuthenticated(): boolean {
-    return this.getAccessToken() !== null;
+    const token = this.getAccessToken();
+    return token !== null && !this.isTokenExpired(token);
   }
 }

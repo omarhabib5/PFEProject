@@ -3,6 +3,134 @@
   "WorkspaceRootPath": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.application\\context\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34B95454-E01D-4F88-BBC7-CFD11FF42409}|Projet.Application\\Projet.Application.csproj|solutionrelative:projet.application\\context\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\model\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\querie\\sprint\\getsprintbyprojectidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\sprint\\getsprintbyprojectidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\querie\\sprint\\getsprintbyidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\sprint\\getsprintbyidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\querie\\sprint\\getallsprintquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\querie\\sprint\\getallsprintquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\model\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\model\\project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\interface\\iapplicationdbset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\interface\\iapplicationdbset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\teamuser\\getemployeehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\teamuser\\getemployeehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\teamuser\\updateteamusercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\teamuser\\updateteamusercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\teamuser\\getprojectleaderhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\teamuser\\getprojectleaderhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\teamuser\\getallteamuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\teamuser\\getallteamuserhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\teamuser\\createteamusercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\teamuser\\createteamusercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\updatesprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\updatesprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\getsprintbyprojectidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\getsprintbyprojectidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\getsprintbyidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\getsprintbyidhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\getallsprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\getallsprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\deletesprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\deletesprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\sprint\\createsprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\sprint\\createsprinthandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\servicehandler\\getservicequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\servicehandler\\getservicequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\servicehandler\\getallservicequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\servicehandler\\getallservicequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\handler\\projecthandler\\updateprojectcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\handler\\projecthandler\\updateprojectcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\teamuser\\updateteamusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\teamuser\\updateteamusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\teamuser\\createteamusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\teamuser\\createteamusercommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\team\\updateteamcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\team\\updateteamcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\team\\createteamcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\team\\createteamcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\sprint\\updatesprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\sprint\\updatesprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\sprint\\deletesprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\sprint\\deletesprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\sprint\\createsprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\sprint\\createsprintcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\command\\project\\updateprojectcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\command\\project\\updateprojectcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.api\\controller\\sprintcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6469CB00-621C-49F0-AC8F-CBB414A5763B}|Projet.Api\\Projet.Api.csproj|solutionrelative:projet.api\\controller\\sprintcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|c:\\users\\rayen\\onedrive - ministere de l\u0027enseignement superieur et de la recherche scientifique\\documents\\pfeproject\\backend\\projet.domain\\projet.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{DDA9C762-010B-4E2F-98A1-AB15AC69BE8C}|Projet.Domain\\Projet.Domain.csproj|solutionrelative:projet.domain\\projet.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
@@ -167,19 +295,403 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Application\\Context\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "Projet.Application\\Context\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Application\\Context\\ApplicationDbContext.cs",
+              "RelativeToolTip": "Projet.Application\\Context\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAGsAAAAAAAAAAADgvxcAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:15:59.496Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Program.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Program.cs",
+              "RelativeToolTip": "Projet.Api\\Program.cs",
+              "ViewState": "AgIAAHIAAAAAAAAAAAAawIoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:14:23.483Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Role.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Role.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\Role.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Role.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:22:00.973Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GetSprintByIdQuery.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetSprintByIdQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\Sprint\\GetSprintByIdQuery.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetSprintByIdQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\Sprint\\GetSprintByIdQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:30:03.296Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GetAllSprintQuery.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetAllSprintQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\Sprint\\GetAllSprintQuery.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetAllSprintQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\Sprint\\GetAllSprintQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:27:16.373Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\User.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\User.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\User.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\User.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAzwBgAAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:23:35.03Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Project.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Project.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Model\\Project.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Project.cs",
+              "RelativeToolTip": "Projet.Domain\\Model\\Project.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBQAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:21:01.85Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GetSprintByProjectIdQuery.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetSprintByProjectIdQuery.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Querie\\Sprint\\GetSprintByProjectIdQuery.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\Sprint\\GetSprintByProjectIdQuery.cs",
+              "RelativeToolTip": "Projet.Domain\\Querie\\Sprint\\GetSprintByProjectIdQuery.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:34:45.119Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IApplicationDbSet.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "RelativeToolTip": "Projet.Domain\\Interface\\IApplicationDbSet.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAwAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:19:05.483Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "getEmployeeHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\getEmployeeHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\TeamUser\\getEmployeeHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\getEmployeeHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\TeamUser\\getEmployeeHandler.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBgAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:18:12.335Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "UpdateTeamUserCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\UpdateTeamUserCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\TeamUser\\UpdateTeamUserCommandHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\UpdateTeamUserCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\TeamUser\\UpdateTeamUserCommandHandler.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAgwCEAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:16:57.798Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "GetProjectLeaderHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\GetProjectLeaderHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\TeamUser\\GetProjectLeaderHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\GetProjectLeaderHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\TeamUser\\GetProjectLeaderHandler.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBgAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:13:55.104Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "GetAllTeamUserHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\GetAllTeamUserHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\TeamUser\\GetAllTeamUserHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\GetAllTeamUserHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\TeamUser\\GetAllTeamUserHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:13:12.642Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "CreateTeamUserCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\CreateTeamUserCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\TeamUser\\CreateTeamUserCommandHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\TeamUser\\CreateTeamUserCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\TeamUser\\CreateTeamUserCommandHandler.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAYwCsAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:08:20.397Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "UpdateSprintHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\UpdateSprintHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\UpdateSprintHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\UpdateSprintHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\UpdateSprintHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:03:40.908Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "GetSprintByProjectIdHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetSprintByProjectIdHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\GetSprintByProjectIdHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetSprintByProjectIdHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\GetSprintByProjectIdHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T12:02:50.809Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "GetSprintByIdHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetSprintByIdHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\GetSprintByIdHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetSprintByIdHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\GetSprintByIdHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:59:59.09Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "GetAllSprintHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetAllSprintHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\GetAllSprintHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\GetAllSprintHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\GetAllSprintHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:55:59.338Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "DeleteSprintHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\DeleteSprintHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\DeleteSprintHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\DeleteSprintHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\DeleteSprintHandler.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAmwB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:54:22.628Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "CreateSprintHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\CreateSprintHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\Sprint\\CreateSprintHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\Sprint\\CreateSprintHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\Sprint\\CreateSprintHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:52:40.45Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "GetServiceQueryHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ServiceHandler\\GetServiceQueryHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\ServiceHandler\\GetServiceQueryHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ServiceHandler\\GetServiceQueryHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\ServiceHandler\\GetServiceQueryHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:37:23.216Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "GetAllServiceQueryHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ServiceHandler\\GetAllServiceQueryHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\ServiceHandler\\GetAllServiceQueryHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ServiceHandler\\GetAllServiceQueryHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\ServiceHandler\\GetAllServiceQueryHandler.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:48:48.784Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "UpdateProjectCommandHandler.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ProjectHandler\\UpdateProjectCommandHandler.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Handler\\ProjectHandler\\UpdateProjectCommandHandler.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\ProjectHandler\\UpdateProjectCommandHandler.cs",
+              "RelativeToolTip": "Projet.Domain\\Handler\\ProjectHandler\\UpdateProjectCommandHandler.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAYwCoAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:36:41.585Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "UpdateTeamUserCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\TeamUser\\UpdateTeamUserCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\TeamUser\\UpdateTeamUserCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\TeamUser\\UpdateTeamUserCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\TeamUser\\UpdateTeamUserCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:35:45.931Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "CreateTeamUserCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\TeamUser\\CreateTeamUserCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\TeamUser\\CreateTeamUserCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\TeamUser\\CreateTeamUserCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\TeamUser\\CreateTeamUserCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:34:51.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "UpdateTeamCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Team\\UpdateTeamCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Team\\UpdateTeamCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Team\\UpdateTeamCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Team\\UpdateTeamCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:33:55.844Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "CreateTeamCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Team\\CreateTeamCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Team\\CreateTeamCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Team\\CreateTeamCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Team\\CreateTeamCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:31:47.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "UpdateSprintCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\UpdateSprintCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Sprint\\UpdateSprintCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\UpdateSprintCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Sprint\\UpdateSprintCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:30:43.789Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "DeleteSprintCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\DeleteSprintCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Sprint\\DeleteSprintCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\DeleteSprintCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Sprint\\DeleteSprintCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:29:31.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "CreateSprintCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\CreateSprintCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Sprint\\CreateSprintCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Sprint\\CreateSprintCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Sprint\\CreateSprintCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:27:41.442Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "UpdateProjectCommand.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Project\\UpdateProjectCommand.cs",
+              "RelativeDocumentMoniker": "Projet.Domain\\Command\\Project\\UpdateProjectCommand.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Project\\UpdateProjectCommand.cs",
+              "RelativeToolTip": "Projet.Domain\\Command\\Project\\UpdateProjectCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:25:20.316Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "SprintController.cs",
+              "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Controller\\SprintController.cs",
+              "RelativeDocumentMoniker": "Projet.Api\\Controller\\SprintController.cs",
+              "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Controller\\SprintController.cs",
+              "RelativeToolTip": "Projet.Api\\Controller\\SprintController.cs",
+              "ViewState": "AgIAACoAAAAAAAAAAAAowGoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T11:11:18.901Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
               "Title": "Projet.Domain.csproj",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
               "RelativeDocumentMoniker": "Projet.Domain\\Projet.Domain.csproj",
               "ToolTip": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Projet.Domain.csproj",
               "RelativeToolTip": "Projet.Domain\\Projet.Domain.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-02-12T18:27:38Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-12T18:27:38Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 55,
               "Title": "GetUserStoriesBySprintQuery.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\UserStory\\GetUserStoriesBySprintQuery.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Querie\\UserStory\\GetUserStoriesBySprintQuery.cs",
@@ -191,7 +703,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 33,
               "Title": "UserStoryController.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Api\\Controller\\UserStoryController.cs",
               "RelativeDocumentMoniker": "Projet.Api\\Controller\\UserStoryController.cs",
@@ -203,7 +715,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 56,
               "Title": "GetUserStoriesBySprintHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\GetUserStoriesBySprintHandler.cs",
@@ -215,7 +727,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 57,
               "Title": "GetUserStoryByIdHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\GetUserStoryByIdHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\GetUserStoryByIdHandler.cs",
@@ -227,7 +739,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 34,
               "Title": "DeleteUserStoryCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\DeleteUserStoryCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\DeleteUserStoryCommand.cs",
@@ -239,7 +751,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 58,
               "Title": "GetUserStoryByIdQuery.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Querie\\UserStory\\GetUserStoryByIdQuery.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Querie\\UserStory\\GetUserStoryByIdQuery.cs",
@@ -251,7 +763,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 59,
               "Title": "CreateUserStoryHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\CreateUserStoryHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\CreateUserStoryHandler.cs",
@@ -263,7 +775,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 35,
               "Title": "UpdateUserStoryStatusCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\UpdateUserStoryStatusCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\UpdateUserStoryStatusCommand.cs",
@@ -275,7 +787,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 36,
               "Title": "CreateUserStoryCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\CreateUserStoryCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\CreateUserStoryCommand.cs",
@@ -287,7 +799,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 37,
               "Title": "TaskDto.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Application\\DTOs\\UserStory\\TaskDto.cs",
               "RelativeDocumentMoniker": "Projet.Application\\DTOs\\UserStory\\TaskDto.cs",
@@ -299,7 +811,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 38,
               "Title": "UserStoryDto.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Application\\DTOs\\UserStory\\UserStoryDto.cs",
               "RelativeDocumentMoniker": "Projet.Application\\DTOs\\UserStory\\UserStoryDto.cs",
@@ -311,7 +823,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 53,
               "Title": "GetUserStoriesBySprintHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\GetUserStoriesBySprintHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\GetUserStoriesBySprintHandler.cs",
@@ -323,7 +835,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 54,
               "Title": "GetUserStoryByIdHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\GetUserStoryByIdHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\GetUserStoryByIdHandler.cs",
@@ -335,7 +847,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 40,
               "Title": "UserStory.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\UserStory.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Model\\UserStory.cs",
@@ -347,7 +859,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 39,
               "Title": "Task.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Task.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Model\\Task.cs",
@@ -359,7 +871,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 41,
               "Title": "UpdateTaskCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Task\\UpdateTaskCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\Task\\UpdateTaskCommand.cs",
@@ -371,7 +883,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 60,
               "Title": "DeleteUserStoryHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\DeleteUserStoryHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\DeleteUserStoryHandler.cs",
@@ -383,7 +895,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 61,
               "Title": "UpdateUserStoryStatusHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\UpdateUserStoryStatusHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\UpdateUserStoryStatusHandler.cs",
@@ -395,7 +907,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 62,
               "Title": "UpdateUserStoryHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserStory\\UpdateUserStoryHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserStory\\UpdateUserStoryHandler.cs",
@@ -407,7 +919,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 42,
               "Title": "Projet.Infrastructure.csproj",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Infrastructure\\Projet.Infrastructure.csproj",
               "RelativeDocumentMoniker": "Projet.Infrastructure\\Projet.Infrastructure.csproj",
@@ -415,12 +927,11 @@
               "RelativeToolTip": "Projet.Infrastructure\\Projet.Infrastructure.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-02-13T11:34:32.92Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-13T11:34:32.92Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 43,
               "Title": "JwtSetting.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\comment\\JwtSetting.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\comment\\JwtSetting.cs",
@@ -432,7 +943,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 44,
               "Title": "AuthResponse.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\comment\\AuthResponse.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\comment\\AuthResponse.cs",
@@ -444,7 +955,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 45,
               "Title": "LogoutCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\LogoutCommand.cs",
@@ -456,7 +967,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 46,
               "Title": "LoginCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Auth\\LoginCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\LoginCommand.cs",
@@ -468,7 +979,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 48,
               "Title": "CreateUserHandler.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Handler\\UserHandler\\CreateUserHandler.cs",
@@ -480,7 +991,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 47,
               "Title": "CreateEmployeeCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\Auth\\CreateEmployeeCommand.cs",
@@ -492,7 +1003,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 49,
               "Title": "UpdateUserStoryCommand.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Command\\UserStory\\UpdateUserStoryCommand.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Command\\UserStory\\UpdateUserStoryCommand.cs",
@@ -504,7 +1015,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 50,
               "Title": "Sprint.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\Sprint.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Model\\Sprint.cs",
@@ -516,7 +1027,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 51,
               "Title": "State.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Domain\\Model\\State.cs",
               "RelativeDocumentMoniker": "Projet.Domain\\Model\\State.cs",
@@ -528,7 +1039,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 52,
               "Title": "AuthenticationService.cs",
               "DocumentMoniker": "C:\\Users\\RAYEN\\OneDrive - Ministere de l\u0027Enseignement Superieur et de la Recherche Scientifique\\Documents\\PFEProject\\backend\\Projet.Infrastructure\\Service\\AuthenticationService.cs",
               "RelativeDocumentMoniker": "Projet.Infrastructure\\Service\\AuthenticationService.cs",

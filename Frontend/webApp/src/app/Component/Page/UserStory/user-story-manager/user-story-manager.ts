@@ -15,6 +15,7 @@ export class UserStoryManagerComponent implements OnInit {
   sprintId: string = '';
   loading: boolean = false;
   error: string = '';
+  processingAction = false;
   State = UserStoryStatus;
   constructor(
     private userStoryService: UserStoryService,
@@ -23,9 +24,24 @@ export class UserStoryManagerComponent implements OnInit {
   ) { }
     ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
-      this.sprintId = params['sprintId'];
+      this.sprintId = params['sprintId'] ?? this.sprintId;
       if (this.sprintId) {
         this.loadUserStories();
+      }
+    });
+
+    this.activatedRoute.queryParams.subscribe(query => {
+      const editId = query['editId'];
+      if (editId && !this.processingAction) {
+        this.processingAction = true;
+        this.openEditDialog(editId).finally(() => {
+          this.processingAction = false;
+          this.route.navigate([], {
+            relativeTo: this.activatedRoute,
+            queryParams: { editId: null },
+            queryParamsHandling: 'merge'
+          });
+        });
       }
     });
   }
@@ -94,12 +110,41 @@ export class UserStoryManagerComponent implements OnInit {
   }
 
   createUserStory(): void {
-    this.route.navigate(['/userstory/create', this.sprintId]);
+    const title = window.prompt('Titre de la user story :');
+    if (!title?.trim()) return;
+
+    const description = window.prompt('Description :', '') ?? '';
+    const acceptanceCriteria = window.prompt('Critères d\'acceptation :', '') ?? '';
+    const storyPointsInput = window.prompt('Story points (nombre) :', '1') ?? '1';
+    const priorityInput = window.prompt('Priorité (1-5) :', '3') ?? '3';
+
+    const storyPoints = Number(storyPointsInput);
+    const priority = Number(priorityInput);
+
+    if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
+      alert('Story points ou priorité invalide');
+      return;
+    }
+
+    this.userStoryService.create({
+      title: title.trim(),
+      description,
+      acceptanceCriteria,
+      storyPoints,
+      priority,
+      sprintId: this.sprintId
+    }).subscribe({
+      next: () => this.loadUserStories(),
+      error: (err) => {
+        alert('Erreur lors de la création de la user story');
+        console.error(err);
+      }
+    });
   }
 
   editUserStory(id: string, event: Event): void {
     event.stopPropagation();
-    this.route.navigate(['/userstory/edit', id]);
+    this.openEditDialog(id);
   }
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
@@ -117,6 +162,61 @@ export class UserStoryManagerComponent implements OnInit {
     }}
     goBack(): void {
     this.route.navigate(['/sprint/view', this.sprintId]);
+  }
+
+  private async openEditDialog(id: string): Promise<void> {
+    const story = this.userStories.find(s => s.id === id);
+    if (!story) {
+      this.userStoryService.getById(id).subscribe({
+        next: (loaded) => this.submitEdit(loaded.id, loaded.title, loaded.description, loaded.acceptanceCriteria, loaded.storyPoints, loaded.priority),
+        error: (err) => {
+          alert('Impossible de charger la user story à modifier');
+          console.error(err);
+        }
+      });
+      return;
+    }
+
+    this.submitEdit(story.id, story.title, story.description, story.acceptanceCriteria, story.storyPoints, story.priority);
+  }
+
+  private submitEdit(id: string, initialTitle: string, initialDescription: string, initialAcceptance: string, initialStoryPoints: number, initialPriority: number): void {
+    const title = window.prompt('Titre de la user story :', initialTitle);
+    if (!title?.trim()) return;
+
+    const description = window.prompt('Description :', initialDescription) ?? initialDescription;
+    const acceptanceCriteria = window.prompt('Critères d\'acceptation :', initialAcceptance) ?? initialAcceptance;
+    const storyPointsInput = window.prompt('Story points (nombre) :', String(initialStoryPoints)) ?? String(initialStoryPoints);
+    const priorityInput = window.prompt('Priorité (1-5) :', String(initialPriority)) ?? String(initialPriority);
+
+    const storyPoints = Number(storyPointsInput);
+    const priority = Number(priorityInput);
+
+    if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
+      alert('Story points ou priorité invalide');
+      return;
+    }
+
+    this.userStoryService.update(id, {
+      id,
+      title: title.trim(),
+      description,
+      acceptanceCriteria,
+      storyPoints,
+      priority
+    }).subscribe({
+      next: () => this.loadUserStories(),
+      error: (err) => {
+        alert('Erreur lors de la mise à jour de la user story');
+        console.error(err);
+      }
+    });
+  }
+
+  private isValidNumber(value: number, min: number, max?: number): boolean {
+    if (Number.isNaN(value) || value < min) return false;
+    if (max !== undefined && value > max) return false;
+    return true;
   }
 
 }

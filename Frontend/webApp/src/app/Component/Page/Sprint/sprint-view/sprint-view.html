@@ -1,1 +1,28 @@
-<p>sprint-view works!</p>
+<div class="sprint-view">
+	<button class="btn-back" type="button" (click)="goBack()">← Retour</button>
+
+	<div *ngIf="loading">Chargement du sprint...</div>
+	<div *ngIf="error" class="error">{{ error }}</div>
+
+	<div *ngIf="!loading && !error && sprint" class="card">
+		<div class="card-header">
+			<h1>{{ sprint.name }}</h1>
+			<span class="status">{{ getStateLabel(sprint.sprintState) }}</span>
+		</div>
+
+		<p class="description">{{ sprint.description || 'Aucune description' }}</p>
+
+		<div class="meta-grid">
+			<div><strong>ID:</strong> {{ sprint.id }}</div>
+			<div><strong>Projet:</strong> {{ sprint.projectId }}</div>
+			<div><strong>Estimé:</strong> {{ sprint.estimatedDuration }} jours</div>
+			<div><strong>Début:</strong> {{ sprint.startDate | date:'dd/MM/yyyy' }}</div>
+			<div><strong>Fin:</strong> {{ sprint.endDate | date:'dd/MM/yyyy' }}</div>
+		</div>
+
+		<div class="actions">
+			<button class="btn-primary" type="button" (click)="goToEdit()">Modifier</button>
+			<button class="btn-danger" type="button" (click)="deleteSprint()">Supprimer</button>
+		</div>
+	</div>
+</div>

@@ -33,18 +33,22 @@ export interface UpdateProfileImageRequest {
 }
 
 export interface AuthResponse {
-  id: string;
+  id?: string;
+  userId?: number;
   firstName: string;
   lastName: string;
   email: string;
-  userName: string;
+  userName?: string;
   role: string;
-  roleDisplayName: string;
-  profileImageUrl: string;
-  token: string;
+  roleDisplayName?: string;
+  profileImageUrl?: string;
+  token?: string;
+  accessToken?: string;
   refreshToken: string;
-  tokenExpiry: string;
-  isEmailConfirmed: boolean;
+  tokenExpiry?: string;
+  accessTokenExpiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  isEmailConfirmed?: boolean;
 }
 
 export interface UserProfile {

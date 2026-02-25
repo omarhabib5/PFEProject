@@ -16,11 +16,17 @@ import { TokenService } from './token.service';
 export class AuthService {
   private baseUrl = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient, private tokens: TokenService) {}
+  constructor(private http: HttpClient, private tokens: TokenService) { }
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, payload).pipe(
-      tap((res) => this.tokens.setTokens(res.token, res.refreshToken, res))
+      tap((res) => {
+        const accessToken = res.accessToken ?? res.token;
+        if (!accessToken) {
+          throw new Error('Access token missing in login response');
+        }
+        this.tokens.setTokens(accessToken, res.refreshToken, res);
+      })
     );
   }
 

@@ -9,6 +9,6 @@ namespace Projet.Domain.Model
    public enum Role
     {
         Employer,
-        PrjectLeader
+        ProjectLeader
     }
 }

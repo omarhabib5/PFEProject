@@ -173,6 +173,7 @@ namespace Projet.Api.Controller
                     Email = request.Email,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
+                    Role = request.Role,
                     ServiceId = request.ServiceId
                 };
 
@@ -191,10 +192,10 @@ namespace Projet.Api.Controller
                     RefreshTokenExpiresAt = result.RefreshTokenExpiresAt
                 };
 
-                return CreatedAtAction(nameof(GetCurrentUser), new { id = result.UserId }, new 
-                { 
-                    message = "Employee created successfully. Credentials have been sent to their email.", 
-                    employee = response 
+                return CreatedAtAction(nameof(GetCurrentUser), new { id = result.UserId }, new
+                {
+                    message = "Employee created successfully. Credentials have been sent to their email.",
+                    employee = response
                 });
             }
             catch (InvalidOperationException ex)

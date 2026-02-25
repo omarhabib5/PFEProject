@@ -1,12 +1,10 @@
-
-
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../Service/auth.service';
+import { AuthResponse } from '../model/auth.model';
 import { RoleGuard } from '../Service/role.guard';
-import { AuthResponse, LoginRequest } from '../model/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -40,7 +38,7 @@ export class Login {
         next: (response: AuthResponse) => {
           this.errorMessage = '';
           console.log('Login successful:', response);
-          // Rediriger vers le dashboard selon le rôle
+      
           this.roleGuard.redirectToDashboard();
           this.isLoading = false;
         },

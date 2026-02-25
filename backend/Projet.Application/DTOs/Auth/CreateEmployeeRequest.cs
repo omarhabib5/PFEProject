@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Projet.Domain.Model;
 
 namespace Projet.Application.DTOs.Auth
 {
@@ -13,6 +14,9 @@ namespace Projet.Application.DTOs.Auth
 
         [Required]
         public string LastName { get; set; } = string.Empty;
+
+        [Required]
+        public UserRole Role { get; set; } = UserRole.Employee;
 
         public int? ServiceId { get; set; }
     }

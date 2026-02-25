@@ -151,13 +151,15 @@ export class UserStoryViewComponent implements OnInit {
 
   editUserStory(): void {
     if (this.userStory) {
-      this.router.navigate(['/userstory/edit', this.userStory.id]);
+      this.router.navigate(['/userstory/manage', this.userStory.sprintId], {
+        queryParams: { editId: this.userStory.id }
+      });
     }
   }
 
   createTask(): void {
     if (this.userStory) {
-      this.router.navigate(['/task/create', this.userStory.id]);
+      this.router.navigate(['/task/manage', this.userStory.id]);
     }
   }
 
@@ -167,7 +169,7 @@ export class UserStoryViewComponent implements OnInit {
 
   goBack(): void {
     if (this.userStory) {
-      this.router.navigate(['/sprint', this.userStory.sprintId, 'userstories']);
+      this.router.navigate(['/userstory/manage', this.userStory.sprintId]);
     } else {
       this.router.navigate(['/']);
     }

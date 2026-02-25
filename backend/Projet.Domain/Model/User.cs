@@ -19,6 +19,10 @@ namespace Projet.Domain.Model
         public bool IsEmailVerified { get; set; }
         public DateTime? EmailVerifiedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public int? Serviceid { get; set; }
+
+        public virtual Service? Service { get; set; }
+        public virtual ICollection<Service> ManagedServices { get; set; }
         public int FailedLoginAttempts { get; set; }
         public DateTime? LockoutEnd { get; set; }
         public virtual ICollection<TeamUser> TeamUsers { get; set; }

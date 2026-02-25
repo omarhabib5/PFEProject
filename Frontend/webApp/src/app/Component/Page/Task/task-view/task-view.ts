@@ -57,12 +57,16 @@ export class TaskView implements OnInit {
   deleteTask(): void {
     if (!this.task) return;
     this.taskService.delete(this.task.id).subscribe({
-      next: () => this.router.navigate(['/task/manage']),
+      next: () => this.goBack(),
       error: () => this.error = 'Erreur lors de la suppression de la tâche'
     });
   }
 
   goBack(): void {
+    if (this.task?.userStoryId) {
+      this.router.navigate(['/userstory/view', this.task.userStoryId]);
+      return;
+    }
     this.router.navigate(['/task/manage']);
   }
 

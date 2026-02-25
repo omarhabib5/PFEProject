@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Interface;
 using Projet.Domain.Querie.Service;
 
@@ -15,8 +16,10 @@ namespace Projet.Domain.Handler.ServiceHandler
 
         public async Task<Model.Service> Handle(GetServiceById request, CancellationToken cancellationToken)
         {
-            var service = await _context.Services.FindAsync(new object[] { request.id }, cancellationToken);
-            
+            var service = await _context.Services
+                  .Include(s => s.Responsible)
+                  .FirstOrDefaultAsync(s => s.id == request.id, cancellationToken);
+
             if (service == null)
             {
                 throw new Exception($"Service with id {request.id} not found");

@@ -5,7 +5,7 @@ import { EmployeeDashboard } from './Component/Dashoard/Employee-dashboard/emplo
 import { ResponsableServiceDashboard } from './Component/Dashoard/ResponsableService-dashboard/responsable-service-dashboard';
 import { Login } from './Component/Auth/login/login';
 import { UserManage } from './Component/Page/user-manage/user-manage';
-import { ServicePage } from './Component/Page/service-page/service-page';
+import { servicepage } from './Component/Page/service-page/service-page';
 import { ProjectView } from './Component/Page/Projet/project-view/project-view';
 import { SprintView } from './Component/Page/Sprint/sprint-view/sprint-view';
 import { TeamView } from './Component/Page/Team/team-view/team-view';
@@ -16,21 +16,24 @@ import { SprintManager } from './Component/Page/Sprint/sprint-manager/sprint-man
 import { TeamManage } from './Component/Page/Team/team-manage/team-manage';
 import { TaskManager } from './Component/Page/Task/task-manager/task-manager';
 import { UserStoryManagerComponent } from './Component/Page/UserStory/user-story-manager/user-story-manager';
+import { KanbanComponent } from './Component/kanban/kanban';
 
 export const routes: Routes = [
     { path: '', component: Login },
     { path: 'login', component: Login },
-    
+
     { path: 'AdminDashboard', component: AdminDashboard },
+    { path: 'kanban', component: KanbanComponent },
     { path: 'ChefProjetDashboard', component: ChefProjetDashboard },
     { path: 'EmployeeDashboard', component: EmployeeDashboard },
     { path: 'ResponsableServiceDashboard', component: ResponsableServiceDashboard },
-    
+
     { path: 'users', component: UserManage },
-    { path: 'Service', component: ServicePage },
-    
+    { path: 'Service', component: servicepage },
+
     { path: 'ProjectView', component: ProjectView },
     { path: 'SprintView', component: SprintView },
+    { path: 'sprint/view/:id', component: SprintView },
     { path: 'TeamView', component: TeamView },
     { path: 'TaskView', component: TaskView },
     { path: 'task/view/:id', component: TaskView },
@@ -39,12 +42,16 @@ export const routes: Routes = [
 
     { path: 'ProjectManage', component: ProjectManager },
     { path: 'SprintManage', component: SprintManager },
+    { path: 'sprint/manage/:projectId', component: SprintManager },
     { path: 'TeamManage', component: TeamManage },
     { path: 'TaskManage', component: TaskManager },
     { path: 'task/manage', component: TaskManager },
+    { path: 'task/manage/:userStoryId', component: TaskManager },
     { path: 'task/create/:userStoryId', component: TaskManager },
     { path: 'task/edit/:id', component: TaskManager },
     { path: 'UserStoryManage', component: UserStoryManagerComponent },
     { path: 'userstory/manage/:sprintId', component: UserStoryManagerComponent },
+    { path: 'userstory/create/:sprintId', component: UserStoryManagerComponent },
+    { path: 'userstory/edit/:id', component: UserStoryManagerComponent },
 ];
 

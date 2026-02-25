@@ -118,6 +118,18 @@ namespace Projet.Application.Context
             {
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.name).IsRequired().HasMaxLength(200);
+
+                // Relation Service.Members <-> User.Service
+                entity.HasMany(s => s.Members)
+                    .WithOne(u => u.Service)
+                    .HasForeignKey(u => u.Serviceid)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Relation Service.Responsible <-> User.ManagedServices
+                entity.HasOne(s => s.Responsible)
+                    .WithMany(u => u.ManagedServices)
+                    .HasForeignKey(s => s.ResponsibleId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Team>(entity =>
