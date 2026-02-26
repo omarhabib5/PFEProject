@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { Observable } from "rxjs";
+import { environment } from "../../../environment";
 
 
 export interface Service {
@@ -47,7 +48,7 @@ export interface UpdateServiceDto {
 })
 export class ServicePage {
   private http = inject(HttpClient);
-  private apiUrl = 'https://localhost:7219/api/Service';
+  private apiUrl = `${environment.apiUrl}/Service`;
 
 
   getServices(): Observable<Service[]> {

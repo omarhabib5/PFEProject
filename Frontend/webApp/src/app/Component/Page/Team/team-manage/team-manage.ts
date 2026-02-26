@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Role, Team, TeamService, TeamUser } from '../Service/TeamService';
 import { Service, ServiceService } from '../Service/ServiceService';
 import { UserApiService, UserDto } from '../Service/UserApiService';
@@ -18,6 +19,7 @@ export class TeamManage implements OnInit {
   users: UserDto[] = [];
   teamMembers: TeamUser[] = [];
   allTeamMembers: TeamUser[] = [];
+  scopedServiceId: number | null = null;
 
   loading = false;
   error: string | null = null;
@@ -48,11 +50,22 @@ export class TeamManage implements OnInit {
   constructor(
     private teamService: TeamService,
     private serviceService: ServiceService,
-    private userApiService: UserApiService
+    private userApiService: UserApiService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.loadInitialData();
+    this.route.queryParamMap.subscribe(params => {
+      const serviceIdParam = params.get('serviceId');
+      const parsedServiceId = serviceIdParam ? Number(serviceIdParam) : NaN;
+      this.scopedServiceId = Number.isFinite(parsedServiceId) ? parsedServiceId : null;
+      this.loadInitialData();
+    });
+  }
+
+  get availableUsersForSelectedTeam(): UserDto[] {
+    const existingUserIds = new Set(this.allTeamMembers.map(member => member.userId));
+    return this.users.filter(user => !existingUserIds.has(user.id));
   }
 
   loadInitialData(): void {
@@ -61,10 +74,19 @@ export class TeamManage implements OnInit {
 
     this.teamService.getTeams().subscribe({
       next: (teams) => {
-        this.teams = teams;
+        this.teams = this.scopedServiceId
+          ? teams.filter(team => team.serviceId === this.scopedServiceId)
+          : teams;
         this.serviceService.getServices().subscribe({
           next: (services) => {
-            this.services = services;
+            this.services = this.scopedServiceId
+              ? services.filter(service => service.id === this.scopedServiceId)
+              : services;
+
+            if (this.scopedServiceId && this.newTeam.serviceId === 0) {
+              this.newTeam.serviceId = this.scopedServiceId;
+            }
+
             this.userApiService.getUsers().subscribe({
               next: (users) => {
                 this.users = users;
@@ -216,6 +238,12 @@ export class TeamManage implements OnInit {
       return;
     }
 
+    const alreadyMember = this.allTeamMembers.some(member => member.userId === this.newMember.userId);
+    if (alreadyMember) {
+      this.error = 'Cet utilisateur est déjà membre de cette équipe';
+      return;
+    }
+
     this.loading = true;
     this.teamService.addMemberToTeam(this.selectedTeam.id, this.newMember).subscribe({
       next: () => {
@@ -224,8 +252,9 @@ export class TeamManage implements OnInit {
         this.newMember = { userId: 0, role: Role.Employer };
         this.loadTeamMembers();
       },
-      error: () => {
-        this.error = 'Erreur lors de l’ajout du membre';
+      error: (err) => {
+        const message = err?.error?.message;
+        this.error = message || 'Erreur lors de l’ajout du membre';
         this.loading = false;
       }
     });
@@ -307,6 +336,11 @@ export class TeamManage implements OnInit {
   }
 
   getUserFullName(userId: number): string {
+    const member = this.teamMembers.find(teamMember => teamMember.userId === userId);
+    if (member?.user) {
+      return `${member.user.firstName} ${member.user.lastName}`;
+    }
+
     const user = this.users.find(u => u.id === userId);
     return user ? `${user.firstName} ${user.lastName}` : `User #${userId}`;
   }

@@ -5,7 +5,7 @@ import {  UserStoryDto,
   UpdateUserStoryRequest,
   UpdateUserStoryStatusRequest,
   UserStoryStatus } from '../Models/userstory.model';
-import { HttpClient, HttpHeaders  } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment';
@@ -16,41 +16,30 @@ import { environment } from '../../../environment';
 export class UserStoryService {
   private apiUrl = `${environment.apiUrl}/userstories`;
     constructor(private http: HttpClient) { }
-    private getAuthHeaders(): HttpHeaders {
-        const token = localStorage.getItem('token');
-        return new HttpHeaders({
-            'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        });
-    }
 
       getBySprintId(sprintId: string): Observable<UserStoryDto[]> {
     return this.http.get<UserStoryDto[]>(
-      `${this.apiUrl}/sprint/${sprintId}`,
-      { headers: this.getAuthHeaders() }
+      `${this.apiUrl}/sprint/${sprintId}`
     );
   }
 
     getById(id: string): Observable<UserStoryDetailDto> {
     return this.http.get<UserStoryDetailDto>(
-      `${this.apiUrl}/${id}`,
-      { headers: this.getAuthHeaders() }
+      `${this.apiUrl}/${id}`
     );
   }
 
     create(request: CreateUserStoryRequest): Observable<string> {
     return this.http.post<string>(
       this.apiUrl,
-      request,
-      { headers: this.getAuthHeaders() }
+      request
     );
   }
 
     update(id: string, request: UpdateUserStoryRequest): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/${id}`,
-      request,
-      { headers: this.getAuthHeaders() }
+      request
     );
   }
 
@@ -58,15 +47,13 @@ export class UserStoryService {
     const request: UpdateUserStoryStatusRequest = { status };
     return this.http.patch<void>(
       `${this.apiUrl}/${id}/status`,
-      request,
-      { headers: this.getAuthHeaders() }
+      request
     );
   }
 
     delete(id: string): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${id}`,
-      { headers: this.getAuthHeaders() }
+      `${this.apiUrl}/${id}`
     );
   }
 

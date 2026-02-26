@@ -1,6 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from "../../../environment";
 
 export interface Team {
     id: number;
@@ -64,7 +65,7 @@ export interface CreateTeamUserCommand {
 })
 export class TeamService {
     private http = inject(HttpClient);
-    private apiUrl = 'https://localhost:7219/api/teams';
+    private apiUrl = `${environment.apiUrl}/teams`;
 
     getTeams(): Observable<Team[]> {
         return this.http.get<Team[]>(this.apiUrl);

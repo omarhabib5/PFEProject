@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { Observable } from "rxjs";
 import { Service, User } from "../../service-page/Service/ServicePage";
+import { environment } from "../../../environment";
 
 
 export enum State{
@@ -71,7 +72,7 @@ export interface UpdateProjectDto {
     providedIn: "root",
 })
 export class ProjectService {
-    private apiUrl = 'https://localhost:7219/api/Project';
+    private apiUrl = `${environment.apiUrl}/Project`;
     private http = inject(HttpClient);
 
   
