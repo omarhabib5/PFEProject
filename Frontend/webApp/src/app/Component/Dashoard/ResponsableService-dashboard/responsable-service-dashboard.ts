@@ -2,9 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize, timeout } from 'rxjs';
+import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { CreateServiceDto, Service, ServicePage } from '../../Page/service-page/Service/ServicePage';
 import { TokenService } from '../../Auth/Service/token.service';
+import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
+import { ProjectService, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
+import { SprintService } from '../../Page/Sprint/Service/SprintService';
 
 interface TeamMemberRow {
   fullName: string;
@@ -26,6 +29,9 @@ interface TeamMemberRow {
 })
 export class ResponsableServiceDashboard implements OnInit {
   private serviceApi = inject(ServicePage);
+  private teamService = inject(TeamService);
+  private projectService = inject(ProjectService);
+  private sprintService = inject(SprintService);
   private router = inject(Router);
   private tokenService = inject(TokenService);
 
@@ -39,6 +45,9 @@ export class ResponsableServiceDashboard implements OnInit {
   statusFilter: 'all' | 'active' = 'all';
 
   services: Service[] = [];
+  serviceTeams: TeamEntity[] = [];
+  allProjects: ProjectEntity[] = [];
+  selectedServiceMemberIds = new Set<number>();
   selectedServiceId: number | null = null;
 
   showCreateModal = false;
@@ -152,11 +161,40 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get membersCount(): number {
+    if (this.selectedServiceMemberIds.size > 0) {
+      return this.selectedServiceMemberIds.size;
+    }
     return this.selectedService?.members?.length ?? 0;
   }
 
+  get selectedServiceTeams(): TeamEntity[] {
+    if (!this.selectedServiceId) {
+      return [];
+    }
+
+    return this.serviceTeams.filter((team) => this.getTeamServiceId(team) === this.selectedServiceId);
+  }
+
+  get teamsCount(): number {
+    if (this.selectedServiceTeams.length > 0) {
+      return this.selectedServiceTeams.length;
+    }
+    return this.selectedService?.teams?.length ?? 0;
+  }
+
   get projectsCount(): number {
+    if (this.selectedServiceProjects.length > 0) {
+      return this.selectedServiceProjects.length;
+    }
     return this.selectedService?.projects?.length ?? 0;
+  }
+
+  get selectedServiceProjects(): ProjectEntity[] {
+    if (!this.selectedServiceId) {
+      return [];
+    }
+
+    return this.allProjects.filter((project) => this.getProjectServiceId(project) === this.selectedServiceId);
   }
 
   loadServices(): void {
@@ -177,6 +215,8 @@ export class ResponsableServiceDashboard implements OnInit {
             this.selectedServiceId = this.services[0].id;
             this.serviceViewMode = 'detail';
           }
+          this.loadTeams();
+          this.loadProjects();
         },
         error: () => {
           this.error = 'Impossible de charger les services. Vérifiez que le backend est démarré.';
@@ -197,11 +237,14 @@ export class ResponsableServiceDashboard implements OnInit {
     this.serviceViewMode = 'detail';
     this.activeSection = 'services';
     this.activeTab = 'dashboard';
+    this.loadMembersForSelectedService();
+    this.loadTeams();
   }
 
   backToServiceList(): void {
     this.serviceViewMode = 'list';
     this.selectedServiceId = null;
+    this.selectedServiceMemberIds = new Set<number>();
   }
 
   setTab(tab: 'dashboard' | 'team'): void {
@@ -260,6 +303,16 @@ export class ResponsableServiceDashboard implements OnInit {
     });
   }
 
+  openCreateTeam(): void {
+    this.router.navigate(['/TeamManage'], {
+      queryParams: {
+        serviceId: this.selectedServiceId ?? undefined,
+        source: 'service-manager',
+        action: 'create-team'
+      }
+    });
+  }
+
   openTeams(): void {
     this.router.navigate(['/TeamManage'], {
       queryParams: {
@@ -269,12 +322,39 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   openUserStories(): void {
-    const firstProjectId = this.selectedService?.projects?.[0]?.id;
-    if (firstProjectId) {
-      this.router.navigate(['/sprint/manage', firstProjectId]);
+    this.error = '';
+
+    const firstProjectId = this.selectedServiceProjects[0]?.id ?? this.selectedService?.projects?.[0]?.id;
+    if (!firstProjectId) {
+      this.error = 'Ajoutez un projet à ce service pour gérer les user stories.';
       return;
     }
-    this.router.navigate(['/SprintManage']);
+
+    this.loading = true;
+    this.sprintService.getSprintsByProjectId(firstProjectId)
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (sprints) => {
+          const firstSprintId = sprints?.[0]?.id;
+          if (firstSprintId) {
+            this.router.navigate(['/userstory/manage', firstSprintId]);
+            return;
+          }
+
+          this.error = 'Aucun sprint trouvé. Créez un sprint pour gérer les user stories.';
+          this.router.navigate(['/sprint/manage', firstProjectId], {
+            queryParams: { source: 'service-manager' }
+          });
+        },
+        error: () => {
+          this.error = 'Impossible de charger les sprints du projet.';
+        }
+      });
   }
 
   logout(): void {
@@ -299,6 +379,20 @@ export class ResponsableServiceDashboard implements OnInit {
       .join('')
       .slice(0, 2)
       .toUpperCase();
+  }
+
+  getServiceProjectsCount(service: Service): number {
+    const serviceId = service.id;
+    if (!serviceId) {
+      return service.projects?.length ?? 0;
+    }
+
+    const filteredCount = this.allProjects.filter((project) => this.getProjectServiceId(project) === serviceId).length;
+    if (filteredCount > 0) {
+      return filteredCount;
+    }
+
+    return service.projects?.length ?? 0;
   }
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
@@ -373,6 +467,73 @@ export class ResponsableServiceDashboard implements OnInit {
         inCurrentMonth
       });
     }
+  }
+
+  private loadTeams(): void {
+    this.teamService.getTeams().subscribe({
+      next: (teams) => {
+        this.serviceTeams = teams ?? [];
+        this.loadMembersForSelectedService();
+      },
+      error: () => {
+        this.serviceTeams = [];
+        this.selectedServiceMemberIds = new Set<number>();
+      }
+    });
+  }
+
+  private loadMembersForSelectedService(): void {
+    const teams = this.selectedServiceTeams;
+    if (teams.length === 0) {
+      this.selectedServiceMemberIds = new Set<number>();
+      return;
+    }
+
+    const membersRequests = teams.map((team) =>
+      this.teamService
+        .getMembersByTeamId(team.id)
+        .pipe(catchError(() => of([] as TeamUser[])))
+    );
+
+    forkJoin(membersRequests).subscribe({
+      next: (membersByTeam) => {
+        const ids = new Set<number>();
+        membersByTeam.forEach((members) => {
+          members.forEach((member) => {
+            if (typeof member.userId === 'number') {
+              ids.add(member.userId);
+            }
+          });
+        });
+        this.selectedServiceMemberIds = ids;
+      },
+      error: () => {
+        this.selectedServiceMemberIds = new Set<number>();
+      }
+    });
+  }
+
+  private loadProjects(): void {
+    this.projectService.getAllProjects().subscribe({
+      next: (projects) => {
+        this.allProjects = projects ?? [];
+      },
+      error: () => {
+        this.allProjects = [];
+      }
+    });
+  }
+
+  private getProjectServiceId(project: ProjectEntity): number | null {
+    const typedProject = project as ProjectEntity & { ServiceId?: number; serviceID?: number };
+    const serviceIdValue = typedProject.serviceId ?? typedProject.ServiceId ?? typedProject.serviceID;
+    return typeof serviceIdValue === 'number' && Number.isFinite(serviceIdValue) ? serviceIdValue : null;
+  }
+
+  private getTeamServiceId(team: TeamEntity): number | null {
+    const typedTeam = team as TeamEntity & { ServiceId?: number; serviceID?: number };
+    const serviceIdValue = typedTeam.serviceId ?? typedTeam.ServiceId ?? typedTeam.serviceID;
+    return typeof serviceIdValue === 'number' && Number.isFinite(serviceIdValue) ? serviceIdValue : null;
   }
 
 }

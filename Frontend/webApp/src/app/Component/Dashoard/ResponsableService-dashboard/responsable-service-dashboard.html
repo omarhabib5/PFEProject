@@ -75,7 +75,7 @@
                         <p class="desc">ID service: {{ service.id }}</p>
 
                         <p class="meta-line">👥 {{ service.members?.length || 0 }} membres</p>
-                        <p class="meta-line">🗂️ {{ service.projects?.length || 0 }} projets</p>
+                        <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
                         <p class="meta-line">Chef de service: {{ service.responsible ? (service.responsible.firstName +
                             ' ' + service.responsible.lastName) : 'Non assigné' }}</p>
 
@@ -111,10 +111,12 @@
                 </div>
 
                 <div class="service-actions-row">
+                    <button class="secondary-btn" type="button" (click)="openCreateTeam()">Ajouter équipe</button>
                     <button class="secondary-btn" type="button" (click)="openAddMembers()">Ajouter membre au
                         service</button>
                     <button class="secondary-btn" type="button" (click)="openProjectEdit()">Modifier les
                         projets</button>
+                    <button class="secondary-btn" type="button" (click)="openUserStories()">Gérer user stories</button>
                 </div>
 
                 <div class="tabs-card">
@@ -129,6 +131,10 @@
                             <article class="kpi-card">
                                 <h4>Projets actifs</h4>
                                 <strong>{{ projectsCount }}</strong>
+                            </article>
+                            <article class="kpi-card">
+                                <h4>Équipes</h4>
+                                <strong>{{ teamsCount }}</strong>
                             </article>
                             <article class="kpi-card">
                                 <h4>Tâches terminées</h4>
@@ -169,42 +175,28 @@
                     </div>
 
                     <div *ngIf="activeTab === 'team'" class="team-tab-content">
-                        <h4>Équipe du service</h4>
+                        <h4>Équipes du service</h4>
                         <p>{{ selectedService.name }}</p>
 
-                        <div class="team-table-wrap" *ngIf="teamRows.length > 0">
+                        <div class="team-table-wrap" *ngIf="selectedServiceTeams.length > 0">
                             <table class="team-table">
                                 <thead>
                                     <tr>
-                                        <th>Membre</th>
-                                        <th>Email</th>
-                                        <th>Rôle</th>
-                                        <th>Tâches actives</th>
-                                        <th>Tâches terminées</th>
+                                        <th>ID</th>
+                                        <th>Nom d'équipe</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let row of teamRows">
-                                        <td>
-                                            <div class="member-cell">
-                                                <span class="mini-avatar big">{{ row.avatar }}</span>
-                                                <div>
-                                                    <strong>{{ row.fullName }}</strong>
-                                                    <small *ngIf="row.subtitle">{{ row.subtitle }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>{{ row.email }}</td>
-                                        <td><span class="role-pill" [class]="'role-pill ' + row.roleClass">{{
-                                                row.roleLabel }}</span></td>
-                                        <td>{{ row.activeTasks }}</td>
-                                        <td>{{ row.completedTasks }}</td>
+                                    <tr *ngFor="let team of selectedServiceTeams">
+                                        <td>{{ team.id }}</td>
+                                        <td>{{ team.name }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <p *ngIf="teamRows.length === 0" class="empty-team">Aucun membre dans ce service.</p>
+                        <p *ngIf="selectedServiceTeams.length === 0" class="empty-team">Aucune équipe dans ce service.
+                        </p>
                     </div>
                 </div>
             </section>

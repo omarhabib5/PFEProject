@@ -1,9 +1,8 @@
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Role, Team, TeamService, TeamUser } from '../Service/TeamService';
-import { Service, ServiceService } from '../Service/ServiceService';
+import { TeamService, Team, TeamUser, CreateTeamRequest, UpdateTeamRequest, AddMemberRequest, Role, UserInTeam } from '../Service/TeamService';
+import { ServiceService, Service } from '../Service/ServiceService';
 import { UserApiService, UserDto } from '../Service/UserApiService';
 
 @Component({
@@ -14,181 +13,220 @@ import { UserApiService, UserDto } from '../Service/UserApiService';
   styleUrl: './team-manage.css',
 })
 export class TeamManage implements OnInit {
+  private teamService = inject(TeamService);
+  private serviceService = inject(ServiceService);
+  private userApiService = inject(UserApiService);
+  private cdr = inject(ChangeDetectorRef); 
+
+  
   teams: Team[] = [];
+  selectedTeam: Team | null = null;
+  teamMembers: TeamUser[] = [];
+  
+  
   services: Service[] = [];
   users: UserDto[] = [];
-  teamMembers: TeamUser[] = [];
-  allTeamMembers: TeamUser[] = [];
-  scopedServiceId: number | null = null;
 
-  loading = false;
-  error: string | null = null;
-  successMessage: string | null = null;
-
-  selectedTeam: Team | null = null;
   showCreateTeamForm = false;
-  showAddMemberForm = false;
   isEditMode = false;
   editingTeamId: number | null = null;
+  newTeam: CreateTeamRequest = {
+    name: '',
+    serviceId: 0
+  };
+
+  showAddMemberForm = false;
+  newMember: AddMemberRequest = {
+    userId: 0,
+    role: Role.Employer
+  };
+
 
   memberFilter: 'all' | 'leaders' | 'employees' = 'all';
+  
+ 
   editingMemberId: number | null = null;
   editMemberRole: Role = Role.Employer;
 
   Role = Role;
 
-  newTeam = {
-    name: '',
-    serviceId: 0
-  };
-
-  newMember = {
-    userId: 0,
-    role: Role.Employer
-  };
-
-  constructor(
-    private teamService: TeamService,
-    private serviceService: ServiceService,
-    private userApiService: UserApiService,
-    private route: ActivatedRoute
-  ) {}
+  loading = false;
+  error: string | null = null;
+  successMessage: string | null = null;
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      const serviceIdParam = params.get('serviceId');
-      const parsedServiceId = serviceIdParam ? Number(serviceIdParam) : NaN;
-      this.scopedServiceId = Number.isFinite(parsedServiceId) ? parsedServiceId : null;
-      this.loadInitialData();
+    this.loadTeams();
+    this.loadServices();
+    this.loadUsers();
+  }
+
+  loadServices(): void {
+    this.serviceService.getServices().subscribe({
+      next: (data) => {
+        this.services = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading services:', err);
+      }
     });
   }
 
-  get availableUsersForSelectedTeam(): UserDto[] {
-    const existingUserIds = new Set(this.allTeamMembers.map(member => member.userId));
-    return this.users.filter(user => !existingUserIds.has(user.id));
+  loadUsers(): void {
+    this.userApiService.getUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading users:', err);
+      }
+    });
   }
 
-  loadInitialData(): void {
+  getServiceName(serviceId?: number): string {
+    if (!serviceId) return 'N/A';
+    const service = this.services.find(s => s.id === serviceId);
+    return service ? service.name : `Service ${serviceId}`;
+  }
+
+  getUserFullName(userId: number): string {
+    const user = this.users.find(u => u.id === userId);
+    return user ? `${user.firstName} ${user.lastName}` : `User ${userId}`;
+  }
+
+  loadTeams(): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.teamService.getTeams().subscribe({
+      next: (data) => {
+        this.teams = data;
+        this.loading = false;
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => {
+        this.error = 'Failed to load teams: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error loading teams:', err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadTeamMembers(teamId: number): void {
+    this.loading = true;
+    this.error = null;
+    
+    let memberObservable;
+    
+    if (this.memberFilter === 'leaders') {
+      memberObservable = this.teamService.getLeadersByTeamId(teamId);
+    } else if (this.memberFilter === 'employees') {
+      memberObservable = this.teamService.getEmployeesByTeamId(teamId);
+    } else {
+      memberObservable = this.teamService.getMembersByTeamId(teamId);
+    }
+    
+    memberObservable.subscribe({
+      next: (data) => {
+        this.teamMembers = data;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.error = 'Failed to load members: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error loading members:', err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  filterMembers(filter: 'all' | 'leaders' | 'employees'): void {
+    if (!this.selectedTeam) return;
+    this.memberFilter = filter;
+    this.loadTeamMembers(this.selectedTeam.id);
+  }
+
+
+  createTeam(): void {
+
+    this.newTeam.name = this.newTeam.name?.trim() || '';
+    
+   
+    if (!this.newTeam.name) {
+      this.error = 'Team name is required';
+      setTimeout(() => this.error = null, 5000);
+      return;
+    }
+    
+    if (!this.newTeam.serviceId || this.newTeam.serviceId === 0) {
+      this.error = 'Please select a service';
+      setTimeout(() => this.error = null, 5000);
+      return;
+    }
+
     this.loading = true;
     this.error = null;
 
-    this.teamService.getTeams().subscribe({
-      next: (teams) => {
-        this.teams = this.scopedServiceId
-          ? teams.filter(team => team.serviceId === this.scopedServiceId)
-          : teams;
-        this.serviceService.getServices().subscribe({
-          next: (services) => {
-            this.services = this.scopedServiceId
-              ? services.filter(service => service.id === this.scopedServiceId)
-              : services;
-
-            if (this.scopedServiceId && this.newTeam.serviceId === 0) {
-              this.newTeam.serviceId = this.scopedServiceId;
-            }
-
-            this.userApiService.getUsers().subscribe({
-              next: (users) => {
-                this.users = users;
-                this.loading = false;
-              },
-              error: () => {
-                this.error = 'Erreur lors du chargement des utilisateurs';
-                this.loading = false;
-              }
-            });
-          },
-          error: () => {
-            this.error = 'Erreur lors du chargement des services';
-            this.loading = false;
-          }
-        });
-      },
-      error: () => {
-        this.error = 'Erreur lors du chargement des équipes';
-        this.loading = false;
-      }
-    });
-  }
-
-  toggleCreateTeamForm(): void {
-    this.showCreateTeamForm = !this.showCreateTeamForm;
-    if (!this.showCreateTeamForm) {
-      this.isEditMode = false;
-      this.editingTeamId = null;
-      this.newTeam = { name: '', serviceId: 0 };
-    }
-  }
-
-  createTeam(): void {
-    if (!this.newTeam.name || !this.newTeam.serviceId) {
-      this.error = 'Veuillez remplir tous les champs';
-      return;
-    }
-
-    this.loading = true;
     this.teamService.createTeam(this.newTeam).subscribe({
-      next: () => {
-        this.successMessage = 'Équipe créée avec succès';
+      next: (response) => {
+        this.successMessage = 'Team created successfully!';
         this.showCreateTeamForm = false;
-        this.newTeam = { name: '', serviceId: 0 };
-        this.loadInitialData();
-      },
-      error: () => {
-        this.error = 'Erreur lors de la création de l’équipe';
+        this.resetNewTeamForm();
+        this.loadTeams(); 
         this.loading = false;
+        setTimeout(() => this.successMessage = null, 3000);
+      },
+      error: (err) => {
+        this.error = 'Failed to create team: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error creating team:', err);
+        this.cdr.detectChanges();
       }
     });
-  }
-
-  UpdateTeam(teamId: number): void {
-    if (!this.newTeam.name || !this.newTeam.serviceId) {
-      this.error = 'Veuillez remplir tous les champs';
-      return;
-    }
-
-    this.loading = true;
-    this.teamService.updateTeam(teamId, this.newTeam).subscribe({
-      next: () => {
-        this.successMessage = 'Équipe mise à jour avec succès';
-        this.showCreateTeamForm = false;
-        this.isEditMode = false;
-        this.editingTeamId = null;
-        this.newTeam = { name: '', serviceId: 0 };
-        this.loadInitialData();
-      },
-      error: () => {
-        this.error = 'Erreur lors de la mise à jour de l’équipe';
-        this.loading = false;
-      }
-    });
-  }
-
-  startEditTeam(team: Team): void {
-    this.isEditMode = true;
-    this.editingTeamId = team.id;
-    this.showCreateTeamForm = true;
-    this.newTeam = {
-      name: team.name,
-      serviceId: team.serviceId ?? 0
-    };
   }
 
   deleteTeam(teamId: number): void {
+    if (!confirm('Are you sure you want to delete this team?')) {
+      return;
+    }
+
+    
+    const teamToDelete = this.teams.find(t => t.id === teamId);
+    
+   
+    this.teams = this.teams.filter(t => t.id !== teamId);
+    
+    
+    if (this.selectedTeam?.id === teamId) {
+      this.selectedTeam = null;
+      this.teamMembers = [];
+    }
+    
+    this.cdr.detectChanges(); 
+
     this.loading = true;
+    this.error = null;
+
     this.teamService.deleteTeam(teamId).subscribe({
       next: () => {
-        this.successMessage = 'Équipe supprimée avec succès';
-        if (this.selectedTeam?.id === teamId) {
-          this.selectedTeam = null;
-          this.teamMembers = [];
-          this.allTeamMembers = [];
-        }
-        this.loadInitialData();
-      },
-      error: () => {
-        this.error = 'Erreur lors de la suppression de l’équipe';
+        this.successMessage = 'Team deleted successfully!';
         this.loading = false;
+        setTimeout(() => this.successMessage = null, 3000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+      
+        if (teamToDelete) {
+          this.teams = [...this.teams, teamToDelete];
+        }
+        
+        this.error = 'Failed to delete team: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error deleting team:', err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -197,92 +235,88 @@ export class TeamManage implements OnInit {
     this.selectedTeam = team;
     this.showAddMemberForm = false;
     this.memberFilter = 'all';
-    this.loadTeamMembers();
-  }
-
-  backToTeamsList(): void {
-    this.selectedTeam = null;
-    this.showAddMemberForm = false;
     this.editingMemberId = null;
-    this.memberFilter = 'all';
+    this.loadTeamMembers(team.id);
+    this.cdr.detectChanges();
   }
 
-  loadTeamMembers(): void {
-    if (!this.selectedTeam) return;
-
-    this.loading = true;
-    this.teamService.getMembersByTeamId(this.selectedTeam.id).subscribe({
-      next: (members) => {
-        this.allTeamMembers = members;
-        this.teamMembers = members;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Erreur lors du chargement des membres';
-        this.loading = false;
-      }
-    });
-  }
-
-  toggleAddMemberForm(): void {
-    this.showAddMemberForm = !this.showAddMemberForm;
-    if (!this.showAddMemberForm) {
-      this.newMember = { userId: 0, role: Role.Employer };
-    }
-  }
+ 
 
   addMember(): void {
-    if (!this.selectedTeam) return;
-    if (!this.newMember.userId) {
-      this.error = 'Veuillez sélectionner un utilisateur';
+    if (!this.selectedTeam || this.newMember.userId === 0) {
+      this.error = 'Please select a user';
       return;
+
     }
 
-    const alreadyMember = this.allTeamMembers.some(member => member.userId === this.newMember.userId);
-    if (alreadyMember) {
-      this.error = 'Cet utilisateur est déjà membre de cette équipe';
-      return;
-    }
+    const selectedUser = this.users.find(u => u.id === this.newMember.userId);
+    const tempMember: TeamUser = {
+      id: -Date.now(), 
+      userId: this.newMember.userId,
+      teamId: this.selectedTeam.id,
+      role: this.newMember.role,
+   
+      user: selectedUser ? { 
+        id: this.newMember.userId,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        email: selectedUser.email
+      } : undefined
+    };
+
+  
+    this.teamMembers = [...this.teamMembers, tempMember];
+    this.showAddMemberForm = false;
+    this.cdr.detectChanges(); 
 
     this.loading = true;
+    this.error = null;
+
+    console.log('Adding member with data:', this.newMember);
+    console.log('Role value:', this.newMember.role, 'Type:', typeof this.newMember.role);
+
     this.teamService.addMemberToTeam(this.selectedTeam.id, this.newMember).subscribe({
-      next: () => {
-        this.successMessage = 'Membre ajouté avec succès';
-        this.showAddMemberForm = false;
-        this.newMember = { userId: 0, role: Role.Employer };
-        this.loadTeamMembers();
+      next: (response) => {
+     
+        this.teamService.getMembersByTeamId(this.selectedTeam!.id).subscribe({
+          next: (members) => {
+            this.teamMembers = members;
+            this.successMessage = 'Member added successfully!';
+            this.resetNewMemberForm();
+            this.loading = false;
+            setTimeout(() => this.successMessage = null, 3000);
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.error = 'Failed to load members after adding: ' + (err.error?.message || err.message);
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: (err) => {
-        const message = err?.error?.message;
-        this.error = message || 'Erreur lors de l’ajout du membre';
-        this.loading = false;
-      }
-    });
-  }
-
-  filterMembers(filter: 'all' | 'leaders' | 'employees'): void {
-    this.memberFilter = filter;
-    if (!this.selectedTeam) return;
-
-    this.loading = true;
-    const request =
-      filter === 'leaders'
-        ? this.teamService.getLeadersByTeamId(this.selectedTeam.id)
-        : filter === 'employees'
-          ? this.teamService.getEmployeesByTeamId(this.selectedTeam.id)
-          : this.teamService.getMembersByTeamId(this.selectedTeam.id);
-
-    request.subscribe({
-      next: (members) => {
-        this.teamMembers = members;
-        if (filter === 'all') {
-          this.allTeamMembers = members;
+       
+        this.teamMembers = this.teamMembers.filter(m => m.id !== tempMember.id);
+        
+        
+        let errorMsg = 'Failed to add member';
+        if (err.error?.message) {
+          errorMsg = err.error.message;
+        } else if (err.error?.title) {
+          errorMsg = err.error.title;
+        } else if (err.error?.errors) {
+     
+          const validationErrors = Object.values(err.error.errors).flat();
+          errorMsg = validationErrors.join(', ');
+        } else if (err.message) {
+          errorMsg = err.message;
         }
+        
+        this.error = errorMsg;
         this.loading = false;
-      },
-      error: () => {
-        this.error = 'Erreur lors du filtrage des membres';
-        this.loading = false;
+        console.error('Error adding member:', err);
+        console.error('Error details:', err.error);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -290,63 +324,184 @@ export class TeamManage implements OnInit {
   startEditMember(member: TeamUser): void {
     this.editingMemberId = member.id;
     this.editMemberRole = member.role;
+    this.cdr.detectChanges();
   }
 
   cancelEditMember(): void {
     this.editingMemberId = null;
-    this.editMemberRole = Role.Employer;
+    this.cdr.detectChanges();
   }
 
   updateMemberRole(memberId: number): void {
     if (!this.selectedTeam) return;
 
     this.loading = true;
+    this.error = null;
+
     this.teamService.updateMemberRole(this.selectedTeam.id, memberId, this.editMemberRole).subscribe({
       next: () => {
-        this.successMessage = 'Rôle mis à jour avec succès';
+        this.successMessage = 'Member role updated successfully!';
         this.editingMemberId = null;
-        this.loadTeamMembers();
-      },
-      error: () => {
-        this.error = 'Erreur lors de la mise à jour du rôle';
+        this.loadTeamMembers(this.selectedTeam!.id);
         this.loading = false;
+        setTimeout(() => this.successMessage = null, 3000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.error = 'Failed to update member role: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error updating member role:', err);
+        this.cdr.detectChanges();
       }
     });
   }
 
   removeMember(memberId: number): void {
     if (!this.selectedTeam) return;
+    
+    if (!confirm('Are you sure you want to remove this member?')) {
+      return;
+    }
+
+    
+    const memberToRemove = this.teamMembers.find(m => m.id === memberId);
+    
+  
+    this.teamMembers = this.teamMembers.filter(m => m.id !== memberId);
+    this.cdr.detectChanges(); 
 
     this.loading = true;
+    this.error = null;
+
     this.teamService.removeMemberFromTeam(this.selectedTeam.id, memberId).subscribe({
       next: () => {
-        this.successMessage = 'Membre supprimé avec succès';
-        this.loadTeamMembers();
-      },
-      error: () => {
-        this.error = 'Erreur lors de la suppression du membre';
+        this.successMessage = 'Member removed successfully!';
         this.loading = false;
+        setTimeout(() => this.successMessage = null, 3000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        
+        if (memberToRemove) {
+          this.teamMembers = [...this.teamMembers, memberToRemove];
+        }
+        
+        this.error = 'Failed to remove member: ' + (err.error?.message || err.message);
+        this.loading = false;
+        console.error('Error removing member:', err);
+        this.cdr.detectChanges();
       }
     });
   }
 
-  getServiceName(serviceId?: number): string {
-    if (!serviceId) return 'N/A';
-    return this.services.find(s => s.id === serviceId)?.name ?? 'N/A';
+  startEditTeam(team: Team): void {
+    this.isEditMode = true;
+    this.editingTeamId = team.id;
+    this.newTeam = {
+      name: team.name,
+      serviceId: team.serviceId || 0
+    };
+    this.showCreateTeamForm = true;
+    this.cdr.detectChanges();
   }
 
-  getUserFullName(userId: number): string {
-    const member = this.teamMembers.find(teamMember => teamMember.userId === userId);
-    if (member?.user) {
-      return `${member.user.firstName} ${member.user.lastName}`;
-    }
+  UpdateTeam(id: number): void {
+  
+  this.newTeam.name = this.newTeam.name?.trim() || '';
+  
+  if (!this.newTeam.name) {
+    this.error = 'Team name is required';
+    setTimeout(() => this.error = null, 5000);
+    return;
+  }
+  
+  if (!this.newTeam.serviceId || this.newTeam.serviceId === 0) {
+    this.error = 'Please select a service';
+    setTimeout(() => this.error = null, 5000);
+    return;
+  }
 
-    const user = this.users.find(u => u.id === userId);
-    return user ? `${user.firstName} ${user.lastName}` : `User #${userId}`;
+  this.loading = true;
+  this.error = null;
+
+  this.teamService.updateTeam(id, this.newTeam).subscribe({
+    next: (response) => {
+      this.successMessage = 'Team updated successfully!';
+      this.showCreateTeamForm = false;
+      this.isEditMode = false;
+      this.editingTeamId = null;
+      this.resetNewTeamForm();
+      this.loadTeams(); 
+      this.loading = false;
+      setTimeout(() => this.successMessage = null, 3000);
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      this.error = 'Failed to update team: ' + (err.error?.message || err.message);
+      this.loading = false;
+      console.error('Error updating team:', err);
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+
+
+
+  toggleCreateTeamForm(): void {
+    this.showCreateTeamForm = !this.showCreateTeamForm;
+    if (this.showCreateTeamForm) {
+      this.resetNewTeamForm();
+    } else {
+      this.isEditMode = false;
+      this.editingTeamId = null;
+    }
+  }
+
+  toggleAddMemberForm(): void {
+    this.showAddMemberForm = !this.showAddMemberForm;
+    if (this.showAddMemberForm) {
+      this.resetNewMemberForm();
+    }
+  }
+
+  resetNewTeamForm(): void {
+    this.newTeam = {
+      name: '',
+      serviceId: 0
+    };
+    this.isEditMode = false;
+    this.editingTeamId = null;
+  }
+
+  resetNewMemberForm(): void {
+    this.newMember = {
+      userId: 0,
+      role: Role.Employer
+    };
   }
 
   getRoleName(role: Role): string {
-    return role === Role.ProjectLeader ? 'Project Leader' : 'Employee';
+    if (role === Role.Employer) return 'Employee';
+    if (role === Role.ProjectLeader) return 'Project Leader';
+    return 'Unknown Role';  // Handle invalid/unknown roles gracefully
   }
 
+  backToTeamsList(): void {
+    this.selectedTeam = null;
+    this.teamMembers = [];
+    this.showAddMemberForm = false;
+    this.memberFilter = 'all';
+    this.editingMemberId = null;
+    this.cdr.detectChanges();
+  }
+
+  
+  trackByTeamId(index: number, team: Team): number {
+    return team.id;
+  }
+
+  trackByMemberId(index: number, member: TeamUser): number {
+    return member.id;
+  }
 }
