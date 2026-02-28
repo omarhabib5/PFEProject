@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { finalize, timeout } from 'rxjs';
 import { TaskDto, UserStoryDetailDto, UserStoryStatus } from '../Models/userstory.model';
 import { UserStoryService } from '../Service/UserStoryService';
 import { TaskService } from '../../Task/Service/TaskService';
@@ -19,16 +20,15 @@ export class UserStoryViewComponent implements OnInit {
   State = UserStoryStatus;
 
   statuses=[
+    { value: UserStoryStatus.PENDING, label: 'En attente', icon: '🕒' },
     { value: UserStoryStatus.TODO, label: 'À faire', icon: '📋' },
     { value: UserStoryStatus.IN_PROGRESS, label: 'En cours', icon: '⚡' },
-    { value: UserStoryStatus.REVIEW, label: 'En revue', icon: '👀' },
     { value: UserStoryStatus.DONE, label: 'Terminé', icon: '✅' },
-    { value: UserStoryStatus.TESTING, label: 'En test', icon: '🧪' }
+    { value: UserStoryStatus.VALIDATED, label: 'Validé', icon: '✔️' }
   ];
   
   constructor(
     private userStoryService: UserStoryService,
-    @Inject(TaskService)
     private taskService: TaskService,
     private route: ActivatedRoute,
     private router: Router
@@ -36,28 +36,37 @@ export class UserStoryViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
+      const id = Number(params['id']);
+      if (Number.isFinite(id) && id > 0) {
         this.loadUserStory(id);
+        return;
       }
+
+      this.loading = false;
+      this.error = 'Identifiant de user story invalide.';
     });
   }
 
-  loadUserStory(id: string): void {
+  loadUserStory(id: number): void {
     this.loading = true;
     this.error = '';
 
-    this.userStoryService.getById(id).subscribe({
-      next: (data) => {
-        this.userStory = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Erreur lors du chargement de la user story';
-        this.loading = false;
-        console.error(err);
-      }
-    });
+    this.userStoryService.getById(id)
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.userStory = data;
+        },
+        error: (err) => {
+          this.error = 'Erreur lors du chargement de la user story';
+          console.error(err);
+        }
+      });
 
   }
 
@@ -73,11 +82,11 @@ export class UserStoryViewComponent implements OnInit {
 
   getStatusClass(status: UserStoryStatus): string {
     const classes: Record<UserStoryStatus, string> = {
+      [UserStoryStatus.PENDING]: 'status-todo',
       [UserStoryStatus.TODO]: 'status-todo',
       [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
-      [UserStoryStatus.REVIEW]: 'status-inreview',
       [UserStoryStatus.DONE]: 'status-done',
-      [UserStoryStatus.TESTING]: 'status-testing'
+      [UserStoryStatus.VALIDATED]: 'status-done'
     };
     return classes[status] || '';
   }
@@ -96,32 +105,40 @@ export class UserStoryViewComponent implements OnInit {
   changeStatus(newStatus: UserStoryStatus): void {
     if (!this.userStory) return;
 
-    this.userStoryService.updateStatus(this.userStory.id, newStatus).subscribe({
-      next: () => {
-        this.loadUserStory(this.userStory!.id);
-      },
-      error: (err) => {
-        alert('Erreur lors du changement de statut');
-        console.error(err);
-      }
-    });
+    const userStoryId = this.userStory.id;
+    this.userStoryService.updateStatus(userStoryId, newStatus)
+      .pipe(timeout(10000))
+      .subscribe({
+        next: () => {
+          this.loadUserStory(userStoryId);
+        },
+        error: (err) => {
+          alert('Erreur lors du changement de statut');
+          console.error(err);
+        }
+      });
   }
 
   changeTaskStatus(task: TaskDto, newStatus: UserStoryStatus): void {
-    this.taskService.updateStatus(task.id, newStatus).subscribe({
-      next: () => {
-        this.loadUserStory(this.userStory!.id);
-      },
-      error: (err) => {
-        alert('Erreur lors du changement de statut de la tâche');
-        console.error(err);
-      }
-    });
+    if (!this.userStory) return;
+
+    const userStoryId = this.userStory.id;
+    this.taskService.updateStatus(task.id, newStatus)
+      .pipe(timeout(10000))
+      .subscribe({
+        next: () => {
+          this.loadUserStory(userStoryId);
+        },
+        error: (err) => {
+          alert('Erreur lors du changement de statut de la tâche');
+          console.error(err);
+        }
+      });
   }
 
   onTaskStatusChange(task: TaskDto, event: Event): void {
     const target = event.target as HTMLSelectElement;
-    const selectedStatus = target.value as UserStoryStatus;
+    const selectedStatus = Number(target.value) as UserStoryStatus;
 
     if (Object.values(UserStoryStatus).includes(selectedStatus)) {
       this.changeTaskStatus(task, selectedStatus);
@@ -163,7 +180,7 @@ export class UserStoryViewComponent implements OnInit {
     }
   }
 
-  viewTask(taskId: string): void {
+  viewTask(taskId: number): void {
     this.router.navigate(['/task/view', taskId]);
   }
 

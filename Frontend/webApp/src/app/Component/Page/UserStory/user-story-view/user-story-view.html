@@ -6,7 +6,7 @@
     <div *ngIf="error" class="error-container">
         <div class="error-icon">⚠️</div>
         <p>{{ error }}</p>
-        <button class="btn-retry" (click)="loadUserStory(userStory?.id || '')">Réessayer</button>
+        <button class="btn-retry" (click)="userStory?.id ? loadUserStory(userStory!.id) : null">Réessayer</button>
     </div>
     <div *ngIf="!loading && !error && userStory" class="view-content">
         <div class="view-header">

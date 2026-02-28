@@ -57,7 +57,7 @@ export class TaskService {
 		});
 	}
 
-	updateStatus(id: string, status: UserStoryStatus): Observable<void> {
+	updateStatus(id: number | string, status: UserStoryStatus): Observable<void> {
 		return this.http.put<void>(
 			`${this.apiUrl}/${id}`,
 			{ status },

@@ -1,9 +1,57 @@
-.userStory-manager{
+.userstory-manager{
     padding: 2rem;
     max-width: 1600px;
     margin:0 auto;
     background: #f8f9fa;
     min-height: 100vh;
+}
+.story-form-card{
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.story-form-card h2{
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+}
+.story-form-grid{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+.form-group{
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.form-group.full-width{
+    grid-column: 1 / -1;
+}
+.form-group label{
+    font-weight: 600;
+    color: #343a40;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.95rem;
+    outline: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+.form-actions{
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
 .manager-header{
     display: flex;
@@ -58,6 +106,16 @@
 .btn-create:hover{
     transform:translateY(-2px) ;
     box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+.btn-create:disabled,
+.btn-edit:disabled,
+.btn-delete:disabled,
+.btn-create-large:disabled,
+.btn-back:disabled{
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 .btn-create .icon{
     font-size: 1.25rem;
@@ -162,6 +220,10 @@
     color: #495057;
 }
 .status-inprogress {
+    background: #cfe2ff;
+    color: #084298;
+}
+.status-in-progress {
     background: #cfe2ff;
     color: #084298;
 }
@@ -296,7 +358,7 @@
 }
 .criteria-preview {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
     padding: 0.5rem;
     background: #e7f3ff;
@@ -308,6 +370,10 @@
 
 .criteria-icon {
     font-size: 1rem;
+}
+.criteria-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 
@@ -401,6 +467,10 @@
     .userstory-manager {
         padding: 1rem;
   }
+
+    .story-form-grid {
+        grid-template-columns: 1fr;
+    }
 
   .manager-header {
     flex-direction: column;

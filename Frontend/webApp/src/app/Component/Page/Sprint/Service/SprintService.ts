@@ -1,6 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from "../../../environment";
 
 export enum State {
     pending = 0,
@@ -47,7 +48,7 @@ export interface UpdateSprintDto {
 })
 export class SprintService {
     private http = inject(HttpClient);
-    private apiUrl = 'https://localhost:7219/api/Sprint';
+    private apiUrl = `${environment.apiUrl}/Sprint`;
 
     getAllSprints(): Observable<Sprint[]> {
         return this.http.get<Sprint[]>(this.apiUrl);

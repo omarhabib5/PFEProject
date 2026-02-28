@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserStoryView } from './user-story-view';
+import { UserStoryViewComponent } from './user-story-view';
 
-describe('UserStoryView', () => {
-  let component: UserStoryView;
-  let fixture: ComponentFixture<UserStoryView>;
+describe('UserStoryViewComponent', () => {
+  let component: UserStoryViewComponent;
+  let fixture: ComponentFixture<UserStoryViewComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserStoryView]
+      imports: [UserStoryViewComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UserStoryView);
+    fixture = TestBed.createComponent(UserStoryViewComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

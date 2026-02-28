@@ -1,21 +1,21 @@
 
 export enum UserStoryStatus {
-  TODO = 'To Do',
-  IN_PROGRESS = 'In Progress',
-  REVIEW = 'Review',
-  TESTING = 'Testing',
-  DONE = 'Done'
+  PENDING = 0,
+  TODO = 1,
+  IN_PROGRESS = 2,
+  DONE = 3,
+  VALIDATED = 4
 }
 export interface  UserStoryDto {
-  id: string;
+  id: number;
   title: string;
   description: string;
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
   status: UserStoryStatus;
-  sprintId: string;
-  assignedToId?: string;
+  sprintId: number;
+  assignedToId?: number;
   assignedToName?: string;
   taskCount: number;
   completedTaskCount: number;
@@ -24,15 +24,15 @@ export interface  UserStoryDto {
 }
 export interface UserStoryDetailDto 
   {
-  id: string;
+  id: number;
   title: string;
   description: string;
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
   status: UserStoryStatus;
-  sprintId: string;
-  assignedToId?: string;
+  sprintId: number;
+  assignedToId?: number;
   assignedToName?: string;
   tasks: TaskDto[];
   createdAt: Date;
@@ -45,30 +45,30 @@ export interface CreateUserStoryRequest {
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
-  sprintId: string;
-  assignedToId?: string;
+  sprintId: number;
+  assignedToId?: number;
 }
 export interface UpdateUserStoryRequest {
-  id: string;
+  id: number;
   title: string;
   description: string;
   acceptanceCriteria: string;
   storyPoints: number;
   priority?: number;
-  assignedToId?: string;
+  assignedToId?: number;
 }
 export interface UpdateUserStoryStatusRequest {
   status: UserStoryStatus
 }
 export interface TaskDto {
-    id: string;
+  id: number;
   title: string;
   description: string;
   status: UserStoryStatus;
   estimatedHours: number;
   actualHours: number;
-  userStoryId: string;
-  assignedToId?: string;
+  userStoryId: number;
+  assignedToId?: number;
   assignedToName?: string;
   createdAt: Date;
   updatedAt?: Date;
@@ -77,16 +77,16 @@ export interface CreateTaskRequest {
   title: string;
   description: string;
   estimatedHours: number;
-  userStoryId: string;
-  assignedToId?: string;
+  userStoryId: number;
+  assignedToId?: number;
 }
 export interface UpdateTaskRequest {
-  id: string;
+  id: number;
   title: string;
   description: string;
   estimatedHours: number;
   actualHours: number;
-  assignedToId?: string;
+  assignedToId?: number;
 }
 export interface UpdateTaskStatusRequest {
   status: UserStoryStatus
