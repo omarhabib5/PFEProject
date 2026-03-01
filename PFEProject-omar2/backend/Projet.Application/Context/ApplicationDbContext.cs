@@ -19,6 +19,7 @@ namespace Projet.Application.Context
         public DbSet<User> Users { get; set; }
         public DbSet<Sprint> Sprints { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<UserStory> UserStories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -183,17 +184,7 @@ namespace Projet.Application.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            modelBuilder.Entity<Sprint>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Description).HasMaxLength(1000);
-
-                entity.HasOne(e => e.Project)
-                    .WithMany(p => p.Sprints)
-                    .HasForeignKey(e => e.ProjectId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+        
         }
     }
 }

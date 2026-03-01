@@ -23,7 +23,7 @@ namespace Projet.Domain.Model
         public virtual Sprint Sprint { get; set; }
         public virtual UserStory UserStory { get; set; }
 
-        public int? AssignedToId { get; set; }
+        public int? AssignedToId { get; set; }  
         public virtual User AssignedTo { get; set; }
 
 

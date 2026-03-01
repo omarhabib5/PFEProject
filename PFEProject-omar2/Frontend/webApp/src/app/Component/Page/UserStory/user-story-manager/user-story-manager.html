@@ -1,1 +1,120 @@
-<p>user-story-manager works!</p>
+
+<div class="userstory-manager">
+
+  <div class="manager-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="goBack()">
+        ← Retour
+      </button>
+      <h1>Gestion des User Stories</h1>
+    </div>
+    <button class="btn-create" (click)="createUserStory()">
+      <span class="icon">+</span>
+      Nouvelle User Story
+    </button>
+  </div>
+
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des user stories...</p>
+  </div>
+
+
+  <div *ngIf="error" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadUserStories()">Réessayer</button>
+  </div>
+
+
+  <div class="stories-grid" *ngIf="!loading && !error">
+    <div 
+      *ngFor="let story of userStories" 
+      class="story-card"
+      (click)="viewUserStory(story.id)"
+    >
+
+      <div class="card-header">
+        <div class="header-content">
+          <h3 class="story-title">{{ story.title }}</h3>
+          <div class="badges">
+            <span [class]="'badge-status ' + getStatusClass(story.status)">
+              {{ getStatuLLabel(story.status) }}
+            </span>
+            <span [class]="'badge-priority ' + getPriorityClass(story.priority)">
+              {{ getPriorityLabel(story.priority) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="card-body">
+        <p class="story-description">{{ story.description }}</p>
+
+
+        <div class="story-meta">
+          <div class="meta-item">
+            <span class="meta-icon">📊</span>
+            <span class="meta-label">Story Points:</span>
+            <span class="meta-value">{{ story.storyPoints }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">👤</span>
+            <span class="meta-label">Assigné:</span>
+            <span class="meta-value">{{ story.assignedToName || 'Non assigné' }}</span>
+          </div>
+        </div>
+
+
+        <div class="progress-section">
+          <div class="progress-header">
+            <span class="progress-label">Progression des tâches</span>
+            <span class="progress-count">{{ story.completedTaskCount }} / {{ story.taskCount }}</span>
+          </div>
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              [style.width.%]="getProgress(story)"
+              [class.progress-complete]="getProgress(story) === 100"
+            ></div>
+          </div>
+          <span class="progress-percentage">{{ getProgress(story) }}%</span>
+        </div>
+
+       
+        <div class="criteria-preview" *ngIf="story.acceptanceCriteria">
+          <span class="criteria-icon">✓</span>
+          <span class="criteria-text">Critères d'acceptation définis</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button 
+          class="btn-edit" 
+          (click)="editUserStory(story.id, $event)"
+          title="Modifier"
+        >
+          ✏️ Modifier
+        </button>
+        <button 
+          class="btn-delete" 
+          (click)="deleteUserStory(story.id, $event)"
+          title="Supprimer"
+        >
+          🗑️ Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !error && userStories.length === 0" class="empty-state">
+    <div class="empty-icon">📝</div>
+    <h2>Aucune user story</h2>
+    <p>Commencez par créer votre première user story pour ce sprint</p>
+    <button class="btn-create-large" (click)="createUserStory()">
+      + Créer ma première user story
+    </button>
+  </div>
+</div>

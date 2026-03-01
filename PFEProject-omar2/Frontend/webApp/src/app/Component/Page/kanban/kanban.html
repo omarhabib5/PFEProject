@@ -1,0 +1,44 @@
+<div class="kanban-page">
+    <header class="kanban-header">
+        <div class="kanban-title-wrap">
+            <h1>Kanban Board</h1>
+            <p>Track your tasks and progress</p>
+        </div>
+        <div class="kanban-actions">
+            <a class="ghost-button" routerLink="/TaskManage">Task Manager</a>
+            <button type="button" class="ghost-button" (click)="goToProjectDetails()">Project Details</button>
+ 
+        </div>
+    </header>
+
+    <div *ngIf="loading" class="global-state">Loading tasks...</div>
+    <div *ngIf="error" class="global-state global-state-error">{{ error }}</div>
+
+    <div class="board" cdkDropListGroup>
+        <section class="board-column" [ngClass]="'board-column--' + column.id" *ngFor="let column of columns; trackBy: trackById">
+            <header class="board-header">
+                <h2 class="board-title">{{ column.title }}</h2>
+                <div class="board-actions">
+                    <span class="board-count">{{ column.tasks.length }}</span>
+                    <button type="button" class="add-task-btn" (click)="addTask(column)">+</button>
+                </div>
+            </header>
+
+            <div class="card-list" cdkDropList [id]="column.id" [cdkDropListData]="column.tasks"
+                [cdkDropListConnectedTo]="connectedIds" (cdkDropListDropped)="drop($event, column)">
+                <div class="card" *ngFor="let task of column.tasks; trackBy: trackByTask" cdkDrag>
+                    <div class="card-head">
+                        <strong>{{ task.title }}</strong>
+                    </div>
+                    <p>{{ task.description || 'No description' }}</p>
+                    <div class="card-meta">
+                        <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
+                        <span>{{ task.estimatedHours }}H</span>
+                    </div>
+                </div>
+
+                <div class="card-placeholder" *ngIf="column.tasks.length === 0">Drop here</div>
+            </div>
+        </section>
+    </div>
+</div>

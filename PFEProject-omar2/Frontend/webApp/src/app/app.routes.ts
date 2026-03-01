@@ -5,7 +5,7 @@ import { EmployeeDashboard } from './Component/Dashoard/Employee-dashboard/emplo
 import { ResponsableServiceDashboard } from './Component/Dashoard/ResponsableService-dashboard/responsable-service-dashboard';
 import { Login } from './Component/Auth/login/login';
 import { UserManage } from './Component/Page/user-manage/user-manage';
-import { servicepage } from './Component/Page/service-page/service-page'; 
+
 import { ProjectView } from './Component/Page/Projet/project-view/project-view';
 import { SprintView } from './Component/Page/Sprint/sprint-view/sprint-view';
 import { TeamView } from './Component/Page/Team/team-view/team-view';
@@ -15,14 +15,16 @@ import { ProjectManager } from './Component/Page/Projet/project-manager/project-
 import { SprintManager } from './Component/Page/Sprint/sprint-manager/sprint-manager';
 import { TeamManage } from './Component/Page/Team/team-manage/team-manage';
 import { TaskManager } from './Component/Page/Task/task-manager/task-manager';
-import { UserStoryManager } from './Component/Page/UserStory/user-story-manager/user-story-manager';
+import { UserStoryManagerComponent} from './Component/Page/UserStory/user-story-manager/user-story-manager';
+import { KanbanComponent } from './Component/Page/kanban/kanban';
 
 export const routes: Routes = [
     {path:'',component:Login },
     {path:'AdminDashboard', component:AdminDashboard},
     
     {path:'users', component:UserManage},
-    {path:'Services', component:servicepage},
+    {path:'kanban', component:KanbanComponent},
+   
 
     {path:'ProjectView',component:ProjectView},
     {path:'SprintView',component:SprintView},
@@ -34,7 +36,8 @@ export const routes: Routes = [
     {path:'SprintManage',component:SprintManager},
     {path:'TeamManage',component:TeamManage},
     {path:'TaskManage',component:TaskManager},
-    {path:'UserStoryManage',component:UserStoryManager},
+    {path:'Kanban',component:KanbanComponent},
+    {path:'UserStoryManage',component:UserStoryManagerComponent},
 
     {path:'ChefProjetDashboard', component:ChefProjetDashboard},
     {path:'EmployeeDashboard', component:EmployeeDashboard},

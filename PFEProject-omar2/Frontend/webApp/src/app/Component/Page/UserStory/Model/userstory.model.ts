@@ -8,9 +8,14 @@ export enum UserStoryStatus {
   DONE = 'Done'
 }
 export interface  UserStoryDto {
+  name: string;
   id: string;
   title: string;
   description: string;
+  startDate?: Date;
+  endDate?: Date;
+  estimatedDuration?: number;
+  userStoryState?: number;
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
@@ -41,21 +46,36 @@ export interface UserStoryDetailDto
 }
 
 export interface CreateUserStoryRequest {
-  title: string;
+  name: string;
   description: string;
-  acceptanceCriteria: string;
-  storyPoints: number;
-  priority: number;
-  sprintId: string;
+  startDate: Date;
+  endDate: Date;
+  estimatedDuration: number;
+  userStoryState: number;
+  projectId: number;
+  sprintId: number;
+  title?: string;
+  acceptanceCriteria?: string;
+  storyPoints?: number;
+  priority?: number;
+  status?: UserStoryStatus;
   assignedToId?: string;
 }
 export interface UpdateUserStoryRequest {
-  id: string;
-  title: string;
+  id: number;
+  name: string;
   description: string;
-  acceptanceCriteria: string;
-  storyPoints: number;
+  startDate: Date;
+  endDate: Date;
+  estimatedDuration: number;
+  userStoryState: number;
+  projectId: number;
+  sprintId: number;
+  title?: string;
+  acceptanceCriteria?: string;
+  storyPoints?: number;
   priority?: number;
+  status?: UserStoryStatus;
   assignedToId?: string;
 }
 export interface UpdateUserStoryStatusRequest {

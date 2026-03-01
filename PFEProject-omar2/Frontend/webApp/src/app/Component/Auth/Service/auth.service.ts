@@ -21,7 +21,14 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, payload).pipe(
-      tap((res) => this.tokens.setTokens(res.token, res.refreshToken, res))
+      tap((res) => {
+        const accessToken = res.accessToken ?? res.token;
+        if (!accessToken) {
+          throw new Error('Access token missing from login response.');
+        }
+
+        this.tokens.setTokens(accessToken, res.refreshToken, res);
+      })
     );
   }
 

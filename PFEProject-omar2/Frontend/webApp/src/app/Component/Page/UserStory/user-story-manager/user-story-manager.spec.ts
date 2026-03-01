@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserStoryManager } from './user-story-manager';
+import { UserStoryManagerComponent } from './user-story-manager';
 
 describe('UserStoryManager', () => {
-  let component: UserStoryManager;
-  let fixture: ComponentFixture<UserStoryManager>;
+  let component: UserStoryManagerComponent;
+  let fixture: ComponentFixture<UserStoryManagerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserStoryManager]
+      imports: [UserStoryManagerComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UserStoryManager);
+    fixture = TestBed.createComponent(UserStoryManagerComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
