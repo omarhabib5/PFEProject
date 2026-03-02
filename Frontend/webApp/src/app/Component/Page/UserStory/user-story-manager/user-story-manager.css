@@ -77,7 +77,7 @@
 .btn-back{
     padding: 0.5rem 1rem;
     background: #6c757d;
-    color: white;
+    color: rgb(214, 79, 79);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -94,7 +94,7 @@
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     background-color: linear-gradient(135deg, #667eea, #764ba2 100%);
-    color: white;
+    color: rgb(228, 194, 45);
     border: none;
     border-radius: 8px;
     cursor: pointer;

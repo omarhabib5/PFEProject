@@ -13,6 +13,7 @@ import { CreateTaskRequest, TaskDto, TaskService, TaskState, UpdateTaskRequest }
 })
 export class TaskManager implements OnInit {
   tasks: TaskDto[] = [];
+  userStories: Array<{ id: number; title?: string; name?: string }> = [];
   loading = false;
   saving = false;
   error = '';
@@ -60,6 +61,7 @@ export class TaskManager implements OnInit {
 
     this.taskService.getAll().subscribe({
       next: (data) => {
+        this.syncUserStoriesFromTasks(data);
         this.tasks = this.selectedUserStoryId
           ? data.filter(task => task.userStoryId === this.selectedUserStoryId)
           : data;
@@ -136,6 +138,15 @@ export class TaskManager implements OnInit {
     return found ? found.label : String(status);
   }
 
+  getUserStoryLabel(userStoryId: number): string {
+    const story = this.userStories.find((item) => Number(item.id) === Number(userStoryId));
+    if (!story) {
+      return `US #${userStoryId}`;
+    }
+
+    return story.name || story.title || `US #${story.id}`;
+  }
+
   private loadTaskForEdit(taskId: number): void {
     this.taskService.getById(taskId).subscribe({
       next: (task) => {
@@ -187,6 +198,24 @@ export class TaskManager implements OnInit {
       return new Date().toISOString().slice(0, 10);
     }
     return value.slice(0, 10);
+  }
+
+  private syncUserStoriesFromTasks(taskItems: TaskDto[]): void {
+    const uniqueStoryIds = new Set<number>();
+    this.userStories = [];
+
+    taskItems.forEach((task) => {
+      const storyId = Number(task.userStoryId);
+      if (!Number.isFinite(storyId) || storyId <= 0 || uniqueStoryIds.has(storyId)) {
+        return;
+      }
+
+      uniqueStoryIds.add(storyId);
+      this.userStories.push({
+        id: storyId,
+        title: `US #${storyId}`
+      });
+    });
   }
 
   private getEmptyForm(): CreateTaskRequest {

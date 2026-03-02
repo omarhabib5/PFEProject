@@ -1,53 +1,100 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { finalize, timeout } from 'rxjs';
-import { TaskDto, UserStoryDetailDto, UserStoryStatus } from '../Models/userstory.model';
 import { UserStoryService } from '../Service/UserStoryService';
-import { TaskService } from '../../Task/Service/TaskService';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
+import { NgIf, NgForOf } from '@angular/common';
+import { finalize, timeout } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-user-story-view',
   standalone: true,
-  imports: [CommonModule,RouterModule],
+  imports: [NgIf, NgForOf, FormsModule],
   templateUrl: './user-story-view.html',
   styleUrl: './user-story-view.css',
 })
-export class UserStoryViewComponent implements OnInit { 
-  userStory: UserStoryDetailDto | null = null;
-  loading: boolean = true;
+export class UserStoryViewComponent implements OnInit {
+  userStories: UserStoryDto[] = [];
+  sprintId: number | null = null;
+  projectId: number | null = null;
+  userStoryId: number | null = null;
+  loading: boolean = false;
   error: string = '';
+  createSubmitting = false;
+  showCreateForm = false;
   State = UserStoryStatus;
+  createForm: CreateUserStoryRequest = {
+    title: '',
+    description: '',
+    acceptanceCriteria: '',
+    storyPoints: 1,
+    priority: 3,
+    sprintId: 0,
+  };
 
-  statuses=[
-    { value: UserStoryStatus.PENDING, label: 'En attente', icon: '🕒' },
-    { value: UserStoryStatus.TODO, label: 'À faire', icon: '📋' },
-    { value: UserStoryStatus.IN_PROGRESS, label: 'En cours', icon: '⚡' },
-    { value: UserStoryStatus.DONE, label: 'Terminé', icon: '✅' },
-    { value: UserStoryStatus.VALIDATED, label: 'Validé', icon: '✔️' }
-  ];
-  
   constructor(
     private userStoryService: UserStoryService,
-    private taskService: TaskService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
+    private route: Router,
+    private activatedRoute: ActivatedRoute,
+  ) { }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const id = Number(params['id']);
-      if (Number.isFinite(id) && id > 0) {
-        this.loadUserStory(id);
-        return;
-      }
+    this.activatedRoute.queryParamMap.subscribe(queryParams => {
+      const sprintIdParam = Number(queryParams.get('sprintId'));
+      const projectIdParam = Number(queryParams.get('projectId'));
 
-      this.loading = false;
-      this.error = 'Identifiant de user story invalide.';
+      this.sprintId = Number.isFinite(sprintIdParam) && sprintIdParam > 0 ? sprintIdParam : null;
+      this.projectId = Number.isFinite(projectIdParam) && projectIdParam > 0 ? projectIdParam : null;
+      this.createForm.sprintId = this.sprintId ?? 0;
+
+      this.activatedRoute.paramMap.subscribe(routeParams => {
+        const userStoryIdParam = Number(routeParams.get('id'));
+        this.userStoryId = Number.isFinite(userStoryIdParam) && userStoryIdParam > 0 ? userStoryIdParam : null;
+
+        if (this.sprintId !== null) {
+          this.loadUserStories();
+          return;
+        }
+
+        if (this.userStoryId !== null) {
+          this.loadUserStoryById(this.userStoryId);
+          return;
+        }
+
+        this.userStories = [];
+        this.error = 'Paramètres invalides pour afficher les user stories';
+      });
     });
   }
 
-  loadUserStory(id: number): void {
+  loadUserStories(): void {
+    if (this.sprintId === null) {
+      this.error = 'Sprint invalide pour charger les user stories';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    this.userStoryService.getBySprintId(this.sprintId)
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+      next: (data) => {
+        this.userStories = data;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des user stories';
+        console.error(err);
+      }
+      });
+  }
+
+  private loadUserStoryById(id: number): void {
     this.loading = true;
     this.error = '';
 
@@ -59,36 +106,62 @@ export class UserStoryViewComponent implements OnInit {
         })
       )
       .subscribe({
-        next: (data) => {
-          this.userStory = data;
+        next: (story) => {
+          this.sprintId = story.sprintId;
+          this.createForm.sprintId = story.sprintId;
+          this.userStories = [{
+            id: story.id,
+            title: story.title,
+            description: story.description,
+            acceptanceCriteria: story.acceptanceCriteria,
+            storyPoints: story.storyPoints,
+            priority: story.priority,
+            status: story.status,
+            sprintId: story.sprintId,
+            assignedToId: story.assignedToId,
+            assignedToName: story.assignedToName,
+            taskCount: story.tasks?.length ?? 0,
+            completedTaskCount: (story.tasks ?? []).filter(task =>
+              task.status === UserStoryStatus.DONE || task.status === UserStoryStatus.VALIDATED
+            ).length,
+            createdAt: story.createdAt,
+            updatedAt: story.updatedAt,
+          }];
         },
         error: (err) => {
           this.error = 'Erreur lors du chargement de la user story';
           console.error(err);
         }
       });
-
   }
 
   getStatusLabel(status: UserStoryStatus): string {
-    const found = this.statuses.find(s => s.value === status);
-    return found ? found.label : 'Inconnu';
-  }
-
-  getStatusIcon(status: UserStoryStatus): string {
-    const found = this.statuses.find(s => s.value === status);
-    return found ? found.icon : '❓';
+      const labels: Record<UserStoryStatus, string> = {
+        [UserStoryStatus.PENDING]: 'En attente',
+        [UserStoryStatus.TODO]: 'À faire',
+        [UserStoryStatus.IN_PROGRESS]: 'En cours',
+        [UserStoryStatus.DONE]: 'Terminé',
+        [UserStoryStatus.VALIDATED]: 'Validé'
+      };
+      return labels[status] || 'Inconnu';
   }
 
   getStatusClass(status: UserStoryStatus): string {
-    const classes: Record<UserStoryStatus, string> = {
-      [UserStoryStatus.PENDING]: 'status-todo',
-      [UserStoryStatus.TODO]: 'status-todo',
-      [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
-      [UserStoryStatus.DONE]: 'status-done',
-      [UserStoryStatus.VALIDATED]: 'status-done'
-    };
-    return classes[status] || '';
+      const classes: Record<UserStoryStatus, string> = {
+        [UserStoryStatus.PENDING]: 'status-todo',
+        [UserStoryStatus.TODO]: 'status-todo',
+        [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
+        [UserStoryStatus.DONE]: 'status-done',
+        [UserStoryStatus.VALIDATED]: 'status-done'
+      };
+      return classes[status] || '';
+  }
+
+  getProgress(userStory: UserStoryDto): number {
+      if (userStory.taskCount === 0) {
+        return 0;
+      }
+      return Math.round((userStory.completedTaskCount / userStory.taskCount) * 100);
   }
 
   getPriorityLabel(priority: number): string {
@@ -102,93 +175,125 @@ export class UserStoryViewComponent implements OnInit {
     return labels[priority] || 'N/A';
   }
 
-  changeStatus(newStatus: UserStoryStatus): void {
-    if (!this.userStory) return;
+  getPriorityClass(priority: number): string {
+    const classes: Record<number, string> = {
+      1: 'priority-critical',
+      2: 'priority-high',
+      3: 'priority-medium',
+      4: 'priority-low',
+      5: 'priority-verylow'
+    };
+    return classes[priority] || '';
+  }
 
-    const userStoryId = this.userStory.id;
-    this.userStoryService.updateStatus(userStoryId, newStatus)
-      .pipe(timeout(10000))
+  viewUserStory(id: number): void {
+    this.route.navigate(['/userstory/view', id]);
+  }
+
+  createUserStory(): void {
+    this.showCreateForm = !this.showCreateForm;
+    if (this.showCreateForm && this.sprintId !== null) {
+      this.createForm.sprintId = this.sprintId;
+    }
+  }
+
+  submitCreateUserStory(): void {
+    if (this.sprintId === null) {
+      this.error = 'Sprint invalide pour créer une user story';
+      return;
+    }
+
+    const title = this.createForm.title?.trim();
+    if (!title) {
+      this.error = 'Le titre est obligatoire';
+      return;
+    }
+
+    const storyPoints = Number(this.createForm.storyPoints);
+    const priority = Number(this.createForm.priority);
+    if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
+      this.error = 'Story points ou priorité invalide';
+      return;
+    }
+
+    this.error = '';
+    this.createSubmitting = true;
+
+    const payload: CreateUserStoryRequest = {
+      title,
+      description: this.createForm.description || '',
+      acceptanceCriteria: this.createForm.acceptanceCriteria || '',
+      storyPoints,
+      priority,
+      sprintId: this.sprintId,
+    };
+
+    this.userStoryService.create(payload)
+      .pipe(finalize(() => { this.createSubmitting = false; }))
       .subscribe({
         next: () => {
-          this.loadUserStory(userStoryId);
+          this.resetCreateForm();
+          this.showCreateForm = false;
+          this.loadUserStories();
         },
         error: (err) => {
-          alert('Erreur lors du changement de statut');
+          this.error = 'Erreur lors de la création de la user story';
           console.error(err);
         }
       });
   }
 
-  changeTaskStatus(task: TaskDto, newStatus: UserStoryStatus): void {
-    if (!this.userStory) return;
+  cancelCreate(): void {
+    this.resetCreateForm();
+    this.showCreateForm = false;
+  }
 
-    const userStoryId = this.userStory.id;
-    this.taskService.updateStatus(task.id, newStatus)
-      .pipe(timeout(10000))
-      .subscribe({
+  editUserStory(id: number, event: Event): void {
+    event.stopPropagation();
+    this.route.navigate(['/userstory/edit', id]);
+  }
+
+  deleteUserStory(id: number, event: Event): void {
+    event.stopPropagation();
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
+      this.userStoryService.delete(id).subscribe({
         next: () => {
-          this.loadUserStory(userStoryId);
+          this.loadUserStories();
         },
         error: (err) => {
-          alert('Erreur lors du changement de statut de la tâche');
+          this.error = 'Erreur lors de la suppression';
           console.error(err);
         }
       });
-  }
-
-  onTaskStatusChange(task: TaskDto, event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    const selectedStatus = Number(target.value) as UserStoryStatus;
-
-    if (Object.values(UserStoryStatus).includes(selectedStatus)) {
-      this.changeTaskStatus(task, selectedStatus);
     }
-  }
-
-  getCompletedTasksCount(): number {
-    if (!this.userStory) return 0;
-    return this.userStory.tasks.filter(t => t.status === UserStoryStatus.DONE).length;
-  }
-
-  getTotalEstimatedHours(): number {
-    if (!this.userStory) return 0;
-    return this.userStory.tasks.reduce((sum, task) => sum + task.estimatedHours, 0);
-  }
-
-  getTotalActualHours(): number {
-    if (!this.userStory) return 0;
-    return this.userStory.tasks.reduce((sum, task) => sum + task.actualHours, 0);
-  }
-
-  getCompletionPercentage(): number {
-    if (!this.userStory || this.userStory.tasks.length === 0) return 0;
-    const completed = this.userStory.tasks.filter(t => t.status === UserStoryStatus.DONE).length;
-    return Math.round((completed / this.userStory.tasks.length) * 100);
-  }
-
-  editUserStory(): void {
-    if (this.userStory) {
-      this.router.navigate(['/userstory/manage', this.userStory.sprintId], {
-        queryParams: { editId: this.userStory.id }
-      });
-    }
-  }
-
-  createTask(): void {
-    if (this.userStory) {
-      this.router.navigate(['/task/manage', this.userStory.id]);
-    }
-  }
-
-  viewTask(taskId: number): void {
-    this.router.navigate(['/task/view', taskId]);
   }
 
   goBack(): void {
-    if (this.userStory) {
-      this.router.navigate(['/userstory/manage', this.userStory.sprintId]);
-    } else {
-      this.router.navigate(['/']);
+    const queryParams: { projectId?: number; detailTab?: string } = {};
+    if (this.projectId !== null) {
+      queryParams.projectId = this.projectId;
+      queryParams.detailTab = 'stories';
     }
+
+    this.route.navigate(['/ProjectManage'], { queryParams });
   }
+
+  private resetCreateForm(): void {
+    this.createForm = {
+      title: '',
+      description: '',
+      acceptanceCriteria: '',
+      storyPoints: 1,
+      priority: 3,
+      sprintId: this.sprintId ?? 0,
+    };
+  }
+
+  private isValidNumber(value: number, min: number, max?: number): boolean {
+    if (Number.isNaN(value) || value < min) return false;
+    if (max !== undefined && value > max) return false;
+    return true;
+  }
+
 }

@@ -54,7 +54,7 @@ export interface UpdateUserStoryRequest {
   description: string;
   acceptanceCriteria: string;
   storyPoints: number;
-  priority?: number;
+  priority: number;
   assignedToId?: number;
 }
 export interface UpdateUserStoryStatusRequest {

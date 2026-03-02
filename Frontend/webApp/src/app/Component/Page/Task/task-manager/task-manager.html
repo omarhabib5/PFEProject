@@ -1,7 +1,10 @@
 <div class="task-manager">
     <div class="header">
         <h1>Gestion des tâches</h1>
-        <button class="btn-reset" type="button" (click)="startCreate()">Nouvelle tâche</button>
+        <div class="header-actions">
+            <button class="btn-reset" type="button" (click)="startCreate()">Nouvelle tâche</button>
+            <a class="btn-reset" routerLink="/kanban">Vue Kanban</a>
+        </div>
     </div>
 
     <div *ngIf="error" class="error">{{ error }}</div>
@@ -40,9 +43,13 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>User Story ID</label>
-                    <input [(ngModel)]="formModel.userStoryId" type="number" min="1"
-                        [readonly]="selectedUserStoryId !== null" />
+                    <label>User Story</label>
+                    <select [(ngModel)]="formModel.userStoryId" [disabled]="selectedUserStoryId !== null">
+                        <option [ngValue]="0" disabled>Sélectionner une user story</option>
+                        <option *ngFor="let story of userStories" [ngValue]="+story.id">
+                            {{ story.name || story.title || ('US #' + story.id) }}
+                        </option>
+                    </select>
                 </div>
             </div>
 
@@ -57,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="actions">
+            <div class="form-actions">
                 <button type="button" class="btn-primary" (click)="saveTask()" [disabled]="saving">
                     {{ saving ? 'Enregistrement...' : (editMode ? 'Mettre à jour' : 'Créer') }}
                 </button>
@@ -67,7 +74,7 @@
         <div class="card">
             <h2>Liste des tâches</h2>
 
-            <div *ngIf="loading">Chargement...</div>
+            <div *ngIf="loading" class="loading-state">Chargement...</div>
 
             <div *ngIf="!loading && tasks.length === 0" class="empty-state">
                 Aucune tâche disponible.
@@ -81,7 +88,7 @@
                     </div>
                     <p>{{ task.description }}</p>
                     <div class="meta">
-                        <span>US #{{ task.userStoryId }}</span>
+                        <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
                         <span>{{ task.estimatedHours }}h</span>
                     </div>
                     <button class="btn-link" type="button" (click)="startEdit(task, $event)">Modifier</button>

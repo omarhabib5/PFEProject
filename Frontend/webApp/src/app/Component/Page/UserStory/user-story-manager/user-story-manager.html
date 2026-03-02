@@ -7,64 +7,49 @@
       </button>
       <h1>Gestion des User Stories</h1>
     </div>
-    <button class="btn-create" (click)="createUserStory()" [disabled]="submitting">
+    <button class="btn-create" (click)="createUserStory()">
       <span class="icon">+</span>
-      Nouvelle User Story
+      {{ showCreateForm ? 'Fermer création' : 'Nouvelle User Story' }}
     </button>
   </div>
 
-  <div class="story-form-card" *ngIf="showStoryForm">
-    <h2>{{ isEditMode ? 'Modifier User Story' : 'Créer User Story' }}</h2>
+  <div class="story-form-card" *ngIf="showCreateForm && sprintId !== null">
+    <h2>Créer une User Story</h2>
 
     <div class="story-form-grid">
       <div class="form-group full-width">
         <label>Titre *</label>
-        <input type="text" [(ngModel)]="storyForm.title" [disabled]="submitting" placeholder="Titre de la user story" />
-      </div>
-
-      <div class="form-group full-width">
-        <label>Description</label>
-        <textarea rows="3" [(ngModel)]="storyForm.description" [disabled]="submitting"
-          placeholder="Description détaillée"></textarea>
-      </div>
-
-      <div class="form-group full-width">
-        <label>Critères d'acceptation</label>
-        <textarea rows="3" [(ngModel)]="storyForm.acceptanceCriteria" [disabled]="submitting"
-          placeholder="Critères d'acceptation"></textarea>
+        <input type="text" [(ngModel)]="createForm.title" placeholder="Ex: Authentification utilisateur" />
       </div>
 
       <div class="form-group">
         <label>Story Points *</label>
-        <input type="number" min="1" [(ngModel)]="storyForm.storyPoints" [disabled]="submitting" />
+        <input type="number" min="1" [(ngModel)]="createForm.storyPoints" />
       </div>
 
       <div class="form-group">
-        <label>Priorité *</label>
-        <select [(ngModel)]="storyForm.priority" [disabled]="submitting">
-          <option [ngValue]="1">Critique</option>
-          <option [ngValue]="2">Élevée</option>
-          <option [ngValue]="3">Moyenne</option>
-          <option [ngValue]="4">Basse</option>
-          <option [ngValue]="5">Très basse</option>
-        </select>
+        <label>Priorité (1-5) *</label>
+        <input type="number" min="1" max="5" [(ngModel)]="createForm.priority" />
       </div>
 
       <div class="form-group full-width">
-        <label>Assigné à</label>
-        <select [(ngModel)]="storyForm.assignedToId" [disabled]="submitting">
-          <option [ngValue]="null">Non assigné</option>
-          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }} ({{ user.email
-            }})</option>
-        </select>
+        <label>Description</label>
+        <textarea rows="3" [(ngModel)]="createForm.description" placeholder="Description de la user story"></textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Critères d'acceptation</label>
+        <textarea rows="3" [(ngModel)]="createForm.acceptanceCriteria" placeholder="Critères d'acceptation"></textarea>
       </div>
     </div>
 
     <div class="form-actions">
-      <button class="btn-create" (click)="saveUserStory()" [disabled]="submitting">
-        {{ isEditMode ? 'Enregistrer' : 'Créer' }}
+      <button class="btn-edit" [disabled]="createSubmitting" (click)="submitCreateUserStory()">
+        {{ createSubmitting ? 'Création...' : 'Enregistrer' }}
       </button>
-      <button class="btn-back" (click)="cancelStoryForm()" [disabled]="submitting">Annuler</button>
+      <button class="btn-delete" (click)="cancelCreate()">
+        Annuler
+      </button>
     </div>
   </div>
 
@@ -115,21 +100,6 @@
             <span class="meta-label">Assigné:</span>
             <span class="meta-value">{{ story.assignedToName || 'Non assigné' }}</span>
           </div>
-          <div class="meta-item">
-            <span class="meta-icon">📅</span>
-            <span class="meta-label">Créé le:</span>
-            <span class="meta-value">{{ story.createdAt | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="meta-item" *ngIf="story.updatedAt">
-            <span class="meta-icon">🕓</span>
-            <span class="meta-label">Modifié le:</span>
-            <span class="meta-value">{{ story.updatedAt | date:'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
-
-        <div class="criteria-preview" *ngIf="story.acceptanceCriteria">
-          <span class="criteria-icon">🧾</span>
-          <span class="criteria-text">{{ story.acceptanceCriteria }}</span>
         </div>
 
 
@@ -146,14 +116,17 @@
         </div>
 
 
+        <div class="criteria-preview" *ngIf="story.acceptanceCriteria">
+          <span class="criteria-icon">✓</span>
+          <span class="criteria-text">Critères d'acceptation définis</span>
+        </div>
       </div>
 
       <div class="card-footer">
-        <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Modifier" [disabled]="submitting">
+        <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Modifier">
           ✏️ Modifier
         </button>
-        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Supprimer"
-          [disabled]="submitting">
+        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Supprimer">
           🗑️ Supprimer
         </button>
       </div>
@@ -164,7 +137,7 @@
     <div class="empty-icon">📝</div>
     <h2>Aucune user story</h2>
     <p>Commencez par créer votre première user story pour ce sprint</p>
-    <button class="btn-create-large" (click)="createUserStory()" [disabled]="submitting">
+    <button class="btn-create-large" (click)="createUserStory()">
       + Créer ma première user story
     </button>
   </div>

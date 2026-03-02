@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute,Router } from '@angular/router';
 import { Chart } from 'chart.js/auto';
 
 import { TokenService } from '../../Auth/Service/token.service';
@@ -43,6 +43,7 @@ interface CalendarCell {
 export class AdminDashboard implements OnInit, AfterViewInit {
 
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private tokenService = inject(TokenService);
   private userApiService = inject(UserApiService);
   private projectService = inject(ProjectService);
@@ -64,7 +65,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   selectedStatus = 'all';
   loading = false;
 
-  /* ===== Dashboard Stats ===== */
+ 
   activeProjects = 0;
   completedProjects = 0;
   totalUsers = 0;
@@ -113,6 +114,10 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   private projectProgressChart?: Chart;
 
   ngOnInit(): void {
+       const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam === 'dashboard' || tabParam === 'calendar' || tabParam === 'users' || tabParam === 'projects') {
+      this.activeTab = tabParam as DashboardTab;
+    }
     const userData = this.tokenService.getUserData();
 
     if (userData?.firstName && userData?.lastName) {
@@ -428,7 +433,17 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         this.loadUsers();
       },
       error: (err) => {
-        this.userFormError = err?.error?.message || 'Erreur lors de la création de l\'utilisateur.';
+       const validationErrors = err?.error?.errors;
+        const validationMessage = validationErrors
+          ? Object.values(validationErrors).flat().join(' ')
+          : null;
+
+        this.userFormError = err?.error?.message
+          || validationMessage
+          || err?.error?.title
+          || (err?.status === 401 || err?.status === 403
+            ? 'Accès refusé. Reconnectez-vous avec un compte Admin ou Service Manager.'
+            : 'Erreur lors de la création de l\'utilisateur.');
         this.userFormLoading = false;
       }
     });

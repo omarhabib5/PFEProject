@@ -34,8 +34,44 @@ export class UserApiService {
     private apiUrl = 'https://localhost:7219/api/user';
     private authApiUrl = 'https://localhost:7219/api/Auth';
 
+    private isUsableToken(token: string | null): token is string {
+        if (!token) {
+            return false;
+        }
+
+        const normalized = token.trim().toLowerCase();
+        return normalized !== '' && normalized !== 'undefined' && normalized !== 'null';
+    }
+
+    private resolveAuthToken(): string | null {
+        const accessToken = localStorage.getItem('access_token');
+        if (this.isUsableToken(accessToken)) {
+            return accessToken;
+        }
+
+        const storedUser = localStorage.getItem('user_data');
+        if (storedUser) {
+            try {
+                const parsed = JSON.parse(storedUser) as { accessToken?: string; token?: string };
+                const userDataToken = parsed.accessToken ?? parsed.token ?? null;
+                if (this.isUsableToken(userDataToken)) {
+                    return userDataToken;
+                }
+            } catch {
+               
+            }
+        }
+
+        const legacyToken = localStorage.getItem('token');
+        if (this.isUsableToken(legacyToken)) {
+            return legacyToken;
+        }
+
+        return null;
+    }
+
     private getAuthHeaders(): HttpHeaders {
-        const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+        const token = this.resolveAuthToken();
         const headers: Record<string, string> = {
             'content-type': 'application/json'
         };
@@ -55,8 +91,18 @@ export class UserApiService {
         return this.http.get<UserDto>(`${this.apiUrl}/${id}`);
     }
 
-    createEmployee(payload: CreateEmployeeRequest): Observable<any> {
-        return this.http.post<any>(`${this.authApiUrl}/create-employee`, payload, {
+     createEmployee(payload: CreateEmployeeRequest): Observable<any> {
+        const requestBody: { firstName: string; lastName: string; email: string; serviceId?: number } = {
+            firstName: payload.firstName,
+            lastName: payload.lastName,
+            email: payload.email
+        };
+
+        if (payload.serviceId != null) {
+            requestBody.serviceId = payload.serviceId;
+        }
+
+        return this.http.post<any>(`${this.authApiUrl}/create-employee`, requestBody, {
             headers: this.getAuthHeaders()
         });
     }

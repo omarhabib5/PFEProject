@@ -7,7 +7,9 @@ import { CreateServiceDto, Service, ServicePage } from '../../Page/service-page/
 import { TokenService } from '../../Auth/Service/token.service';
 import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { ProjectService, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
-import { SprintService } from '../../Page/Sprint/Service/SprintService';
+import { Sprint as SprintEntity, SprintService } from '../../Page/Sprint/Service/SprintService';
+import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
+import { UserStoryDto } from '../../Page/UserStory/Models/userstory.model';
 
 interface TeamMemberRow {
   fullName: string;
@@ -32,6 +34,7 @@ export class ResponsableServiceDashboard implements OnInit {
   private teamService = inject(TeamService);
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
+  private userStoryService = inject(UserStoryService);
   private router = inject(Router);
   private tokenService = inject(TokenService);
 
@@ -47,6 +50,8 @@ export class ResponsableServiceDashboard implements OnInit {
   services: Service[] = [];
   serviceTeams: TeamEntity[] = [];
   allProjects: ProjectEntity[] = [];
+  serviceSprints: SprintEntity[] = [];
+  serviceUserStories: UserStoryDto[] = [];
   selectedServiceMemberIds = new Set<number>();
   selectedServiceId: number | null = null;
 
@@ -101,31 +106,31 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get userStoryTotal(): number {
-    return 0;
+    return this.serviceUserStories.length;
   }
 
   get sprintTotal(): number {
-    return 0;
+    return this.serviceSprints.length;
   }
 
   get activeSprintCount(): number {
-    return 0;
+    return this.serviceSprints.filter((sprint) => !this.isDoneState((sprint as unknown as Record<string, unknown>)['sprintState'])).length;
   }
 
   get completedSprintCount(): number {
-    return 0;
+    return this.serviceSprints.filter((sprint) => this.isDoneState((sprint as unknown as Record<string, unknown>)['sprintState'])).length;
   }
 
   get completedUserStoriesCount(): number {
-    return 0;
+    return this.serviceUserStories.filter((story) => this.isDoneState(story.status)).length;
   }
 
   get inProgressUserStoriesCount(): number {
-    return 0;
+    return this.serviceUserStories.filter((story) => !this.isDoneState(story.status)).length;
   }
 
   get todoTasksCount(): number {
-    return 0;
+    return this.serviceUserStories.reduce((sum, story) => sum + Math.max((story.taskCount ?? 0) - (story.completedTaskCount ?? 0), 0), 0);
   }
 
   ngOnInit(): void {
@@ -239,12 +244,15 @@ export class ResponsableServiceDashboard implements OnInit {
     this.activeTab = 'dashboard';
     this.loadMembersForSelectedService();
     this.loadTeams();
+    this.loadServiceInsights();
   }
 
   backToServiceList(): void {
     this.serviceViewMode = 'list';
     this.selectedServiceId = null;
     this.selectedServiceMemberIds = new Set<number>();
+    this.serviceSprints = [];
+    this.serviceUserStories = [];
   }
 
   setTab(tab: 'dashboard' | 'team'): void {
@@ -517,11 +525,109 @@ export class ResponsableServiceDashboard implements OnInit {
     this.projectService.getAllProjects().subscribe({
       next: (projects) => {
         this.allProjects = projects ?? [];
+        this.loadServiceInsights();
       },
       error: () => {
         this.allProjects = [];
+        this.serviceSprints = [];
+        this.serviceUserStories = [];
       }
     });
+  }
+
+  private loadServiceInsights(): void {
+    const projectIds = this.getSelectedServiceProjectIds();
+    if (projectIds.length === 0) {
+      this.serviceSprints = [];
+      this.serviceUserStories = [];
+      return;
+    }
+
+    const sprintRequests = projectIds.map((projectId) =>
+      this.sprintService
+        .getSprintsByProjectId(projectId)
+        .pipe(
+          timeout(10000),
+          catchError(() => of([] as SprintEntity[]))
+        )
+    );
+
+    forkJoin(sprintRequests).subscribe({
+      next: (sprintsByProject) => {
+        const sprints = sprintsByProject.flat();
+        this.serviceSprints = this.uniqueById(sprints);
+
+        const sprintIds = this.serviceSprints.map((sprint) => sprint.id).filter((id) => typeof id === 'number' && id > 0);
+        if (sprintIds.length === 0) {
+          this.serviceUserStories = [];
+          return;
+        }
+
+        const userStoryRequests = sprintIds.map((sprintId) =>
+          this.userStoryService
+            .getBySprintId(sprintId)
+            .pipe(
+              timeout(10000),
+              catchError(() => of([] as UserStoryDto[]))
+            )
+        );
+
+        forkJoin(userStoryRequests).subscribe({
+          next: (storiesBySprint) => {
+            this.serviceUserStories = this.uniqueById(storiesBySprint.flat());
+          },
+          error: () => {
+            this.serviceUserStories = [];
+          }
+        });
+      },
+      error: () => {
+        this.serviceSprints = [];
+        this.serviceUserStories = [];
+      }
+    });
+  }
+
+  private getSelectedServiceProjectIds(): number[] {
+    const ids = new Set<number>();
+
+    this.selectedServiceProjects.forEach((project) => {
+      if (typeof project.id === 'number' && project.id > 0) {
+        ids.add(project.id);
+      }
+    });
+
+    const selectedServiceProjects = this.selectedService?.projects as Array<{ id?: unknown }> | undefined;
+    selectedServiceProjects?.forEach((project) => {
+      if (typeof project?.id === 'number' && project.id > 0) {
+        ids.add(project.id);
+      }
+    });
+
+    return Array.from(ids);
+  }
+
+  private uniqueById<T extends { id?: number }>(items: T[]): T[] {
+    const map = new Map<number, T>();
+    items.forEach((item) => {
+      if (typeof item.id === 'number' && item.id > 0) {
+        map.set(item.id, item);
+      }
+    });
+    return Array.from(map.values());
+  }
+
+  private isDoneState(value: unknown): boolean {
+    if (typeof value === 'number') {
+      return value === 3 || value === 4;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'done' || normalized === 'validated' || normalized === 'completed';
+    }
+
+    return false;
   }
 
   private getProjectServiceId(project: ProjectEntity): number | null {
