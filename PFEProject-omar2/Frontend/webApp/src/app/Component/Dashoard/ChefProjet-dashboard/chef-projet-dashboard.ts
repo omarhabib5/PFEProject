@@ -445,6 +445,7 @@ export class ChefProjetDashboard implements OnInit {
       },
       error: (err) => {
         this.error = err?.error?.message || 'Erreur lors de la suppression du sprint.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -529,11 +530,16 @@ export class ChefProjetDashboard implements OnInit {
           this.taskSaving = false;
           this.cancelTaskForm();
           this.loadTasks();
+          this.cdr.detectChanges();
         },
+
+
         error: (err) => {
           this.error = err?.error?.message || 'Erreur lors de la mise à jour de la tâche.';
           this.taskSaving = false;
+          this.cdr.detectChanges();
         },
+
       });
       return;
     }
@@ -544,10 +550,12 @@ export class ChefProjetDashboard implements OnInit {
         this.taskSaving = false;
         this.cancelTaskForm();
         this.loadTasks();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Erreur lors de la création de la tâche.';
         this.taskSaving = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -562,9 +570,11 @@ export class ChefProjetDashboard implements OnInit {
       next: () => {
         this.success = 'Tâche supprimée avec succès.';
         this.loadTasks();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Erreur lors de la suppression de la tâche.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -626,6 +636,74 @@ export class ChefProjetDashboard implements OnInit {
     return story?.name || story?.title || `US #${userStoryId}`;
   }
 
+  getUserStoryStatusDisplay(story: UserStoryDto): string {
+    const stateValue = Number((story as any)?.userStoryState ?? -1);
+    const stateMap: Record<number, string> = {
+      0: 'Pending',
+      1: 'To Do',
+      2: 'In Progress',
+      3: 'Done',
+      4: 'Validated',
+    };
+
+    if (stateMap[stateValue]) {
+      return stateMap[stateValue];
+    }
+
+    const status = String(story?.status ?? '').trim();
+    return status || 'To Do';
+  }
+
+  isUserStoryDone(story: UserStoryDto): boolean {
+    const statusText = String(story?.status ?? '').toLowerCase();
+    const stateValue = Number((story as any)?.userStoryState ?? -1);
+    return statusText.includes('done') || stateValue === 3 || stateValue === 4;
+  }
+
+  getUserStoryAssignee(story: UserStoryDto): string {
+    const assignedName = String((story as any)?.assignedToName ?? '').trim();
+    if (assignedName) {
+      return assignedName;
+    }
+
+    const assignedId = Number((story as any)?.assignedToId ?? 0);
+    if (!assignedId) {
+      return 'Non assigné';
+    }
+
+    const assignedUser = this.employeeUsers.find((user) => Number(user.id) === assignedId);
+    return assignedUser ? this.getEmployeeLabel(assignedUser) : `User #${assignedId}`;
+  }
+
+  getUserStoryProgress(story: UserStoryDto): number {
+    const total = Number((story as any)?.taskCount ?? 0);
+    const completed = Number((story as any)?.completedTaskCount ?? 0);
+    if (total <= 0) {
+      return this.isUserStoryDone(story) ? 100 : 0;
+    }
+
+    return Math.max(0, Math.min(100, Math.round((completed / total) * 100)));
+  }
+
+  getTaskAssigneeName(task: TaskDto): string {
+    const assignedName = String((task as any)?.assignedToName ?? '').trim();
+    if (assignedName) {
+      return assignedName;
+    }
+
+    const assignedId = Number((task as any)?.assignedToId ?? 0);
+    if (!assignedId) {
+      return 'Non assigné';
+    }
+
+    const assignedUser = this.employeeUsers.find((user) => Number(user.id) === assignedId);
+    if (assignedUser) {
+      return this.getEmployeeLabel(assignedUser);
+    }
+
+    return `User #${assignedId}`;
+  }
+
   getSprintStateLabel(state: State): string {
     const found = this.sprintStateOptions.find((option) => option.value === state);
     return found?.label ?? 'Unknown';
@@ -670,9 +748,11 @@ export class ChefProjetDashboard implements OnInit {
       next: (data) => {
         this.sprints = data.filter((sprint) => this.scopedProjectIds.has(Number(sprint.projectId)));
         this.scopedSprintIds = new Set(this.sprints.map((item) => Number(item.id)));
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Impossible de recharger les sprints.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -683,11 +763,14 @@ export class ChefProjetDashboard implements OnInit {
         this.tasks = data.filter((task) => {
           const taskSprintId = Number(task.sprintId ?? 0);
           const taskUserStoryId = Number(task.userStoryId ?? 0);
+          this.cdr.detectChanges();
           return this.scopedSprintIds.has(taskSprintId) || this.scopedUserStoryIds.has(taskUserStoryId);
+        
         });
       },
       error: () => {
         this.error = 'Impossible de recharger les tâches.';
+        this.cdr.detectChanges();
       },
     });
   }

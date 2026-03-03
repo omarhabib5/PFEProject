@@ -142,12 +142,26 @@
           <article class="story-card" *ngFor="let story of userStories">
             <div class="story-top">
               <h4>{{ story.name || story.title || ('US #' + story.id) }}</h4>
-              <span class="badge" [class.state-done]="(story.status + '').toLowerCase().includes('done')">{{ story.status || 'To Do' }}</span>
+              <span class="badge" [class.state-done]="isUserStoryDone(story)">{{ getUserStoryStatusDisplay(story) }}</span>
             </div>
             <p>{{ story.description || 'Sans description' }}</p>
+
+            <div class="story-details">
+              <span>🗓️ {{ formatDate(story.startDate) }} - {{ formatDate(story.endDate) }}</span>
+              <span>🏁 {{ getSprintName(+story.sprintId) }}</span>
+              
+             
+            </div>
+
+            <div class="story-progress">
+              <div class="bar"><span [style.width.%]="getUserStoryProgress(story)"></span></div>
+              <small>{{ getUserStoryProgress(story) }}% complété</small>
+            </div>
+
             <div class="story-meta">
               <span>⭐ {{ story.storyPoints || 0 }} pts</span>
               <span>✔ {{ story.completedTaskCount || 0 }}/{{ story.taskCount || 0 }} tâches</span>
+              <span>⏱️ {{ story.estimatedDuration || 0 }} jours</span>
             </div>
           </article>
         </div>
@@ -287,6 +301,7 @@
                 <span>⏱ {{ task.estimatedHours }}h</span>
                 <span>📚 {{ getUserStoryName(task.userStoryId) }}</span>
                 <span>🗓 {{ getSprintName(task.sprintId) }}</span>
+                <span>👤 {{ getTaskAssigneeName(task) }}</span>
               </div>
             </div>
             <div class="icon-actions">
