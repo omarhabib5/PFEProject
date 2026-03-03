@@ -256,6 +256,12 @@ export class SprintManager implements OnInit {
       this.error = 'End date must be after start date';
       return false;
     }
+
+    if (!this.isDateInRange(this.newSprint.startDate, this.sprintMinDateInput, this.sprintMaxDateInput)
+      || !this.isDateInRange(this.newSprint.endDate, this.sprintMinDateInput, this.sprintMaxDateInput)) {
+      this.error = 'Sprint dates must be inside selected project period';
+      return false;
+    }
     return true;
   }
 
@@ -276,7 +282,35 @@ export class SprintManager implements OnInit {
   }
 
   onSprintDatesChange(): void {
+    if (this.newSprint.endDate && this.newSprint.startDate && this.newSprint.endDate < this.newSprint.startDate) {
+      this.newSprint.endDate = this.newSprint.startDate;
+    }
     this.newSprint.estimatedDuration = this.calculateEstimatedDurationDays(this.newSprint.startDate, this.newSprint.endDate);
+  }
+
+  onSprintProjectChange(): void {
+    const minDate = this.sprintMinDateInput;
+    const maxDate = this.sprintMaxDateInput;
+
+    if (!this.isDateInRange(this.newSprint.startDate, minDate, maxDate)) {
+      this.newSprint.startDate = minDate || this.newSprint.startDate;
+    }
+
+    if (!this.isDateInRange(this.newSprint.endDate, minDate, maxDate) || this.newSprint.endDate < this.newSprint.startDate) {
+      this.newSprint.endDate = this.newSprint.startDate;
+    }
+
+    this.onSprintDatesChange();
+  }
+
+  get sprintMinDateInput(): string {
+    const selectedProject = this.getSelectedProject();
+    return selectedProject?.startDate ? this.formatDateForInput(new Date(selectedProject.startDate)) : '';
+  }
+
+  get sprintMaxDateInput(): string {
+    const selectedProject = this.getSelectedProject();
+    return selectedProject?.endDate ? this.formatDateForInput(new Date(selectedProject.endDate)) : '';
   }
 
   private calculateEstimatedDurationDays(startDateValue: string | Date, endDateValue: string | Date): number {
@@ -293,6 +327,22 @@ export class SprintManager implements OnInit {
     }
 
     return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  }
+
+  private getSelectedProject(): project | undefined {
+    const projectId = Number(this.newSprint.projectId ?? 0);
+    if (!projectId) {
+      return undefined;
+    }
+
+    return this.projects.find((item) => Number(item.id) === projectId);
+  }
+
+  private isDateInRange(value: string, minDate?: string, maxDate?: string): boolean {
+    if (!value) return false;
+    if (minDate && value < minDate) return false;
+    if (maxDate && value > maxDate) return false;
+    return true;
   }
 
   getStateName(state: State): string {

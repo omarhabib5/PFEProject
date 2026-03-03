@@ -44,7 +44,7 @@
                 </div>
                 <div class="form-group">
                     <label>User Story</label>
-                    <select [(ngModel)]="formModel.userStoryId" [disabled]="selectedUserStoryId !== null">
+                    <select [(ngModel)]="formModel.userStoryId" (ngModelChange)="onUserStoryChange()" [disabled]="selectedUserStoryId !== null">
                         <option [ngValue]="0" disabled>Sélectionner une user story</option>
                         <option *ngFor="let story of userStories" [ngValue]="+story.id">
                             {{ story.name || story.title || ('US #' + story.id) }}
@@ -56,11 +56,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Date début</label>
-                    <input [(ngModel)]="formModel.startDate" type="date" />
+                    <input [(ngModel)]="formModel.startDate" (ngModelChange)="onTaskStartDateChange()" type="date" [min]="taskMinDateInput" [max]="taskMaxDateInput" />
                 </div>
                 <div class="form-group">
                     <label>Date fin</label>
-                    <input [(ngModel)]="formModel.endDate" type="date" />
+                    <input [(ngModel)]="formModel.endDate" type="date" [min]="formModel.startDate || taskMinDateInput" [max]="taskMaxDateInput" />
                 </div>
             </div>
 

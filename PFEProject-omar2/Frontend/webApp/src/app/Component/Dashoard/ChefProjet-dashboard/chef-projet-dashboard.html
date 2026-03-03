@@ -1,1 +1,312 @@
-<p>chef-projet-dashboard works!</p>
+<div class="layout">
+  <aside class="left-nav">
+    <div class="brand-block">
+      <h1>TaskFlow Pro</h1>
+      <p>Gestion de Projets</p>
+    </div>
+
+    <button class="nav-item" [class.active]="activeSection === 'projects'" (click)="setSection('projects')">◎ Mes Projets</button>
+    <button class="nav-item" [class.active]="activeSection === 'calendar'" (click)="setSection('calendar')">🗓️ Calendrier</button>
+    <button class="nav-item bottom" [class.active]="activeSection === 'settings'" (click)="setSection('settings')">⚙️ Paramètres</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2>Gestion de Projet</h2>
+        <p>{{ currentDateLabel }}</p>
+      </div>
+
+      <div class="topbar-right">
+    
+
+        <div class="notify-pill">4</div>
+
+        <div class="profile-box">
+          <div>
+            <strong>{{ managerDisplayName }}</strong>
+            <small>{{ managerRoleLabel }}</small>
+          </div>
+          <span class="avatar">🧑</span>
+        </div>
+      </div>
+    </header>
+
+    <div *ngIf="error" class="message error">{{ error }}</div>
+    <div *ngIf="success" class="message success">{{ success }}</div>
+
+    <section *ngIf="activeSection === 'projects'">
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p>User Stories</p>
+              <h3>{{ userStories.length }}</h3>
+            </div>
+            <span class="stat-icon blue">📘</span>
+          </div>
+          <div class="mini-track"><span [style.width.%]="userStoriesProgress"></span></div>
+          <small>{{ completedStoryPoints }} / {{ totalStoryPoints }} points complétés</small>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p>Sprints Actifs</p>
+              <h3>{{ activeSprintsCount }}</h3>
+            </div>
+            <span class="stat-icon green">📅</span>
+          </div>
+          <div class="mini-track"><span [style.width.%]="sprintProgress"></span></div>
+          <small>{{ sprints.length }} sprints au total</small>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p>Tâches</p>
+              <h3>{{ tasks.length }}</h3>
+            </div>
+            <span class="stat-icon purple">☑️</span>
+          </div>
+          <div class="mini-track"><span [style.width.%]="tasksProgress"></span></div>
+          <small>{{ completedTasksCount }} tâches complétées</small>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p>Progression</p>
+              <h3>{{ globalProgress }}%</h3>
+            </div>
+            <span class="stat-icon orange">📈</span>
+          </div>
+          <div class="mini-track"><span [style.width.%]="globalProgress"></span></div>
+          <small>Avancement global du projet</small>
+        </article>
+      </section>
+
+      <div class="project-card" *ngIf="currentProject as project; else noProject">
+        <h2>◎ Détails du Projet</h2>
+
+        <div class="project-grid">
+          <div>
+            <p class="label">Description</p>
+            <p class="value">{{ project.description || project.name }}</p>
+          </div>
+          <div>
+            <p class="label">Statut</p>
+            <span class="badge" [ngClass]="projectStatusClass">{{ projectStatusLabel }}</span>
+          </div>
+
+          <div>
+            <p class="label">Date de début</p>
+            <p class="value">{{ formatDate(project.startDate) }}</p>
+          </div>
+          <div>
+            <p class="label">Date de fin</p>
+            <p class="value">{{ formatDate(project.endDate) }}</p>
+          </div>
+
+          <div>
+            <p class="label">Manager</p>
+            <p class="value">🧑 {{ managerDisplayName }}</p>
+          </div>
+          <div>
+            <p class="label">Équipe</p>
+            <div class="chips" *ngIf="teamDisplayMembers.length > 0; else emptyTeam">
+              <span class="chip" *ngFor="let member of teamDisplayMembers">🧑 {{ member }}</span>
+            </div>
+            <ng-template #emptyTeam>
+              <p class="value muted">Aucun membre affecté</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noProject>
+        <div class="project-card empty-card">Aucun projet associé à ce chef de projet.</div>
+      </ng-template>
+
+      <div class="segment">
+        <button [class.active]="activeProjectTab === 'userStories'" (click)="setProjectTab('userStories')">📖 User Stories</button>
+        <button [class.active]="activeProjectTab === 'sprints'" (click)="setProjectTab('sprints')">🗓️ Sprints</button>
+        <button [class.active]="activeProjectTab === 'tasks'" (click)="setProjectTab('tasks')">☑️ Tâches</button>
+      </div>
+
+      <section class="list-section" *ngIf="activeProjectTab === 'userStories'">
+        <div class="header-row">
+          <h3>Liste des User Stories</h3>
+        </div>
+        <div class="story-list" *ngIf="userStories.length > 0; else noStories">
+          <article class="story-card" *ngFor="let story of userStories">
+            <div class="story-top">
+              <h4>{{ story.name || story.title || ('US #' + story.id) }}</h4>
+              <span class="badge" [class.state-done]="(story.status + '').toLowerCase().includes('done')">{{ story.status || 'To Do' }}</span>
+            </div>
+            <p>{{ story.description || 'Sans description' }}</p>
+            <div class="story-meta">
+              <span>⭐ {{ story.storyPoints || 0 }} pts</span>
+              <span>✔ {{ story.completedTaskCount || 0 }}/{{ story.taskCount || 0 }} tâches</span>
+            </div>
+          </article>
+        </div>
+        <ng-template #noStories>
+          <div class="empty-line">Aucune user story.</div>
+        </ng-template>
+      </section>
+
+      <section class="list-section" *ngIf="activeProjectTab === 'sprints'">
+        <div class="header-row">
+          <h3>Liste des Sprints</h3>
+          <button class="primary" (click)="openCreateSprint()">+ Nouveau Sprint</button>
+        </div>
+
+        <form *ngIf="showSprintForm" class="form-card" (ngSubmit)="submitSprint()">
+          <div class="form-grid">
+            <input [(ngModel)]="sprintForm.name" name="sprintName" type="text" placeholder="Nom du sprint" />
+            <input
+              [(ngModel)]="sprintForm.startDate"
+              (ngModelChange)="onSprintStartDateChange()"
+              name="sprintStart"
+              type="date"
+              [min]="projectStartDateInput"
+              [max]="projectEndDateInput" />
+            <input
+              [(ngModel)]="sprintForm.endDate"
+              (ngModelChange)="recomputeSprintDuration()"
+              name="sprintEnd"
+              type="date"
+              [min]="sprintForm.startDate || projectStartDateInput"
+              [max]="projectEndDateInput" />
+            <select [(ngModel)]="sprintForm.sprintState" name="sprintState">
+              <option *ngFor="let option of sprintStateOptions" [ngValue]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+          <textarea [(ngModel)]="sprintForm.description" name="sprintDescription" rows="2" placeholder="Description"></textarea>
+          <div class="form-actions">
+            <button class="primary" type="submit" [disabled]="sprintSaving">{{ sprintEditId ? 'Mettre à jour' : 'Créer' }}</button>
+            <button type="button" (click)="cancelSprintForm()">Annuler</button>
+          </div>
+        </form>
+
+        <div class="item-list" *ngIf="filteredSprints.length > 0; else noSprints">
+          <article class="item-card" *ngFor="let sprint of filteredSprints">
+            <div>
+              <h4>{{ sprint.name }}</h4>
+              <p>{{ sprint.description || 'Sans description' }}</p>
+              <div class="meta-row">
+                <span>🗓️ {{ formatDate(sprint.startDate) }} - {{ formatDate(sprint.endDate) }}</span>
+                <span class="badge" [ngClass]="getSprintStateClass(sprint.sprintState)">{{ getSprintStateLabel(sprint.sprintState) }}</span>
+              </div>
+            </div>
+            <div class="icon-actions">
+              <button (click)="openEditSprint(sprint)">✏️</button>
+              <button class="danger" (click)="deleteSprint(sprint)">🗑️</button>
+            </div>
+          </article>
+        </div>
+        <ng-template #noSprints>
+          <div class="empty-line">Aucun sprint.</div>
+        </ng-template>
+      </section>
+
+      <section class="list-section" *ngIf="activeProjectTab === 'tasks'">
+        <div class="header-row">
+          <h3>Liste des Tâches</h3>
+          <button class="primary" (click)="openCreateTask()">+ Nouvelle Tâche</button>
+        </div>
+
+        <div class="progress-mini">
+          <div class="bar"><span [style.width.%]="progressLineWidth"></span></div>
+          <small>{{ completedTasksCount }} / {{ tasks.length }} tâches complétées</small>
+        </div>
+
+        <form *ngIf="showTaskForm" class="form-card" (ngSubmit)="submitTask()">
+          <div class="form-grid two">
+            <input [(ngModel)]="taskForm.title" name="taskTitle" type="text" placeholder="Titre" />
+            <select [(ngModel)]="taskForm.status" name="taskStatus">
+              <option *ngFor="let status of taskStatusOptions" [ngValue]="status.value">{{ status.label }}</option>
+            </select>
+            <select [(ngModel)]="taskForm.userStoryId" (ngModelChange)="onTaskUserStoryChange()" name="taskUserStoryId">
+              <option [ngValue]="0">User Story</option>
+              <option *ngFor="let story of userStories" [ngValue]="+story.id">{{ story.name || story.title || ('US #' + story.id) }}</option>
+            </select>
+            <div class="field">
+              <label class="field-label">Employé assigné</label>
+              <select [(ngModel)]="taskForm.assignedToUserId" name="taskAssignedToUserId">
+                <option [ngValue]="null">Sélectionner un employé</option>
+                <option *ngFor="let user of employeeUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Heures estimées</label>
+              <input [(ngModel)]="taskForm.estimatedHours" name="taskEstimatedHours" type="number" min="1" placeholder="Heures" />
+            </div>
+            <div class="field">
+              <label class="field-label">Complexité</label>
+              <input [(ngModel)]="taskForm.complexity" name="taskComplexity" type="number" min="1" placeholder="Complexité" />
+            </div>
+
+            <div class="field">
+              <label class="field-label">Date début</label>
+              <input
+                [(ngModel)]="taskForm.startDate"
+                (ngModelChange)="onTaskStartDateChange()"
+                name="taskStart"
+                type="date"
+                [min]="taskMinDateInput"
+                [max]="taskMaxDateInput" />
+            </div>
+            <div class="field">
+              <label class="field-label">Date fin</label>
+              <input
+                [(ngModel)]="taskForm.endDate"
+                name="taskEnd"
+                type="date"
+                [min]="taskForm.startDate || taskMinDateInput"
+                [max]="taskMaxDateInput" />
+            </div>
+          </div>
+          <textarea [(ngModel)]="taskForm.description" name="taskDescription" rows="2" placeholder="Description"></textarea>
+          <div class="form-actions">
+            <button class="primary" type="submit" [disabled]="taskSaving">{{ taskEditId ? 'Mettre à jour' : 'Créer' }}</button>
+            <button type="button" (click)="cancelTaskForm()">Annuler</button>
+          </div>
+        </form>
+
+        <div class="item-list" *ngIf="filteredTasks.length > 0; else noTasks">
+          <article class="item-card" *ngFor="let task of filteredTasks">
+            <div>
+              <div class="task-head">
+                <h4>{{ task.title }}</h4>
+                <span class="badge" [ngClass]="getTaskStatusClass(task.status)">{{ getTaskStatusLabel(task.status) }}</span>
+              </div>
+              <p>{{ task.description || 'Sans description' }}</p>
+              <div class="meta-row">
+                <span>⏱ {{ task.estimatedHours }}h</span>
+                <span>📚 {{ getUserStoryName(task.userStoryId) }}</span>
+                <span>🗓 {{ getSprintName(task.sprintId) }}</span>
+              </div>
+            </div>
+            <div class="icon-actions">
+              <button (click)="openEditTask(task)">✏️</button>
+              <button class="danger" (click)="deleteTask(task)">🗑️</button>
+            </div>
+          </article>
+        </div>
+        <ng-template #noTasks>
+          <div class="empty-line">Aucune tâche.</div>
+        </ng-template>
+      </section>
+    </section>
+
+    <section *ngIf="activeSection === 'calendar'" class="project-card empty-card">
+      Vue calendrier en cours de préparation.
+    </section>
+
+    <section *ngIf="activeSection === 'settings'" class="project-card empty-card">
+      Paramètres du dashboard en cours de préparation.
+    </section>
+  </main>
+</div>

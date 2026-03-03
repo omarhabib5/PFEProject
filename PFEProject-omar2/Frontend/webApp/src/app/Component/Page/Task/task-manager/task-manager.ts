@@ -128,6 +128,12 @@ export class TaskManager implements OnInit {
       return;
     }
 
+    if (!this.isDateInRange(this.formModel.startDate, this.taskMinDateInput, this.taskMaxDateInput)
+      || !this.isDateInRange(this.formModel.endDate, this.taskMinDateInput, this.taskMaxDateInput)) {
+      this.error = 'Les dates de tâche doivent être dans l\'intervalle autorisé de la user story';
+      return;
+    }
+
     this.saving = true;
     this.error = '';
 
@@ -206,6 +212,43 @@ export class TaskManager implements OnInit {
   getUserLabel(user: UserDto): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email || `User #${user.id}`;
+  }
+
+  get taskMinDateInput(): string {
+    const selectedStory = this.getSelectedUserStory();
+    if (!selectedStory?.startDate) {
+      return '';
+    }
+
+    return this.toDateInput(new Date(selectedStory.startDate).toISOString());
+  }
+
+  get taskMaxDateInput(): string {
+    const selectedStory = this.getSelectedUserStory();
+    if (!selectedStory?.endDate) {
+      return '';
+    }
+
+    return this.toDateInput(new Date(selectedStory.endDate).toISOString());
+  }
+
+  onUserStoryChange(): void {
+    const minDate = this.taskMinDateInput;
+    const maxDate = this.taskMaxDateInput;
+
+    if (!this.isDateInRange(this.formModel.startDate, minDate, maxDate)) {
+      this.formModel.startDate = minDate || this.formModel.startDate;
+    }
+
+    if (!this.isDateInRange(this.formModel.endDate, minDate, maxDate) || this.formModel.endDate < this.formModel.startDate) {
+      this.formModel.endDate = this.formModel.startDate;
+    }
+  }
+
+  onTaskStartDateChange(): void {
+    if (this.formModel.endDate < this.formModel.startDate) {
+      this.formModel.endDate = this.formModel.startDate;
+    }
   }
 
   private loadUserStories(): void {
@@ -347,6 +390,17 @@ export class TaskManager implements OnInit {
       assignedToId: null,
       sprintId: null
     };
+  }
+
+  private getSelectedUserStory(): UserStoryDto | undefined {
+    return this.userStories.find((story) => Number(story.id) === Number(this.formModel.userStoryId));
+  }
+
+  private isDateInRange(value: string, minDate?: string, maxDate?: string): boolean {
+    if (!value) return false;
+    if (minDate && value < minDate) return false;
+    if (maxDate && value > maxDate) return false;
+    return true;
   }
 
 }

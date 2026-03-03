@@ -440,11 +440,71 @@ export class ProjectManager implements OnInit {
   }
 
   onDetailSprintDatesChange(): void {
+    const minDate = this.detailSprintMinDateInput;
+    const maxDate = this.detailSprintMaxDateInput;
+
+    if (!this.isDateInRange(this.newDetailSprint.startDate, minDate, maxDate)) {
+      this.newDetailSprint.startDate = minDate || this.newDetailSprint.startDate;
+    }
+
+    if (!this.isDateInRange(this.newDetailSprint.endDate, minDate, maxDate) || this.newDetailSprint.endDate < this.newDetailSprint.startDate) {
+      this.newDetailSprint.endDate = this.newDetailSprint.startDate;
+    }
+
     this.newDetailSprint.estimatedDuration = this.calculateEstimatedDurationDays(this.newDetailSprint.startDate, this.newDetailSprint.endDate);
   }
 
   onDetailUserStoryDatesChange(): void {
+    const minDate = this.detailUserStoryMinDateInput;
+    const maxDate = this.detailUserStoryMaxDateInput;
+
+    if (!this.isDateInRange(this.newDetailUserStory.startDate, minDate, maxDate)) {
+      this.newDetailUserStory.startDate = minDate || this.newDetailUserStory.startDate;
+    }
+
+    if (!this.isDateInRange(this.newDetailUserStory.endDate, minDate, maxDate) || this.newDetailUserStory.endDate < this.newDetailUserStory.startDate) {
+      this.newDetailUserStory.endDate = this.newDetailUserStory.startDate;
+    }
+
     this.newDetailUserStory.estimatedDuration = this.calculateEstimatedDurationDays(this.newDetailUserStory.startDate, this.newDetailUserStory.endDate);
+  }
+
+  get detailSprintMinDateInput(): string {
+    if (!this.selectedProject?.startDate) {
+      return '';
+    }
+
+    return this.formatDateForInput(new Date(this.selectedProject.startDate));
+  }
+
+  get detailSprintMaxDateInput(): string {
+    if (!this.selectedProject?.endDate) {
+      return '';
+    }
+
+    return this.formatDateForInput(new Date(this.selectedProject.endDate));
+  }
+
+  get detailUserStoryMinDateInput(): string {
+    const selectedSprint = this.getSelectedDetailSprint();
+    if (!selectedSprint?.startDate) {
+      return '';
+    }
+
+    return this.formatDateForInput(new Date(selectedSprint.startDate));
+  }
+
+  get detailUserStoryMaxDateInput(): string {
+    const selectedSprint = this.getSelectedDetailSprint();
+    if (!selectedSprint?.endDate) {
+      return '';
+    }
+
+    return this.formatDateForInput(new Date(selectedSprint.endDate));
+  }
+
+  onDetailUserStorySprintChange(): void {
+    this.onDetailUserStoryDatesChange();
   }
 
   getStateName(state: State): string {
@@ -924,6 +984,7 @@ export class ProjectManager implements OnInit {
         if (!this.isEditingUserStoryInDetails && !this.newDetailUserStory.sprintId && data.length > 0) {
           this.newDetailUserStory.sprintId = String(data[0].id);
         }
+        this.onDetailUserStorySprintChange();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -973,6 +1034,12 @@ export class ProjectManager implements OnInit {
       return false;
     }
 
+    if (!this.isDateInRange(this.newDetailSprint.startDate, this.detailSprintMinDateInput, this.detailSprintMaxDateInput)
+      || !this.isDateInRange(this.newDetailSprint.endDate, this.detailSprintMinDateInput, this.detailSprintMaxDateInput)) {
+      this.error = 'Sprint dates must be within the selected project date interval';
+      return false;
+    }
+
     return true;
   }
 
@@ -991,6 +1058,37 @@ export class ProjectManager implements OnInit {
     const endDate = new Date(this.newDetailUserStory.endDate);
     if (startDate >= endDate) {
       this.error = 'User story end date must be after start date';
+      return false;
+    }
+
+    if (!this.isDateInRange(this.newDetailUserStory.startDate, this.detailUserStoryMinDateInput, this.detailUserStoryMaxDateInput)
+      || !this.isDateInRange(this.newDetailUserStory.endDate, this.detailUserStoryMinDateInput, this.detailUserStoryMaxDateInput)) {
+      this.error = 'User story dates must be within the selected sprint date interval';
+      return false;
+    }
+
+    return true;
+  }
+
+  private getSelectedDetailSprint(): Sprint | undefined {
+    const sprintId = Number(this.newDetailUserStory.sprintId);
+    if (!sprintId || Number.isNaN(sprintId)) {
+      return undefined;
+    }
+
+    return this.projectSprints.find((sprint) => Number(sprint.id) === sprintId);
+  }
+
+  private isDateInRange(dateValue: string, minDate: string, maxDate: string): boolean {
+    if (!dateValue) {
+      return false;
+    }
+
+    if (minDate && dateValue < minDate) {
+      return false;
+    }
+
+    if (maxDate && dateValue > maxDate) {
       return false;
     }
 

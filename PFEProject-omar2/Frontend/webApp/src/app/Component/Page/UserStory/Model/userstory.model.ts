@@ -28,6 +28,12 @@ export interface  UserStoryDto {
   createdAt: Date;
   updatedAt?: Date;
 }
+export interface User{
+  id: string;
+  name: string;
+  email: string;
+  role:string;
+}
 export interface UserStoryDetailDto 
   {
   id: string;
