@@ -7,12 +7,27 @@
             </div>
 
             <nav class="menu">
-                <button class="menu-item" [class.active]="activeSection === 'services'"
-                    (click)="setSection('services')">
-                    Mon Service
+                <button class="menu-item" [class.active]="serviceViewMode === 'list'" (click)="openServicesList()">
+                    Services
                 </button>
-                <button class="menu-item" [class.active]="activeSection === 'calendar'"
-                    (click)="setSection('calendar')">
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
+                    [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
+                    Tableau de bord
+                </button>
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'projects'"
+                    (click)="setTab('projects')">
+                    Projets
+                </button>
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
+                    [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">
+                    User Stories
+                </button>
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
+                    [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">
+                    Équipe & membres
+                </button>
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'calendar'"
+                    (click)="setTab('calendar')">
                     Calendrier
                 </button>
             </nav>
@@ -43,177 +58,289 @@
         </header>
 
         <div *ngIf="error" class="error-banner">{{ error }}</div>
-
         <section *ngIf="loading" class="loading">Chargement...</section>
 
-        <ng-container *ngIf="!loading && activeSection === 'services'">
-            <section *ngIf="serviceViewMode === 'list'" class="services-list-view">
-                <div class="list-header">
-                    <div>
-                        <h3>Services</h3>
-                        <p>Gérez vos services et explorez leurs projets</p>
-                    </div>
-                    <button class="primary-btn" (click)="openCreateServiceModal()">+ Nouveau service</button>
+        <section *ngIf="!loading && serviceViewMode === 'list'" class="services-list-view">
+            <div class="list-header">
+                <div>
+                    <h3>Services</h3>
+                    <p>Gérez vos services et explorez leurs projets</p>
                 </div>
-
-                <div class="filters-row">
-                    <input type="text" placeholder="Rechercher un service..." [(ngModel)]="searchTerm" />
-                    <select [(ngModel)]="statusFilter">
-                        <option value="all">Tous les statuts</option>
-                        <option value="active">Actif</option>
-                    </select>
-                </div>
-
-                <div class="cards-grid">
-                    <article class="service-card" *ngFor="let service of filteredServices">
-                        <div class="card-top">
-                            <div class="service-icon">🏢</div>
-                            <span class="status-pill">{{ getServiceStatus(service) }}</span>
-                        </div>
-
-                        <h4>{{ service.name }}</h4>
-                        <p class="desc">ID service: {{ service.id }}</p>
-
-                        <p class="meta-line">👥 {{ service.members?.length || 0 }} membres</p>
-                        <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
-                        <p class="meta-line">Chef de service: {{ service.responsible ? (service.responsible.firstName +
-                            ' ' + service.responsible.lastName) : 'Non assigné' }}</p>
-
-                        <div class="members-block">
-                            <span>Membres de l'équipe</span>
-                            <div class="avatars">
-                                <span class="mini-avatar" *ngFor="let avatar of getServiceAvatars(service)">{{ avatar
-                                    }}</span>
-                            </div>
-                        </div>
-
-                        <button class="link-btn" (click)="openServiceDetails(service)">Voir les projets →</button>
-                    </article>
-                </div>
-            </section>
-
-            <section *ngIf="serviceViewMode === 'detail' && selectedService" class="service-detail-view">
-                <div class="service-header-card">
-                    <div class="service-left">
-                        <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
-                        <div>
-                            <h3>{{ selectedService.name }}</h3>
-                            <p>Chef de service: {{ selectedService.responsible ? (selectedService.responsible.firstName
-                                + ' ' + selectedService.responsible.lastName) : 'Non assigné' }}</p>
-                            <div class="detail-meta">
-                                <span>👥 {{ membersCount }} membres</span>
-                                <span>🗂️ {{ projectsCount }} projets</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="primary-btn" (click)="openProjects()">Nouveau projet</button>
-                </div>
-
-                <div class="service-actions-row">
-                    <button class="secondary-btn" type="button" (click)="openCreateTeam()">Ajouter équipe</button>
-                    <button class="secondary-btn" type="button" (click)="openAddMembers()">Ajouter membre au
-                        service</button>
-                    <button class="secondary-btn" type="button" (click)="openProjectEdit()">Modifier les
-                        projets</button>
-                    <button class="secondary-btn" type="button" (click)="openUserStories()">Gérer user stories</button>
-                </div>
-
-                <div class="tabs-card">
-                    <div class="tabs-header">
-                        <button [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">Tableau de
-                            bord</button>
-                        <button [class.active]="activeTab === 'team'" (click)="setTab('team')">Mon équipe</button>
-                    </div>
-
-                    <div *ngIf="activeTab === 'dashboard'" class="dashboard-tab-content">
-                        <div class="kpi-grid">
-                            <article class="kpi-card">
-                                <h4>Projets actifs</h4>
-                                <strong>{{ projectsCount }}</strong>
-                            </article>
-                            <article class="kpi-card">
-                                <h4>Équipes</h4>
-                                <strong>{{ teamsCount }}</strong>
-                            </article>
-                            <article class="kpi-card">
-                                <h4>Tâches terminées</h4>
-                                <strong>{{ completedTasksCount }}</strong>
-                            </article>
-                            <article class="kpi-card">
-                                <h4>Tâches en cours</h4>
-                                <strong>{{ activeTasksCount }}</strong>
-                            </article>
-                            <article class="kpi-card">
-                                <h4>Progression globale</h4>
-                                <strong>{{ globalProgressPercent }}%</strong>
-                            </article>
-                        </div>
-
-                        <div class="stats-grid">
-                            <article class="stats-card">
-                                <h5>User Stories</h5>
-                                <p>Total <strong>{{ userStoryTotal }}</strong></p>
-                                <p>Terminées <strong>{{ completedUserStoriesCount }}</strong></p>
-                                <p>En cours <strong>{{ inProgressUserStoriesCount }}</strong></p>
-                            </article>
-
-                            <article class="stats-card">
-                                <h5>Sprints</h5>
-                                <p>Total <strong>{{ sprintTotal }}</strong></p>
-                                <p>Actifs <strong>{{ activeSprintCount }}</strong></p>
-                                <p>Complétés <strong>{{ completedSprintCount }}</strong></p>
-                            </article>
-
-                            <article class="stats-card">
-                                <h5>Membres de l'équipe</h5>
-                                <p>Total <strong>{{ membersCount }}</strong></p>
-                                <p>Tâches actives <strong>{{ activeTasksCount }}</strong></p>
-                                <p>À faire <strong>{{ todoTasksCount }}</strong></p>
-                            </article>
-                        </div>
-                    </div>
-
-                    <div *ngIf="activeTab === 'team'" class="team-tab-content">
-                        <h4>Équipes du service</h4>
-                        <p>{{ selectedService.name }}</p>
-
-                        <div class="team-table-wrap" *ngIf="selectedServiceTeams.length > 0">
-                            <table class="team-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nom d'équipe</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let team of selectedServiceTeams">
-                                        <td>{{ team.id }}</td>
-                                        <td>{{ team.name }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <p *ngIf="selectedServiceTeams.length === 0" class="empty-team">Aucune équipe dans ce service.
-                        </p>
-                    </div>
-                </div>
-            </section>
-        </ng-container>
-
-        <section *ngIf="!loading && activeSection === 'calendar'" class="calendar-view">
-            <div class="calendar-grid">
-                <div class="weekday" *ngFor="let day of ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']">{{ day }}
-                </div>
-                <div class="day-cell" *ngFor="let day of calendarDays" [class.today]="day.isToday"
-                    [class.outside]="!day.inCurrentMonth">
-                    {{ day.day || '' }}
-                </div>
+                <button class="primary-btn" (click)="openCreateServiceModal()">+ Nouveau service</button>
             </div>
 
-            <div class="upcoming-card">
-                <h4>Tâches à venir</h4>
+            <div class="filters-row">
+                <input type="text" placeholder="Rechercher un service..." [(ngModel)]="searchTerm" />
+                <select [(ngModel)]="statusFilter">
+                    <option value="all">Tous les statuts</option>
+                    <option value="active">Actif</option>
+                </select>
+            </div>
+
+            <div class="cards-grid">
+                <article class="service-card" *ngFor="let service of filteredServices">
+                    <div class="card-top">
+                        <div class="service-icon">🏢</div>
+                        <span class="status-pill">{{ getServiceStatus(service) }}</span>
+                    </div>
+
+                    <h4>{{ service.name }}</h4>
+                    <p class="desc">ID service: {{ service.id }}</p>
+                    <p class="meta-line">👥 {{ service.members?.length || 0 }} membres</p>
+                    <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
+                    <p class="meta-line">Chef de service: {{ service.responsible ? (service.responsible.firstName + ' '
+                        + service.responsible.lastName) : 'Non assigné' }}</p>
+
+                    <div class="members-block">
+                        <span>Membres de l'équipe</span>
+                        <div class="avatars">
+                            <span class="mini-avatar" *ngFor="let avatar of getServiceAvatars(service)">{{ avatar
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <button class="link-btn" (click)="openServiceDetails(service)">Ouvrir dashboard →</button>
+                </article>
+            </div>
+        </section>
+
+        <section *ngIf="!loading && serviceViewMode === 'detail' && selectedService" class="service-detail-view">
+            <div class="service-header-card">
+                <div class="service-left">
+                    <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
+                    <div>
+                        <h3>{{ selectedService.name }}</h3>
+                        <p>Chef de service: {{ selectedService.responsible ? (selectedService.responsible.firstName + '
+                            ' + selectedService.responsible.lastName) : 'Non assigné' }}</p>
+                        <div class="detail-meta">
+                            <span>👥 {{ membersCount }} membres</span>
+                            <span>🗂️ {{ projectsCount }} projets</span>
+                            <span>⚡ {{ teamsCount }} équipes</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="primary-btn" (click)="openProjects()">Nouveau projet</button>
+            </div>
+
+            <div class="service-actions-row">
+                <button class="secondary-btn" type="button" (click)="openCreateTeam()">Ajouter équipe</button>
+                <button class="secondary-btn" type="button" (click)="openAddMembers()">Ajouter membre au
+                    service</button>
+                <button class="secondary-btn" type="button" (click)="openProjectEdit()">Modifier les projets</button>
+                <button class="secondary-btn" type="button" (click)="openUserStories()">Ajouter user story</button>
+                <button class="secondary-btn" type="button" (click)="backToServiceList()">Changer de service</button>
+            </div>
+
+            <div class="tabs-card">
+                <div class="tabs-header">
+                    <button [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">Tableau de
+                        bord</button>
+                    <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Projets</button>
+                    <button [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">User
+                        Stories</button>
+                    <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Équipe &
+                        membres</button>
+                    <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendrier</button>
+                </div>
+
+                <div *ngIf="activeTab === 'dashboard'" class="dashboard-tab-content">
+                    <div class="kpi-grid">
+                        <article class="kpi-card">
+                            <h4>Projets actifs</h4><strong>{{ projectsCount }}</strong>
+                        </article>
+                        <article class="kpi-card">
+                            <h4>Équipes</h4><strong>{{ teamsCount }}</strong>
+                        </article>
+                        <article class="kpi-card">
+                            <h4>Tâches terminées</h4><strong>{{ completedTasksCount }}</strong>
+                        </article>
+                        <article class="kpi-card">
+                            <h4>Tâches en cours</h4><strong>{{ activeTasksCount }}</strong>
+                        </article>
+                        <article class="kpi-card">
+                            <h4>Progression globale</h4><strong>{{ globalProgressPercent }}%</strong>
+                        </article>
+                    </div>
+
+                    <div class="stats-grid">
+                        <article class="stats-card">
+                            <h5>User Stories</h5>
+                            <p>Total <strong>{{ userStoryTotal }}</strong></p>
+                            <p>Terminées <strong>{{ completedUserStoriesCount }}</strong></p>
+                            <p>En cours <strong>{{ inProgressUserStoriesCount }}</strong></p>
+                        </article>
+                        <article class="stats-card">
+                            <h5>Sprints</h5>
+                            <p>Total <strong>{{ sprintTotal }}</strong></p>
+                            <p>Actifs <strong>{{ activeSprintCount }}</strong></p>
+                            <p>Complétés <strong>{{ completedSprintCount }}</strong></p>
+                        </article>
+                        <article class="stats-card">
+                            <h5>Membres de l'équipe</h5>
+                            <p>Total <strong>{{ membersCount }}</strong></p>
+                            <p>Tâches actives <strong>{{ activeTasksCount }}</strong></p>
+                            <p>À faire <strong>{{ todoTasksCount }}</strong></p>
+                        </article>
+                    </div>
+                </div>
+
+                <div *ngIf="activeTab === 'projects'" class="team-tab-content">
+                    <div class="section-title-row">
+                        <h4>Projets du service</h4>
+                        <div class="inline-actions">
+                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Modifier les
+                                projets</button>
+                            <button class="primary-btn" type="button" (click)="openProjects()">+ Nouveau projet</button>
+                        </div>
+                    </div>
+                    <div class="team-table-wrap" *ngIf="selectedServiceProjects.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Projet</th>
+                                    <th>Statut</th>
+                                    <th>Progression</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let project of selectedServiceProjects">
+                                    <td>{{ project.name }}</td>
+                                    <td><span class="status-chip" [ngClass]="getProjectStatusClass(project)">{{
+                                            getProjectStatusLabel(project) }}</span></td>
+                                    <td>
+                                        <div class="progress-line">
+                                            <div class="progress-fill" [style.width.%]="getProjectProgress(project)">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><button class="tiny-btn" type="button"
+                                            (click)="openProjectManager(project.id)">Modifier</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p *ngIf="selectedServiceProjects.length === 0" class="empty-team">Aucun projet dans ce service.</p>
+                </div>
+
+                <div *ngIf="activeTab === 'userStories'" class="team-tab-content">
+                    <div class="section-title-row">
+                        <h4>User Stories du service</h4>
+                        <button class="primary-btn" type="button" (click)="openUserStories()">+ Ajouter user
+                            story</button>
+                    </div>
+                    <div class="team-table-wrap" *ngIf="serviceUserStories.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Priorité</th>
+                                    <th>Statut actuel</th>
+                                    <th>Changer statut</th>
+                                    <th>Tâches</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let story of serviceUserStories">
+                                    <td>{{ story.title }}</td>
+                                    <td>{{ story.priority }}</td>
+                                    <td><span class="status-chip" [ngClass]="getUserStoryStatusClass(story.status)">{{
+                                            getUserStoryStatusLabel(story.status) }}</span></td>
+                                    <td>
+                                        <select [ngModel]="getSelectedUserStoryStatus(story)"
+                                            (ngModelChange)="setSelectedUserStoryStatus(story.id, $event)">
+                                            <option *ngFor="let item of userStoryStatuses" [ngValue]="item.value">{{
+                                                item.label }}</option>
+                                        </select>
+                                    </td>
+                                    <td>{{ story.completedTaskCount }} / {{ story.taskCount }}</td>
+                                    <td><button class="tiny-btn" type="button"
+                                            (click)="saveUserStoryStatus(story)">Enregistrer</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p *ngIf="serviceUserStories.length === 0" class="empty-team">Aucune user story disponible pour ce
+                        service.</p>
+                </div>
+
+                <div *ngIf="activeTab === 'teamMembers'" class="team-tab-content">
+                    <div class="section-title-row">
+                        <h4>Équipes et membres du service</h4>
+                        <div class="inline-actions">
+                            <button class="secondary-btn" type="button" (click)="openCreateTeam()">Ajouter
+                                équipe</button>
+                            <button class="secondary-btn" type="button" (click)="openAddMembers()">Ajouter
+                                membre</button>
+                        </div>
+                    </div>
+                    <p>{{ selectedService.name }}</p>
+
+                    <div class="team-table-wrap" *ngIf="selectedServiceTeams.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom d'équipe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let team of selectedServiceTeams">
+                                    <td>{{ team.id }}</td>
+                                    <td>{{ team.name }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="team-table-wrap" *ngIf="teamRows.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Membre</th>
+                                    <th>Rôle</th>
+                                    <th>Tâches en cours</th>
+                                    <th>Tâches terminées</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of teamRows">
+                                    <td>
+                                        <div class="member-cell">
+                                            <span class="mini-avatar big">{{ row.avatar }}</span>
+                                            <div><strong>{{ row.fullName }}</strong><small>{{ row.email }}</small></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="role-pill" [ngClass]="row.roleClass">{{ row.roleLabel }}</span>
+                                    </td>
+                                    <td>{{ row.activeTasks }}</td>
+                                    <td>{{ row.completedTasks }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p *ngIf="selectedServiceTeams.length === 0 && teamRows.length === 0" class="empty-team">Aucune
+                        équipe dans ce service.</p>
+                </div>
+
+                <div *ngIf="activeTab === 'calendar'" class="dashboard-tab-content">
+                    <div class="calendar-toolbar">
+                        <button class="secondary-btn" type="button" (click)="prevMonth()">‹</button>
+                        <h4>{{ calendarTitle }}</h4>
+                        <button class="secondary-btn" type="button" (click)="nextMonth()">›</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="weekday" *ngFor="let day of calendarWeekdays">{{ day }}</div>
+                        <div class="day-cell" *ngFor="let day of calendarDays" [class.today]="day.isToday"
+                            [class.outside]="!day.inCurrentMonth">
+                            <div class="day-head">
+                                <span>{{ day.day }}</span>
+                                <span class="day-dot" *ngIf="day.hasProject"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -228,6 +355,42 @@
             <div class="modal-actions">
                 <button type="button" class="secondary-btn" (click)="closeCreateServiceModal()">Annuler</button>
                 <button type="submit" class="primary-btn">Créer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div *ngIf="showUserStoryModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>Nouvelle user story</h3>
+        <form class="user-story-modal-form" (ngSubmit)="submitCreateUserStory()">
+            <label>Titre</label>
+            <input type="text" [(ngModel)]="userStoryForm.title" name="storyTitle" required />
+
+            <label>Description</label>
+            <input type="text" [(ngModel)]="userStoryForm.description" name="storyDescription" />
+
+            <label>Critères d'acceptation</label>
+            <input type="text" [(ngModel)]="userStoryForm.acceptanceCriteria" name="storyCriteria" />
+
+            <label>Sprint</label>
+            <select [(ngModel)]="userStoryForm.sprintId" name="storySprint" required>
+                <option *ngFor="let sprint of availableSprints" [ngValue]="sprint.id">{{ sprint.name }}</option>
+            </select>
+
+            <label>Story points</label>
+            <input type="number" min="1" [(ngModel)]="userStoryForm.storyPoints" name="storyPoints" required />
+
+            <label>Priorité</label>
+            <select [(ngModel)]="userStoryForm.priority" name="storyPriority" required>
+                <option *ngFor="let priority of userStoryPriorities" [ngValue]="priority">{{ priority }}</option>
+            </select>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary-btn" (click)="closeUserStoryModal()">Annuler</button>
+                <button type="submit" class="primary-btn" [disabled]="userStorySubmitting">
+                    {{ userStorySubmitting ? 'Création...' : 'Créer' }}
+                </button>
             </div>
         </form>
     </div>

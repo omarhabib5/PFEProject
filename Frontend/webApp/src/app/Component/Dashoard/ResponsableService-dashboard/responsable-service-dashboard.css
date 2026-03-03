@@ -53,10 +53,6 @@
 	color: #0f172a;
 }
 
-.settings-btn {
-	margin-top: 24px;
-}
-
 .content-area {
 	display: flex;
 	flex-direction: column;
@@ -142,8 +138,7 @@
 
 .loading,
 .services-list-view,
-.service-detail-view,
-.calendar-view {
+.service-detail-view {
 	padding: 1rem 1.5rem;
 }
 
@@ -178,6 +173,14 @@
 	border-radius: 10px;
 	padding: 0 .8rem;
 	font-size: .95rem;
+	background: #fff;
+}
+
+select {
+	border: 1px solid #d1d5db;
+	height: 36px;
+	border-radius: 8px;
+	padding: 0 .55rem;
 	background: #fff;
 }
 
@@ -405,14 +408,19 @@
 	padding: 14px;
 }
 
-.team-tab-content h4 {
-	margin: 0;
-	font-size: 2rem;
+.section-title-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
 }
 
-.team-tab-content>p {
-	margin: .2rem 0 1rem;
-	color: #64748b;
+.inline-actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .team-table-wrap {
@@ -451,22 +459,6 @@
 	gap: .7rem;
 }
 
-.member-cell strong {
-	display: block;
-	font-size: 1rem;
-}
-
-.member-cell small {
-	color: #2563eb;
-	font-size: .8rem;
-}
-
-.mini-avatar.big {
-	width: 32px;
-	height: 32px;
-	font-size: .75rem;
-}
-
 .role-pill {
 	display: inline-flex;
 	align-items: center;
@@ -481,14 +473,60 @@
 	color: #1d4ed8;
 }
 
-.role-pill.role-member {
+.role-pill.role-employee {
 	background: #dcfce7;
 	color: #166534;
 }
 
-.role-pill.role-employee {
+.status-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: .22rem .65rem;
+	border-radius: 999px;
+	font-size: .8rem;
+	font-weight: 700;
+}
+
+.status-chip.pending,
+.status-chip.todo {
+	background: #fff7ed;
+	color: #c2410c;
+}
+
+.status-chip.active,
+.status-chip.in-progress {
+	background: #dbeafe;
+	color: #1d4ed8;
+}
+
+.status-chip.done {
 	background: #dcfce7;
 	color: #166534;
+}
+
+.progress-line {
+	width: 100%;
+	height: 9px;
+	background: #e2e8f0;
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background: #2563eb;
+	border-radius: 999px;
+}
+
+.tiny-btn {
+	border: 1px solid #cbd5e1;
+	background: #fff;
+	color: #0f172a;
+	font-size: .85rem;
+	font-weight: 600;
+	border-radius: 8px;
+	padding: .25rem .65rem;
+	cursor: pointer;
 }
 
 .empty-team {
@@ -536,15 +574,6 @@
 	color: #475569;
 }
 
-.back-link {
-	margin-top: 12px;
-	border: 0;
-	background: transparent;
-	color: #2563eb;
-	font-size: .95rem;
-	cursor: pointer;
-}
-
 .calendar-grid {
 	background: #fff;
 	border: 1px solid #e5e7eb;
@@ -552,6 +581,19 @@
 	overflow: hidden;
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+}
+
+.calendar-toolbar h4 {
+	margin: 0;
+	text-transform: capitalize;
+	font-size: 1.2rem;
 }
 
 .weekday {
@@ -574,6 +616,20 @@
 	font-size: 14px;
 }
 
+.day-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.day-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 999px;
+	background: #2563eb;
+	display: inline-block;
+}
+
 .day-cell.today {
 	background: #dbeafe;
 	box-shadow: inset 0 0 0 2px #3b82f6;
@@ -582,19 +638,6 @@
 
 .day-cell.outside {
 	color: #cbd5e1;
-}
-
-.upcoming-card {
-	margin-top: 14px;
-	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-radius: 14px;
-	padding: 14px;
-}
-
-.upcoming-card h4 {
-	margin: 0;
-	font-size: 1.8rem;
 }
 
 .modal-overlay {
@@ -614,51 +657,9 @@
 	padding: 16px;
 }
 
-.modal-card h3 {
-	margin: 0 0 12px;
-}
-
-.modal-card form {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
-.modal-card input {
-	border: 1px solid #cbd5e1;
-	border-radius: 10px;
-	padding: 10px;
-	font-size: 14px;
-}
-
 .modal-actions {
 	margin-top: 8px;
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
-}
-
-@media (max-width: 1100px) {
-	.service-manager-layout {
-		grid-template-columns: 1fr;
-	}
-
-	.sidebar {
-		border-right: 0;
-		border-bottom: 1px solid #e5e7eb;
-	}
-
-	.topbar {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 10px;
-	}
-
-	.kpi-grid {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	.stats-grid {
-		grid-template-columns: 1fr;
-	}
 }

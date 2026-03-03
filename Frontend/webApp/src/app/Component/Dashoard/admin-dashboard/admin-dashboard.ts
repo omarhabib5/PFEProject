@@ -141,7 +141,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     }, 500);
   }
 
-  /* ============================= */
+
 
   setCurrentDate(): void {
     const options: Intl.DateTimeFormatOptions = {
@@ -175,7 +175,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     }
   }
 
-  /* ===== LOAD DATA ===== */
+
 
   loadProjects(): void {
     this.loading = true;
@@ -227,7 +227,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     });
   }
 
-  /* ===== FILTER ===== */
+
 
   filterProjects(): void {
     const term = this.searchTerm.trim().toLowerCase();
@@ -475,7 +475,6 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     return 3;
   }
 
-  /* ===== CHARTS ===== */
 
   initCharts(): void {
     if (this.activeTab !== 'dashboard') {
@@ -720,3 +719,4 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     return days <= 3;
   }
 }
+  

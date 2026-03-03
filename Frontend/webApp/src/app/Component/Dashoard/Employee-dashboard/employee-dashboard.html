@@ -1,1 +1,295 @@
-<p>employee-dashboard works!</p>
+<div class="employee-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h1>TaskFlow Pro</h1>
+                <p>Gestion de Projets</p>
+            </div>
+
+            <button class="menu-item" [class.active]="sidebarSection === 'dashboard'"
+                (click)="setSidebarSection('dashboard')">
+                Mon Tableau de bord
+            </button>
+            <button class="menu-item" [class.active]="sidebarSection === 'calendar'"
+                (click)="setSidebarSection('calendar')">
+                Calendrier
+            </button>
+            <button class="menu-item" [class.active]="sidebarSection === 'notifications'"
+                (click)="setSidebarSection('notifications')">
+                Notifications
+            </button>
+        </div>
+
+        <button class="menu-item" (click)="logout()">Paramètres</button>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <p>{{ todayLabel }}</p>
+            <div class="topbar-right">
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher..." />
+                <div class="notif">{{ unreadNotifications }}</div>
+                <div class="profile">
+                    <strong>{{ userName }}</strong>
+                    <small>{{ roleLabel }}</small>
+                </div>
+            </div>
+        </header>
+
+        <div *ngIf="error" class="error">{{ error }}</div>
+        <section *ngIf="loading" class="loading">Chargement...</section>
+
+        <ng-container *ngIf="!loading && sidebarSection === 'dashboard'">
+            <section class="hero">
+                <div class="hero-main">
+                    <h2>Bonjour, {{ userName }} 👋</h2>
+                    <p>Service : {{ serviceLabel }} · {{ roleLabel }}</p>
+                    <p>{{ todayLabel }}</p>
+                    <div class="progress-wrap">
+                        <span>Progression globale de mes tâches</span>
+                        <div class="progress-line">
+                            <div class="fill" [style.width.%]="completionPercent"></div>
+                        </div>
+                        <small>{{ completionPercent }}%</small>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <article><strong>{{ inProgressCount }}</strong><span>En cours</span></article>
+                    <article><strong>{{ reviewCount }}</strong><span>À réviser</span></article>
+                    <article><strong>{{ doneCount }}</strong><span>Terminées</span></article>
+                </div>
+            </section>
+
+            <section class="tabs-row">
+                <button [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Vue d'ensemble</button>
+                <button [class.active]="activeTab === 'tasks'" (click)="setTab('tasks')">Mes Tâches</button>
+                <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Mes Projets</button>
+                <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints & Stories</button>
+            </section>
+
+            <section *ngIf="activeTab === 'overview'" class="page">
+                <div class="kpi-grid">
+                    <article class="kpi blue">
+                        <h4>Total tâches</h4><strong>{{ myTasks.length }}</strong><small>{{ projectCards.length }}
+                            projets</small>
+                    </article>
+                    <article class="kpi green">
+                        <h4>Taux achèvement</h4><strong>{{ completionPercent }}%</strong><small>{{ doneCount }}
+                            terminées</small>
+                    </article>
+                    <article class="kpi purple">
+                        <h4>Heures estimées</h4><strong>{{ totalEstimatedHours }}h</strong><small>charge prévue</small>
+                    </article>
+                    <article class="kpi red">
+                        <h4>Priorité haute</h4><strong>{{ highPriorityCount }}</strong><small>à surveiller</small>
+                    </article>
+                </div>
+
+                <div class="overview-grid">
+                    <article class="card">
+                        <h3>Mes tâches par statut</h3>
+                        <div class="status-list">
+                            <div><span class="dot todo"></span> À faire <strong>{{ countByBucket('todo') }}</strong>
+                            </div>
+                            <div><span class="dot progress"></span> En cours <strong>{{ countByBucket('inProgress')
+                                    }}</strong></div>
+                            <div><span class="dot review"></span> En révision <strong>{{ countByBucket('review')
+                                    }}</strong></div>
+                            <div><span class="dot done"></span> Terminé <strong>{{ countByBucket('done') }}</strong>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <h3>Activité cette semaine</h3>
+                        <div class="bars">
+                            <div class="bar-col" *ngFor="let value of activityWeekly; let i = index">
+                                <div class="bar" [style.height.px]="20 + value * 12"></div>
+                                <small>{{ weekdays[i] }}</small>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <h3>Échéances proches</h3>
+                        <div *ngIf="nearestDueTask; else noDue">
+                            <p>{{ nearestDueTask.title }}</p>
+                            <small>{{ nearestDueTask.delayLabel }}</small>
+                        </div>
+                        <ng-template #noDue>
+                            <p>Aucune échéance dans 7 jours</p>
+                        </ng-template>
+                    </article>
+                </div>
+
+                <article class="card large">
+                    <div class="card-head">
+                        <h3>Tâches en cours</h3>
+                    </div>
+                    <div *ngIf="inProgressTasks.length === 0" class="empty">Aucune tâche en cours</div>
+                    <div *ngFor="let task of inProgressTasks" class="task-line">
+                        <div>
+                            <strong>{{ task.title }}</strong>
+                            <small>{{ task.projectName }}</small>
+                        </div>
+                        <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
+                    </div>
+                </article>
+
+                <article class="card large">
+                    <div class="card-head">
+                        <h3>Mes projets</h3>
+                    </div>
+                    <div class="project-mini-grid">
+                        <div class="project-mini" *ngFor="let project of projectCards">
+                            <strong>{{ project.name }}</strong>
+                            <small>{{ project.statusLabel }}</small>
+                            <div class="progress-line">
+                                <div class="fill" [style.width.%]="project.progress"></div>
+                            </div>
+                            <small>Mes tâches : {{ project.counts.done }} / {{ project.myTasks.length }}</small>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section *ngIf="activeTab === 'tasks'" class="page">
+                <article class="card">
+                    <div class="filters">
+                        <strong>Statut :</strong>
+                        <button [class.active]="statusFilter==='all'" (click)="setStatusFilter('all')">Tous</button>
+                        <button [class.active]="statusFilter==='todo'" (click)="setStatusFilter('todo')">À
+                            faire</button>
+                        <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">En
+                            cours</button>
+                        <button [class.active]="statusFilter==='review'" (click)="setStatusFilter('review')">En
+                            révision</button>
+                        <button [class.active]="statusFilter==='done'"
+                            (click)="setStatusFilter('done')">Terminé</button>
+
+                        <strong>Priorité :</strong>
+                        <button [class.active]="priorityFilter==='all'"
+                            (click)="setPriorityFilter('all')">Toutes</button>
+                        <button [class.active]="priorityFilter==='basse'"
+                            (click)="setPriorityFilter('basse')">Basse</button>
+                        <button [class.active]="priorityFilter==='moyenne'"
+                            (click)="setPriorityFilter('moyenne')">Moyenne</button>
+                        <button [class.active]="priorityFilter==='haute'"
+                            (click)="setPriorityFilter('haute')">Haute</button>
+                        <button [class.active]="priorityFilter==='urgente'"
+                            (click)="setPriorityFilter('urgente')">Urgente</button>
+                        <span class="task-count">{{ filteredTasks.length }} tâches</span>
+                    </div>
+                </article>
+
+                <article class="task-group" *ngFor="let group of groupedFilteredTasks" [ngClass]="group.bucket">
+                    <header>
+                        <strong>{{ group.label }}</strong>
+                        <span>{{ group.items.length }}</span>
+                    </header>
+
+                    <div *ngIf="group.items.length === 0" class="empty">Aucune tâche dans cette catégorie</div>
+
+                    <div class="task-line" *ngFor="let task of group.items">
+                        <div>
+                            <strong>{{ task.title }}</strong>
+                            <small>{{ task.projectName }} · {{ task.estimatedHours }}h · {{ task.delayLabel }}</small>
+                        </div>
+                        <div class="task-actions">
+                            <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
+                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Avancer →</button>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section *ngIf="activeTab === 'projects'" class="page">
+                <article class="project-card" *ngFor="let project of projectCards" [ngClass]="project.statusClass">
+                    <div class="project-head">
+                        <div>
+                            <h3>{{ project.name }}</h3>
+                            <p>{{ project.description }}</p>
+                        </div>
+                        <div class="project-meta">
+                            <span>{{ project.managerName }}</span>
+                            <span>{{ project.dueDate }}</span>
+                            <span class="status" [ngClass]="project.statusClass">{{ project.statusLabel }}</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-line">
+                        <div class="fill" [style.width.%]="project.progress"></div>
+                    </div>
+
+                    <div class="project-body">
+                        <div>
+                            <h4>Mes tâches ({{ project.myTasks.length }})</h4>
+                            <div class="status-boxes">
+                                <span>À faire {{ project.counts.todo }}</span>
+                                <span>En cours {{ project.counts.inProgress }}</span>
+                                <span>Révision {{ project.counts.review }}</span>
+                                <span>Terminé {{ project.counts.done }}</span>
+                            </div>
+                            <p *ngFor="let task of project.myTasks | slice:0:4">• {{ task.title }}</p>
+                        </div>
+
+                        <div class="sprint-box" *ngIf="project.activeSprint; else noSprint">
+                            <h4>{{ project.activeSprint.name }}</h4>
+                            <p>{{ project.activeSprint.periodLabel }}</p>
+                            <small>{{ project.activeSprint.storyCount }} user stories · Vélocité {{
+                                project.activeSprint.velocity }}</small>
+                        </div>
+                        <ng-template #noSprint>
+                            <div class="sprint-box empty">Aucun sprint actif</div>
+                        </ng-template>
+                    </div>
+
+                    <div class="chips">
+                        <span *ngFor="let chip of project.teamChips">{{ chip }}</span>
+                    </div>
+                </article>
+            </section>
+
+            <section *ngIf="activeTab === 'sprints'" class="page">
+                <article class="card" *ngFor="let sprint of sprintCards">
+                    <div class="card-head">
+                        <h3>{{ sprint.name }} · {{ sprint.projectName }}</h3>
+                        <span class="status active">{{ sprint.statusLabel }}</span>
+                    </div>
+                    <p>{{ sprint.periodLabel }}</p>
+                    <small>{{ sprint.storyCount }} user stories · Vélocité {{ sprint.velocity }}</small>
+                </article>
+            </section>
+        </ng-container>
+
+        <section *ngIf="!loading && sidebarSection === 'calendar'" class="page">
+            <article class="card">
+                <div class="card-head">
+                    <button (click)="prevMonth()">‹</button>
+                    <h3>{{ calendarTitle }}</h3>
+                    <button (click)="nextMonth()">›</button>
+                </div>
+                <div class="calendar-head"><span *ngFor="let day of weekdays">{{ day }}</span></div>
+                <div class="calendar-grid">
+                    <div class="day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth"
+                        [class.today]="cell.isToday">
+                        <span>{{ cell.day }}</span>
+                        <i *ngIf="cell.hasDeadline"></i>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section *ngIf="!loading && sidebarSection === 'notifications'" class="page">
+            <article class="card" *ngFor="let item of notifications">
+                <div class="notif-line" [ngClass]="item.level">
+                    <strong>{{ item.message }}</strong>
+                    <small>{{ item.dateLabel }}</small>
+                </div>
+            </article>
+            <article class="card" *ngIf="notifications.length === 0">
+                <div class="empty">Aucune notification</div>
+            </article>
+        </section>
+    </main>
+</div>
