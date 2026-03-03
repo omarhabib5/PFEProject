@@ -89,7 +89,9 @@ export class TaskService {
 			EndDate: request.endDate,
 			taskState: normalizedTaskState,
 			complexity: Number(request.complexity ?? 1),
-			UserStoryId: Number(request.userStoryId ?? 0)
+			UserStoryId: Number(request.userStoryId ?? 0),
+			assignedToId: request.assignedToId != null ? Number(request.assignedToId) : null,
+			AssignedToId: request.assignedToId != null ? Number(request.assignedToId) : null
 		};
 
 		return this.http.post<{ id: number }>(this.apiUrl, payload, {
@@ -108,7 +110,9 @@ export class TaskService {
 			EndDate: request.endDate,
 			taskState: normalizedTaskState,
 			complexity: Number(request.complexity ?? 1),
-			UserStoryId: Number(request.userStoryId ?? 0)
+			UserStoryId: Number(request.userStoryId ?? 0),
+			assignedToId: request.assignedToId != null ? Number(request.assignedToId) : null,
+			AssignedToId: request.assignedToId != null ? Number(request.assignedToId) : null
 		};
 
 		return this.http.put<void>(`${this.apiUrl}/${request.id}`, payload, {
@@ -124,6 +128,9 @@ export class TaskService {
 
 	private mapTaskFromApi(item: any): TaskDto {
 		const normalizedStatus = this.normalizeTaskState(item?.taskState ?? item?.status);
+		const fallbackAssignedToName = item?.assignedTo
+			? `${item.assignedTo.firstName ?? ''} ${item.assignedTo.lastName ?? ''}`.trim()
+			: null;
 		return {
 			id: Number(item?.id ?? 0),
 			title: item?.title ?? item?.name ?? '',
@@ -137,8 +144,8 @@ export class TaskService {
 			endDate: item?.endDate,
 			userStoryId: Number(item?.userStoryId ?? 0),
 			sprintId: item?.sprintId ?? null,
-			assignedToId: item?.assignedToId ?? null,
-			assignedToName: item?.assignedToName ?? null,
+			assignedToId: item?.assignedToId ?? item?.AssignedToId ?? null,
+			assignedToName: item?.assignedToName ?? item?.AssignedToName ?? fallbackAssignedToName,
 			createdAt: item?.createdAt,
 			updatedAt: item?.updatedAt ?? null
 		};

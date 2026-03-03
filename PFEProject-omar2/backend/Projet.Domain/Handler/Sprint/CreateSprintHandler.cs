@@ -32,6 +32,11 @@ namespace Projet.Domain.Handler.Sprint
                 throw new KeyNotFoundException("project with the specified ID was not found.");
             }
 
+            if (request.StartDate < project.startDate || request.EndDate > project.endDate)
+            {
+                throw new InvalidOperationException("Sprint dates must be within the project's start and end dates.");
+            }
+
             var sprint = new Model.Sprint
             {
                 Name = request.Name,

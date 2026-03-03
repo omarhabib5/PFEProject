@@ -118,6 +118,8 @@ export class SprintManager implements OnInit {
       return;
     }
 
+    this.onSprintDatesChange();
+
     this.loading = true;
     this.error = null;
 
@@ -163,12 +165,16 @@ export class SprintManager implements OnInit {
       sprintState: sprint.sprintState,
       projectId: sprint.projectId,
     };
+
+    this.onSprintDatesChange();
   }
 
   updateSprint(): void {
     if (!this.validateForm() || !this.editingSprintId) {
       return;
     }
+
+    this.onSprintDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -266,6 +272,27 @@ export class SprintManager implements OnInit {
     this.isEditMode = false;
     this.editingSprintId = null;
     this.error = null;
+    this.onSprintDatesChange();
+  }
+
+  onSprintDatesChange(): void {
+    this.newSprint.estimatedDuration = this.calculateEstimatedDurationDays(this.newSprint.startDate, this.newSprint.endDate);
+  }
+
+  private calculateEstimatedDurationDays(startDateValue: string | Date, endDateValue: string | Date): number {
+    const startDate = new Date(startDateValue);
+    const endDate = new Date(endDateValue);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return 0;
+    }
+
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    if (diffInMs <= 0) {
+      return 0;
+    }
+
+    return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
   }
 
   getStateName(state: State): string {

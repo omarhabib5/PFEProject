@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CreateTaskRequest, TaskDto, TaskService, TaskState, UpdateTaskRequest } from '../Service/TaskService';
 import { UserStoryService } from '../../UserStory/Service/UserStoryService';
 import { UserStoryDto } from '../../UserStory/Model/userstory.model';
+import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
 import { finalize, timeout } from 'rxjs/operators';
 
 @Component({
@@ -23,8 +24,10 @@ export class TaskManager implements OnInit {
   editMode = false;
   editingTaskId: number | null = null;
   selectedUserStoryId: number | null = null;
+  prefilledStatus: TaskState = 'pending';
   userStories: UserStoryDto[] = [];
   userStoryNameMap: Record<number, string> = {};
+  users: UserDto[] = [];
 
   statusOptions: { value: TaskState; label: string }[] = [
     { value: 'pending', label: 'Pending' },
@@ -39,6 +42,7 @@ export class TaskManager implements OnInit {
   constructor(
     private taskService: TaskService,
     private userStoryService: UserStoryService,
+    private userApiService: UserApiService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -46,14 +50,20 @@ export class TaskManager implements OnInit {
 
   ngOnInit(): void {
     this.loadUserStories();
+    this.loadUsers();
 
     this.route.params.subscribe((params) => {
       const userStoryIdParam = params['userStoryId'];
       const taskIdParam = params['id'];
+      this.prefilledStatus = this.mapRouteStatus(this.route.snapshot.queryParamMap.get('status'));
       this.selectedUserStoryId = userStoryIdParam ? Number(userStoryIdParam) : null;
 
       if (this.selectedUserStoryId) {
         this.formModel.userStoryId = this.selectedUserStoryId;
+      }
+
+      if (!taskIdParam) {
+        this.formModel.status = this.prefilledStatus;
       }
 
       this.loadTasks();
@@ -91,6 +101,7 @@ export class TaskManager implements OnInit {
     if (this.selectedUserStoryId) {
       this.formModel.userStoryId = this.selectedUserStoryId;
     }
+    this.formModel.status = this.prefilledStatus;
   }
 
   startEdit(task: TaskDto, event: Event): void {
@@ -156,6 +167,32 @@ export class TaskManager implements OnInit {
     this.router.navigate(['/task/view', task.id]);
   }
 
+  deleteTask(task: TaskDto, event: Event): void {
+    event.stopPropagation();
+
+    if (!confirm(`Delete task "${task.title}"?`)) {
+      return;
+    }
+
+    this.error = '';
+    this.loading = true;
+
+    this.taskService.delete(task.id).subscribe({
+      next: () => {
+        if (this.editingTaskId === task.id) {
+          this.startCreate();
+        }
+
+        this.loadTasks();
+      },
+      error: (error) => {
+        this.error = this.buildSaveError(error, 'Error while deleting task');
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   getStatusLabel(status: TaskState): string {
     const normalized = this.normalizeStatus(status);
     const found = this.statusOptions.find(option => option.value === normalized);
@@ -164,6 +201,11 @@ export class TaskManager implements OnInit {
 
   getUserStoryLabel(userStoryId: number): string {
     return this.userStoryNameMap[userStoryId] ?? `US #${userStoryId}`;
+  }
+
+  getUserLabel(user: UserDto): string {
+    const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    return fullName || user.email || `User #${user.id}`;
   }
 
   private loadUserStories(): void {
@@ -185,6 +227,28 @@ export class TaskManager implements OnInit {
         this.userStoryNameMap = {};
       }
     });
+  }
+
+  private loadUsers(): void {
+    this.userApiService.getUsers().subscribe({
+      next: (users) => {
+        this.users = (Array.isArray(users) ? users : []).filter((user) => this.isEmployeeRole(user.role));
+      },
+      error: () => {
+        this.users = [];
+      }
+    });
+  }
+
+  private isEmployeeRole(role?: string | number | null): boolean {
+    if (typeof role === 'number') {
+      return role === 3;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === '3'
+      || normalized === 'employee'
+      || normalized === 'employer';
   }
 
   private loadTaskForEdit(taskId: number): void {
@@ -257,6 +321,16 @@ export class TaskManager implements OnInit {
       return new Date().toISOString().slice(0, 10);
     }
     return value.slice(0, 10);
+  }
+
+  private mapRouteStatus(statusParam: string | null): TaskState {
+    const normalized = String(statusParam ?? '').trim().toLowerCase();
+    if (normalized === 'pending') return 'pending';
+    if (normalized === 'todo' || normalized === 'to-do') return 'todo';
+    if (normalized === 'in-progress' || normalized === 'inprogress') return 'inProgress';
+    if (normalized === 'done') return 'done';
+    if (normalized === 'validated') return 'validated';
+    return 'pending';
   }
 
   private getEmptyForm(): CreateTaskRequest {

@@ -15,16 +15,35 @@ namespace Projet.Domain.Handler.TaskHandler
 
         public async Task<int> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
+            if (request.EndDate <= request.StartDate)
+            {
+                throw new InvalidOperationException("End date must be after start date.");
+            }
+
+            var estimatedDuration = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+
+            var userStory = _context.UserStories.FirstOrDefault(us => us.id == request.UserStoryId);
+            if (userStory == null)
+            {
+                throw new KeyNotFoundException("User story with the specified ID was not found.");
+            }
+
+            if (request.StartDate < userStory.StartDate || request.EndDate > userStory.EndDate)
+            {
+                throw new InvalidOperationException("Task dates must be within the user story's start and end dates.");
+            }
+
             var task = new Model.Task
             {
                 Name = request.Name,
                 description = request.description,
-                EstimationDuration = request.EstimationDuration,
+                EstimationDuration = estimatedDuration,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 taskState = request.taskState,
                 complexity = request.complexity,
-                UserStoryId = request.UserStoryId
+                UserStoryId = request.UserStoryId,
+                AssignedToId = request.AssignedToId
             };
 
             _context.Tasks.Add(task);

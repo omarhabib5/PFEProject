@@ -1,120 +1,126 @@
-
-<div class="userstory-manager">
-
-  <div class="manager-header">
-    <div class="header-left">
-      <button class="btn-back" (click)="goBack()">
-        ← Retour
+<div class="min-h-screen bg-slate-50 p-4 md:p-6">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <div class="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 md:flex-row md:items-center md:justify-between md:p-6">
+      <div class="flex items-center gap-3">
+        <button
+          class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          (click)="goBack()"
+        >
+          ← Retour
+        </button>
+        <h1 class="text-xl font-bold text-slate-900 md:text-2xl">Gestion des User Stories</h1>
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+        (click)="createUserStory()"
+      >
+        <span>+</span>
+        Nouvelle User Story
       </button>
-      <h1>Gestion des User Stories</h1>
     </div>
-    <button class="btn-create" (click)="createUserStory()">
-      <span class="icon">+</span>
-      Nouvelle User Story
-    </button>
-  </div>
 
+    <div *ngIf="loading" class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-slate-600 shadow-sm">
+      <span class="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600"></span>
+      <p class="text-sm font-medium">Chargement des user stories...</p>
+    </div>
 
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Chargement des user stories...</p>
-  </div>
+    <div *ngIf="error" class="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2">
+          <span class="text-lg">⚠️</span>
+          <p class="text-sm font-medium">{{ error }}</p>
+        </div>
+        <button
+          class="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+          (click)="loadUserStories()"
+        >
+          Réessayer
+        </button>
+      </div>
+    </div>
 
-
-  <div *ngIf="error" class="error-container">
-    <div class="error-icon">⚠️</div>
-    <p>{{ error }}</p>
-    <button class="btn-retry" (click)="loadUserStories()">Réessayer</button>
-  </div>
-
-
-  <div class="stories-grid" *ngIf="!loading && !error">
-    <div 
-      *ngFor="let story of userStories" 
-      class="story-card"
-      (click)="viewUserStory(story.id)"
-    >
-
-      <div class="card-header">
-        <div class="header-content">
-          <h3 class="story-title">{{ story.title }}</h3>
-          <div class="badges">
-            <span [class]="'badge-status ' + getStatusClass(story.status)">
+    <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" *ngIf="!loading && !error">
+      <div
+        *ngFor="let story of userStories"
+        class="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        (click)="viewUserStory(story.id)"
+      >
+        <div class="mb-4 flex items-start justify-between gap-3">
+          <h3 class="line-clamp-2 text-base font-semibold text-slate-900">{{ story.title }}</h3>
+          <div class="flex flex-col items-end gap-2">
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold text-slate-700" [class]="'rounded-full px-2.5 py-1 text-xs font-semibold ' + getStatusClass(story.status)">
               {{ getStatuLLabel(story.status) }}
             </span>
-            <span [class]="'badge-priority ' + getPriorityClass(story.priority)">
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class]="'rounded-full px-2.5 py-1 text-xs font-semibold ' + getPriorityClass(story.priority)">
               {{ getPriorityLabel(story.priority) }}
             </span>
           </div>
         </div>
-      </div>
 
+        <p class="mb-4 line-clamp-3 text-sm text-slate-600">{{ story.description }}</p>
 
-      <div class="card-body">
-        <p class="story-description">{{ story.description }}</p>
-
-
-        <div class="story-meta">
-          <div class="meta-item">
-            <span class="meta-icon">📊</span>
-            <span class="meta-label">Story Points:</span>
-            <span class="meta-value">{{ story.storyPoints }}</span>
+        <div class="mb-4 space-y-2 rounded-lg bg-slate-50 p-3 text-sm">
+          <div class="flex items-center justify-between text-slate-700">
+            <span>📊 Story Points</span>
+            <span class="font-semibold">{{ story.storyPoints }}</span>
           </div>
-          <div class="meta-item">
-            <span class="meta-icon">👤</span>
-            <span class="meta-label">Assigné:</span>
-            <span class="meta-value">{{ story.assignedToName || 'Non assigné' }}</span>
+          <div class="flex items-center justify-between text-slate-700">
+            <span>👤 Assigné</span>
+            <span class="font-semibold">{{ story.assignedToName || 'Non assigné' }}</span>
           </div>
         </div>
 
-
-        <div class="progress-section">
-          <div class="progress-header">
-            <span class="progress-label">Progression des tâches</span>
-            <span class="progress-count">{{ story.completedTaskCount }} / {{ story.taskCount }}</span>
+        <div class="mb-4">
+          <div class="mb-1.5 flex items-center justify-between text-xs text-slate-600">
+            <span class="font-medium">Progression des tâches</span>
+            <span>{{ story.completedTaskCount }} / {{ story.taskCount }}</span>
           </div>
-          <div class="progress-bar">
-            <div 
-              class="progress-fill" 
+          <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div
+              class="h-full rounded-full bg-indigo-500 transition-all"
               [style.width.%]="getProgress(story)"
-              [class.progress-complete]="getProgress(story) === 100"
             ></div>
           </div>
-          <span class="progress-percentage">{{ getProgress(story) }}%</span>
+          <p class="mt-1 text-right text-xs font-semibold text-slate-700">{{ getProgress(story) }}%</p>
         </div>
 
-       
-        <div class="criteria-preview" *ngIf="story.acceptanceCriteria">
-          <span class="criteria-icon">✓</span>
-          <span class="criteria-text">Critères d'acceptation définis</span>
+        <div *ngIf="story.acceptanceCriteria" class="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+          <span>✓</span>
+          <span>Critères d'acceptation définis</span>
         </div>
-      </div>
 
-      <div class="card-footer">
-        <button 
-          class="btn-edit" 
-          (click)="editUserStory(story.id, $event)"
-          title="Modifier"
-        >
-          ✏️ Modifier
-        </button>
-        <button 
-          class="btn-delete" 
-          (click)="deleteUserStory(story.id, $event)"
-          title="Supprimer"
-        >
-          🗑️ Supprimer
-        </button>
+        <div class="flex gap-2 border-t border-slate-100 pt-4">
+          <button
+            class="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            (click)="editUserStory(story.id, $event)"
+            title="Modifier"
+          >
+            ✏️ Modifier
+          </button>
+          <button
+            class="inline-flex flex-1 items-center justify-center rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+            (click)="deleteUserStory(story.id, $event)"
+            title="Supprimer"
+          >
+            🗑️ Supprimer
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div *ngIf="!loading && !error && userStories.length === 0" class="empty-state">
-    <div class="empty-icon">📝</div>
-    <h2>Aucune user story</h2>
-    <p>Commencez par créer votre première user story pour ce sprint</p>
-    <button class="btn-create-large" (click)="createUserStory()">
-      + Créer ma première user story
-    </button>
+    <div
+      *ngIf="!loading && !error && userStories.length === 0"
+      class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm"
+    >
+      <div class="mx-auto mb-3 h-12 w-12 rounded-full bg-slate-100 text-2xl leading-12">📝</div>
+      <h2 class="text-lg font-semibold text-slate-900">Aucune user story</h2>
+      <p class="mt-1 text-sm text-slate-600">Commencez par créer votre première user story pour ce sprint</p>
+      <button
+        class="mt-5 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+        (click)="createUserStory()"
+      >
+        + Créer ma première user story
+      </button>
+    </div>
   </div>
 </div>

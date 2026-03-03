@@ -33,6 +33,11 @@ namespace Projet.Domain.Handler.UserStory
                 throw new KeyNotFoundException("Sprint with the specified ID was not found.");
             }
 
+            if (request.StartDate < sprint.startDate || request.EndDate > sprint.endDate)
+            {
+                throw new InvalidOperationException("User story dates must be within the sprint's start and end dates.");
+            }
+
             var project = context.Projects.FirstOrDefault(p => p.id == request.ProjectId);
             if (project == null)
             {

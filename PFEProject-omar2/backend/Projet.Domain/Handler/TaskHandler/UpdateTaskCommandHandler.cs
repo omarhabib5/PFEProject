@@ -16,6 +16,13 @@ namespace Projet.Domain.Handler.TaskHandler
 
         public async Task<Unit> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
         {
+            if (request.EndDate <= request.StartDate)
+            {
+                throw new InvalidOperationException("End date must be after start date.");
+            }
+
+            var estimatedDuration = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+
             var task = await _context.Tasks
                 .FirstOrDefaultAsync(t => t.id == request.id, cancellationToken);
 
@@ -24,14 +31,28 @@ namespace Projet.Domain.Handler.TaskHandler
                 throw new KeyNotFoundException($"Task with ID {request.id} not found.");
             }
 
+            var userStory = await _context.UserStories
+                .FirstOrDefaultAsync(us => us.id == request.UserStoryId, cancellationToken);
+
+            if (userStory == null)
+            {
+                throw new KeyNotFoundException("User story with the specified ID was not found.");
+            }
+
+            if (request.StartDate < userStory.StartDate || request.EndDate > userStory.EndDate)
+            {
+                throw new InvalidOperationException("Task dates must be within the user story's start and end dates.");
+            }
+
             task.Name = request.Name;
             task.description = request.description;
-            task.EstimationDuration = request.EstimationDuration;
+            task.EstimationDuration = estimatedDuration;
             task.StartDate = request.StartDate;
             task.EndDate = request.EndDate;
             task.taskState = request.taskState;
             task.complexity = request.complexity;
             task.UserStoryId = request.UserStoryId;
+            task.AssignedToId = request.AssignedToId;
 
             await _context.SaveChangesAsync(cancellationToken);
 

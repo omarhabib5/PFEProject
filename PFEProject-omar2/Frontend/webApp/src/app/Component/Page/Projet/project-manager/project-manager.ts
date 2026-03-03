@@ -32,6 +32,7 @@ export class ProjectManager implements OnInit {
   teams: Team[] = [];
   services: Service[] = [];
   users: UserDto[] = [];
+  projectManagerUsers: UserDto[] = [];
   selectedServiceFilter: number | null = null;
   private requestedProjectId: number | null = null;
   private requestedDetailTab: 'overview' | 'stories' | 'sprints' = 'overview';
@@ -199,12 +200,26 @@ export class ProjectManager implements OnInit {
     this.userService.getUsers().subscribe({
       next: (data) => {
         this.users = data;
+        this.projectManagerUsers = data.filter((user) => this.isProjectManagerRole(user.role));
             this.cdr.detectChanges();
       },
       error: (err) => {
+        this.projectManagerUsers = [];
         console.error('Failed to load users:', err);
       }
     });
+  }
+
+  private isProjectManagerRole(role: string | number | undefined): boolean {
+    if (typeof role === 'number') {
+      return role === 2;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === '2'
+      || normalized === 'projectmanager'
+      || normalized === 'project manager'
+      || normalized === 'project_manager';
   }
 
   toggleCreateProjectForm(): void {
@@ -218,6 +233,8 @@ export class ProjectManager implements OnInit {
     if (!this.validateForm()) {
       return;
     }
+
+    this.onProjectDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -262,12 +279,16 @@ export class ProjectManager implements OnInit {
       teamId: project.teamId,
       projectManagerId: project.projectManagerId,
     };
+
+    this.onProjectDatesChange();
   }
 
   updateProject(): void {
     if (!this.validateForm() || !this.editingProjectId) {
       return;
     }
+
+    this.onProjectDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -411,6 +432,19 @@ export class ProjectManager implements OnInit {
     this.isEditMode = false;
     this.editingProjectId = null;
     this.error = null;
+    this.onProjectDatesChange();
+  }
+
+  onProjectDatesChange(): void {
+    this.newProject.estimatedDuration = this.calculateEstimatedDurationDays(this.newProject.startDate, this.newProject.endDate);
+  }
+
+  onDetailSprintDatesChange(): void {
+    this.newDetailSprint.estimatedDuration = this.calculateEstimatedDurationDays(this.newDetailSprint.startDate, this.newDetailSprint.endDate);
+  }
+
+  onDetailUserStoryDatesChange(): void {
+    this.newDetailUserStory.estimatedDuration = this.calculateEstimatedDurationDays(this.newDetailUserStory.startDate, this.newDetailUserStory.endDate);
   }
 
   getStateName(state: State): string {
@@ -580,12 +614,16 @@ export class ProjectManager implements OnInit {
       sprintState: sprint.sprintState,
       projectId: sprint.projectId,
     };
+
+    this.onDetailSprintDatesChange();
   }
 
   createDetailSprint(): void {
     if (!this.validateDetailSprintForm() || !this.selectedProject?.id) {
       return;
     }
+
+    this.onDetailSprintDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -622,6 +660,8 @@ export class ProjectManager implements OnInit {
     if (!this.validateDetailSprintForm() || !this.editingSprintDetailId || !this.selectedProject?.id) {
       return;
     }
+
+    this.onDetailSprintDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -709,12 +749,16 @@ export class ProjectManager implements OnInit {
       sprintId: story.sprintId,
       projectId: this.selectedProject?.id ?? 0
     };
+
+    this.onDetailUserStoryDatesChange();
   }
 
   createDetailUserStory(): void {
     if (!this.validateDetailUserStoryForm() || !this.selectedProject?.id) {
       return;
     }
+
+    this.onDetailUserStoryDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -754,6 +798,8 @@ export class ProjectManager implements OnInit {
     if (!this.validateDetailUserStoryForm() || !this.editingUserStoryDetailId || !this.selectedProject?.id) {
       return;
     }
+
+    this.onDetailUserStoryDatesChange();
 
     this.loading = true;
     this.error = null;
@@ -971,6 +1017,7 @@ export class ProjectManager implements OnInit {
 
     this.isEditingSprintInDetails = false;
     this.editingSprintDetailId = null;
+    this.onDetailSprintDatesChange();
   }
 
   private resetDetailUserStoryForm(): void {
@@ -987,6 +1034,7 @@ export class ProjectManager implements OnInit {
 
     this.isEditingUserStoryInDetails = false;
     this.editingUserStoryDetailId = null;
+    this.onDetailUserStoryDatesChange();
   }
 
   private prependCreatedUserStoryPreview(request: CreateUserStoryRequest, response: any): void {
@@ -1076,6 +1124,22 @@ export class ProjectManager implements OnInit {
         this.selectedProjectMembers = manager ? [manager] : [];
       }
     });
+  }
+
+  private calculateEstimatedDurationDays(startDateValue: string | Date, endDateValue: string | Date): number {
+    const startDate = new Date(startDateValue);
+    const endDate = new Date(endDateValue);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return 0;
+    }
+
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    if (diffInMs <= 0) {
+      return 0;
+    }
+
+    return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
   }
 
   formatDate(date: Date): string {

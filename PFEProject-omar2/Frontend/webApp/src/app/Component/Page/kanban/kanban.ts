@@ -10,6 +10,7 @@ import {
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TaskDto, TaskService, TaskState, UpdateTaskRequest } from '../Task/Service/TaskService';
 import { UserStoryService } from '../UserStory/Service/UserStoryService';
+import { UserApiService, UserDto } from '../Team/Service/UserApiService';
 
 @Component({
   selector: 'app-kanban',
@@ -20,12 +21,15 @@ import { UserStoryService } from '../UserStory/Service/UserStoryService';
 })
 
 export class KanbanComponent implements OnInit {
+  private readonly projectContextStorageKey = 'kanban:lastProjectId';
+
   constructor(
     private auth: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private taskService: TaskService,
     private userStoryService: UserStoryService,
+    private userApiService: UserApiService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -60,26 +64,48 @@ export class KanbanComponent implements OnInit {
   loading = false;
   error = '';
   userStoryNameMap: Record<number, string> = {};
+  userNameMap: Record<number, string> = {};
   projectId: number | null = null;
 
   ngOnInit(): void {
     const projectIdParam = this.route.snapshot.queryParamMap.get('projectId');
-    this.projectId = projectIdParam ? Number(projectIdParam) : null;
+    this.projectId = this.resolveProjectId(projectIdParam);
 
     this.loadUserStories();
+    this.loadUsers();
     this.loadTasks();
   }
 
   goToProjectDetails(): void {
-    const queryParams = this.projectId && !Number.isNaN(this.projectId)
-      ? { projectId: this.projectId, detailTab: 'overview' }
-      : { detailTab: 'overview' };
+    if (!this.hasProjectContext()) {
+      this.error = 'Project context missing. Open Kanban from a specific project first.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const queryParams = { projectId: this.projectId as number, detailTab: 'overview' };
 
     this.router.navigate(['/ProjectManage'], { queryParams });
   }
 
+  hasProjectContext(): boolean {
+    return typeof this.projectId === 'number' && Number.isFinite(this.projectId) && this.projectId > 0;
+  }
+
   getUserStoryLabel(userStoryId: number): string {
     return this.userStoryNameMap[userStoryId] ?? `US #${userStoryId}`;
+  }
+
+  getAssignedUserLabel(task: TaskDto): string {
+    if (task.assignedToName && task.assignedToName.trim().length > 0) {
+      return task.assignedToName;
+    }
+
+    if (task.assignedToId == null) {
+      return 'Unassigned';
+    }
+
+    return this.userNameMap[task.assignedToId] ?? `User #${task.assignedToId}`;
   }
 
   get connectedIds(): string[] {
@@ -201,6 +227,23 @@ export class KanbanComponent implements OnInit {
     });
   }
 
+  private loadUsers(): void {
+    this.userApiService.getUsers().subscribe({
+      next: (users: UserDto[]) => {
+        this.userNameMap = (Array.isArray(users) ? users : []).reduce((acc, user) => {
+          const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+          acc[user.id] = fullName || user.email || `User #${user.id}`;
+          return acc;
+        }, {} as Record<number, string>);
+
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.userNameMap = {};
+      }
+    });
+  }
+
   private columnIdToStatus(columnId: string): TaskState {
     const map: Record<string, TaskState> = {
       pending: 'pending',
@@ -239,6 +282,21 @@ export class KanbanComponent implements OnInit {
     }
 
     return value.slice(0, 10);
+  }
+
+  private resolveProjectId(projectIdParam: string | null): number | null {
+    const fromQuery = Number(projectIdParam);
+    if (projectIdParam && Number.isFinite(fromQuery) && fromQuery > 0) {
+      localStorage.setItem(this.projectContextStorageKey, String(fromQuery));
+      return fromQuery;
+    }
+
+    const cached = Number(localStorage.getItem(this.projectContextStorageKey));
+    if (Number.isFinite(cached) && cached > 0) {
+      return cached;
+    }
+
+    return null;
   }
 }
 

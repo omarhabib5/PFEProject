@@ -28,14 +28,14 @@
         <header class="topbar">
             <div>
                 <h1>
-                    {{ activeTab === 'dashboard' ? 'Tableau de bord' : activeTab === 'services' ? 'Services et Projets'
-                    : activeTab === 'calendar' ? 'Calendrier' : 'Utilisateurs' }}
+                    {{ activeTab === 'dashboard' ? 'Dashboard' : activeTab === 'services' ? 'Services & Projects'
+                    : activeTab === 'calendar' ? 'Calendar' : 'Users' }}
                 </h1>
                 <p>{{ currentDate }}</p>
             </div>
 
             <div class="topbar-right">
-                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()" placeholder="Rechercher..." />
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()" placeholder="Search..." />
                 <div class="notif">🔔<span>{{ unreadNotifications }}</span></div>
                 <div class="profile">
                     <strong>{{ userName }}</strong>
@@ -101,51 +101,44 @@
 
             <div class="card user-form-card" *ngIf="showAddServiceForm">
                 <div class="title-row">
-                    <h3>Créer un nouveau service</h3>
-                    <button type="button" (click)="toggleAddServiceForm()">close</button>
+                    <h3>Create a new service</h3>
+                    <button type="button" (click)="toggleAddServiceForm()">Close</button>
                 </div>
 
                 <form class="user-form" (ngSubmit)="createService()">
-                    <input type="text" [(ngModel)]="newService.name" name="serviceName" placeholder="Nom du service" required />
+                    <input type="text" [(ngModel)]="newService.name" name="serviceName" placeholder="Service name" required />
                     <select [(ngModel)]="newService.responsibleId" name="responsibleId">
                         <option [value]="undefined">Select a manager</option>
-                        <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+                        <option *ngFor="let user of serviceManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
                     </select>
                     <button type="submit" class="btn-primary" [disabled]="serviceFormLoading">
-                        {{ serviceFormLoading ? 'Création...' : 'Créer le service' }}
+                        {{ serviceFormLoading ? 'Creating...' : 'Create service' }}
                     </button>
                 </form>
             </div>
 
             <div class="card user-form-card" *ngIf="showEditServiceForm">
                 <div class="title-row">
-                    <h3>update service</h3>
-                    <button type="button" (click)="cancelEditService()">close</button>
+                    <h3>Update service</h3>
+                    <button type="button" (click)="cancelEditService()">Close</button>
                 </div>
 
                 <form class="user-form" (ngSubmit)="updateService()">
-                    <input type="text" [(ngModel)]="editService.name" name="editServiceName" placeholder="Nom du service" required />
+                    <input type="text" [(ngModel)]="editService.name" name="editServiceName" placeholder="Service name" required />
                     <select [(ngModel)]="editService.responsibleId" name="editResponsibleId">
                         <option [value]="undefined">Select a manager</option>
-                        <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+                        <option *ngFor="let user of serviceManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
                     </select>
                     <button type="submit" class="btn-primary" [disabled]="serviceFormLoading">
-                        {{ serviceFormLoading ? 'Modification...' : 'Modifier le service' }}
+                        {{ serviceFormLoading ? 'Updating...' : 'Update service' }}
                     </button>
-                    <button type="button" class="btn-secondary" (click)="cancelEditService()">Annuler</button>
+                    <button type="button" class="btn-secondary" (click)="cancelEditService()">Cancel</button>
                 </form>
             </div>
 
             <div class="toolbar">
-                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()"
-                    placeholder="Rechercher un projet..." />
-                <select [(ngModel)]="selectedStatus" (change)="filterProjects()">
-                    <option value="all">Tous les statuts</option>
-                    <option value="active">Actif</option>
-                    <option value="todo">À faire</option>
-                    <option value="done">Terminé</option>
-                    <option value="pending">En attente</option>
-                </select>
+            
+
                 <button type="button" class="btn-secondary" (click)="exportProjects()">Export</button>
                 <button type="button" class="btn-primary" (click)="toggleAddServiceForm()">+ New service</button>
             </div>
@@ -153,7 +146,7 @@
              <div class="project-grid">
                 <article class="project-card" [class.active]="selectedServiceId === 'all'" (click)="goToProjectsByService('all')">
                     <div class="project-head">
-                        <h4>Tous les services</h4>
+                        <h4>All services</h4>
                         <span class="status active">{{ projects.length }} projects</span>
                     </div>
                   
@@ -167,8 +160,8 @@
                     </div>
                     <p (click)="goToProjectsByService(service.id)">see the projects of this service</p>
                     <div class="user-actions">
-                        <button type="button" class="btn-secondary" (click)="startEditService(service); $event.stopPropagation()">Modifier</button>
-                        <button type="button" class="btn-danger" (click)="deleteService(service); $event.stopPropagation()">Supprimer</button>
+                        <button type="button" class="btn-secondary" (click)="startEditService(service); $event.stopPropagation()">Edit</button>
+                        <button type="button" class="btn-danger" (click)="deleteService(service); $event.stopPropagation()">Delete</button>
                     </div>
                 </article>
             </div>
@@ -184,12 +177,23 @@
                 </div>
 
                 <div class="calendar-head">
-                    <span>Dim</span><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span>
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                 </div>
                 <div class="calendar-grid">
                     <div class="day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth">
                         <span>{{ cell.date.getDate() }}</span>
                         <div class="dot" *ngIf="hasProjectOnDate(cell.date)"></div>
+                        <div class="calendar-projects" *ngIf="getProjectsOnDate(cell.date).length > 0">
+                            <div class="calendar-project-item" *ngFor="let project of getProjectsOnDate(cell.date) | slice:0:2"
+                                [title]="project.name + ' | ' + project.serviceLabel + ' | ' + project.startLabel + ' - ' + project.endLabel">
+                                <strong>{{ project.name }}</strong>
+                                <small>{{ project.serviceLabel }}</small>
+                                <small>{{ project.startLabel }} → {{ project.endLabel }}</small>
+                            </div>
+                            <small class="calendar-project-more" *ngIf="getProjectsOnDate(cell.date).length > 2">
+                                +{{ getProjectsOnDate(cell.date).length - 2 }} more
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,8 +202,8 @@
         <section class="page" *ngIf="activeTab === 'users'">
             <div class="card user-form-card">
                 <div class="title-row">
-                    <h3>Ajouter un utilisateur</h3>
-                    <button type="button" (click)="toggleAddUserForm()">{{ showAddUserForm ? 'Fermer' : 'Nouveau'
+                    <h3>Add a user</h3>
+                    <button type="button" (click)="toggleAddUserForm()">{{ showAddUserForm ? 'Close' : 'New'
                         }}</button>
                 </div>
 
@@ -207,29 +211,29 @@
                 <div class="user-message success" *ngIf="userFormSuccess">{{ userFormSuccess }}</div>
 
                 <form class="user-form" *ngIf="showAddUserForm" (ngSubmit)="createUser()">
-                    <input type="text" [(ngModel)]="newUser.firstName" name="firstName" placeholder="Prénom" required />
-                    <input type="text" [(ngModel)]="newUser.lastName" name="lastName" placeholder="Nom" required />
+                    <input type="text" [(ngModel)]="newUser.firstName" name="firstName" placeholder="First name" required />
+                    <input type="text" [(ngModel)]="newUser.lastName" name="lastName" placeholder="Last name" required />
                     <input type="email" [(ngModel)]="newUser.email" name="email" placeholder="Email" required />
                     <select [(ngModel)]="newUser.role" name="role" required>
                         <option *ngFor="let role of userRoleOptions" [ngValue]="role.value">{{ role.label }}</option>
                     </select>
                     <button type="submit" class="btn-primary" [disabled]="userFormLoading">
-                        {{ userFormLoading ? 'Création...' : 'Créer et envoyer email' }}
+                        {{ userFormLoading ? 'Creating...' : 'Create and send email' }}
                     </button>
                 </form>
 
                 <form class="user-form" *ngIf="showEditUserForm" (ngSubmit)="updateUser()">
-                    <input type="text" [(ngModel)]="editUser.firstName" name="editFirstName" placeholder="Prénom"
+                    <input type="text" [(ngModel)]="editUser.firstName" name="editFirstName" placeholder="First name"
                         required />
-                    <input type="text" [(ngModel)]="editUser.lastName" name="editLastName" placeholder="Nom" required />
+                    <input type="text" [(ngModel)]="editUser.lastName" name="editLastName" placeholder="Last name" required />
                     <input type="email" [(ngModel)]="editUser.email" name="editEmail" placeholder="Email" required />
                     <select [(ngModel)]="editUser.role" name="editRole" required>
                         <option *ngFor="let role of userRoleOptions" [ngValue]="role.value">{{ role.label }}</option>
                     </select>
                     <button type="submit" class="btn-primary" [disabled]="userFormLoading">
-                        {{ userFormLoading ? 'Modification...' : 'Modifier utilisateur' }}
+                        {{ userFormLoading ? 'Updating...' : 'Update user' }}
                     </button>
-                    <button type="button" class="btn-secondary" (click)="cancelEditUser()">Annuler</button>
+                    <button type="button" class="btn-secondary" (click)="cancelEditUser()">Cancel</button>
                 </form>
             </div>
 
@@ -240,8 +244,8 @@
                     <small>{{ user.email }}</small>
                     <span class="badge">{{ getRoleDisplay(user.role) }}</span>
                     <div class="user-actions">
-                        <button type="button" class="btn-secondary" (click)="startEditUser(user)">Modifier</button>
-                        <button type="button" class="btn-danger" (click)="deleteUser(user)">Supprimer</button>
+                        <button type="button" class="btn-secondary" (click)="startEditUser(user)">Edit</button>
+                        <button type="button" class="btn-danger" (click)="deleteUser(user)">Delete</button>
                     </div>
                 </article>
             </div>

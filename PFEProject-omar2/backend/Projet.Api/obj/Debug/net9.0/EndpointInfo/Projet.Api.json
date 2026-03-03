@@ -1445,6 +1445,11 @@
           "userStoryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "assignedToId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1767,6 +1772,11 @@
           "userStoryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "assignedToId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false

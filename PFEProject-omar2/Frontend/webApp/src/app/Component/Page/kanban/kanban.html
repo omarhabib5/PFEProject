@@ -6,7 +6,7 @@
         </div>
         <div class="kanban-actions">
             <a class="ghost-button" routerLink="/TaskManage">Task Manager</a>
-            <button type="button" class="ghost-button" (click)="goToProjectDetails()">Project Details</button>
+            <button type="button" class="ghost-button" (click)="goToProjectDetails()" [disabled]="!hasProjectContext()">Project Details</button>
  
         </div>
     </header>
@@ -20,7 +20,7 @@
                 <h2 class="board-title">{{ column.title }}</h2>
                 <div class="board-actions">
                     <span class="board-count">{{ column.tasks.length }}</span>
-                    <button type="button" class="add-task-btn" (click)="addTask(column)">+</button>
+                    
                 </div>
             </header>
 
@@ -31,6 +31,7 @@
                         <strong>{{ task.title }}</strong>
                     </div>
                     <p>{{ task.description || 'No description' }}</p>
+                    <p>{{ getAssignedUserLabel(task) }}</p>
                     <div class="card-meta">
                         <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
                         <span>{{ task.estimatedHours }}H</span>

@@ -67,7 +67,7 @@
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="0" disabled>Select a project manager</option>
-            <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            <option *ngFor="let user of projectManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
           </select>
         </div>
       </div>
@@ -92,6 +92,7 @@
             type="date" 
             id="startDate" 
             [(ngModel)]="newProject.startDate" 
+            (ngModelChange)="onProjectDatesChange()"
             name="startDate"
             required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
@@ -105,6 +106,7 @@
             type="date" 
             id="endDate" 
             [(ngModel)]="newProject.endDate" 
+            (ngModelChange)="onProjectDatesChange()"
             name="endDate"
             required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
@@ -123,6 +125,7 @@
             name="estimatedDuration"
             placeholder="0"
             min="0"
+            readonly
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
         </div>
@@ -257,7 +260,7 @@
         </div>
         <div>
           <p class="text-3xl font-bold text-slate-900">{{ getProjectTasksCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">Tâches</p>
+          <p class="text-base text-slate-600">Tâsks</p>
         </div>
         <div>
           <p class="text-3xl font-bold text-slate-900">{{ getProjectMembersCount(selectedProject) }}</p>
@@ -267,7 +270,7 @@
 
       <div class="pt-5">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-lg text-slate-700">Progression globale</p>
+          <p class="text-lg text-slate-700">Overall progress</p>
           <span class="text-lg font-semibold text-slate-900">{{ getProjectProgress(selectedProject) }}%</span>
         </div>
         <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -292,28 +295,28 @@
       <div class="p-6" *ngIf="detailTab === 'overview'">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h3 class="text-2xl font-bold text-slate-900 mb-4">Informations du projet</h3>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Project information</h3>
             <div class="space-y-2 text-base">
-              <p><span class="text-slate-500">Date de début:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.startDate) }}</strong></p>
-              <p><span class="text-slate-500">Date de fin:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.endDate) }}</strong></p>
-              <p><span class="text-slate-500">Chef de projet:</span> <strong class="ml-2 text-slate-900">{{ getUserName(selectedProject.projectManagerId) }}</strong></p>
+              <p><span class="text-slate-500">Start Date:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.startDate) }}</strong></p>
+              <p><span class="text-slate-500">End Date:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.endDate) }}</strong></p>
+              <p><span class="text-slate-500">project Manager: </span> <strong class="ml-2 text-slate-900">{{ getUserName(selectedProject.projectManagerId) }}</strong></p>
             </div>
           </div>
 
           <div>
-            <h3 class="text-2xl font-bold text-slate-900 mb-4">Équipe</h3>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Team</h3>
             <div class="flex flex-wrap gap-3">
               <div *ngFor="let member of selectedProjectMembers" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-800">
                 <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">{{ getMemberInitials(member) }}</span>
                 <span class="text-base">{{ member.firstName }} {{ member.lastName }}</span>
               </div>
-              <p *ngIf="selectedProjectMembers.length === 0" class="text-slate-500">Aucun membre assigné.</p>
+              <p *ngIf="selectedProjectMembers.length === 0" class="text-slate-500">No members assigned.</p>
             </div>
           </div>
         </div>
 
         <button type="button" class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
-          Voir le tableau Kanban des tâches
+         See the Kanban board for tasks
         </button>
       </div>
 
@@ -376,6 +379,7 @@
                   type="date"
                   id="storyStartDate"
                   [(ngModel)]="newDetailUserStory.startDate"
+                  (ngModelChange)="onDetailUserStoryDatesChange()"
                   name="storyStartDate"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
@@ -387,6 +391,7 @@
                   type="date"
                   id="storyEndDate"
                   [(ngModel)]="newDetailUserStory.endDate"
+                  (ngModelChange)="onDetailUserStoryDatesChange()"
                   name="storyEndDate"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
@@ -400,6 +405,7 @@
                   [(ngModel)]="newDetailUserStory.estimatedDuration"
                   name="storyEstimatedDuration"
                   min="1"
+                  readonly
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
               </div>
@@ -531,6 +537,7 @@
                   type="date"
                   id="detailSprintStartDate"
                   [(ngModel)]="newDetailSprint.startDate"
+                  (ngModelChange)="onDetailSprintDatesChange()"
                   name="detailSprintStartDate"
                   required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -543,6 +550,7 @@
                   type="date"
                   id="detailSprintEndDate"
                   [(ngModel)]="newDetailSprint.endDate"
+                  (ngModelChange)="onDetailSprintDatesChange()"
                   name="detailSprintEndDate"
                   required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -557,6 +565,7 @@
                   [(ngModel)]="newDetailSprint.estimatedDuration"
                   name="detailSprintDuration"
                   min="0"
+                  readonly
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
               </div>

@@ -38,6 +38,7 @@ export const routes: Routes = [
     {path:'TaskManage',component:TaskManager},
     {path:'Kanban',component:KanbanComponent},
     {path:'UserStoryManage',component:UserStoryManagerComponent},
+    {path:'UserStoryManage/:sprintId',component:UserStoryManagerComponent},
 
     {path:'ChefProjetDashboard', component:ChefProjetDashboard},
     {path:'EmployeeDashboard', component:EmployeeDashboard},

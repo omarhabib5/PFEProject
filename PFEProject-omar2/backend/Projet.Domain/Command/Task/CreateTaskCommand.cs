@@ -15,5 +15,6 @@ namespace Projet.Domain.Command.TaskCRUD
         public State taskState { get; set; }
         public int complexity { get; set; }
         public int UserStoryId { get; set; }
+        public int? AssignedToId { get; set; }
     }
 }

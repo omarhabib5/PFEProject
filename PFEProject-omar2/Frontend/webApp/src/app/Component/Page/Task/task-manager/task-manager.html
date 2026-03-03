@@ -64,6 +64,19 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Assigner à</label>
+                    <select [(ngModel)]="formModel.assignedToId">
+                        <option [ngValue]="null">Non assigné</option>
+                        <option *ngFor="let user of users" [ngValue]="user.id">
+                            {{ getUserLabel(user) }}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group"></div>
+            </div>
+
             <div class="form-actions">
                 <button type="button" class="btn-primary" (click)="saveTask()" [disabled]="saving">
                     {{ saving ? 'Enregistrement...' : (editMode ? 'Mettre à jour' : 'Créer') }}
@@ -91,7 +104,10 @@
                         <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
                         <span>{{ task.estimatedHours }}h</span>
                     </div>
-                    <button class="btn-link" type="button" (click)="startEdit(task, $event)">Modifier</button>
+                    <div class="item-actions">
+                        <button class="btn-link" type="button" (click)="startEdit(task, $event)">Modifier</button>
+                        <button class="btn-link" type="button" (click)="deleteTask(task, $event)">Delete</button>
+                    </div>
                 </div>
             </div>
         </div>

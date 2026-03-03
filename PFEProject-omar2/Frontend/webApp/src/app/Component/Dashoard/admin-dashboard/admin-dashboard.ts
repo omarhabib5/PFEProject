@@ -32,6 +32,14 @@ interface CalendarCell {
   inCurrentMonth: boolean;
 }
 
+interface CalendarProjectEntry {
+  id: number;
+  name: string;
+  serviceLabel: string;
+  startLabel: string;
+  endLabel: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -51,7 +59,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   private teamService = inject(TeamService);
   private cdr = inject(ChangeDetectorRef);
 
-  userName = 'Administrateur';
+  userName = 'Administrator';
   userRole = 'Admin';
   currentDate = '';
   activeTab: DashboardTab = 'dashboard';
@@ -63,6 +71,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   projectCards: UiProjectCard[] = [];
   filteredProjectCards: UiProjectCard[] = [];
   users: UserDto[] = [];
+  serviceManagerUsers: UserDto[] = [];
   tasks: TaskDto[] = [];
 
   searchTerm = '';
@@ -70,7 +79,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   selectedServiceId: number | 'all' = 'all';
   loading = false;
 
-  /* ===== Dashboard Stats ===== */
+
   activeProjects = 0;
   completedProjects = 0;
   totalUsers = 0;
@@ -129,6 +138,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   currentMonthDate = new Date();
   calendarTitle = '';
   calendarCells: CalendarCell[] = [];
+  calendarProjectsByDate: Record<string, CalendarProjectEntry[]> = {};
 
   private tasksPieChart?: Chart;
   private priorityBarChart?: Chart;
@@ -173,7 +183,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
       month: 'long',
       day: 'numeric'
     };
-    this.currentDate = new Date().toLocaleDateString('fr-FR', options);
+    this.currentDate = new Date().toLocaleDateString('en-US', options);
   }
   goToServiceManager(){
     this.router.navigate(['/Services']);
@@ -192,6 +202,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     }
 
     if (tab === 'calendar') {
+      this.focusCalendarOnMatchedProjectStartMonth(this.searchTerm.trim().toLowerCase());
       this.buildCalendar();
     }
 
@@ -201,7 +212,6 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     }
   }
 
-  /* ===== LOAD DATA ===== */
 
   loadProjects(): void {
     this.loading = true;
@@ -219,6 +229,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         this.recentProjects = this.projectCards.slice(0, 3);
 
         this.filterProjects();
+        this.updateCalendarProjectsMap();
         this.refreshCharts();
         this.loading = false;
          this.cdr.detectChanges();
@@ -248,6 +259,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.serviceService.getServices().subscribe({
       next: (data) => {
         this.services = data;
+        this.updateCalendarProjectsMap();
          this.cdr.detectChanges();
       },
       error: (err) => console.error(err)
@@ -259,12 +271,28 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.userApiService.getUsers().subscribe({
       next: (data) => {
         this.users = data;
+        this.serviceManagerUsers = data.filter((user) => this.isServiceManagerRole(user.role));
         this.totalUsers = data.length;
         this.activeTeam = data.slice(0, 3);
            this.cdr.detectChanges();
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        this.serviceManagerUsers = [];
+        console.error(err);
+      }
     });
+  }
+
+  private isServiceManagerRole(role: string | number | undefined): boolean {
+    if (typeof role === 'number') {
+      return role === 1;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === '1'
+      || normalized === 'servicemanager'
+      || normalized === 'service manager'
+      || normalized === 'service_manager';
   }
 
   loadTeams(): void {
@@ -294,6 +322,48 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
       return matchesTerm && matchesStatus && matchesService;
     });
+
+    const hasJumpedToMatchedMonth = this.focusCalendarOnMatchedProjectStartMonth(term);
+    if (!hasJumpedToMatchedMonth) {
+      this.updateCalendarProjectsMap();
+    }
+  }
+
+  private focusCalendarOnMatchedProjectStartMonth(term: string): boolean {
+    if (!term) {
+      return false;
+    }
+
+    const visibleProjects = this.filteredProjectCards
+      .map((card) => this.projects.find((projectItem) => (projectItem.id ?? 0) === card.id))
+      .filter((projectItem): projectItem is project => !!projectItem);
+
+    const source = visibleProjects.length > 0 ? visibleProjects : this.projects;
+
+    const matchedProject = source.find((item) => (item.name ?? '').toLowerCase() === term)
+      ?? source.find((item) => (item.name ?? '').toLowerCase().startsWith(term))
+      ?? source.find((item) => (item.name ?? '').toLowerCase().includes(term));
+    if (!matchedProject) {
+      return false;
+    }
+
+    const startDate = new Date(matchedProject.startDate);
+    if (Number.isNaN(startDate.getTime())) {
+      return false;
+    }
+
+    const targetYear = startDate.getFullYear();
+    const targetMonth = startDate.getMonth();
+    const currentYear = this.currentMonthDate.getFullYear();
+    const currentMonth = this.currentMonthDate.getMonth();
+
+    if (targetYear === currentYear && targetMonth === currentMonth) {
+      return false;
+    }
+
+    this.currentMonthDate = new Date(targetYear, targetMonth, 1);
+    this.buildCalendar();
+    return true;
   }
 
   selectService(serviceId: number | 'all'): void {
@@ -325,7 +395,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   exportProjects(): void {
     const rows = [
-      ['Nom', 'Statut', 'Progression'],
+      ['Name', 'Status', 'Progress'],
       ...this.filteredProjectCards.map((item) => [
         item.name,
         item.statusLabel,
@@ -363,11 +433,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   hasProjectOnDate(date: Date): boolean {
     const key = this.toDateKey(date);
-    return this.projects.some((item) => {
-      const start = this.toDateKey(new Date(item.startDate));
-      const end = this.toDateKey(new Date(item.endDate));
-      return key >= start && key <= end;
-    });
+    return (this.calendarProjectsByDate[key]?.length ?? 0) > 0;
+  }
+
+  getProjectsOnDate(date: Date): CalendarProjectEntry[] {
+    return this.calendarProjectsByDate[this.toDateKey(date)] ?? [];
   }
 
   getUserInitials(user: UserDto): string {
@@ -382,9 +452,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     return roleOption?.label ?? 'Employee';
   }
 
-  openKanbanBoard(): void {
-    this.router.navigate(['/kanban']);
-  }
+
 
   toggleAddUserForm(): void {
     this.showAddUserForm = !this.showAddUserForm;
@@ -422,7 +490,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.userFormSuccess = '';
 
     if (!this.editUser.firstName.trim() || !this.editUser.lastName.trim() || !this.editUser.email.trim()) {
-      this.userFormError = 'Nom, prénom et email sont obligatoires.';
+      this.userFormError = 'First name, last name, and email are required.';
       return;
     }
 
@@ -437,7 +505,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     this.userApiService.updateUser(payload).subscribe({
       next: () => {
-        this.userFormSuccess = 'Utilisateur modifié avec succès.';
+        this.userFormSuccess = 'User updated successfully.';
         this.userFormLoading = false;
         this.showEditUserForm = false;
         this.editingUserId = null;
@@ -445,14 +513,14 @@ export class AdminDashboard implements OnInit, AfterViewInit {
           this.cdr.detectChanges();
       },
       error: (err) => {
-        this.userFormError = err?.error?.message || 'Erreur lors de la modification de l\'utilisateur.';
+        this.userFormError = err?.error?.message || 'Error while updating user.';
         this.userFormLoading = false;
       }
     });
   }
 
   deleteUser(user: UserDto): void {
-    if (!confirm(`Supprimer l'utilisateur ${user.firstName} ${user.lastName} ?`)) {
+    if (!confirm(`Delete user ${user.firstName} ${user.lastName}?`)) {
       return;
     }
 
@@ -463,7 +531,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.getUserDeleteBlockReasons(user).subscribe({
       next: (reasons) => {
         if (reasons.length > 0) {
-          this.userFormError = `Suppression impossible: cet utilisateur est lié comme ${reasons.join(', ')}.`;
+          this.userFormError = `Deletion not allowed: this user is linked as ${reasons.join(', ')}.`;
           this.userFormLoading = false;
           this.cdr.detectChanges();
           return;
@@ -471,20 +539,20 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
         this.userApiService.deleteUser(user.id).subscribe({
           next: () => {
-            this.userFormSuccess = 'Utilisateur supprimé avec succès.';
+            this.userFormSuccess = 'User deleted successfully.';
             this.userFormLoading = false;
             this.loadUsers();
             this.cdr.detectChanges();
           },
           error: (err) => {
-            this.userFormError = err?.error?.message || 'Erreur lors de la suppression de l\'utilisateur.';
+            this.userFormError = err?.error?.message || 'Error while deleting user.';
             this.userFormLoading = false;
             this.cdr.detectChanges();
           }
         });
       },
       error: () => {
-        this.userFormError = 'Impossible de vérifier les liaisons utilisateur. Réessayez.';
+        this.userFormError = 'Unable to verify user links. Please try again.';
         this.userFormLoading = false;
         this.cdr.detectChanges();
       }
@@ -496,12 +564,12 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     const isProjectLeader = this.projects.some((item) => Number(item.projectManagerId) === user.id);
     if (isProjectLeader) {
-      reasons.push('chef de projet');
+      reasons.push('project manager');
     }
 
     const isServiceResponsible = this.services.some((item) => Number(item.responsibleId ?? -1) === user.id);
     if (isServiceResponsible) {
-      reasons.push('responsable de service');
+      reasons.push('service manager');
     }
 
     if (this.teams.length === 0) {
@@ -530,11 +598,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         );
 
         if (isTeamMember) {
-          reasons.push('membre d\'équipe');
+          reasons.push('team member');
         }
 
         if (isTeamLeader) {
-          reasons.push('leader d\'équipe');
+          reasons.push('team leader');
         }
 
         return Array.from(new Set(reasons));
@@ -547,7 +615,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.userFormSuccess = '';
 
     if (!this.newUser.firstName.trim() || !this.newUser.lastName.trim() || !this.newUser.email.trim()) {
-      this.userFormError = 'Nom, prénom et email sont obligatoires.';
+      this.userFormError = 'First name, last name, and email are required.';
       return;
     }
 
@@ -562,7 +630,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     this.userApiService.createEmployee(payload).subscribe({
       next: () => {
-        this.userFormSuccess = 'Utilisateur créé. Les identifiants ont été envoyés par email.';
+        this.userFormSuccess = 'User created. Credentials were sent by email.';
         this.userFormLoading = false;
         this.showAddUserForm = false;
         this.resetUserForm();
@@ -579,8 +647,8 @@ export class AdminDashboard implements OnInit, AfterViewInit {
           || validationMessage
           || err?.error?.title
           || (err?.status === 401 || err?.status === 403
-            ? 'Accès refusé. Reconnectez-vous avec un compte Admin ou Service Manager.'
-            : 'Erreur lors de la création de l\'utilisateur.');
+            ? 'Access denied. Sign in again with an Admin or Service Manager account.'
+            : 'Error while creating user.');
         this.userFormLoading = false;
       }
     });
@@ -628,7 +696,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.tasksPieChart = new Chart('tasksPieChart', {
       type: 'pie',
       data: {
-        labels: ['En cours', 'En révision', 'Terminé', 'À faire'],
+        labels: ['In progress', 'In review', 'Done', 'To do'],
         datasets: [{
           data: [
             statusCounts.inProgress,
@@ -649,9 +717,9 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.priorityBarChart = new Chart('priorityBarChart', {
       type: 'bar',
       data: {
-        labels: ['Basse', 'Moyenne', 'Haute', 'Urgente'],
+        labels: ['Low', 'Medium', 'High', 'Urgent'],
         datasets: [{
-          label: 'Tâches',
+          label: 'Tasks',
           data: [
             priorityCounts.low,
             priorityCounts.medium,
@@ -687,11 +755,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     };
 
     const stateLabelMap: Record<number, string> = {
-      [State.pending]: 'En attente',
-      [State.todo]: 'À faire',
-      [State.inProgress]: 'Actif',
-      [State.done]: 'Terminé',
-      [State.validated]: 'Validé'
+      [State.pending]: 'Pending',
+      [State.todo]: 'To do',
+      [State.inProgress]: 'Active',
+      [State.done]: 'Done',
+      [State.validated]: 'Validated'
     };
 
     const stateClassMap: Record<number, string> = {
@@ -705,26 +773,26 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     return {
       id: item.id ?? 0,
       name: item.name,
-      description: item.description || 'Aucune description',
+      description: item.description || 'No description',
       progress: progressMap[state] ?? 0,
-      statusLabel: stateLabelMap[state] ?? 'Inconnu',
+      statusLabel: stateLabelMap[state] ?? 'Unknown',
       statusClass: stateClassMap[state] ?? 'pending',
       dueDate: this.formatDate(item.endDate),
-      membersLabel: item.team?.name ? `Équipe: ${item.team.name}` : 'Équipe non assignée',
+      membersLabel: item.team?.name ? `Team: ${item.team.name}` : 'Team not assigned',
       taskSummary: `${item.userStories?.length ?? 0} user stories`
     };
   }
 
   private formatDate(dateValue: Date | string): string {
     const date = new Date(dateValue);
-    return date.toLocaleDateString('fr-FR');
+    return date.toLocaleDateString('en-US');
   }
 
   private buildCalendar(): void {
     const year = this.currentMonthDate.getFullYear();
     const month = this.currentMonthDate.getMonth();
 
-    this.calendarTitle = new Date(year, month, 1).toLocaleDateString('fr-FR', {
+    this.calendarTitle = new Date(year, month, 1).toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric'
     });
@@ -741,6 +809,75 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         inCurrentMonth: date.getMonth() === month
       };
     });
+
+    this.updateCalendarProjectsMap();
+  }
+
+  private updateCalendarProjectsMap(): void {
+    const map: Record<string, CalendarProjectEntry[]> = {};
+    const projectsToRender = this.getCalendarSourceProjects();
+
+    if (this.calendarCells.length === 0 || projectsToRender.length === 0) {
+      this.calendarProjectsByDate = map;
+      return;
+    }
+
+    const cellStart = new Date(this.calendarCells[0].date);
+    const cellEnd = new Date(this.calendarCells[this.calendarCells.length - 1].date);
+
+    for (const item of projectsToRender) {
+      const projectStart = new Date(item.startDate);
+      const projectEnd = new Date(item.endDate);
+
+      if (Number.isNaN(projectStart.getTime()) || Number.isNaN(projectEnd.getTime())) {
+        continue;
+      }
+
+      if (projectEnd < cellStart || projectStart > cellEnd) {
+        continue;
+      }
+
+      const rangeStart = new Date(projectStart > cellStart ? projectStart : cellStart);
+      const rangeEnd = new Date(projectEnd < cellEnd ? projectEnd : cellEnd);
+
+      const entry: CalendarProjectEntry = {
+        id: item.id ?? 0,
+        name: item.name,
+        serviceLabel: this.getCalendarServiceLabel(item.serviceId),
+        startLabel: this.formatDate(item.startDate),
+        endLabel: this.formatDate(item.endDate)
+      };
+
+      const cursor = new Date(rangeStart);
+      while (cursor <= rangeEnd) {
+        const key = this.toDateKey(cursor);
+        if (!map[key]) {
+          map[key] = [];
+        }
+        map[key].push(entry);
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+
+    this.calendarProjectsByDate = map;
+  }
+
+  private getCalendarSourceProjects(): project[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) {
+      return [];
+    }
+
+    return this.projects.filter((item) => (item.name ?? '').toLowerCase().includes(term));
+  }
+
+  private getCalendarServiceLabel(serviceId?: number): string {
+    if (!serviceId) {
+      return 'No service';
+    }
+
+    const service = this.services.find((item) => item.id === serviceId);
+    return service?.name ?? `Service #${serviceId}`;
   }
 
   private toDateKey(date: Date): string {
@@ -841,7 +978,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.serviceFormSuccess = '';
 
     if (!this.newService.name.trim()) {
-      this.serviceFormError = 'Le nom du service est obligatoire.';
+      this.serviceFormError = 'Service name is required.';
       return;
     }
 
@@ -853,7 +990,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     this.serviceService.createService(payload).subscribe({
       next: () => {
-        this.serviceFormSuccess = 'Service créé avec succès.';
+        this.serviceFormSuccess = 'Service created successfully.';
         this.serviceFormLoading = false;
         this.showAddServiceForm = false;
         this.resetServiceForm();
@@ -862,7 +999,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
                 setTimeout(() => this.serviceFormSuccess = '', 3000);
       },
       error: (err) => {
-        this.serviceFormError = err?.error?.message || 'Erreur lors de la création du service.';
+        this.serviceFormError = err?.error?.message || 'Error while creating service.';
         this.serviceFormLoading = false;
       }
     });
@@ -900,7 +1037,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.serviceFormSuccess = '';
 
     if (!this.editService.name.trim()) {
-      this.serviceFormError = 'Le nom du service est obligatoire.';
+      this.serviceFormError = 'Service name is required.';
       return;
     }
 
@@ -917,7 +1054,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     this.serviceService.updateService(this.editingServiceId, payload).subscribe({
       next: () => {
-        this.serviceFormSuccess = 'Service modifié avec succès.';
+        this.serviceFormSuccess = 'Service updated successfully.';
         this.serviceFormLoading = false;
         this.showEditServiceForm = false;
         this.editingServiceId = null;
@@ -926,14 +1063,14 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         setTimeout(() => this.serviceFormSuccess = '', 3000);
       },
       error: (err) => {
-        this.serviceFormError = err?.error?.message || 'Erreur lors de la modification du service.';
+        this.serviceFormError = err?.error?.message || 'Error while updating service.';
         this.serviceFormLoading = false;
       }
     });
   }
 
   deleteService(service: Service): void {
-    if (!confirm(`Supprimer le service "${service.name}" ? Cette action est irréversible.`)) {
+    if (!confirm(`Delete service "${service.name}"? This action cannot be undone.`)) {
       return;
     }
 
@@ -943,7 +1080,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
     this.serviceService.deleteService(service.id).subscribe({
       next: () => {
-        this.serviceFormSuccess = 'Service supprimé avec succès.';
+        this.serviceFormSuccess = 'Service deleted successfully.';
         this.serviceFormLoading = false;
         this.loadServices();
        
@@ -951,7 +1088,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
          this.cdr.detectChanges();
       },
       error: (err) => {
-        this.serviceFormError = err?.error?.message || 'Erreur lors de la suppression du service.';
+        this.serviceFormError = err?.error?.message || 'Error while deleting service.';
         this.serviceFormLoading = false;
       }
     });

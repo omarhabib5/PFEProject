@@ -32,6 +32,18 @@ namespace Projet.Domain.Handler.Sprint
             {
                 throw new Exception("Sprint not found");
             }
+
+            var project = context.Projects.FirstOrDefault(p => p.id == request.ProjectId);
+            if (project == null)
+            {
+                throw new KeyNotFoundException("Project with the specified ID was not found.");
+            }
+
+            if (request.StartDate < project.startDate || request.EndDate > project.endDate)
+            {
+                throw new InvalidOperationException("Sprint dates must be within the project's start and end dates.");
+            }
+
             sprint.Name = request.Name;
             sprint.Description = request.Description;
             sprint.estimatedDuration = estimatedDuration;
