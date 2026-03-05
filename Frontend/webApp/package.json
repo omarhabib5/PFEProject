@@ -36,6 +36,7 @@
     "@syncfusion/ej2-layouts": "^32.2.3",
     "@syncfusion/ej2-navigations": "^32.2.7",
     "chart.js": "^4.5.1",
+    "jwt-decode": "^4.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

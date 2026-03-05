@@ -4,6 +4,13 @@ export interface LoginRequest {
   rememberMe?: boolean;
 }
 
+export enum AppRole {
+  Admin = 'admin',
+  ServiceManager = 'servicemanager',
+  ProjectManager = 'projectmanager',
+  Employee = 'employee'
+}
+
 export enum UserRole {
   ProdectOwner = 1,
   ScrumMaster = 2,
@@ -44,11 +51,18 @@ export interface AuthResponse {
   profileImageUrl?: string;
   token?: string;
   accessToken?: string;
-  refreshToken: string;
+  refreshToken?: string;
   tokenExpiry?: string;
   accessTokenExpiresAt?: string;
   refreshTokenExpiresAt?: string;
   isEmailConfirmed?: boolean;
+}
+
+export interface JwtPayload {
+  exp: number;
+  role?: string | number;
+  roles?: Array<string | number>;
+  [claim: string]: unknown;
 }
 
 export interface UserProfile {

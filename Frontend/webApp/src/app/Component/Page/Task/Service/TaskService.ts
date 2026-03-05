@@ -57,9 +57,10 @@ export class TaskService {
 		});
 	}
 updateStatus(id: number | string, status: UserStoryStatus): Observable<void> {
+		const normalizedTaskState = this.toApiTaskStateNumber(status);
 		return this.http.put<void>(
 			`${this.apiUrl}/${id}`,
-			{ taskState: status },
+			{ taskState: normalizedTaskState },
 			{ headers: this.getAuthHeaders() }
 		);
 	}

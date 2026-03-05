@@ -22,3 +22,72 @@ app-responsable-service-dashboard .user-story-modal-form select {
 	padding: 0 10px;
 	background: #fff;
 }
+
+@media (max-width: 1024px) {
+	app-employee-dashboard .employee-layout,
+	app-responsable-service-dashboard .service-manager-layout { grid-template-columns: 1fr !important; }
+
+	app-employee-dashboard .sidebar,
+	app-responsable-service-dashboard .sidebar {
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		border-right: 0;
+		border-bottom: 1px solid #e5e7eb;
+		padding: 10px;
+	}
+}
+
+@media (max-width: 768px) {
+	app-employee-dashboard .topbar,
+	app-responsable-service-dashboard .topbar { flex-direction: column; align-items: stretch !important; gap: 10px; }
+
+	app-employee-dashboard .topbar-right,
+	app-responsable-service-dashboard .topbar-right { width: 100%; flex-wrap: wrap; }
+
+	app-employee-dashboard .topbar input,
+	app-responsable-service-dashboard .search-box input,
+	app-responsable-service-dashboard .filters-row input { width: 100% !important; min-width: 0; }
+
+	app-employee-dashboard .hero,
+	app-employee-dashboard .hero-stats,
+	app-employee-dashboard .kpi-grid,
+	app-employee-dashboard .overview-grid,
+	app-employee-dashboard .project-body,
+	app-responsable-service-dashboard .kpi-grid,
+	app-responsable-service-dashboard .stats-grid,
+	app-responsable-service-dashboard .service-header-card,
+	app-responsable-service-dashboard .service-left { grid-template-columns: 1fr !important; flex-direction: column; align-items: flex-start !important; }
+
+	app-employee-dashboard .tabs-row,
+	app-responsable-service-dashboard .tabs-header { width: 100%; overflow-x: auto; white-space: nowrap; }
+
+	app-employee-dashboard .project-head,
+	app-responsable-service-dashboard .section-title-row,
+	app-responsable-service-dashboard .inline-actions,
+	app-responsable-service-dashboard .filters-row,
+	app-responsable-service-dashboard .service-actions-row { flex-wrap: wrap; }
+
+	app-employee-dashboard .calendar-head,
+	app-employee-dashboard .calendar-grid,
+	app-responsable-service-dashboard .calendar-grid { min-width: 560px; }
+
+	app-employee-dashboard .card,
+	app-responsable-service-dashboard .tabs-card,
+	app-responsable-service-dashboard .team-table-wrap { overflow-x: auto; }
+
+	app-responsable-service-dashboard .modal-card { width: calc(100vw - 24px) !important; max-width: none !important; }
+}
+
+@media (max-width: 480px) {
+	app-employee-dashboard .hero h2,
+	app-responsable-service-dashboard .topbar h2,
+	app-responsable-service-dashboard .service-left h3 { font-size: 1.4rem !important; }
+
+	app-employee-dashboard .kpi strong,
+	app-responsable-service-dashboard .kpi-card strong { font-size: 1.5rem !important; }
+
+	app-employee-dashboard .page,
+	app-responsable-service-dashboard .services-list-view,
+	app-responsable-service-dashboard .service-detail-view { padding: .75rem !important; }
+}

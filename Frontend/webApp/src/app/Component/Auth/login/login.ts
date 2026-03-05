@@ -1,9 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../Service/auth.service';
-import { AuthResponse } from '../model/auth.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { LoginRequest } from '../model/auth.model';
 import { RoleGuard } from '../Service/role.guard';
 
 @Component({
@@ -12,41 +13,80 @@ import { RoleGuard } from '../Service/role.guard';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
-  private roleGuard = inject(RoleGuard);
+  private roleNavigator = inject(RoleGuard);
+
   errorMessage: string = '';
   isLoading: boolean = false;
-  
-  form = this.fb.group({
+
+  readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     rememberMe: [false]
   });
-  
+
   constructor(private auth: AuthService, private router: Router) {}
-  
+
+  ngOnInit(): void {
+    if (this.auth.isAuthenticated()) {
+      this.roleNavigator.redirectToDashboard();
+    }
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.isLoading) {
+      this.form.markAllAsTouched();
       return;
     }
 
+    const payload: LoginRequest = this.form.getRawValue();
+
     this.isLoading = true;
     this.auth
-      .login(this.form.value as { email: string; password: string; rememberMe: boolean })
+      .login(payload)
       .subscribe({
-        next: (response: AuthResponse) => {
+        next: () => {
           this.errorMessage = '';
-          console.log('Login successful:', response);
-      
-          this.roleGuard.redirectToDashboard();
+
+          const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'];
+          if (typeof returnUrl === 'string' && returnUrl.startsWith('/')) {
+            void this.router.navigateByUrl(returnUrl);
+          } else {
+            this.roleNavigator.redirectToDashboard();
+          }
+
           this.isLoading = false;
         },
-        error: (err) => {
+        error: (error: unknown) => {
           this.isLoading = false;
-          this.errorMessage = err?.error?.message || 'Login failed. Check your credentials.';
-          console.error('Login error:', err);
+          this.errorMessage = this.extractErrorMessage(error);
         }
       });
+  }
+
+  private extractErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (typeof error.error === 'string' && error.error.trim().length > 0) {
+        return error.error;
+      }
+
+      if (error.error && typeof error.error === 'object') {
+        const maybeMessage = (error.error as { message?: unknown }).message;
+        if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+          return maybeMessage;
+        }
+      }
+
+      if (error.message.trim().length > 0) {
+        return error.message;
+      }
+    }
+
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return 'Login failed. Check your credentials and try again.';
   }
 }

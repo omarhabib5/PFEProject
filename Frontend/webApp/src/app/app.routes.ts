@@ -17,41 +17,69 @@ import { TeamManage } from './Component/Page/Team/team-manage/team-manage';
 import { TaskManager } from './Component/Page/Task/task-manager/task-manager';
 import { UserStoryManagerComponent } from './Component/Page/UserStory/user-story-manager/user-story-manager';
 import { KanbanComponent } from './Component/kanban/kanban';
+import { AppRole } from './Component/Auth/model/auth.model';
+import { authGuard, guestGuard, roleGuard } from './Component/Auth/Service/auth.guards';
 
 export const routes: Routes = [
-    { path: '', component: Login },
-    { path: 'login', component: Login },
+    { path: '', pathMatch: 'full', component: Login, canActivate: [guestGuard] },
+    { path: 'login', component: Login, canActivate: [guestGuard] },
+    {
+        path: '',
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'AdminDashboard',
+                component: AdminDashboard,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.Admin] }
+            },
+            {
+                path: 'ChefProjetDashboard',
+                component: ChefProjetDashboard,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager] }
+            },
+            {
+                path: 'EmployeeDashboard',
+                component: EmployeeDashboard,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.Employee] }
+            },
+            {
+                path: 'ResponsableServiceDashboard',
+                component: ResponsableServiceDashboard,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ServiceManager] }
+            },
 
-    { path: 'AdminDashboard', component: AdminDashboard },
-    { path: 'kanban', component: KanbanComponent },
-    { path: 'ChefProjetDashboard', component: ChefProjetDashboard },
-    { path: 'EmployeeDashboard', component: EmployeeDashboard },
-    { path: 'ResponsableServiceDashboard', component: ResponsableServiceDashboard },
+            { path: 'kanban', component: KanbanComponent },
+            { path: 'users', component: UserManage },
+            { path: 'Service', component: servicepage },
 
-    { path: 'users', component: UserManage },
-    { path: 'Service', component: servicepage },
+            { path: 'ProjectView', component: ProjectView },
+            { path: 'SprintView', component: SprintView },
+            { path: 'sprint/view/:id', component: SprintView },
+            { path: 'TeamView', component: TeamView },
+            { path: 'TaskView', component: TaskView },
+            { path: 'task/view/:id', component: TaskView },
+            { path: 'UserStoryView', component: UserStoryViewComponent },
+            { path: 'userstory/view/:id', component: UserStoryViewComponent },
 
-    { path: 'ProjectView', component: ProjectView },
-    { path: 'SprintView', component: SprintView },
-    { path: 'sprint/view/:id', component: SprintView },
-    { path: 'TeamView', component: TeamView },
-    { path: 'TaskView', component: TaskView },
-    { path: 'task/view/:id', component: TaskView },
-    { path: 'UserStoryView', component: UserStoryViewComponent },
-    { path: 'userstory/view/:id', component: UserStoryViewComponent },
-
-    { path: 'ProjectManage', component: ProjectManager },
-    { path: 'SprintManage', component: SprintManager },
-    { path: 'sprint/manage/:projectId', component: SprintManager },
-    { path: 'TeamManage', component: TeamManage },
-    { path: 'TaskManage', component: TaskManager },
-    { path: 'task/manage', component: TaskManager },
-    { path: 'task/manage/:userStoryId', component: TaskManager },
-    { path: 'task/create/:userStoryId', component: TaskManager },
-    { path: 'task/edit/:id', component: TaskManager },
-    { path: 'UserStoryManage', component: UserStoryManagerComponent },
-    { path: 'userstory/manage/:sprintId', component: UserStoryManagerComponent },
-    { path: 'userstory/create/:sprintId', component: UserStoryManagerComponent },
-    { path: 'userstory/edit/:id', component: UserStoryManagerComponent },
+            { path: 'ProjectManage', component: ProjectManager },
+            { path: 'SprintManage', component: SprintManager },
+            { path: 'sprint/manage/:projectId', component: SprintManager },
+            { path: 'TeamManage', component: TeamManage },
+            { path: 'TaskManage', component: TaskManager },
+            { path: 'task/manage', component: TaskManager },
+            { path: 'task/manage/:userStoryId', component: TaskManager },
+            { path: 'task/create/:userStoryId', component: TaskManager },
+            { path: 'task/edit/:id', component: TaskManager },
+            { path: 'UserStoryManage', component: UserStoryManagerComponent },
+            { path: 'userstory/manage/:sprintId', component: UserStoryManagerComponent },
+            { path: 'userstory/create/:sprintId', component: UserStoryManagerComponent },
+            { path: 'userstory/edit/:id', component: UserStoryManagerComponent }
+        ]
+    },
+    { path: '**', redirectTo: '' }
 ];
 

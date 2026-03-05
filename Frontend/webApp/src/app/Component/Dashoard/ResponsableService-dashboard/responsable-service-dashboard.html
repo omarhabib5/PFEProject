@@ -86,10 +86,9 @@
 
                     <h4>{{ service.name }}</h4>
                     <p class="desc">ID service: {{ service.id }}</p>
-                    <p class="meta-line">👥 {{ service.members?.length || 0 }} membres</p>
+                    <p class="meta-line">👥 {{ getMembersCountForService(service) }} membres</p>
                     <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
-                    <p class="meta-line">Chef de service: {{ service.responsible ? (service.responsible.firstName + ' '
-                        + service.responsible.lastName) : 'Non assigné' }}</p>
+                    <p class="meta-line">Chef de service: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block">
                         <span>Membres de l'équipe</span>
@@ -110,8 +109,7 @@
                     <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
                     <div>
                         <h3>{{ selectedService.name }}</h3>
-                        <p>Chef de service: {{ selectedService.responsible ? (selectedService.responsible.firstName + '
-                            ' + selectedService.responsible.lastName) : 'Non assigné' }}</p>
+                        <p>Chef de service: {{ getResponsibleLabel(selectedService) }}</p>
                         <div class="detail-meta">
                             <span>👥 {{ membersCount }} membres</span>
                             <span>🗂️ {{ projectsCount }} projets</span>

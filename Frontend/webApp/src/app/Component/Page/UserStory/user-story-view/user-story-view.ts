@@ -23,7 +23,14 @@ export class UserStoryViewComponent implements OnInit {
   createSubmitting = false;
   showCreateForm = false;
   State = UserStoryStatus;
-  createForm: CreateUserStoryRequest = {
+  createForm: {
+    title: string;
+    description: string;
+    acceptanceCriteria: string;
+    storyPoints: number;
+    priority: number;
+    sprintId: number;
+  } = {
     title: '',
     description: '',
     acceptanceCriteria: '',
@@ -107,9 +114,10 @@ export class UserStoryViewComponent implements OnInit {
       )
       .subscribe({
         next: (story) => {
-          this.sprintId = story.sprintId;
-          this.createForm.sprintId = story.sprintId;
+          this.sprintId = Number(story.sprintId);
+          this.createForm.sprintId = Number(story.sprintId);
           this.userStories = [{
+            name: story.title,
             id: story.id,
             title: story.title,
             description: story.description,
@@ -122,7 +130,7 @@ export class UserStoryViewComponent implements OnInit {
             assignedToName: story.assignedToName,
             taskCount: story.tasks?.length ?? 0,
             completedTaskCount: (story.tasks ?? []).filter(task =>
-              task.status === UserStoryStatus.DONE || task.status === UserStoryStatus.VALIDATED
+              task.status === UserStoryStatus.DONE
             ).length,
             createdAt: story.createdAt,
             updatedAt: story.updatedAt,
@@ -137,22 +145,22 @@ export class UserStoryViewComponent implements OnInit {
 
   getStatusLabel(status: UserStoryStatus): string {
       const labels: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.PENDING]: 'En attente',
         [UserStoryStatus.TODO]: 'À faire',
         [UserStoryStatus.IN_PROGRESS]: 'En cours',
+        [UserStoryStatus.REVIEW]: 'Review',
+        [UserStoryStatus.TESTING]: 'Testing',
         [UserStoryStatus.DONE]: 'Terminé',
-        [UserStoryStatus.VALIDATED]: 'Validé'
       };
       return labels[status] || 'Inconnu';
   }
 
   getStatusClass(status: UserStoryStatus): string {
       const classes: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.PENDING]: 'status-todo',
         [UserStoryStatus.TODO]: 'status-todo',
         [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
+        [UserStoryStatus.REVIEW]: 'status-inprogress',
+        [UserStoryStatus.TESTING]: 'status-inprogress',
         [UserStoryStatus.DONE]: 'status-done',
-        [UserStoryStatus.VALIDATED]: 'status-done'
       };
       return classes[status] || '';
   }
@@ -186,7 +194,7 @@ export class UserStoryViewComponent implements OnInit {
     return classes[priority] || '';
   }
 
-  viewUserStory(id: number): void {
+  viewUserStory(id: string): void {
     this.route.navigate(['/userstory/view', id]);
   }
 
@@ -219,12 +227,20 @@ export class UserStoryViewComponent implements OnInit {
     this.error = '';
     this.createSubmitting = true;
 
+    const now = new Date();
     const payload: CreateUserStoryRequest = {
+      name: title,
       title,
       description: this.createForm.description || '',
       acceptanceCriteria: this.createForm.acceptanceCriteria || '',
       storyPoints,
       priority,
+      status: UserStoryStatus.TODO,
+      startDate: now,
+      endDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      estimatedDuration: 1,
+      userStoryState: 1,
+      projectId: this.projectId ?? 0,
       sprintId: this.sprintId,
     };
 
@@ -248,16 +264,16 @@ export class UserStoryViewComponent implements OnInit {
     this.showCreateForm = false;
   }
 
-  editUserStory(id: number, event: Event): void {
+  editUserStory(id: string, event: Event): void {
     event.stopPropagation();
     this.route.navigate(['/userstory/edit', id]);
   }
 
-  deleteUserStory(id: number, event: Event): void {
+  deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
     if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
-      this.userStoryService.delete(id).subscribe({
+      this.userStoryService.delete(Number(id)).subscribe({
         next: () => {
           this.loadUserStories();
         },

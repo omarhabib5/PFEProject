@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserStoryService } from '../Service/UserStoryService';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
+import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
 import { NgIf, NgForOf } from '@angular/common';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,14 @@ export class UserStoryManagerComponent implements OnInit {
   showCreateForm = false;
   createSubmitting = false;
   State = UserStoryStatus;
-  createForm: CreateUserStoryRequest = {
+  createForm: {
+    title: string;
+    description: string;
+    acceptanceCriteria: string;
+    storyPoints: number;
+    priority: number;
+    sprintId: number;
+  } = {
     title: '',
     description: '',
     acceptanceCriteria: '',
@@ -75,22 +82,22 @@ export class UserStoryManagerComponent implements OnInit {
 
   getStatusLabel(status: UserStoryStatus): string {
       const labels: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.PENDING]: 'En attente',
         [UserStoryStatus.TODO]: 'À faire',
         [UserStoryStatus.IN_PROGRESS]: 'En cours',
+        [UserStoryStatus.REVIEW]: 'Review',
+        [UserStoryStatus.TESTING]: 'Testing',
         [UserStoryStatus.DONE]: 'Terminé',
-        [UserStoryStatus.VALIDATED]: 'Validé'
       };
       return labels[status] || 'Inconnu';
   }
 
   getStatusClass(status: UserStoryStatus): string {
       const classes: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.PENDING]: 'status-todo',
         [UserStoryStatus.TODO]: 'status-todo',
         [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
+        [UserStoryStatus.REVIEW]: 'status-inprogress',
+        [UserStoryStatus.TESTING]: 'status-inprogress',
         [UserStoryStatus.DONE]: 'status-done',
-        [UserStoryStatus.VALIDATED]: 'status-done'
       };
       return classes[status] || '';
   }
@@ -124,7 +131,7 @@ export class UserStoryManagerComponent implements OnInit {
     return classes[priority] || '';
   }
 
-  viewUserStory(id: number): void {
+  viewUserStory(id: string): void {
     this.route.navigate(['/userstory/view', id]);
   }
 
@@ -160,12 +167,20 @@ export class UserStoryManagerComponent implements OnInit {
       return;
     }
 
+    const now = new Date();
     const payload: CreateUserStoryRequest = {
+      name: title,
       title,
       description: this.createForm.description || '',
       acceptanceCriteria: this.createForm.acceptanceCriteria || '',
       storyPoints,
       priority,
+      status: UserStoryStatus.TODO,
+      startDate: now,
+      endDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      estimatedDuration: 1,
+      userStoryState: 1,
+      projectId: 0,
       sprintId: this.sprintId,
     };
 
@@ -194,7 +209,7 @@ export class UserStoryManagerComponent implements OnInit {
     this.showCreateForm = false;
   }
 
-  editUserStory(id: number, event: Event): void {
+  editUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
     const story = this.userStories.find(item => item.id === id);
@@ -217,15 +232,24 @@ export class UserStoryManagerComponent implements OnInit {
       return;
     }
 
-    this.userStoryService.update(id, {
-      id,
+    const updatePayload: UpdateUserStoryRequest = {
+      id: Number(id),
+      name: title.trim(),
       title: title.trim(),
       description,
+      startDate: story.startDate ? new Date(story.startDate) : new Date(),
+      endDate: story.endDate ? new Date(story.endDate) : new Date(Date.now() + 24 * 60 * 60 * 1000),
+      estimatedDuration: Number(story.estimatedDuration ?? 1),
+      userStoryState: Number(story.userStoryState ?? 1),
+      projectId: 0,
+      sprintId: Number(story.sprintId ?? this.sprintId ?? 0),
       acceptanceCriteria,
       storyPoints,
       priority,
       assignedToId: story.assignedToId
-    }).subscribe({
+    };
+
+    this.userStoryService.update(Number(id), updatePayload).subscribe({
       next: () => this.loadUserStories(),
       error: (err) => {
         this.error = 'Erreur lors de la mise à jour de la user story';
@@ -234,11 +258,11 @@ export class UserStoryManagerComponent implements OnInit {
     });
   }
 
-  deleteUserStory(id: number, event: Event): void {
+  deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
     if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
-      this.userStoryService.delete(id).subscribe({
+      this.userStoryService.delete(Number(id)).subscribe({
         next: () => {
           this.loadUserStories();
         },

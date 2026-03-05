@@ -1,17 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
-import { CreateServiceDto, Service, ServicePage } from '../../Page/service-page/Service/ServicePage';
 import { TokenService } from '../../Auth/Service/token.service';
-import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
-import { Sprint as SprintEntity, SprintService } from '../../Page/Sprint/Service/SprintService';
-import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
+import { Sprint, SprintService } from '../../Page/Sprint/Service/SprintService';
+import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
+import { CreateServiceDto, Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
-
-type ServiceDashboardTab = 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar';
+import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 
 interface TeamMemberRow {
   fullName: string;
@@ -24,12 +22,8 @@ interface TeamMemberRow {
   subtitle?: string;
 }
 
-interface CalendarDayCell {
-  date: Date;
-  day: number;
-  isToday: boolean;
-  inCurrentMonth: boolean;
-  hasProject: boolean;
+interface ServiceUserStoryRow extends UserStoryDto {
+  numericId: number;
 }
 
 @Component({
@@ -40,16 +34,18 @@ interface CalendarDayCell {
   styleUrl: './responsable-service-dashboard.css',
 })
 export class ResponsableServiceDashboard implements OnInit {
-  private serviceApi = inject(ServicePage);
+  private serviceApi = inject(ServiceService);
   private teamService = inject(TeamService);
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private userStoryService = inject(UserStoryService);
   private router = inject(Router);
   private tokenService = inject(TokenService);
+  private cdr = inject(ChangeDetectorRef);
 
+  activeSection: 'services' | 'calendar' = 'services';
   serviceViewMode: 'list' | 'detail' = 'list';
-  activeTab: ServiceDashboardTab = 'dashboard';
+  activeTab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' = 'dashboard';
 
   loading = false;
   error = '';
@@ -59,71 +55,124 @@ export class ResponsableServiceDashboard implements OnInit {
   services: Service[] = [];
   serviceTeams: TeamEntity[] = [];
   allProjects: ProjectEntity[] = [];
-  serviceSprints: SprintEntity[] = [];
-  serviceUserStories: UserStoryDto[] = [];
   selectedServiceMemberIds = new Set<number>();
+  selectedServiceMembers: TeamUser[] = [];
   selectedServiceId: number | null = null;
 
   showCreateModal = false;
-  showUserStoryModal = false;
-  userStorySubmitting = false;
-
-  userStoryForm: CreateUserStoryRequest = {
-    title: '',
-    description: '',
-    acceptanceCriteria: '',
-    storyPoints: 1,
-    priority: 3,
-    sprintId: 0,
-    assignedToId: undefined
-  };
-
-  readonly userStoryStatuses = [
-    { value: UserStoryStatus.PENDING, label: 'En attente' },
-    { value: UserStoryStatus.TODO, label: 'À faire' },
-    { value: UserStoryStatus.IN_PROGRESS, label: 'En cours' },
-    { value: UserStoryStatus.DONE, label: 'Terminé' },
-    { value: UserStoryStatus.VALIDATED, label: 'Validé' }
-  ];
-
-  readonly userStoryPriorities = [1, 2, 3, 4, 5];
-
-  selectedUserStoryStatus: Record<number, UserStoryStatus> = {};
-
-  newService: CreateServiceDto = {
-    name: ''
-  };
+  newService: CreateServiceDto = { name: '' };
 
   currentDateLabel = '';
   userName = '';
   userRole = '';
   notificationCount = 0;
-  currentMonth = new Date();
-  calendarDays: CalendarDayCell[] = [];
-  calendarWeekdays = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
 
-  get teamRows(): TeamMemberRow[] {
-    const service = this.selectedService;
-    if (!service) {
-      return [];
+  currentMonth = new Date();
+  readonly calendarWeekdays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  calendarDays: Array<{ day: number; isToday: boolean; inCurrentMonth: boolean; hasProject: boolean }> = [];
+
+  serviceUserStories: ServiceUserStoryRow[] = [];
+  userStoryStatuses = [
+    { value: UserStoryStatus.TODO, label: 'To Do' },
+    { value: UserStoryStatus.IN_PROGRESS, label: 'In Progress' },
+    { value: UserStoryStatus.REVIEW, label: 'Review' },
+    { value: UserStoryStatus.TESTING, label: 'Testing' },
+    { value: UserStoryStatus.DONE, label: 'Done' }
+  ];
+  selectedUserStoryStatuses: Record<number, UserStoryStatus> = {};
+
+  showUserStoryModal = false;
+  userStorySubmitting = false;
+  availableSprints: Sprint[] = [];
+  userStoryPriorities = [1, 2, 3, 4, 5];
+  userStoryForm = {
+    title: '',
+    description: '',
+    acceptanceCriteria: '',
+    sprintId: null as number | null,
+    storyPoints: 1,
+    priority: 3
+  };
+
+  ngOnInit(): void {
+    if (!this.tokenService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
     }
 
-    return (service.members ?? []).map((member) => {
-      const isManager = service.responsibleId === member.id;
-      const memberData = member as unknown as Record<string, unknown>;
-      const roleValue = memberData['role'];
+    this.setUserProfile();
+    this.setCurrentDate();
+    this.generateCalendar();
+    this.loadServices();
+  }
+
+  get pageTitle(): string {
+    if (this.activeSection === 'calendar') return 'Calendrier';
+    if (this.serviceViewMode === 'detail') return 'Mon Service';
+    return 'Gestion des Services';
+  }
+
+  get calendarTitle(): string {
+    return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  }
+
+  get selectedService(): Service | null {
+    if (!this.selectedServiceId) return null;
+    return this.services.find((service) => service.id === this.selectedServiceId) ?? null;
+  }
+
+  get filteredServices(): Service[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.services.filter((service) => {
+      const matchesTerm = !term || service.name.toLowerCase().includes(term);
+      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Actif';
+      return matchesTerm && matchesStatus;
+    });
+  }
+
+  get selectedServiceTeams(): TeamEntity[] {
+    if (!this.selectedServiceId) return [];
+    return this.serviceTeams.filter((team) => this.getTeamServiceId(team) === this.selectedServiceId);
+  }
+
+  get selectedServiceProjects(): ProjectEntity[] {
+    if (!this.selectedServiceId) return [];
+    return this.allProjects.filter((project) => this.getProjectServiceId(project) === this.selectedServiceId);
+  }
+
+  get teamRows(): TeamMemberRow[] {
+    if (!this.selectedService || this.selectedServiceMembers.length === 0) return [];
+
+    return this.selectedServiceMembers.map((member) => {
+      const memberUser = member.user;
+      const isManager = this.selectedService?.responsibleId === member.userId;
+      const firstName = memberUser?.firstName ?? 'Member';
+      const lastName = memberUser?.lastName ?? String(member.userId ?? '');
+      const fullName = `${firstName} ${lastName}`.trim();
 
       return {
-        fullName: `${member.firstName} ${member.lastName}`,
-        email: member.email,
-        roleLabel: this.getRoleLabel(roleValue, isManager),
-        roleClass: this.getRoleClass(roleValue, isManager),
-        activeTasks: this.toNumber(memberData['activeTasks']),
-        completedTasks: this.toNumber(memberData['completedTasks']),
-        avatar: this.getInitials(`${member.firstName} ${member.lastName}`),
-        subtitle: isManager ? 'Chef de service' : undefined
+        fullName,
+        email: memberUser?.email ?? '—',
+        roleLabel: this.getRoleLabel(member.role, isManager),
+        roleClass: this.getRoleClass(member.role, isManager),
+        activeTasks: 0,
+        completedTasks: 0,
+        avatar: this.getInitials(fullName),
+        subtitle: isManager ? 'Chef de service' : undefined,
       };
     });
+  }
+
+  get membersCount(): number {
+    return this.selectedServiceMemberIds.size;
+  }
+
+  get teamsCount(): number {
+    return this.selectedServiceTeams.length;
+  }
+
+  get projectsCount(): number {
+    return this.selectedServiceProjects.length;
   }
 
   get completedTasksCount(): number {
@@ -145,99 +194,30 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get sprintTotal(): number {
-    return this.serviceSprints.length;
+    return this.availableSprints.length;
   }
 
   get activeSprintCount(): number {
-    return this.serviceSprints.filter((sprint) => !this.isDoneState((sprint as unknown as Record<string, unknown>)['sprintState'])).length;
+    return this.availableSprints.filter((sprint) => Number((sprint as any).sprintState) === 2).length;
   }
 
   get completedSprintCount(): number {
-    return this.serviceSprints.filter((sprint) => this.isDoneState((sprint as unknown as Record<string, unknown>)['sprintState'])).length;
+    return this.availableSprints.filter((sprint) => {
+      const state = Number((sprint as any).sprintState);
+      return state === 3 || state === 4;
+    }).length;
   }
 
   get completedUserStoriesCount(): number {
-    return this.serviceUserStories.filter((story) => this.isDoneState(story.status)).length;
+    return this.serviceUserStories.filter((story) => story.status === UserStoryStatus.DONE).length;
   }
 
   get inProgressUserStoriesCount(): number {
-    return this.serviceUserStories.filter((story) => !this.isDoneState(story.status)).length;
+    return this.serviceUserStories.filter((story) => story.status === UserStoryStatus.IN_PROGRESS).length;
   }
 
   get todoTasksCount(): number {
-    return this.serviceUserStories.reduce((sum, story) => sum + Math.max((story.taskCount ?? 0) - (story.completedTaskCount ?? 0), 0), 0);
-  }
-
-  ngOnInit(): void {
-    if (!this.tokenService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    this.setUserProfile();
-    this.setCurrentDate();
-    this.loadServices();
-  }
-
-  get pageTitle(): string {
-    if (this.serviceViewMode === 'list') return 'Gestion des Services';
-    if (this.activeTab === 'dashboard') return 'Tableau de bord du service';
-    if (this.activeTab === 'projects') return 'Projets du service';
-    if (this.activeTab === 'userStories') return 'User Stories';
-    if (this.activeTab === 'teamMembers') return 'Équipes et membres';
-    if (this.activeTab === 'calendar') return 'Calendrier';
-    return 'Gestion des Services';
-  }
-
-  get selectedService(): Service | null {
-    if (!this.selectedServiceId) return null;
-    return this.services.find(service => service.id === this.selectedServiceId) ?? null;
-  }
-
-  get filteredServices(): Service[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    return this.services.filter(service => {
-      const matchesTerm = !term || service.name.toLowerCase().includes(term);
-      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Actif';
-      return matchesTerm && matchesStatus;
-    });
-  }
-
-  get membersCount(): number {
-    if (this.selectedServiceMemberIds.size > 0) {
-      return this.selectedServiceMemberIds.size;
-    }
-    return this.selectedService?.members?.length ?? 0;
-  }
-
-  get selectedServiceTeams(): TeamEntity[] {
-    if (!this.selectedServiceId) {
-      return [];
-    }
-
-    return this.serviceTeams.filter((team) => this.getTeamServiceId(team) === this.selectedServiceId);
-  }
-
-  get teamsCount(): number {
-    if (this.selectedServiceTeams.length > 0) {
-      return this.selectedServiceTeams.length;
-    }
-    return this.selectedService?.teams?.length ?? 0;
-  }
-
-  get projectsCount(): number {
-    if (this.selectedServiceProjects.length > 0) {
-      return this.selectedServiceProjects.length;
-    }
-    return this.selectedService?.projects?.length ?? 0;
-  }
-
-  get selectedServiceProjects(): ProjectEntity[] {
-    if (!this.selectedServiceId) {
-      return [];
-    }
-
-    return this.allProjects.filter((project) => this.getProjectServiceId(project) === this.selectedServiceId);
+    return 0;
   }
 
   loadServices(): void {
@@ -247,19 +227,17 @@ export class ResponsableServiceDashboard implements OnInit {
     this.serviceApi.getServices()
       .pipe(
         timeout(10000),
-        finalize(() => {
-          this.loading = false;
-        })
+        finalize(() => (this.loading = false))
       )
       .subscribe({
         next: (data) => {
           this.services = data ?? [];
           if (this.services.length > 0 && !this.selectedServiceId) {
             this.selectedServiceId = this.services[0].id;
+            this.serviceViewMode = 'detail';
           }
           this.loadTeams();
           this.loadProjects();
-          this.generateCalendar();
         },
         error: () => {
           this.error = 'Impossible de charger les services. Vérifiez que le backend est démarré.';
@@ -268,243 +246,40 @@ export class ResponsableServiceDashboard implements OnInit {
       });
   }
 
-  openServicesList(): void {
-    this.backToServiceList();
+  setSection(section: 'services' | 'calendar'): void {
+    this.activeSection = section;
+    if (section === 'services') {
+      this.serviceViewMode = this.selectedServiceId ? 'detail' : 'list';
+    }
   }
 
   openServiceDetails(service: Service): void {
     this.selectedServiceId = service.id;
     this.serviceViewMode = 'detail';
+    this.activeSection = 'services';
     this.activeTab = 'dashboard';
     this.loadMembersForSelectedService();
     this.loadTeams();
-    this.loadServiceInsights();
-    this.generateCalendar();
+    this.loadProjects();
   }
 
   backToServiceList(): void {
     this.serviceViewMode = 'list';
-    this.activeTab = 'dashboard';
+    this.selectedServiceId = null;
     this.selectedServiceMemberIds = new Set<number>();
-    this.serviceSprints = [];
+    this.selectedServiceMembers = [];
     this.serviceUserStories = [];
   }
 
-  setTab(tab: ServiceDashboardTab): void {
+  openServicesList(): void {
+    this.backToServiceList();
+  }
+
+  setTab(tab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar'): void {
     this.activeTab = tab;
-    if (tab === 'calendar') {
-      this.generateCalendar();
+    if (tab === 'userStories') {
+      this.loadServiceUserStories();
     }
-  }
-
-  prevMonth(): void {
-    this.currentMonth = new Date(
-      this.currentMonth.getFullYear(),
-      this.currentMonth.getMonth() - 1,
-      1
-    );
-    this.generateCalendar();
-  }
-
-  nextMonth(): void {
-    this.currentMonth = new Date(
-      this.currentMonth.getFullYear(),
-      this.currentMonth.getMonth() + 1,
-      1
-    );
-    this.generateCalendar();
-  }
-
-  get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('fr-FR', {
-      month: 'long',
-      year: 'numeric'
-    });
-  }
-
-  openProjectManager(projectId?: number): void {
-    this.router.navigate(['/ProjectManage'], {
-      queryParams: {
-        serviceId: this.selectedServiceId ?? undefined,
-        id: projectId ?? undefined,
-        source: 'service-manager'
-      }
-    });
-  }
-
-  get availableSprints(): SprintEntity[] {
-    return this.serviceSprints.filter((sprint) => typeof sprint.id === 'number' && sprint.id > 0);
-  }
-
-  openUserStories(): void {
-    this.error = '';
-    this.activeTab = 'userStories';
-
-    if (this.availableSprints.length === 0) {
-      this.error = 'Aucun sprint trouvé. Créez un sprint pour pouvoir ajouter des user stories.';
-      return;
-    }
-
-    this.userStoryForm = {
-      title: '',
-      description: '',
-      acceptanceCriteria: '',
-      storyPoints: 1,
-      priority: 3,
-      sprintId: this.availableSprints[0].id,
-      assignedToId: undefined
-    };
-    this.showUserStoryModal = true;
-  }
-
-  closeUserStoryModal(): void {
-    this.showUserStoryModal = false;
-  }
-
-  submitCreateUserStory(): void {
-    if (this.userStorySubmitting) {
-      return;
-    }
-
-    const title = this.userStoryForm.title?.trim();
-    if (!title) {
-      this.error = 'Le titre de la user story est obligatoire.';
-      return;
-    }
-
-    if (!this.userStoryForm.sprintId || this.userStoryForm.sprintId <= 0) {
-      this.error = 'Veuillez sélectionner un sprint valide.';
-      return;
-    }
-
-    this.error = '';
-    this.userStorySubmitting = true;
-
-    const payload: CreateUserStoryRequest = {
-      ...this.userStoryForm,
-      title,
-      description: this.userStoryForm.description?.trim() ?? '',
-      acceptanceCriteria: this.userStoryForm.acceptanceCriteria?.trim() ?? '',
-      storyPoints: Number(this.userStoryForm.storyPoints) || 1,
-      priority: Number(this.userStoryForm.priority) || 3,
-      assignedToId: this.userStoryForm.assignedToId || undefined
-    };
-
-    this.userStoryService.create(payload)
-      .pipe(
-        timeout(10000),
-        finalize(() => {
-          this.userStorySubmitting = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.showUserStoryModal = false;
-          this.loadServiceInsights();
-        },
-        error: () => {
-          this.error = 'Impossible de créer la user story.';
-        }
-      });
-  }
-
-  getSelectedUserStoryStatus(story: UserStoryDto): UserStoryStatus {
-    return this.selectedUserStoryStatus[story.id] ?? (story.status as UserStoryStatus);
-  }
-
-  setSelectedUserStoryStatus(storyId: number, status: UserStoryStatus): void {
-    this.selectedUserStoryStatus[storyId] = status;
-  }
-
-  saveUserStoryStatus(story: UserStoryDto): void {
-    const nextStatus = this.getSelectedUserStoryStatus(story);
-    if (nextStatus === story.status) {
-      return;
-    }
-
-    this.userStoryService.updateStatus(story.id, nextStatus)
-      .pipe(timeout(10000))
-      .subscribe({
-        next: () => {
-          this.serviceUserStories = this.serviceUserStories.map((item) =>
-            item.id === story.id ? { ...item, status: nextStatus } : item
-          );
-        },
-        error: () => {
-          this.error = 'Impossible de mettre à jour le statut de la user story.';
-          this.selectedUserStoryStatus[story.id] = story.status as UserStoryStatus;
-        }
-      });
-  }
-
-  getProjectStatusLabel(project: ProjectEntity): string {
-    const value = Number((project as ProjectEntity).projectState);
-    const map: Record<number, string> = {
-      [ProjectState.pending]: 'En attente',
-      [ProjectState.todo]: 'À faire',
-      [ProjectState.inProgress]: 'Actif',
-      [ProjectState.done]: 'Terminé',
-      [ProjectState.validated]: 'Validé'
-    };
-    return map[value] ?? 'Inconnu';
-  }
-
-  getProjectStatusClass(project: ProjectEntity): string {
-    const value = Number((project as ProjectEntity).projectState);
-    const map: Record<number, string> = {
-      [ProjectState.pending]: 'pending',
-      [ProjectState.todo]: 'todo',
-      [ProjectState.inProgress]: 'active',
-      [ProjectState.done]: 'done',
-      [ProjectState.validated]: 'done'
-    };
-    return map[value] ?? 'pending';
-  }
-
-  getProjectProgress(project: ProjectEntity): number {
-    const value = Number((project as ProjectEntity).projectState);
-    const map: Record<number, number> = {
-      [ProjectState.pending]: 10,
-      [ProjectState.todo]: 30,
-      [ProjectState.inProgress]: 60,
-      [ProjectState.done]: 100,
-      [ProjectState.validated]: 100
-    };
-    return map[value] ?? 0;
-  }
-
-  getUserStoryStatusLabel(status: unknown): string {
-    if (typeof status === 'number') {
-      if (status === 0) return 'En attente';
-      if (status === 1) return 'À faire';
-      if (status === 2) return 'En cours';
-      if (status === 3) return 'Terminé';
-      if (status === 4) return 'Validé';
-    }
-    if (typeof status === 'string') {
-      const normalized = status.trim().toLowerCase();
-      if (normalized === 'pending') return 'En attente';
-      if (normalized === 'todo') return 'À faire';
-      if (normalized === 'inprogress') return 'En cours';
-      if (normalized === 'done') return 'Terminé';
-      if (normalized === 'validated') return 'Validé';
-    }
-    return 'Inconnu';
-  }
-
-  getUserStoryStatusClass(status: unknown): string {
-    if (typeof status === 'number') {
-      if (status === 2) return 'in-progress';
-      if (status === 3 || status === 4) return 'done';
-      return 'todo';
-    }
-    if (typeof status === 'string') {
-      const normalized = status.trim().toLowerCase();
-      if (normalized === 'inprogress') return 'in-progress';
-      if (normalized === 'done' || normalized === 'validated') return 'done';
-      return 'todo';
-    }
-    return 'todo';
   }
 
   openCreateServiceModal(): void {
@@ -526,6 +301,7 @@ export class ResponsableServiceDashboard implements OnInit {
       next: () => {
         this.showCreateModal = false;
         this.loadServices();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Impossible de créer le service';
@@ -535,15 +311,24 @@ export class ResponsableServiceDashboard implements OnInit {
 
   openProjects(): void {
     this.router.navigate(['/ProjectManage'], {
-      queryParams: {
-        serviceId: this.selectedServiceId ?? undefined
-      }
+      queryParams: { serviceId: this.selectedServiceId ?? undefined }
     });
   }
 
   openProjectEdit(): void {
     this.router.navigate(['/ProjectManage'], {
       queryParams: {
+        serviceId: this.selectedServiceId ?? undefined,
+        source: 'service-manager'
+      }
+    });
+  }
+
+  openProjectManager(projectId?: number): void {
+    if (!projectId) return;
+    this.router.navigate(['/ProjectManage'], {
+      queryParams: {
+        projectId,
         serviceId: this.selectedServiceId ?? undefined,
         source: 'service-manager'
       }
@@ -577,42 +362,213 @@ export class ResponsableServiceDashboard implements OnInit {
     });
   }
 
+  openUserStories(): void {
+    this.error = '';
+    const firstProjectId = this.selectedServiceProjects[0]?.id;
+    if (!firstProjectId) {
+      this.error = 'Ajoutez un projet à ce service pour gérer les user stories.';
+      return;
+    }
+
+    this.loading = true;
+    this.sprintService.getSprintsByProjectId(firstProjectId)
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (sprints) => {
+          this.availableSprints = sprints ?? [];
+          if (this.availableSprints.length === 0) {
+            this.error = 'Aucun sprint trouvé. Créez un sprint pour gérer les user stories.';
+            this.router.navigate(['/SprintManage', firstProjectId], {
+              queryParams: { source: 'service-manager' }
+            });
+            return;
+          }
+
+          this.userStoryForm = {
+            title: '',
+            description: '',
+            acceptanceCriteria: '',
+            sprintId: this.availableSprints[0].id,
+            storyPoints: 1,
+            priority: 3
+          };
+          this.showUserStoryModal = true;
+        },
+        error: () => {
+          this.error = 'Impossible de charger les sprints du projet.';
+        }
+      });
+  }
+
+  closeUserStoryModal(): void {
+    this.showUserStoryModal = false;
+  }
+
+  submitCreateUserStory(): void {
+    if (!this.selectedServiceProjects[0]?.id || !this.userStoryForm.sprintId || !this.userStoryForm.title.trim()) {
+      this.error = 'Veuillez remplir les champs obligatoires de la user story.';
+      return;
+    }
+
+    this.userStorySubmitting = true;
+    this.error = '';
+
+    const startDate = new Date();
+    const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+
+    const request: CreateUserStoryRequest = {
+      name: this.userStoryForm.title,
+      title: this.userStoryForm.title,
+      description: this.userStoryForm.description || this.userStoryForm.title,
+      acceptanceCriteria: this.userStoryForm.acceptanceCriteria,
+      storyPoints: Number(this.userStoryForm.storyPoints),
+      priority: Number(this.userStoryForm.priority),
+      status: UserStoryStatus.TODO,
+      startDate,
+      endDate,
+      estimatedDuration: 1,
+      userStoryState: 1,
+      projectId: this.selectedServiceProjects[0].id!,
+      sprintId: Number(this.userStoryForm.sprintId),
+    };
+
+    this.userStoryService.create(request)
+      .pipe(finalize(() => (this.userStorySubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.showUserStoryModal = false;
+          this.loadServiceUserStories();
+        },
+        error: () => {
+          this.error = 'Impossible de créer la user story.';
+        }
+      });
+  }
+
   logout(): void {
     this.tokenService.clear();
     this.router.navigate(['/login']);
   }
 
-  getServiceStatus(_service: Service): 'Actif' { 
+  prevMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+    this.generateCalendar();
+  }
+
+  nextMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    this.generateCalendar();
+  }
+
+  getServiceStatus(_service: Service): 'Actif' {
     return 'Actif';
   }
 
   getServiceAvatars(service: Service): string[] {
-    const members = service.members ?? [];
-    return members.slice(0, 3).map(member => this.getInitials(`${member.firstName} ${member.lastName}`));
+    if (this.selectedServiceId === service.id && this.teamRows.length > 0) {
+      return this.teamRows.slice(0, 3).map((row) => row.avatar);
+    }
+    return [this.getInitials(service.name)];
   }
 
   getInitials(name: string): string {
     if (!name) return '';
     return name
       .split(' ')
-      .map(word => word[0])
+      .map((word) => word[0])
       .join('')
       .slice(0, 2)
       .toUpperCase();
   }
 
   getServiceProjectsCount(service: Service): number {
-    const serviceId = service.id;
-    if (!serviceId) {
-      return service.projects?.length ?? 0;
+    return this.allProjects.filter((project) => this.getProjectServiceId(project) === service.id).length;
+  }
+
+  getMembersCountForService(service: Service): number {
+    if (!service?.id) return 0;
+    if (this.selectedServiceId === service.id && this.selectedServiceMemberIds.size > 0) {
+      return this.selectedServiceMemberIds.size;
     }
 
-    const filteredCount = this.allProjects.filter((project) => this.getProjectServiceId(project) === serviceId).length;
-    if (filteredCount > 0) {
-      return filteredCount;
-    }
+    const teamIds = this.serviceTeams
+      .filter((team) => this.getTeamServiceId(team) === service.id)
+      .map((team) => team.id);
 
-    return service.projects?.length ?? 0;
+    if (teamIds.length === 0) return 0;
+    return this.selectedServiceMembers.filter((member) => teamIds.includes(member.teamId)).length;
+  }
+
+  getResponsibleLabel(service: Service): string {
+    if (!service?.responsibleId) return 'Non assigné';
+    const manager = this.selectedServiceMembers.find((member) => member.userId === service.responsibleId)?.user;
+    if (manager) return `${manager.firstName} ${manager.lastName}`.trim();
+    return `User #${service.responsibleId}`;
+  }
+
+  getProjectStatusLabel(project: ProjectEntity): string {
+    const state = Number(project.projectState);
+    if (state === ProjectState.done || state === ProjectState.validated) return 'Terminé';
+    if (state === ProjectState.inProgress) return 'Actif';
+    if (state === ProjectState.todo) return 'Planifié';
+    return 'En attente';
+  }
+
+  getProjectStatusClass(project: ProjectEntity): string {
+    const state = Number(project.projectState);
+    if (state === ProjectState.done || state === ProjectState.validated) return 'done';
+    if (state === ProjectState.inProgress) return 'active';
+    if (state === ProjectState.todo) return 'todo';
+    return 'pending';
+  }
+
+  getProjectProgress(project: ProjectEntity): number {
+    const state = Number(project.projectState);
+    if (state === ProjectState.done || state === ProjectState.validated) return 100;
+    if (state === ProjectState.inProgress) return 65;
+    if (state === ProjectState.todo) return 30;
+    return 10;
+  }
+
+  getUserStoryStatusLabel(status: UserStoryStatus): string {
+    return this.userStoryStatuses.find((item) => item.value === status)?.label ?? 'Unknown';
+  }
+
+  getUserStoryStatusClass(status: UserStoryStatus): string {
+    if (status === UserStoryStatus.DONE) return 'done';
+    if (status === UserStoryStatus.IN_PROGRESS) return 'active';
+    if (status === UserStoryStatus.REVIEW || status === UserStoryStatus.TESTING) return 'review';
+    return 'todo';
+  }
+
+  getSelectedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStatus {
+    return this.selectedUserStoryStatuses[story.numericId] ?? story.status;
+  }
+
+  setSelectedUserStoryStatus(storyId: string, status: UserStoryStatus): void {
+    const numericId = Number(storyId);
+    if (!Number.isFinite(numericId) || numericId <= 0) return;
+    this.selectedUserStoryStatuses[numericId] = status;
+  }
+
+  saveUserStoryStatus(story: ServiceUserStoryRow): void {
+    const newStatus = this.getSelectedUserStoryStatus(story);
+    if (newStatus === story.status) return;
+
+    this.userStoryService.updateStatus(story.numericId, newStatus).subscribe({
+      next: () => {
+        this.loadServiceUserStories();
+      },
+      error: () => {
+        this.error = 'Impossible de mettre à jour le statut de la user story.';
+      }
+    });
   }
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
@@ -622,9 +578,7 @@ export class ResponsableServiceDashboard implements OnInit {
       if (role === 2) return 'Chef de projet';
       if (role === 3) return 'Employé';
     }
-    if (typeof role === 'string' && role.trim().length > 0) {
-      return role;
-    }
+    if (typeof role === 'string' && role.trim().length > 0) return role;
     return isManager ? 'Manager' : 'Employé';
   }
 
@@ -638,10 +592,6 @@ export class ResponsableServiceDashboard implements OnInit {
     return isManager ? 'role-manager' : 'role-employee';
   }
 
-  private toNumber(value: unknown): number {
-    return typeof value === 'number' && Number.isFinite(value) ? value : 0;
-  }
-
   private setCurrentDate(): void {
     this.currentDateLabel = new Date().toLocaleDateString('fr-FR', {
       weekday: 'long',
@@ -653,45 +603,51 @@ export class ResponsableServiceDashboard implements OnInit {
 
   private setUserProfile(): void {
     const userData = this.tokenService.getUserData();
-    if (userData?.firstName && userData?.lastName) {
-      this.userName = `${userData.firstName} ${userData.lastName}`;
-    } else {
-      this.userName = '—';
-    }
-    if (userData?.role) {
-      this.userRole = userData.role;
-    } else {
-      this.userRole = '—';
-    }
+    this.userName = userData?.firstName && userData?.lastName ? `${userData.firstName} ${userData.lastName}` : '—';
+    this.userRole = userData?.role ?? '—';
   }
 
   private generateCalendar(): void {
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
     const firstDay = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     const startOffset = (firstDay.getDay() + 6) % 7;
-    const startDate = new Date(year, month, 1 - startOffset);
-    const totalCells = 42;
+    const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
     const today = new Date();
     this.calendarDays = [];
 
     for (let index = 0; index < totalCells; index++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + index);
-      const inCurrentMonth = date.getMonth() === month;
-      const isToday = date.getDate() === today.getDate()
-        && date.getMonth() === today.getMonth()
-        && date.getFullYear() === today.getFullYear();
+      const dayNumber = index - startOffset + 1;
+      const inCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
+      const isToday = inCurrentMonth
+        && dayNumber === today.getDate()
+        && month === today.getMonth()
+        && year === today.getFullYear();
 
       this.calendarDays.push({
-        date,
-        day: date.getDate(),
+        day: inCurrentMonth ? dayNumber : 0,
         isToday,
         inCurrentMonth,
-        hasProject: this.hasProjectOnDate(date)
+        hasProject: false,
       });
     }
+
+    const projectDates = this.selectedServiceProjects
+      .map((project) => new Date(project.endDate as unknown as string))
+      .filter((date) => !Number.isNaN(date.getTime()));
+
+    this.calendarDays = this.calendarDays.map((cell) => {
+      if (!cell.inCurrentMonth || cell.day <= 0) return cell;
+      const cellDate = new Date(year, month, cell.day);
+      const hasProject = projectDates.some((date) =>
+        date.getFullYear() === cellDate.getFullYear()
+        && date.getMonth() === cellDate.getMonth()
+        && date.getDate() === cellDate.getDate()
+      );
+      return { ...cell, hasProject };
+    });
   }
 
   private loadTeams(): void {
@@ -711,29 +667,34 @@ export class ResponsableServiceDashboard implements OnInit {
     const teams = this.selectedServiceTeams;
     if (teams.length === 0) {
       this.selectedServiceMemberIds = new Set<number>();
+      this.selectedServiceMembers = [];
       return;
     }
 
     const membersRequests = teams.map((team) =>
-      this.teamService
-        .getMembersByTeamId(team.id)
-        .pipe(catchError(() => of([] as TeamUser[])))
+      this.teamService.getMembersByTeamId(team.id).pipe(catchError(() => of([] as TeamUser[])))
     );
 
     forkJoin(membersRequests).subscribe({
       next: (membersByTeam) => {
         const ids = new Set<number>();
-        membersByTeam.forEach((members) => {
-          members.forEach((member) => {
+        const members: TeamUser[] = [];
+
+        membersByTeam.forEach((membersList) => {
+          membersList.forEach((member) => {
             if (typeof member.userId === 'number') {
               ids.add(member.userId);
             }
+            members.push(member);
           });
         });
+
         this.selectedServiceMemberIds = ids;
+        this.selectedServiceMembers = members;
       },
       error: () => {
         this.selectedServiceMemberIds = new Set<number>();
+        this.selectedServiceMembers = [];
       }
     });
   }
@@ -742,135 +703,66 @@ export class ResponsableServiceDashboard implements OnInit {
     this.projectService.getAllProjects().subscribe({
       next: (projects) => {
         this.allProjects = projects ?? [];
-        this.loadServiceInsights();
-        this.generateCalendar();
-      },
-      error: () => {
-        this.allProjects = [];
-        this.serviceSprints = [];
-        this.serviceUserStories = [];
-        this.generateCalendar();
-      }
-    });
-  }
-
-  private loadServiceInsights(): void {
-    const projectIds = this.getSelectedServiceProjectIds();
-    if (projectIds.length === 0) {
-      this.serviceSprints = [];
-      this.serviceUserStories = [];
-      return;
-    }
-
-    const sprintRequests = projectIds.map((projectId) =>
-      this.sprintService
-        .getSprintsByProjectId(projectId)
-        .pipe(
-          timeout(10000),
-          catchError(() => of([] as SprintEntity[]))
-        )
-    );
-
-    forkJoin(sprintRequests).subscribe({
-      next: (sprintsByProject) => {
-        const sprints = sprintsByProject.flat();
-        this.serviceSprints = this.uniqueById(sprints);
-
-        const sprintIds = this.serviceSprints.map((sprint) => sprint.id).filter((id) => typeof id === 'number' && id > 0);
-        if (sprintIds.length === 0) {
-          this.serviceUserStories = [];
+        const firstProjectId = this.selectedServiceProjects[0]?.id;
+        if (!firstProjectId) {
+          this.availableSprints = [];
+          this.generateCalendar();
+          this.loadServiceUserStories();
           return;
         }
 
-        const userStoryRequests = sprintIds.map((sprintId) =>
-          this.userStoryService
-            .getBySprintId(sprintId)
-            .pipe(
-              timeout(10000),
-              catchError(() => of([] as UserStoryDto[]))
-            )
-        );
-
-        forkJoin(userStoryRequests).subscribe({
-          next: (storiesBySprint) => {
-            this.serviceUserStories = this.uniqueById(storiesBySprint.flat());
+        this.sprintService.getSprintsByProjectId(firstProjectId).pipe(catchError(() => of([] as Sprint[]))).subscribe({
+          next: (sprints) => {
+            this.availableSprints = sprints ?? [];
+            this.generateCalendar();
+            this.loadServiceUserStories();
           },
           error: () => {
-            this.serviceUserStories = [];
+            this.availableSprints = [];
+            this.generateCalendar();
+            this.loadServiceUserStories();
           }
         });
       },
       error: () => {
-        this.serviceSprints = [];
+        this.allProjects = [];
+        this.availableSprints = [];
         this.serviceUserStories = [];
       }
     });
   }
 
-  private getSelectedServiceProjectIds(): number[] {
-    const ids = new Set<number>();
+  private loadServiceUserStories(): void {
+    const projectIds = this.selectedServiceProjects
+      .map((project) => project.id)
+      .filter((id): id is number => typeof id === 'number' && id > 0);
 
-    this.selectedServiceProjects.forEach((project) => {
-      if (typeof project.id === 'number' && project.id > 0) {
-        ids.add(project.id);
-      }
-    });
-
-    const selectedServiceProjects = this.selectedService?.projects as Array<{ id?: unknown }> | undefined;
-    selectedServiceProjects?.forEach((project) => {
-      if (typeof project?.id === 'number' && project.id > 0) {
-        ids.add(project.id);
-      }
-    });
-
-    return Array.from(ids);
-  }
-
-  private hasProjectOnDate(date: Date): boolean {
-    const key = this.toDateKey(date);
-    return this.selectedServiceProjects.some((project) => {
-      const typedProject = project as ProjectEntity & { startDate?: string | Date; endDate?: string | Date };
-      const startDate = typedProject.startDate;
-      const endDate = typedProject.endDate;
-
-      if (!startDate || !endDate) {
-        return false;
-      }
-
-      const start = this.toDateKey(new Date(startDate));
-      const end = this.toDateKey(new Date(endDate));
-      return key >= start && key <= end;
-    });
-  }
-
-  private toDateKey(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  private uniqueById<T extends { id?: number }>(items: T[]): T[] {
-    const map = new Map<number, T>();
-    items.forEach((item) => {
-      if (typeof item.id === 'number' && item.id > 0) {
-        map.set(item.id, item);
-      }
-    });
-    return Array.from(map.values());
-  }
-
-  private isDoneState(value: unknown): boolean {
-    if (typeof value === 'number') {
-      return value === 3 || value === 4;
+    if (projectIds.length === 0) {
+      this.serviceUserStories = [];
+      this.selectedUserStoryStatuses = {};
+      return;
     }
 
-    if (typeof value === 'string') {
-      const normalized = value.trim().toLowerCase();
-      return normalized === 'done' || normalized === 'validated' || normalized === 'completed';
-    }
+    const requests = projectIds.map((projectId) =>
+      this.userStoryService.getByProjectId(projectId).pipe(catchError(() => of([] as UserStoryDto[])))
+    );
 
-    return false;
+    forkJoin(requests).subscribe({
+      next: (storiesByProject) => {
+        const flattened = storiesByProject.flat();
+        this.serviceUserStories = flattened
+          .map((story) => ({ ...story, numericId: Number(story.id) }))
+          .filter((story) => Number.isFinite(story.numericId) && story.numericId > 0);
+
+        this.selectedUserStoryStatuses = {};
+        this.serviceUserStories.forEach((story) => {
+          this.selectedUserStoryStatuses[story.numericId] = story.status;
+        });
+      },
+      error: () => {
+        this.serviceUserStories = [];
+      }
+    });
   }
 
   private getProjectServiceId(project: ProjectEntity): number | null {
@@ -884,5 +776,4 @@ export class ResponsableServiceDashboard implements OnInit {
     const serviceIdValue = typedTeam.serviceId ?? typedTeam.ServiceId ?? typedTeam.serviceID;
     return typeof serviceIdValue === 'number' && Number.isFinite(serviceIdValue) ? serviceIdValue : null;
   }
-
 }

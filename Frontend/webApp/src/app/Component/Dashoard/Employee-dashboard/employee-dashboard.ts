@@ -9,6 +9,7 @@ import { Sprint as SprintEntity, SprintService } from '../../Page/Sprint/Service
 import { TaskDto, TaskService } from '../../Page/Task/Service/TaskService';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
+import { Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 
 type SidebarSection = 'dashboard' | 'calendar' | 'notifications';
 type EmployeeTab = 'overview' | 'tasks' | 'projects' | 'sprints';
@@ -84,6 +85,7 @@ export class EmployeeDashboard implements OnInit {
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private userStoryService = inject(UserStoryService);
+  private serviceService = inject(ServiceService);
 
   sidebarSection: SidebarSection = 'dashboard';
   activeTab: EmployeeTab = 'overview';
@@ -168,7 +170,7 @@ export class EmployeeDashboard implements OnInit {
   }
 
   get highPriorityCount(): number {
-    return this.myTasks.filter((task) => task.priorityClass === 'urgent' || task.priorityClass === 'high').length;
+    return this.myTasks.filter((task) => task.priorityClass === 'urgente' || task.priorityClass === 'haute').length;
   }
 
   get inProgressTasks(): UiTask[] {
@@ -283,11 +285,12 @@ export class EmployeeDashboard implements OnInit {
 
     forkJoin({
       tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[]))),
-      projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as ProjectEntity[])))
+      projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as ProjectEntity[]))),
+      services: this.serviceService.getServices().pipe(catchError(() => of([] as Service[])))
     })
       .pipe(timeout(15000))
       .subscribe({
-        next: ({ tasks, projects }) => {
+        next: ({ tasks, projects, services }) => {
           const projectIds = projects
             .map((p) => p.id)
             .filter((id): id is number => typeof id === 'number' && id > 0);
@@ -297,7 +300,7 @@ export class EmployeeDashboard implements OnInit {
           );
 
           if (sprintRequests.length === 0) {
-            this.composeDashboard(tasks, projects, [], []);
+            this.composeDashboard(tasks, projects, [], [], services);
             this.loading = false;
             return;
           }
@@ -312,7 +315,7 @@ export class EmployeeDashboard implements OnInit {
                   .filter((id): id is number => typeof id === 'number' && id > 0);
 
                 if (sprintIds.length === 0) {
-                  this.composeDashboard(tasks, projects, sprints, []);
+                  this.composeDashboard(tasks, projects, sprints, [], services);
                   return;
                 }
 
@@ -322,15 +325,15 @@ export class EmployeeDashboard implements OnInit {
 
                 forkJoin(storyRequests).subscribe({
                   next: (storiesBySprint) => {
-                    this.composeDashboard(tasks, projects, sprints, storiesBySprint.flat());
+                    this.composeDashboard(tasks, projects, sprints, storiesBySprint.flat(), services);
                   },
                   error: () => {
-                    this.composeDashboard(tasks, projects, sprints, []);
+                    this.composeDashboard(tasks, projects, sprints, [], services);
                   }
                 });
               },
               error: () => {
-                this.composeDashboard(tasks, projects, [], []);
+                this.composeDashboard(tasks, projects, [], [], services);
               }
             });
         },
@@ -345,7 +348,8 @@ export class EmployeeDashboard implements OnInit {
     tasks: TaskDto[],
     projects: ProjectEntity[],
     sprints: SprintEntity[],
-    stories: UserStoryDto[]
+    stories: UserStoryDto[],
+    services: Service[]
   ): void {
     this.allTasks = tasks;
     this.userStories = stories;
@@ -359,8 +363,9 @@ export class EmployeeDashboard implements OnInit {
 
     const storyById = new Map<number, UserStoryDto>();
     stories.forEach((story) => {
-      if (typeof story.id === 'number') {
-        storyById.set(story.id, story);
+      const storyId = Number(story.id);
+      if (Number.isFinite(storyId) && storyId > 0) {
+        storyById.set(storyId, story);
       }
     });
 
@@ -368,6 +373,13 @@ export class EmployeeDashboard implements OnInit {
     projects.forEach((project) => {
       if (typeof project.id === 'number') {
         projectById.set(project.id, project);
+      }
+    });
+
+    const serviceById = new Map<number, Service>();
+    services.forEach((service) => {
+      if (typeof service.id === 'number') {
+        serviceById.set(service.id, service);
       }
     });
 
@@ -387,7 +399,7 @@ export class EmployeeDashboard implements OnInit {
       const project = projectById.get(projectId);
       const allProjectTasks = tasks.filter((task) => {
         const story = storyById.get(task.userStoryId);
-        const sprint = story?.sprintId ? sprintById.get(story.sprintId) : null;
+        const sprint = story?.sprintId ? sprintById.get(Number(story.sprintId)) : null;
         const pid = Number((sprint as any)?.projectId ?? 0);
         return pid === projectId;
       });
@@ -427,7 +439,7 @@ export class EmployeeDashboard implements OnInit {
     this.sprintCards = sprints
       .filter((sprint) => this.projectCards.some((card) => card.id === Number((sprint as any).projectId)))
       .map((sprint) => {
-        const sprintStories = stories.filter((story) => story.sprintId === sprint.id);
+        const sprintStories = stories.filter((story) => Number(story.sprintId) === sprint.id);
         const completedStories = sprintStories.filter((story) => this.isStoryDone(story.status)).length;
         return {
           id: sprint.id,
@@ -441,6 +453,17 @@ export class EmployeeDashboard implements OnInit {
         };
       });
 
+    const myServiceNames = Array.from(new Set(
+      this.projectCards
+        .map((card) => projectById.get(card.id))
+        .map((project) => {
+          const serviceId = Number(project?.serviceId ?? 0);
+          return serviceId > 0 ? (serviceById.get(serviceId)?.name ?? '') : '';
+        })
+        .filter((name) => name.trim().length > 0)
+    ));
+    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service non défini';
+
     this.notifications = this.buildNotifications();
     this.unreadNotifications = this.notifications.length;
     this.buildCalendar();
@@ -453,7 +476,7 @@ export class EmployeeDashboard implements OnInit {
     projectById: Map<number, ProjectEntity>
   ): UiTask {
     const story = storyById.get(task.userStoryId);
-    const sprint = (task.sprintId ? sprintById.get(task.sprintId) : null) ?? (story?.sprintId ? sprintById.get(story.sprintId) : null);
+    const sprint = (task.sprintId ? sprintById.get(task.sprintId) : null) ?? (story?.sprintId ? sprintById.get(Number(story.sprintId)) : null);
     const project = sprint ? projectById.get(Number((sprint as any).projectId ?? 0)) : null;
     const bucket = this.mapBucket(task.status);
     const priority = this.mapPriority(task.complexity);
@@ -479,7 +502,7 @@ export class EmployeeDashboard implements OnInit {
 
   private resolveProjectId(task: UiTask, storyById: Map<number, UserStoryDto>, sprintById: Map<number, SprintEntity>): number | null {
     const story = storyById.get(task.storyId);
-    const sprint = (task.sprintId ? sprintById.get(task.sprintId) : null) ?? (story?.sprintId ? sprintById.get(story.sprintId) : null);
+    const sprint = (task.sprintId ? sprintById.get(task.sprintId) : null) ?? (story?.sprintId ? sprintById.get(Number(story.sprintId)) : null);
     const projectId = Number((sprint as any)?.projectId ?? 0);
     return projectId > 0 ? projectId : null;
   }
@@ -494,7 +517,7 @@ export class EmployeeDashboard implements OnInit {
       return !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && now >= start && now <= end;
     }) ?? sprints[0];
 
-    const sprintStories = stories.filter((story) => story.sprintId === active.id);
+    const sprintStories = stories.filter((story) => Number(story.sprintId) === active.id);
     return {
       id: active.id,
       projectId: Number((active as any).projectId ?? 0),
@@ -511,7 +534,7 @@ export class EmployeeDashboard implements OnInit {
     const notifications: UiNotification[] = [];
 
     this.myTasks.forEach((task) => {
-      if (task.priorityClass === 'urgent' || task.priorityClass === 'high') {
+      if (task.priorityClass === 'urgente' || task.priorityClass === 'haute') {
         notifications.push({
           level: 'warning',
           message: `Priorité ${task.priorityLabel} : ${task.title}`,
@@ -580,13 +603,17 @@ export class EmployeeDashboard implements OnInit {
     }
 
     const fullName = this.userName.trim().toLowerCase();
-    return (task.assignedToName ?? '').toLowerCase().includes(fullName) || fullName === '';
+    if (!fullName) {
+      return false;
+    }
+    return (task.assignedToName ?? '').toLowerCase().includes(fullName);
   }
 
   private mapBucket(status: TaskDto['status']): TaskBucket {
     const normalized = typeof status === 'string' ? status.toLowerCase() : Number(status);
 
-    if (normalized === 'inprogress' || normalized === 'inprogress' || normalized === 2) return 'inProgress';
+    if (normalized === 'inprogress' || normalized === 'in progress' || normalized === 2) return 'inProgress';
+    if (normalized === 'review') return 'review';
     if (normalized === 'done' || normalized === 'validated' || normalized === 3 || normalized === 4) return 'done';
     if (normalized === 'pending' || normalized === 0) return 'review';
     return 'todo';
@@ -614,7 +641,7 @@ export class EmployeeDashboard implements OnInit {
   private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
     const bucket = this.mapBucket(status);
     if (bucket === 'todo') return UserStoryStatus.IN_PROGRESS;
-    if (bucket === 'inProgress') return UserStoryStatus.PENDING;
+    if (bucket === 'inProgress') return UserStoryStatus.REVIEW;
     if (bucket === 'review') return UserStoryStatus.DONE;
     return null;
   }
@@ -646,7 +673,12 @@ export class EmployeeDashboard implements OnInit {
   }
 
   private isStoryDone(value: unknown): boolean {
-    return Number(value) === UserStoryStatus.DONE || Number(value) === UserStoryStatus.VALIDATED;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === UserStoryStatus.DONE.toLowerCase();
+    }
+
+    return Number(value) === 3 || Number(value) === 4;
   }
 
   private toFrDate(value: unknown): string {
