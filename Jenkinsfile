@@ -86,7 +86,7 @@ pipeline {
             post {
                 always {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                        junit 'backend/**/test-results.trx'
+                        archiveArtifacts artifacts: 'backend/**/test-results.trx', allowEmptyArchive: true
                     }
                 }
             }
@@ -134,7 +134,7 @@ pipeline {
                     dir("${FRONTEND_DIR}") {
                         sh '''
                             echo "Running Angular tests"
-                            npm run test -- --watch=false --code-coverage --browsers=ChromeHeadless || true
+                            npm run test -- --watch=false --coverage --browsers=ChromeHeadless || true
                         '''
                     }
                 }
@@ -146,7 +146,7 @@ pipeline {
                             allowMissing: true,
                             alwaysLinkToLastBuild: true,
                             keepAll: true,
-                            reportDir: "Frontend/webApp/coverage",
+                            reportDir: "Frontend/webApp/coverage/web-app",
                             reportFiles: 'index.html',
                             reportName: 'Angular Coverage Report'
                         ])
@@ -182,7 +182,7 @@ pipeline {
                     echo "🐳 Building Docker Images..."
                     sh '''
                         echo "Building Backend Docker image"
-                        docker build -f backend/Projet.Api/Dockerfile -t ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} .
+                        docker build -f backend/Projet.Api/Dockerfile -t ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} backend
                         docker tag ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} ${IMAGE_NAME_BACKEND}:latest
                         
                         echo "Building Frontend Docker image"
