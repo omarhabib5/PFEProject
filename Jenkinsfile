@@ -235,16 +235,7 @@ pipeline {
                         
                         echo "Testing Backend API"
                         curl -i http://localhost:7219/swagger/index.html || true
-                        
-                        echo "Stopping services"
-                        docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml down
                     '''
-                }
-            }
-            post {
-                always {
-                    sh 'docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml down --volumes || true'
-                    sh 'docker rm -f pfe-db pfe-backend pfe-frontend || true'
                 }
             }
         }
@@ -272,17 +263,30 @@ pipeline {
                 script {
                     echo "❤️ Performing Health Checks..."
                     sh '''
-                        echo "Checking Backend API health"
+                        echo "Checking Backend API health endpoint"
                         for i in $(seq 1 10); do
-                            if curl -s http://localhost:7219/healthz; then
+                            if curl -fsS http://localhost:7219/healthz > /dev/null; then
                                 echo "✓ Backend API is healthy"
                                 exit 0
                             fi
+
+                            echo "Health endpoint unavailable, trying Swagger endpoint"
+                            if curl -fsS http://localhost:7219/swagger/index.html > /dev/null; then
+                                echo "✓ Backend API is reachable (Swagger)"
+                                exit 0
+                            fi
+
                             sleep 5
                         done
                         echo "⚠️ Health check timed out"
                         exit 1
                     '''
+                }
+            }
+            post {
+                always {
+                    sh 'docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml down --volumes || true'
+                    sh 'docker rm -f pfe-db pfe-backend pfe-frontend || true'
                 }
             }
         }
