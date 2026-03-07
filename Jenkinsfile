@@ -16,18 +16,15 @@ pipeline {
         FRONTEND_DIR = 'Frontend/webApp'
         
         // Docker Configuration
-        DOCKER_REGISTRY = credentials('docker-registry-credentials')
         IMAGE_NAME_BACKEND = 'pfe-backend'
         IMAGE_NAME_FRONTEND = 'pfe-frontend'
         IMAGE_TAG = "${BUILD_NUMBER}"
         
         // Database Configuration
-        DB_SA_PASSWORD = credentials('mssql-sa-password')
         MSSQL_DB = 'ProjetPFE'
         
         // API Configuration
         ASPNETCORE_ENVIRONMENT = 'Production'
-        JWT_SECRET = credentials('jwt-secret-key')
     }
 
     stages {
@@ -235,22 +232,28 @@ pipeline {
             steps {
                 script {
                     echo "📤 Pushing Docker Images..."
-                    bat '''
-                        @echo off
-                        echo Logging into Docker Registry
-                        echo %DOCKER_REGISTRY_PSW% | docker login -u %DOCKER_REGISTRY_USR% --password-stdin
-                        
-                        echo Tagging images with registry
-                        docker tag %IMAGE_NAME_BACKEND%:%IMAGE_TAG% %DOCKER_REGISTRY_USR%/%IMAGE_NAME_BACKEND%:%IMAGE_TAG%
-                        docker tag %IMAGE_NAME_FRONTEND%:%IMAGE_TAG% %DOCKER_REGISTRY_USR%/%IMAGE_NAME_FRONTEND%:%IMAGE_TAG%
-                        
-                        echo Pushing images to registry
-                        docker push %DOCKER_REGISTRY_USR%/%IMAGE_NAME_BACKEND%:%IMAGE_TAG%
-                        docker push %DOCKER_REGISTRY_USR%/%IMAGE_NAME_FRONTEND%:%IMAGE_TAG%
-                        
-                        echo Logging out
-                        docker logout
-                    '''
+                    echo "⚠️ Skipping Docker Registry push - credentials not configured"
+                    // Uncomment when credentials are available:
+                    // withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', 
+                    //                                   usernameVariable: 'DOCKER_USER', 
+                    //                                   passwordVariable: 'DOCKER_PASS')]) {
+                    //     bat '''
+                    //         @echo off
+                    //         echo Logging into Docker Registry
+                    //         echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    //         
+                    //         echo Tagging images with registry
+                    //         docker tag %IMAGE_NAME_BACKEND%:%IMAGE_TAG% %DOCKER_USER%/%IMAGE_NAME_BACKEND%:%IMAGE_TAG%
+                    //         docker tag %IMAGE_NAME_FRONTEND%:%IMAGE_TAG% %DOCKER_USER%/%IMAGE_NAME_FRONTEND%:%IMAGE_TAG%
+                    //         
+                    //         echo Pushing images to registry
+                    //         docker push %DOCKER_USER%/%IMAGE_NAME_BACKEND%:%IMAGE_TAG%
+                    //         docker push %DOCKER_USER%/%IMAGE_NAME_FRONTEND%:%IMAGE_TAG%
+                    //         
+                    //         echo Logging out
+                    //         docker logout
+                    //     '''
+                    // }
                 }
             }
         }
@@ -296,15 +299,17 @@ pipeline {
 
     post {
         always {
-            script {
-                echo "📋 Generating Reports..."
-                
-                // Archive artifacts
-                archiveArtifacts artifacts: 'backend/**/bin/Release/**/*.dll, Frontend/webApp/dist/**', 
-                                 allowEmptyArchive: true
-                
-                // Clean up
-                cleanWs()
+            node {
+                script {
+                    echo "📋 Generating Reports..."
+                    
+                    // Archive artifacts
+                    archiveArtifacts artifacts: 'backend/**/bin/Release/**/*.dll, Frontend/webApp/dist/**', 
+                                     allowEmptyArchive: true
+                    
+                    // Clean up
+                    cleanWs()
+                }
             }
         }
         
