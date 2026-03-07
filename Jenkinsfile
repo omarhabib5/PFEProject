@@ -299,17 +299,17 @@ pipeline {
 
     post {
         always {
-            node {
-                script {
-                    echo "📋 Generating Reports..."
-                    
-                    // Archive artifacts
+            script {
+                echo "📋 Generating Reports..."
+                
+                // Archive artifacts - with catchError to handle missing files gracefully
+                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     archiveArtifacts artifacts: 'backend/**/bin/Release/**/*.dll, Frontend/webApp/dist/**', 
                                      allowEmptyArchive: true
-                    
-                    // Clean up
-                    cleanWs()
                 }
+                
+                // Clean up workspace
+                cleanWs()
             }
         }
         
