@@ -42,13 +42,12 @@ pipeline {
                 script {
                     echo "📊 Analyzing Backend Code..."
                     dir('backend') {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Checking .NET version
                             dotnet --version
                             
                             echo Listing project structure
-                            dir /s /b *.csproj
+                            find . -name "*.csproj" -type f
                         '''
                     }
                 }
@@ -60,13 +59,12 @@ pipeline {
                 script {
                     echo "🔨 Building Backend (.NET)..."
                     dir('backend') {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Restoring NuGet packages
-                            dotnet restore %BACKEND_SOLUTION%
+                            dotnet restore $BACKEND_SOLUTION
                             
                             echo Building solution
-                            dotnet build %BACKEND_SOLUTION% --configuration Release --no-restore
+                            dotnet build $BACKEND_SOLUTION --configuration Release --no-restore
                         '''
                     }
                 }
@@ -78,10 +76,9 @@ pipeline {
                 script {
                     echo "🧪 Running Backend Tests..."
                     dir('backend') {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Running unit tests
-                            dotnet test %BACKEND_SOLUTION% --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+                            dotnet test $BACKEND_SOLUTION --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
                         '''
                     }
                 }
@@ -98,14 +95,13 @@ pipeline {
                 script {
                     echo "📊 Analyzing Frontend Code..."
                     dir(env.FRONTEND_DIR) {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Checking Node and npm versions
                             node --version
                             npm --version
                             
                             echo Checking package.json
-                            type package.json | findstr "\"name\"|\"version\""
+                            grep -E '"name"|"version"' package.json
                         '''
                     }
                 }
@@ -117,13 +113,12 @@ pipeline {
                 script {
                     echo "🔨 Building Frontend (Angular)..."
                     dir(env.FRONTEND_DIR) {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Installing dependencies
-                            call npm ci
+                            npm ci
                             
                             echo Building Angular application
-                            call npm run build
+                            npm run build
                         '''
                     }
                 }
@@ -135,10 +130,9 @@ pipeline {
                 script {
                     echo "🧪 Running Frontend Tests..."
                     dir(env.FRONTEND_DIR) {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Running Angular tests
-                            call npm run test -- --watch=false --code-coverage
+                            npm run test -- --watch=false --code-coverage
                         '''
                     }
                 }
@@ -165,8 +159,7 @@ pipeline {
                 script {
                     echo "📈 Running SonarQube Analysis..."
                     withSonarQubeEnv('SonarQube') {
-                        bat '''
-                            @echo off
+                        sh '''
                             echo Analyzing code quality with SonarQube
                             dotnet sonarscanner begin /k:"PFEProject" /d:sonar.host.url=http://sonarqube:9000
                             dotnet build backend/backend.sln --configuration Release
@@ -181,15 +174,14 @@ pipeline {
             steps {
                 script {
                     echo "🐳 Building Docker Images..."
-                    bat '''
-                        @echo off
+                    sh '''
                         echo Building Backend Docker image
-                        docker build -f backend/Projet.Api/Dockerfile -t %IMAGE_NAME_BACKEND%:%IMAGE_TAG% .
-                        docker tag %IMAGE_NAME_BACKEND%:%IMAGE_TAG% %IMAGE_NAME_BACKEND%:latest
+                        docker build -f backend/Projet.Api/Dockerfile -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
+                        docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $IMAGE_NAME_BACKEND:latest
                         
                         echo Building Frontend Docker image
-                        docker build -f Frontend/webApp/Dockerfile -t %IMAGE_NAME_FRONTEND%:%IMAGE_TAG% Frontend/webApp
-                        docker tag %IMAGE_NAME_FRONTEND%:%IMAGE_TAG% %IMAGE_NAME_FRONTEND%:latest
+                        docker build -f Frontend/webApp/Dockerfile -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG Frontend/webApp
+                        docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $IMAGE_NAME_FRONTEND:latest
                     '''
                 }
             }
@@ -199,13 +191,12 @@ pipeline {
             steps {
                 script {
                     echo "🔍 Testing with Docker Compose..."
-                    bat '''
-                        @echo off
+                    sh '''
                         echo Starting services with docker-compose
                         docker-compose -f docker-compose.yml up -d
                         
                         echo Waiting for services to be healthy
-                        timeout /t 30
+                        sleep 30
                         
                         echo Checking service status
                         docker-compose ps
@@ -220,7 +211,7 @@ pipeline {
             }
             post {
                 always {
-                    bat 'docker-compose down --volumes || exit /b 0'
+                    sh 'docker-compose down --volumes || true'
                 }
             }
         }
@@ -265,8 +256,7 @@ pipeline {
             steps {
                 script {
                     echo "🚀 Deploying to Staging Environment..."
-                    bat '''
-                        @echo off
+                    sh '''
                         echo Deploying using docker-compose to staging
                         docker-compose -p pfe-staging -f docker-compose.yml up -d
                         
@@ -281,16 +271,16 @@ pipeline {
             steps {
                 script {
                     echo "❤️ Performing Health Checks..."
-                    bat '''
-                        @echo off
+                    sh '''
                         echo Checking Backend API health
-                        for /l %%i in (1,1,10) do (
-                            curl -s http://localhost:7219/healthz && goto success
-                            timeout /t 5 /nobreak
-                        )
-                        exit /b 1
-                        :success
-                        echo ✓ Backend API is healthy
+                        for i in {1..10}; do
+                            if curl -s http://localhost:7219/healthz; then
+                                echo "✓ Backend API is healthy"
+                                exit 0
+                            fi
+                            sleep 5
+                        done
+                        exit 1
                     '''
                 }
             }
