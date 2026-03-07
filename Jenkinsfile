@@ -149,6 +149,9 @@ pipeline {
             post {
                 always {
                     publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
                         reportDir: "${env.FRONTEND_DIR}/coverage",
                         reportFiles: 'index.html',
                         reportName: 'Angular Coverage Report'
