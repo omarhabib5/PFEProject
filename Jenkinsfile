@@ -86,7 +86,15 @@ pipeline {
             post {
                 always {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                        archiveArtifacts artifacts: 'backend/**/test-results.trx', allowEmptyArchive: true
+                        script {
+                            def hasTrx = sh(script: "find backend -type f -name 'test-results.trx' | grep -q .", returnStatus: true) == 0
+                            if (hasTrx) {
+                                archiveArtifacts artifacts: 'backend/**/test-results.trx', allowEmptyArchive: true
+                                echo "✓ Backend test reports archived"
+                            } else {
+                                echo "ℹ No backend test report (*.trx) found"
+                            }
+                        }
                     }
                 }
             }
@@ -134,7 +142,7 @@ pipeline {
                     dir("${FRONTEND_DIR}") {
                         sh '''
                             echo "Running Angular tests"
-                            npm run test -- --watch=false --coverage --browsers=ChromeHeadless || true
+                            npm run test -- --watch=false || true
                         '''
                     }
                 }
@@ -142,14 +150,29 @@ pipeline {
             post {
                 always {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                        publishHTML([
-                            allowMissing: true,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: "Frontend/webApp/coverage/web-app",
-                            reportFiles: 'index.html',
-                            reportName: 'Angular Coverage Report'
-                        ])
+                        script {
+                            if (fileExists('Frontend/webApp/coverage/index.html')) {
+                                publishHTML([
+                                    allowMissing: true,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: "Frontend/webApp/coverage",
+                                    reportFiles: 'index.html',
+                                    reportName: 'Angular Coverage Report'
+                                ])
+                            } else if (fileExists('Frontend/webApp/coverage/web-app/index.html')) {
+                                publishHTML([
+                                    allowMissing: true,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: "Frontend/webApp/coverage/web-app",
+                                    reportFiles: 'index.html',
+                                    reportName: 'Angular Coverage Report'
+                                ])
+                            } else {
+                                echo "ℹ No frontend coverage report found"
+                            }
+                        }
                     }
                 }
             }
@@ -198,26 +221,30 @@ pipeline {
                 script {
                     echo "🔍 Testing with Docker Compose..."
                     sh '''
+                        echo "Cleaning conflicting containers if they already exist"
+                        docker rm -f pfe-db pfe-backend pfe-frontend || true
+
                         echo "Starting services with docker-compose"
-                        docker-compose -f docker-compose.yml up -d
+                        docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml up -d
                         
                         echo "Waiting for services to be healthy"
                         sleep 30
                         
                         echo "Checking service status"
-                        docker-compose ps
+                        docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml ps
                         
                         echo "Testing Backend API"
                         curl -i http://localhost:7219/swagger/index.html || true
                         
                         echo "Stopping services"
-                        docker-compose down
+                        docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml down
                     '''
                 }
             }
             post {
                 always {
-                    sh 'docker-compose down --volumes || true'
+                    sh 'docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml down --volumes || true'
+                    sh 'docker rm -f pfe-db pfe-backend pfe-frontend || true'
                 }
             }
         }
