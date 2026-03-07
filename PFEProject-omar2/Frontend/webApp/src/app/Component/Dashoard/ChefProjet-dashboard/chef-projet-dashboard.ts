@@ -22,6 +22,7 @@ import {
 import { UserStoryDto } from '../../Page/UserStory/Model/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserApiService, UserDto } from '../../Page/Team/Service/UserApiService';
+import { TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 
 type DashboardSection = 'projects' | 'calendar' | 'settings';
 type ProjectTab = 'userStories' | 'sprints' | 'tasks';
@@ -49,6 +50,28 @@ interface TaskFormModel {
   assignedToUserId: number | null;
 }
 
+type CalendarEventType = 'task';
+
+interface CalendarEventItem {
+  id: string;
+  title: string;
+  type: CalendarEventType;
+  startIso: string;
+  endIso: string;
+  meta: string;
+  className: string;
+}
+
+interface CalendarDayCell {
+  date: Date;
+  iso: string;
+  dayNumber: number;
+  inCurrentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+  events: CalendarEventItem[];
+}
+
 @Component({
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
@@ -61,6 +84,7 @@ export class ChefProjetDashboard implements OnInit {
   private taskService = inject(TaskService);
   private userStoryService = inject(UserStoryService);
   private userApiService = inject(UserApiService);
+  private teamService = inject(TeamService);
   private tokenService = inject(TokenService);
 
   private currentManagerId: number | null = null;
@@ -83,6 +107,8 @@ export class ChefProjetDashboard implements OnInit {
   tasks: TaskDto[] = [];
   userStories: UserStoryDto[] = [];
   employeeUsers: UserDto[] = [];
+  private teamMemberNamesByTeamId: Record<number, string[]> = {};
+  private teamMembersByTeamId: Record<number, UserDto[]> = {};
 
   selectedProjectFilter: number | 'all' = 'all';
   selectedSprintFilter: number | 'all' = 'all';
@@ -111,6 +137,10 @@ export class ChefProjetDashboard implements OnInit {
     { value: 'done', label: 'Done' },
     { value: 'validated', label: 'Validated' },
   ];
+
+  readonly calendarWeekdayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  currentCalendarDate = new Date();
+  selectedCalendarDateIso = this.toIsoDateLocal(new Date());
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -189,6 +219,31 @@ export class ChefProjetDashboard implements OnInit {
     return role || 'Project Manager';
   }
 
+  get calendarMonthLabel(): string {
+    return this.currentCalendarDate.toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  get selectedCalendarDateLabel(): string {
+    const selectedDate = this.parseToLocalDate(this.selectedCalendarDateIso);
+    return selectedDate.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  get calendarDays(): CalendarDayCell[] {
+    return this.buildCalendarDays();
+  }
+
+  get selectedCalendarDayEvents(): CalendarEventItem[] {
+    return this.getEventsForDate(this.selectedCalendarDateIso);
+  }
+
   get currentDateLabel(): string {
     return new Date().toLocaleDateString('fr-FR', {
       weekday: 'long',
@@ -199,16 +254,20 @@ export class ChefProjetDashboard implements OnInit {
   }
 
   get teamDisplayMembers(): string[] {
-    const members = new Set<string>();
+    const teamId = this.getCurrentProjectTeamId();
+    if (!teamId) {
+      return [];
+    }
+    return (this.teamMemberNamesByTeamId[teamId] ?? []).slice(0, 8);
+  }
 
-    for (const task of this.tasks) {
-      const name = String(task.assignedToName ?? '').trim();
-      if (name) {
-        members.add(name);
-      }
+  get assignableUsers(): UserDto[] {
+    const teamId = this.getCurrentProjectTeamId();
+    if (!teamId) {
+      return [];
     }
 
-    return Array.from(members).slice(0, 8);
+    return this.teamMembersByTeamId[teamId] ?? [];
   }
 
   get completedStoriesCount(): number {
@@ -243,7 +302,7 @@ export class ChefProjetDashboard implements OnInit {
     if (this.sprints.length === 0) {
       return 0;
     }
-    return Math.round((this.activeSprintsCount / this.sprints.length) * 100);
+    return Math.round((this.completedSprintsCount / this.sprints.length) * 100);
   }
 
   get tasksProgress(): number {
@@ -255,6 +314,32 @@ export class ChefProjetDashboard implements OnInit {
 
   get progressLineWidth(): number {
     return Math.max(4, Math.min(this.globalProgress, 100));
+  }
+
+  goToPreviousCalendarMonth(): void {
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() - 1,
+      1
+    );
+  }
+
+  goToNextCalendarMonth(): void {
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() + 1,
+      1
+    );
+  }
+
+  goToCurrentCalendarMonth(): void {
+    const today = new Date();
+    this.currentCalendarDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.selectedCalendarDateIso = this.toIsoDateLocal(today);
+  }
+
+  selectCalendarDay(iso: string): void {
+    this.selectedCalendarDateIso = iso;
   }
 
   loadDashboardData(): void {
@@ -282,6 +367,7 @@ export class ChefProjetDashboard implements OnInit {
       next: ({ projects, sprints, tasks, userStories, users }) => {
         this.applyScopedData(projects, sprints, tasks, userStories);
         this.employeeUsers = (users ?? []).filter((user) => this.isEmployeeRole(user.role));
+        this.preloadDeclaredTeamMembers();
 
         if (this.projects.length === 0) {
           this.error = 'Aucun projet ne vous est attribué.';
@@ -322,8 +408,10 @@ export class ChefProjetDashboard implements OnInit {
     }).length;
   }
 
-  get activeSprintsCount(): number {
-    return this.sprints.filter((s) => s.sprintState === State.todo || s.sprintState === State.inProgress).length;
+
+
+  get completedSprintsCount(): number {
+    return this.sprints.filter((s) => s.sprintState === State.done || s.sprintState === State.validated).length;
   }
 
   get globalProgress(): number {
@@ -407,7 +495,7 @@ export class ChefProjetDashboard implements OnInit {
           this.success = 'Sprint mis à jour avec succès.';
           this.sprintSaving = false;
           this.cancelSprintForm();
-          this.loadSprints();
+          this.loadDashboardData();
         },
         error: (err) => {
           this.error = err?.error?.message || 'Erreur lors de la mise à jour du sprint.';
@@ -422,7 +510,7 @@ export class ChefProjetDashboard implements OnInit {
         this.success = 'Sprint créé avec succès.';
         this.sprintSaving = false;
         this.cancelSprintForm();
-        this.loadSprints();
+        this.loadDashboardData();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Erreur lors de la création du sprint.';
@@ -440,7 +528,7 @@ export class ChefProjetDashboard implements OnInit {
     this.sprintService.deleteSprint(sprint.id).subscribe({
       next: () => {
         this.success = 'Sprint supprimé avec succès.';
-        this.loadSprints();
+        this.loadDashboardData();
           this.cdr.detectChanges();
       },
       error: (err) => {
@@ -526,10 +614,11 @@ export class ChefProjetDashboard implements OnInit {
       const updatePayload: UpdateTaskRequest = { id: this.taskEditId, ...payload };
       this.taskService.update(updatePayload).subscribe({
         next: () => {
+          this.applyTaskLocally(payload, this.taskEditId ?? 0);
           this.success = 'Tâche mise à jour avec succès.';
           this.taskSaving = false;
           this.cancelTaskForm();
-          this.loadTasks();
+          this.loadDashboardData();
           this.cdr.detectChanges();
         },
 
@@ -545,11 +634,12 @@ export class ChefProjetDashboard implements OnInit {
     }
 
     this.taskService.create(payload).subscribe({
-      next: () => {
+      next: (created) => {
+        this.applyTaskLocally(payload, Number(created?.id ?? 0));
         this.success = 'Tâche créée avec succès.';
         this.taskSaving = false;
         this.cancelTaskForm();
-        this.loadTasks();
+        this.loadDashboardData();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -569,7 +659,7 @@ export class ChefProjetDashboard implements OnInit {
     this.taskService.delete(task.id).subscribe({
       next: () => {
         this.success = 'Tâche supprimée avec succès.';
-        this.loadTasks();
+        this.loadDashboardData();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -675,15 +765,32 @@ export class ChefProjetDashboard implements OnInit {
     return assignedUser ? this.getEmployeeLabel(assignedUser) : `User #${assignedId}`;
   }
 
-  getUserStoryProgress(story: UserStoryDto): number {
-    const total = Number((story as any)?.taskCount ?? 0);
-    const completed = Number((story as any)?.completedTaskCount ?? 0);
-    if (total <= 0) {
-      return this.isUserStoryDone(story) ? 100 : 0;
+  getUserStoryTaskCount(story: UserStoryDto): number {
+    const storyId = Number(story?.id ?? 0);
+    if (!storyId) {
+      return 0;
     }
 
-    return Math.max(0, Math.min(100, Math.round((completed / total) * 100)));
+    return this.tasks.filter((task) => Number(task.userStoryId) === storyId).length;
   }
+
+  getUserStoryCompletedTaskCount(story: UserStoryDto): number {
+    const storyId = Number(story?.id ?? 0);
+    if (!storyId) {
+      return 0;
+    }
+
+    return this.tasks.filter((task) => {
+      if (Number(task.userStoryId) !== storyId) {
+        return false;
+      }
+
+      const status = this.normalizeTaskState(task.status);
+      return status === 'done' || status === 'validated';
+    }).length;
+  }
+
+
 
   getTaskAssigneeName(task: TaskDto): string {
     const assignedName = String((task as any)?.assignedToName ?? '').trim();
@@ -740,7 +847,27 @@ export class ChefProjetDashboard implements OnInit {
     if (!value) {
       return '-';
     }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      const datePart = trimmed.length >= 10 ? trimmed.slice(0, 10) : trimmed;
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+      if (match) {
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        return new Date(year, month - 1, day).toLocaleDateString('fr-FR');
+      }
+    }
+
     return new Date(value).toLocaleDateString('fr-FR');
+  }
+
+  getCalendarEventTypeLabel(type: CalendarEventType): string {
+    if (type === 'task') {
+      return 'Tâche';
+    }
+    return 'Tâche';
   }
 
   private loadSprints(): void {
@@ -763,16 +890,61 @@ export class ChefProjetDashboard implements OnInit {
         this.tasks = data.filter((task) => {
           const taskSprintId = Number(task.sprintId ?? 0);
           const taskUserStoryId = Number(task.userStoryId ?? 0);
-          this.cdr.detectChanges();
           return this.scopedSprintIds.has(taskSprintId) || this.scopedUserStoryIds.has(taskUserStoryId);
         
         });
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Impossible de recharger les tâches.';
         this.cdr.detectChanges();
       },
     });
+  }
+
+  private applyTaskLocally(payload: CreateTaskRequest, taskId: number): void {
+    if (!taskId) {
+      return;
+    }
+
+    const normalizedStatus = this.normalizeTaskState(payload.status);
+    const assignedToId = payload.assignedToId != null ? Number(payload.assignedToId) : null;
+    const assignedUser = this.employeeUsers.find((user) => Number(user.id) === Number(assignedToId));
+
+    const nextTask: TaskDto = {
+      id: taskId,
+      title: payload.title,
+      description: payload.description,
+      status: normalizedStatus,
+      taskState: normalizedStatus,
+      estimatedHours: Number(payload.estimatedHours ?? 0),
+      complexity: Number(payload.complexity ?? 1),
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      userStoryId: Number(payload.userStoryId),
+      sprintId: payload.sprintId != null ? Number(payload.sprintId) : null,
+      assignedToId,
+      assignedToName: assignedUser ? this.getEmployeeLabel(assignedUser) : null,
+    };
+
+    const isInScope = this.scopedUserStoryIds.has(Number(nextTask.userStoryId))
+      || this.scopedSprintIds.has(Number(nextTask.sprintId ?? 0));
+
+    const existingIndex = this.tasks.findIndex((task) => Number(task.id) === Number(taskId));
+
+    if (!isInScope) {
+      if (existingIndex >= 0) {
+        this.tasks = this.tasks.filter((task) => Number(task.id) !== Number(taskId));
+      }
+      return;
+    }
+
+    if (existingIndex >= 0) {
+      this.tasks = this.tasks.map((task) => (Number(task.id) === Number(taskId) ? nextTask : task));
+      return;
+    }
+
+    this.tasks = [nextTask, ...this.tasks];
   }
 
   private applyScopedData(projects: project[], sprints: Sprint[], tasks: TaskDto[], userStories: UserStoryDto[]): void {
@@ -900,7 +1072,22 @@ export class ChefProjetDashboard implements OnInit {
     if (!value) {
       return new Date().toISOString().slice(0, 10);
     }
-    return new Date(value).toISOString().slice(0, 10);
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length >= 10) {
+        const datePart = trimmed.slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+          return datePart;
+        }
+      }
+    }
+
+    const dateObj = value instanceof Date ? value : new Date(value);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private getSelectedTaskUserStory(): UserStoryDto | undefined {
@@ -926,9 +1113,221 @@ export class ChefProjetDashboard implements OnInit {
     return true;
   }
 
+  private buildCalendarDays(): CalendarDayCell[] {
+    const year = this.currentCalendarDate.getFullYear();
+    const month = this.currentCalendarDate.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const startDayOffset = (firstOfMonth.getDay() + 6) % 7;
+    const gridStartDate = this.addDays(firstOfMonth, -startDayOffset);
+    const todayIso = this.toIsoDateLocal(new Date());
+
+    const days: CalendarDayCell[] = [];
+
+    for (let index = 0; index < 42; index += 1) {
+      const date = this.addDays(gridStartDate, index);
+      const iso = this.toIsoDateLocal(date);
+
+      days.push({
+        date,
+        iso,
+        dayNumber: date.getDate(),
+        inCurrentMonth: date.getMonth() === month,
+        isToday: iso === todayIso,
+        isSelected: iso === this.selectedCalendarDateIso,
+        events: this.getEventsForDate(iso),
+      });
+    }
+
+    return days;
+  }
+
+  private getEventsForDate(dateIso: string): CalendarEventItem[] {
+    return this.getCalendarEvents().filter((event) => dateIso >= event.startIso && dateIso <= event.endIso);
+  }
+
+  private getCalendarEvents(): CalendarEventItem[] {
+    const events: CalendarEventItem[] = [];
+
+    this.tasks.forEach((task) => {
+      const taskId = Number(task.id ?? 0);
+      const startIso = this.getSafeIsoDate(task.startDate);
+      const endIso = this.getSafeIsoDate(task.endDate);
+      const normalizedStatus = this.normalizeTaskState(task.status);
+      if (!startIso || !endIso) {
+        return;
+      }
+      events.push({
+        id: `task-${taskId}`,
+        title: task.title,
+        type: 'task',
+        startIso,
+        endIso,
+        meta: `${this.getTaskStatusLabel(normalizedStatus)} - ${this.getTaskAssigneeName(task)} - ${this.getUserStoryName(task.userStoryId)}`,
+        className: `cal-event-task ${this.getCalendarTaskStateClass(normalizedStatus)}`,
+      });
+    });
+
+    return events.sort((a, b) => {
+      if (a.startIso === b.startIso) {
+        return a.title.localeCompare(b.title);
+      }
+      return a.startIso.localeCompare(b.startIso);
+    });
+  }
+
+  private addDays(date: Date, days: number): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+  }
+
+  private getCalendarTaskStateClass(status: TaskState): string {
+    const normalized = this.normalizeTaskState(status);
+
+    if (normalized === 'validated') {
+      return 'cal-task-validated';
+    }
+    if (normalized === 'done') {
+      return 'cal-task-done';
+    }
+    if (normalized === 'inProgress') {
+      return 'cal-task-in-progress';
+    }
+    if (normalized === 'todo') {
+      return 'cal-task-todo';
+    }
+
+    return 'cal-task-pending';
+  }
+
+  private getSafeIsoDate(value?: Date | string | null): string {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length >= 10) {
+        const datePart = trimmed.slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+          return datePart;
+        }
+      }
+    }
+
+    const candidate = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(candidate.getTime())) {
+      return '';
+    }
+
+    return this.toIsoDateLocal(candidate);
+  }
+
+  private parseToLocalDate(isoDate: string): Date {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+    if (!match) {
+      return new Date();
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    return new Date(year, month, day);
+  }
+
+  private toIsoDateLocal(value: Date): string {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   private clearMessages(): void {
     this.error = '';
     this.success = '';
+  }
+
+  private getCurrentProjectTeamId(): number {
+    const current = this.currentProject;
+    if (!current) {
+      return 0;
+    }
+
+    const directTeamId = Number(current.teamId ?? 0);
+    if (directTeamId > 0) {
+      return directTeamId;
+    }
+
+    const nestedTeamId = Number((current as any)?.team?.id ?? 0);
+    return nestedTeamId > 0 ? nestedTeamId : 0;
+  }
+
+  private preloadDeclaredTeamMembers(): void {
+    const teamIds = Array.from(new Set(
+      this.projects
+        .map((item) => {
+          const directTeamId = Number(item.teamId ?? 0);
+          if (directTeamId > 0) {
+            return directTeamId;
+          }
+
+          return Number((item as any)?.team?.id ?? 0);
+        })
+        .filter((id) => id > 0)
+    ));
+
+    if (teamIds.length === 0) {
+      this.teamMemberNamesByTeamId = {};
+      this.teamMembersByTeamId = {};
+      return;
+    }
+
+    const requests = teamIds.map((teamId) =>
+      this.teamService.getMembersByTeamId(teamId).pipe(catchError(() => of([] as TeamUser[])))
+    );
+
+    forkJoin(requests).subscribe({
+      next: (membersByTeam) => {
+        const mapByTeamId: Record<number, string[]> = {};
+        const usersByTeamId: Record<number, UserDto[]> = {};
+
+        membersByTeam.forEach((members, index) => {
+          const teamId = teamIds[index];
+          const userMap = new Map<number, UserDto>();
+
+          (Array.isArray(members) ? members : []).forEach((member) => {
+            const userId = Number(member?.userId ?? member?.user?.id ?? 0);
+            if (!userId) {
+              return;
+            }
+
+            const firstName = String(member?.user?.firstName ?? '').trim();
+            const lastName = String(member?.user?.lastName ?? '').trim();
+            const email = String(member?.user?.email ?? '').trim();
+            const roleValue = member?.user?.role ?? member?.role;
+
+            userMap.set(userId, {
+              id: userId,
+              firstName,
+              lastName,
+              email,
+              role: roleValue != null ? String(roleValue) : undefined,
+            });
+          });
+
+          const users = Array.from(userMap.values());
+          usersByTeamId[teamId] = users;
+          mapByTeamId[teamId] = users.map((user) => this.getEmployeeLabel(user));
+        });
+
+        this.teamMemberNamesByTeamId = mapByTeamId;
+        this.teamMembersByTeamId = usersByTeamId;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.teamMemberNamesByTeamId = {};
+        this.teamMembersByTeamId = {};
+        this.cdr.detectChanges();
+      }
+    });
   }
 
 }

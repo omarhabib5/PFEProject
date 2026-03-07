@@ -7,7 +7,11 @@ import { CreateTaskRequest, TaskDto, TaskService, TaskState, UpdateTaskRequest }
 import { UserStoryService } from '../../UserStory/Service/UserStoryService';
 import { UserStoryDto } from '../../UserStory/Model/userstory.model';
 import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
-import { finalize, timeout } from 'rxjs/operators';
+import { finalize, timeout, catchError } from 'rxjs/operators';
+import { TeamService, TeamUser } from '../../Team/Service/TeamService';
+import { ProjectService, project } from '../../Projet/Service/ProjectService';
+import { SprintService, Sprint } from '../../Sprint/Service/SprintService';
+import { forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-task-manager',
@@ -28,6 +32,12 @@ export class TaskManager implements OnInit {
   userStories: UserStoryDto[] = [];
   userStoryNameMap: Record<number, string> = {};
   users: UserDto[] = [];
+  assignableUsers: UserDto[] = [];
+
+  private teamMembersByTeamId: Record<number, UserDto[]> = {};
+  private projectTeamIdMap: Record<number, number> = {};
+  private sprintProjectIdMap: Record<number, number> = {};
+  private loadingTeamIds = new Set<number>();
 
   statusOptions: { value: TaskState; label: string }[] = [
     { value: 'pending', label: 'Pending' },
@@ -43,6 +53,9 @@ export class TaskManager implements OnInit {
     private taskService: TaskService,
     private userStoryService: UserStoryService,
     private userApiService: UserApiService,
+    private teamService: TeamService,
+    private projectService: ProjectService,
+    private sprintService: SprintService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -51,6 +64,7 @@ export class TaskManager implements OnInit {
   ngOnInit(): void {
     this.loadUserStories();
     this.loadUsers();
+    this.loadProjectContext();
 
     this.route.params.subscribe((params) => {
       const userStoryIdParam = params['userStoryId'];
@@ -65,6 +79,8 @@ export class TaskManager implements OnInit {
       if (!taskIdParam) {
         this.formModel.status = this.prefilledStatus;
       }
+
+      this.refreshAssignableUsers();
 
       this.loadTasks();
 
@@ -102,6 +118,7 @@ export class TaskManager implements OnInit {
       this.formModel.userStoryId = this.selectedUserStoryId;
     }
     this.formModel.status = this.prefilledStatus;
+    this.refreshAssignableUsers();
   }
 
   startEdit(task: TaskDto, event: Event): void {
@@ -120,6 +137,7 @@ export class TaskManager implements OnInit {
       assignedToId: task.assignedToId ?? null,
       sprintId: task.sprintId ?? null
     };
+    this.refreshAssignableUsers();
   }
 
   saveTask(): void {
@@ -243,6 +261,8 @@ export class TaskManager implements OnInit {
     if (!this.isDateInRange(this.formModel.endDate, minDate, maxDate) || this.formModel.endDate < this.formModel.startDate) {
       this.formModel.endDate = this.formModel.startDate;
     }
+
+    this.refreshAssignableUsers();
   }
 
   onTaskStartDateChange(): void {
@@ -264,10 +284,12 @@ export class TaskManager implements OnInit {
         }, {} as Record<number, string>);
 
         this.cdr.detectChanges();
+        this.refreshAssignableUsers();
       },
       error: () => {
         this.userStories = [];
         this.userStoryNameMap = {};
+        this.assignableUsers = [];
       }
     });
   }
@@ -276,9 +298,51 @@ export class TaskManager implements OnInit {
     this.userApiService.getUsers().subscribe({
       next: (users) => {
         this.users = (Array.isArray(users) ? users : []).filter((user) => this.isEmployeeRole(user.role));
+        this.refreshAssignableUsers();
       },
       error: () => {
         this.users = [];
+        this.assignableUsers = [];
+      }
+    });
+  }
+
+  private loadProjectContext(): void {
+    forkJoin({
+      projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as project[]))),
+      sprints: this.sprintService.getAllSprints().pipe(catchError(() => of([] as Sprint[])))
+    }).subscribe({
+      next: ({ projects, sprints }) => {
+        this.projectTeamIdMap = (Array.isArray(projects) ? projects : []).reduce((acc, item) => {
+          const projectId = Number((item as any)?.id ?? (item as any)?.Id ?? 0);
+          const teamId = Number(
+            (item as any)?.teamId
+            ?? (item as any)?.TeamId
+            ?? (item as any)?.team?.id
+            ?? (item as any)?.Team?.id
+            ?? 0
+          );
+          if (projectId > 0 && teamId > 0) {
+            acc[projectId] = teamId;
+          }
+          return acc;
+        }, {} as Record<number, number>);
+
+        this.sprintProjectIdMap = (Array.isArray(sprints) ? sprints : []).reduce((acc, sprint) => {
+          const sprintId = Number((sprint as any)?.id ?? (sprint as any)?.Id ?? 0);
+          const projectId = Number((sprint as any)?.projectId ?? (sprint as any)?.ProjectId ?? 0);
+          if (sprintId > 0 && projectId > 0) {
+            acc[sprintId] = projectId;
+          }
+          return acc;
+        }, {} as Record<number, number>);
+
+        this.refreshAssignableUsers();
+      },
+      error: () => {
+        this.projectTeamIdMap = {};
+        this.sprintProjectIdMap = {};
+        this.assignableUsers = [];
       }
     });
   }
@@ -311,11 +375,118 @@ export class TaskManager implements OnInit {
           assignedToId: task.assignedToId ?? null,
           sprintId: task.sprintId ?? null
         };
+        this.refreshAssignableUsers();
       },
       error: () => {
         this.error = 'Impossible de charger la tâche à modifier';
       }
     });
+  }
+
+  private refreshAssignableUsers(): void {
+    const teamId = this.resolveSelectedStoryTeamId();
+
+    if (!teamId) {
+      this.setAssignableUsers(this.users);
+      return;
+    }
+
+    const cachedUsers = this.teamMembersByTeamId[teamId];
+    if (cachedUsers) {
+      this.setAssignableUsers(cachedUsers.length > 0 ? cachedUsers : this.users);
+      return;
+    }
+
+    if (this.loadingTeamIds.has(teamId)) {
+      return;
+    }
+
+    this.loadingTeamIds.add(teamId);
+    forkJoin({
+      members: this.teamService.getMembersByTeamId(teamId).pipe(catchError(() => of([] as TeamUser[]))),
+      employees: this.teamService.getEmployeesByTeamId(teamId).pipe(catchError(() => of([] as TeamUser[]))),
+      leaders: this.teamService.getLeadersByTeamId(teamId).pipe(catchError(() => of([] as TeamUser[])))
+    }).pipe(
+      finalize(() => this.loadingTeamIds.delete(teamId))
+    ).subscribe({
+      next: ({ members, employees, leaders }) => {
+        const mergedMembers = [
+          ...(Array.isArray(members) ? members : []),
+          ...(Array.isArray(employees) ? employees : []),
+          ...(Array.isArray(leaders) ? leaders : [])
+        ];
+
+        this.teamMembersByTeamId[teamId] = this.mapTeamMembersToUsers(mergedMembers);
+        this.setAssignableUsers(
+          this.teamMembersByTeamId[teamId].length > 0 ? this.teamMembersByTeamId[teamId] : this.users
+        );
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.teamMembersByTeamId[teamId] = [];
+        this.setAssignableUsers(this.users);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private mapTeamMembersToUsers(members: TeamUser[]): UserDto[] {
+    const usersById = new Map<number, UserDto>();
+
+    (Array.isArray(members) ? members : []).forEach((member: TeamUser) => {
+      const rawMember = member as any;
+      const rawUser = rawMember?.user ?? rawMember?.User;
+      const userId = Number(rawMember?.userId ?? rawMember?.UserId ?? rawUser?.id ?? rawUser?.Id ?? 0);
+      if (!userId) {
+        return;
+      }
+
+      const fallbackUser = this.users.find((user) => Number(user.id) === userId);
+      const firstName = String(rawUser?.firstName ?? rawUser?.FirstName ?? fallbackUser?.firstName ?? '').trim();
+      const lastName = String(rawUser?.lastName ?? rawUser?.LastName ?? fallbackUser?.lastName ?? '').trim();
+      const email = String(rawUser?.email ?? rawUser?.Email ?? fallbackUser?.email ?? '').trim();
+
+      usersById.set(userId, {
+        id: userId,
+        firstName,
+        lastName,
+        email,
+        role: fallbackUser?.role
+      });
+    });
+
+    return Array.from(usersById.values());
+  }
+
+  private setAssignableUsers(users: UserDto[]): void {
+    this.assignableUsers = Array.isArray(users) ? users : [];
+
+    if (this.formModel.assignedToId != null
+      && !this.assignableUsers.some((user) => Number(user.id) === Number(this.formModel.assignedToId))) {
+      this.formModel.assignedToId = null;
+    }
+  }
+
+  private resolveSelectedStoryTeamId(): number {
+    const selectedStory = this.getSelectedUserStory();
+    if (!selectedStory) {
+      return 0;
+    }
+
+    const directProjectId = Number((selectedStory as any)?.projectId ?? (selectedStory as any)?.ProjectId ?? 0);
+    if (directProjectId > 0) {
+      return Number(this.projectTeamIdMap[directProjectId] ?? 0);
+    }
+
+    const sprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+    if (sprintId > 0) {
+      const projectId = Number(this.sprintProjectIdMap[sprintId] ?? 0);
+      if (projectId > 0) {
+        return Number(this.projectTeamIdMap[projectId] ?? 0);
+      }
+    }
+
+    return 0;
   }
 
   private afterSaveSuccess(): void {

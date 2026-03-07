@@ -69,7 +69,7 @@
                     <label>Assigner à</label>
                     <select [(ngModel)]="formModel.assignedToId">
                         <option [ngValue]="null">Non assigné</option>
-                        <option *ngFor="let user of users" [ngValue]="user.id">
+                        <option *ngFor="let user of assignableUsers" [ngValue]="user.id">
                             {{ getUserLabel(user) }}
                         </option>
                     </select>
