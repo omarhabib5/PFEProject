@@ -76,7 +76,6 @@ interface CalendarDayCell {
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
   templateUrl: './chef-projet-dashboard.html',
-  styleUrl: './chef-projet-dashboard.css',
 })
 export class ChefProjetDashboard implements OnInit {
   private projectService = inject(ProjectService);
@@ -138,7 +137,7 @@ export class ChefProjetDashboard implements OnInit {
     { value: 'validated', label: 'Validated' },
   ];
 
-  readonly calendarWeekdayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  readonly calendarWeekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   currentCalendarDate = new Date();
   selectedCalendarDateIso = this.toIsoDateLocal(new Date());
 
@@ -211,7 +210,7 @@ export class ChefProjetDashboard implements OnInit {
   get managerDisplayName(): string {
     const userData = this.tokenService.getUserData();
     const fullName = `${userData?.firstName ?? ''} ${userData?.lastName ?? ''}`.trim();
-    return fullName || 'Chef de projet';
+    return fullName || 'Project Manager';
   }
 
   get managerRoleLabel(): string {
@@ -220,7 +219,7 @@ export class ChefProjetDashboard implements OnInit {
   }
 
   get calendarMonthLabel(): string {
-    return this.currentCalendarDate.toLocaleDateString('fr-FR', {
+    return this.currentCalendarDate.toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric',
     });
@@ -228,7 +227,7 @@ export class ChefProjetDashboard implements OnInit {
 
   get selectedCalendarDateLabel(): string {
     const selectedDate = this.parseToLocalDate(this.selectedCalendarDateIso);
-    return selectedDate.toLocaleDateString('fr-FR', {
+    return selectedDate.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -245,7 +244,7 @@ export class ChefProjetDashboard implements OnInit {
   }
 
   get currentDateLabel(): string {
-    return new Date().toLocaleDateString('fr-FR', {
+    return new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -353,7 +352,7 @@ export class ChefProjetDashboard implements OnInit {
       this.tasks = [];
       this.userStories = [];
       this.loading = false;
-      this.error = 'Utilisateur chef de projet non identifié.';
+      this.error = 'Project manager user not identified.';
       return;
     }
 
@@ -370,14 +369,14 @@ export class ChefProjetDashboard implements OnInit {
         this.preloadDeclaredTeamMembers();
 
         if (this.projects.length === 0) {
-          this.error = 'Aucun projet ne vous est attribué.';
+          this.error = 'No project is assigned to you.';
         }
 
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de charger les données du dashboard.';
+        this.error = 'Unable to load dashboard data.';
         this.loading = false;
           this.cdr.detectChanges();
       },
@@ -454,23 +453,23 @@ export class ChefProjetDashboard implements OnInit {
 
   submitSprint(): void {
     if (!this.sprintForm.name.trim() || this.sprintForm.projectId <= 0) {
-      this.error = 'Le nom du sprint et le projet sont obligatoires.';
+      this.error = 'Sprint name and project are required.';
       return;
     }
 
     if (!this.scopedProjectIds.has(Number(this.sprintForm.projectId))) {
-      this.error = 'Vous ne pouvez gérer que vos propres projets.';
+      this.error = 'You can only manage your own projects.';
       return;
     }
 
     if (new Date(this.sprintForm.endDate) <= new Date(this.sprintForm.startDate)) {
-      this.error = 'La date de fin doit être après la date de début.';
+      this.error = 'End date must be after start date.';
       return;
     }
 
     if (!this.isDateInRange(this.sprintForm.startDate, this.projectStartDateInput, this.projectEndDateInput)
       || !this.isDateInRange(this.sprintForm.endDate, this.projectStartDateInput, this.projectEndDateInput)) {
-      this.error = 'Les dates du sprint doivent être dans l\'intervalle du projet.';
+      this.error = 'Sprint dates must be within project range.';
       return;
     }
 
@@ -492,13 +491,13 @@ export class ChefProjetDashboard implements OnInit {
       const updatePayload: UpdateSprintDto = { id: this.sprintEditId, ...payload };
       this.sprintService.updateSprint(this.sprintEditId, updatePayload).subscribe({
         next: () => {
-          this.success = 'Sprint mis à jour avec succès.';
+          this.success = 'Sprint updated successfully.';
           this.sprintSaving = false;
           this.cancelSprintForm();
           this.loadDashboardData();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Erreur lors de la mise à jour du sprint.';
+          this.error = err?.error?.message || 'Error while updating sprint.';
           this.sprintSaving = false;
         },
       });
@@ -507,32 +506,32 @@ export class ChefProjetDashboard implements OnInit {
 
     this.sprintService.createSprint(payload).subscribe({
       next: () => {
-        this.success = 'Sprint créé avec succès.';
+        this.success = 'Sprint created successfully.';
         this.sprintSaving = false;
         this.cancelSprintForm();
         this.loadDashboardData();
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors de la création du sprint.';
+        this.error = err?.error?.message || 'Error while creating sprint.';
         this.sprintSaving = false;
       },
     });
   }
 
   deleteSprint(sprint: Sprint): void {
-    if (!confirm(`Supprimer le sprint "${sprint.name}" ?`)) {
+    if (!confirm(`Delete sprint "${sprint.name}" ?`)) {
       return;
     }
 
     this.clearMessages();
     this.sprintService.deleteSprint(sprint.id).subscribe({
       next: () => {
-        this.success = 'Sprint supprimé avec succès.';
+        this.success = 'Sprint deleted successfully.';
         this.loadDashboardData();
           this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors de la suppression du sprint.';
+        this.error = err?.error?.message || 'Error while deleting sprint.';
         this.cdr.detectChanges();
       },
     });
@@ -569,28 +568,28 @@ export class ChefProjetDashboard implements OnInit {
 
   submitTask(): void {
     if (!this.taskForm.title.trim() || this.taskForm.userStoryId <= 0) {
-      this.error = 'Le titre de la tâche et la user story sont obligatoires.';
+      this.error = 'Task title and user story are required.';
       return;
     }
 
     if (!this.scopedUserStoryIds.has(Number(this.taskForm.userStoryId))) {
-      this.error = 'Vous ne pouvez créer des tâches que dans vos user stories.';
+      this.error = 'You can only create tasks in your own user stories.';
       return;
     }
 
     if (this.taskForm.sprintId && !this.scopedSprintIds.has(Number(this.taskForm.sprintId))) {
-      this.error = 'Vous ne pouvez sélectionner que vos propres sprints.';
+      this.error = 'You can only select your own sprints.';
       return;
     }
 
     if (new Date(this.taskForm.endDate) < new Date(this.taskForm.startDate)) {
-      this.error = 'La date de fin doit être après ou égale à la date de début.';
+      this.error = 'End date must be after or equal to start date.';
       return;
     }
 
     if (!this.isDateInRange(this.taskForm.startDate, this.taskMinDateInput, this.taskMaxDateInput)
       || !this.isDateInRange(this.taskForm.endDate, this.taskMinDateInput, this.taskMaxDateInput)) {
-      this.error = 'Les dates de la tâche sont hors intervalle autorisé.';
+      this.error = 'Task dates are outside the allowed range.';
       return;
     }
 
@@ -615,7 +614,7 @@ export class ChefProjetDashboard implements OnInit {
       this.taskService.update(updatePayload).subscribe({
         next: () => {
           this.applyTaskLocally(payload, this.taskEditId ?? 0);
-          this.success = 'Tâche mise à jour avec succès.';
+          this.success = 'Task updated successfully.';
           this.taskSaving = false;
           this.cancelTaskForm();
           this.loadDashboardData();
@@ -624,7 +623,7 @@ export class ChefProjetDashboard implements OnInit {
 
 
         error: (err) => {
-          this.error = err?.error?.message || 'Erreur lors de la mise à jour de la tâche.';
+          this.error = err?.error?.message || 'Error while updating task.';
           this.taskSaving = false;
           this.cdr.detectChanges();
         },
@@ -636,14 +635,14 @@ export class ChefProjetDashboard implements OnInit {
     this.taskService.create(payload).subscribe({
       next: (created) => {
         this.applyTaskLocally(payload, Number(created?.id ?? 0));
-        this.success = 'Tâche créée avec succès.';
+        this.success = 'Task created successfully.';
         this.taskSaving = false;
         this.cancelTaskForm();
         this.loadDashboardData();
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors de la création de la tâche.';
+        this.error = err?.error?.message || 'Error while creating task.';
         this.taskSaving = false;
         this.cdr.detectChanges();
       },
@@ -651,19 +650,19 @@ export class ChefProjetDashboard implements OnInit {
   }
 
   deleteTask(task: TaskDto): void {
-    if (!confirm(`Supprimer la tâche "${task.title}" ?`)) {
+    if (!confirm(`Delete task "${task.title}" ?`)) {
       return;
     }
 
     this.clearMessages();
     this.taskService.delete(task.id).subscribe({
       next: () => {
-        this.success = 'Tâche supprimée avec succès.';
+        this.success = 'Task deleted successfully.';
         this.loadDashboardData();
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors de la suppression de la tâche.';
+        this.error = err?.error?.message || 'Error while deleting task.';
         this.cdr.detectChanges();
       },
     });
@@ -710,12 +709,12 @@ export class ChefProjetDashboard implements OnInit {
 
   getProjectName(projectId: number): string {
     const item = this.projects.find((project) => Number(project.id) === Number(projectId));
-    return item?.name ?? 'Projet inconnu';
+    return item?.name ?? 'Unknown project';
   }
 
   getSprintName(sprintId?: number | null): string {
     if (!sprintId) {
-      return 'Non assigné';
+      return 'Unassigned';
     }
     const sprint = this.sprints.find((item) => item.id === Number(sprintId));
     return sprint?.name ?? `Sprint #${sprintId}`;
@@ -758,7 +757,7 @@ export class ChefProjetDashboard implements OnInit {
 
     const assignedId = Number((story as any)?.assignedToId ?? 0);
     if (!assignedId) {
-      return 'Non assigné';
+      return 'Unassigned';
     }
 
     const assignedUser = this.employeeUsers.find((user) => Number(user.id) === assignedId);
@@ -800,7 +799,7 @@ export class ChefProjetDashboard implements OnInit {
 
     const assignedId = Number((task as any)?.assignedToId ?? 0);
     if (!assignedId) {
-      return 'Non assigné';
+      return 'Unassigned';
     }
 
     const assignedUser = this.employeeUsers.find((user) => Number(user.id) === assignedId);
@@ -856,18 +855,18 @@ export class ChefProjetDashboard implements OnInit {
         const year = Number(match[1]);
         const month = Number(match[2]);
         const day = Number(match[3]);
-        return new Date(year, month - 1, day).toLocaleDateString('fr-FR');
+        return new Date(year, month - 1, day).toLocaleDateString('en-US');
       }
     }
 
-    return new Date(value).toLocaleDateString('fr-FR');
+    return new Date(value).toLocaleDateString('en-US');
   }
 
   getCalendarEventTypeLabel(type: CalendarEventType): string {
     if (type === 'task') {
-      return 'Tâche';
+      return 'Task';
     }
-    return 'Tâche';
+    return 'Task';
   }
 
   private loadSprints(): void {
@@ -878,7 +877,7 @@ export class ChefProjetDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de recharger les sprints.';
+        this.error = 'Unable to reload sprints.';
         this.cdr.detectChanges();
       },
     });
@@ -896,7 +895,7 @@ export class ChefProjetDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de recharger les tâches.';
+        this.error = 'Unable to reload tasks.';
         this.cdr.detectChanges();
       },
     });
@@ -1329,5 +1328,6 @@ export class ChefProjetDashboard implements OnInit {
       }
     });
   }
+  
 
 }

@@ -24,7 +24,31 @@ namespace Projet.Domain.Handler.TaskHandler
                 throw new KeyNotFoundException($"Task with ID {request.id} not found.");
             }
 
+            var sprintIdsToSync = new HashSet<int>();
+
+            if (task.SprintId.HasValue)
+            {
+                sprintIdsToSync.Add(task.SprintId.Value);
+            }
+
+            var userStorySprintId = await _context.UserStories
+                .Where(us => us.id == task.UserStoryId)
+                .Select(us => us.SprintId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userStorySprintId > 0)
+            {
+                sprintIdsToSync.Add(userStorySprintId);
+            }
+
             _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            foreach (var sprintId in sprintIdsToSync)
+            {
+                await SprintStateSyncHelper.SyncSprintStateFromTasksAsync(_context, sprintId, cancellationToken);
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;

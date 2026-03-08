@@ -38,18 +38,18 @@ export class UserStoryManagerComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement des user stories';
+        this.error = 'Error while loading user stories';
         this.loading = false;
         console.error(err);
       }
     });}
     getStatuLLabel(status: UserStoryStatus): string {
       const labels: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.TODO]: 'À faire',
+        [UserStoryStatus.TODO]: 'To Do',
         [UserStoryStatus.IN_PROGRESS]: 'En cours',
         [UserStoryStatus.REVIEW]: 'En revue',
         [UserStoryStatus.TESTING]: 'En test',
-        [UserStoryStatus.DONE]: 'Terminé'
+        [UserStoryStatus.DONE]: 'Done'
       };
       return labels[status] || 'Inconnu';
     }
@@ -72,10 +72,10 @@ export class UserStoryManagerComponent implements OnInit {
   getPriorityLabel(priority: number): string {
     const labels: Record<number, string> = {
       1: 'Critique',
-      2: 'Élevée',
+      2: 'High',
       3: 'Moyenne',
       4: 'Basse',
-      5: 'Très basse'
+      5: 'Very low'
     };
     return labels[priority] || 'N/A';
   }
@@ -104,13 +104,13 @@ export class UserStoryManagerComponent implements OnInit {
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
     
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
+    if (confirm('Are you sure you want to delete this user story and all its tasks?')) {
       this.userStoryService.delete(id).subscribe({
         next: () => {
           this.loadUserStories();
         },
         error: (err) => {
-          alert('Erreur lors de la suppression');
+          alert('Error while deleting');
           console.error(err);
         }
       });

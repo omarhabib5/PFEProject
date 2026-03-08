@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Command.TaskCRUD;
 using Projet.Domain.Interface;
 
@@ -47,6 +48,23 @@ namespace Projet.Domain.Handler.TaskHandler
             };
 
             _context.Tasks.Add(task);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var sprintIdsToSync = await _context.UserStories
+                .Where(us => us.id == request.UserStoryId)
+                .Select(us => us.SprintId)
+                .ToListAsync(cancellationToken);
+
+            if (task.SprintId.HasValue)
+            {
+                sprintIdsToSync.Add(task.SprintId.Value);
+            }
+
+            foreach (var sprintId in sprintIdsToSync.Distinct())
+            {
+                await SprintStateSyncHelper.SyncSprintStateFromTasksAsync(_context, sprintId, cancellationToken);
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
             return task.id;

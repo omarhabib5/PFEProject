@@ -145,9 +145,9 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get pageTitle(): string {
-    if (this.activeSection === 'calendar') return 'Calendrier';
-    if (this.serviceViewMode === 'detail') return 'Mon Service';
-    return 'Gestion des Services';
+    if (this.activeSection === 'calendar') return 'Calendar';
+    if (this.serviceViewMode === 'detail') return 'My Service';
+    return 'Service Management';
   }
 
   get selectedService(): Service | null {
@@ -159,7 +159,7 @@ export class ResponsableServiceDashboard implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
     return this.services.filter(service => {
       const matchesTerm = !term || service.name.toLowerCase().includes(term);
-      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Actif';
+      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Active';
       return matchesTerm && matchesStatus;
     });
   }
@@ -223,7 +223,7 @@ export class ResponsableServiceDashboard implements OnInit {
           this.loadProjects();
         },
         error: () => {
-          this.error = 'Impossible de charger les services. Vérifiez que le backend est démarré.';
+          this.error = 'Unable to load services. Check that the backend is running.';
           this.services = [];
         }
       });
@@ -266,7 +266,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
   createService(): void {
     if (!this.newService.name.trim()) {
-      this.error = 'Le nom du service est obligatoire';
+      this.error = 'Service name is required';
       return;
     }
 
@@ -277,7 +277,7 @@ export class ResponsableServiceDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de créer le service';
+        this.error = 'Unable to create service';
       }
     });
   }
@@ -331,7 +331,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
     const firstProjectId = this.selectedServiceProjects[0]?.id;
     if (!firstProjectId) {
-      this.error = 'Ajoutez un projet à ce service pour gérer les user stories.';
+      this.error = 'Add a project to this service to manage user stories.';
       return;
     }
 
@@ -353,13 +353,13 @@ export class ResponsableServiceDashboard implements OnInit {
             return;
           }
 
-          this.error = 'Aucun sprint trouvé. Créez un sprint pour gérer les user stories.';
+          this.error = 'No sprint found. Create a sprint to manage user stories.';
           this.router.navigate(['/SprintManage', firstProjectId], {
             queryParams: { source: 'service-manager' }
           });
         },
         error: () => {
-          this.error = 'Impossible de charger les sprints du projet.';
+          this.error = 'Unable to load project sprints.';
             this.cdr.detectChanges();
         }
       });
@@ -370,8 +370,8 @@ export class ResponsableServiceDashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  getServiceStatus(_service: Service): 'Actif' {
-    return 'Actif';
+  getServiceStatus(_service: Service): 'Active' {
+    return 'Active';
   }
 
   getServiceAvatars(service: Service): string[] {
@@ -428,7 +428,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
   getResponsibleLabel(service: Service): string {
     if (!service?.responsibleId) {
-      return 'Non assigné';
+      return 'Unassigned';
     }
 
     const manager = this.selectedServiceMembers.find((member) => member.userId === service.responsibleId)?.user;
@@ -441,15 +441,15 @@ export class ResponsableServiceDashboard implements OnInit {
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
     if (typeof role === 'number') {
-      if (role === 0) return 'Administrateur';
+      if (role === 0) return 'Administrator';
       if (role === 1) return 'Service Manager';
-      if (role === 2) return 'Chef de projet';
-      if (role === 3) return 'Employé';
+      if (role === 2) return 'Project Manager';
+      if (role === 3) return 'Employee';
     }
     if (typeof role === 'string' && role.trim().length > 0) {
       return role;
     }
-    return isManager ? 'Manager' : 'Employé';
+    return isManager ? 'Manager' : 'Employee';
   }
 
   private getRoleClass(role: unknown, isManager: boolean): string {
@@ -467,7 +467,7 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   private setCurrentDate(): void {
-    this.currentDateLabel = new Date().toLocaleDateString('fr-FR', {
+    this.currentDateLabel = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

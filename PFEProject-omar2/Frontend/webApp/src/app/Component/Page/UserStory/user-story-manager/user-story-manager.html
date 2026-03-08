@@ -6,22 +6,22 @@
           class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
           (click)="goBack()"
         >
-          ← Retour
+          ← Back
         </button>
-        <h1 class="text-xl font-bold text-slate-900 md:text-2xl">Gestion des User Stories</h1>
+        <h1 class="text-xl font-bold text-slate-900 md:text-2xl">User Story Management</h1>
       </div>
       <button
         class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
         (click)="createUserStory()"
       >
         <span>+</span>
-        Nouvelle User Story
+        New User Story
       </button>
     </div>
 
     <div *ngIf="loading" class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-slate-600 shadow-sm">
       <span class="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600"></span>
-      <p class="text-sm font-medium">Chargement des user stories...</p>
+      <p class="text-sm font-medium">Loading user stories...</p>
     </div>
 
     <div *ngIf="error" class="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
@@ -34,7 +34,7 @@
           class="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
           (click)="loadUserStories()"
         >
-          Réessayer
+          Retry
         </button>
       </div>
     </div>
@@ -65,14 +65,14 @@
             <span class="font-semibold">{{ story.storyPoints }}</span>
           </div>
           <div class="flex items-center justify-between text-slate-700">
-            <span>👤 Assigné</span>
-            <span class="font-semibold">{{ story.assignedToName || 'Non assigné' }}</span>
+            <span>👤 Assigned</span>
+            <span class="font-semibold">{{ story.assignedToName || 'Unassigned' }}</span>
           </div>
         </div>
 
         <div class="mb-4">
           <div class="mb-1.5 flex items-center justify-between text-xs text-slate-600">
-            <span class="font-medium">Progression des tâches</span>
+            <span class="font-medium">Task progress</span>
             <span>{{ story.completedTaskCount }} / {{ story.taskCount }}</span>
           </div>
           <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
@@ -86,23 +86,23 @@
 
         <div *ngIf="story.acceptanceCriteria" class="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
           <span>✓</span>
-          <span>Critères d'acceptation définis</span>
+          <span>Acceptance criteria defined</span>
         </div>
 
         <div class="flex gap-2 border-t border-slate-100 pt-4">
           <button
             class="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
             (click)="editUserStory(story.id, $event)"
-            title="Modifier"
+            title="Edit"
           >
-            ✏️ Modifier
+            ✏️ Edit
           </button>
           <button
             class="inline-flex flex-1 items-center justify-center rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50"
             (click)="deleteUserStory(story.id, $event)"
-            title="Supprimer"
+            title="Delete"
           >
-            🗑️ Supprimer
+            🗑️ Delete
           </button>
         </div>
       </div>
@@ -113,13 +113,13 @@
       class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm"
     >
       <div class="mx-auto mb-3 h-12 w-12 rounded-full bg-slate-100 text-2xl leading-12">📝</div>
-      <h2 class="text-lg font-semibold text-slate-900">Aucune user story</h2>
-      <p class="mt-1 text-sm text-slate-600">Commencez par créer votre première user story pour ce sprint</p>
+      <h2 class="text-lg font-semibold text-slate-900">No user story</h2>
+      <p class="mt-1 text-sm text-slate-600">Start by creating your first user story for this sprint</p>
       <button
         class="mt-5 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
         (click)="createUserStory()"
       >
-        + Créer ma première user story
+        + Create my first user story
       </button>
     </div>
   </div>

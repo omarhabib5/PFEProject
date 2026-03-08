@@ -1,384 +1,423 @@
-<div class="layout">
-  <aside class="left-nav">
-    <div class="brand-block">
-      <h1>TaskFlow Pro</h1>
-      <p>Gestion de Projets</p>
-    </div>
-
-    <button class="nav-item" [class.active]="activeSection === 'projects'" (click)="setSection('projects')">◎ Mes Projets</button>
-    <button class="nav-item" [class.active]="activeSection === 'calendar'" (click)="setSection('calendar')">🗓️ Calendrier</button>
-    <button class="nav-item bottom" [class.active]="activeSection === 'settings'" (click)="setSection('settings')">⚙️ Paramètres</button>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-left">
-        <h2>Gestion de Projet</h2>
-        <p>{{ currentDateLabel }}</p>
+<div class="min-h-screen bg-slate-100">
+  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[280px_1fr]">
+    <aside class="border-r border-slate-200 bg-slate-50 p-4 lg:p-5">
+      <div class="mb-6">
+        <h1 class="text-3xl font-black tracking-tight text-blue-600">TaskFlow Pro</h1>
+        <p class="mt-1 text-sm font-medium text-slate-600">Project Management</p>
       </div>
 
-      <div class="topbar-right">
-    
+      <nav class="flex flex-col gap-2">
+        <button
+          class="rounded-xl px-4 py-3 text-left text-sm font-semibold transition"
+          [ngClass]="activeSection === 'projects' ? 'bg-slate-200 text-blue-700' : 'text-slate-700 hover:bg-slate-200/60'"
+          (click)="setSection('projects')">
+          ◎ My Projects
+        </button>
+        <button
+          class="rounded-xl px-4 py-3 text-left text-sm font-semibold transition"
+          [ngClass]="activeSection === 'calendar' ? 'bg-slate-200 text-blue-700' : 'text-slate-700 hover:bg-slate-200/60'"
+          (click)="setSection('calendar')">
+          🗓️ Calendar
+        </button>
+        <button
+          class="mt-auto rounded-xl px-4 py-3 text-left text-sm font-semibold transition"
+          [ngClass]="activeSection === 'settings' ? 'bg-slate-200 text-blue-700' : 'text-slate-700 hover:bg-slate-200/60'"
+          (click)="setSection('settings')">
+          ⚙️ Settings
+        </button>
+      </nav>
+    </aside>
 
-        <div class="notify-pill">4</div>
-
-        <div class="profile-box">
-          <div>
-            <strong>{{ managerDisplayName }}</strong>
-            <small>{{ managerRoleLabel }}</small>
-          </div>
-          <span class="avatar">🧑</span>
+    <main class="flex min-w-0 flex-col">
+      <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 lg:px-6">
+        <div>
+          <h2 class="text-2xl font-black tracking-tight text-slate-900">Project Management</h2>
+          <p class="mt-1 text-sm text-slate-500">{{ currentDateLabel }}</p>
         </div>
-      </div>
-    </header>
 
-    <div *ngIf="error" class="message error">{{ error }}</div>
-    <div *ngIf="success" class="message success">{{ success }}</div>
-
-    <section *ngIf="activeSection === 'projects'">
-      <section class="stats-grid">
-        <article class="stat-card">
-          <div class="stat-head">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 border-l border-slate-200 pl-4">
             <div>
-              <p>User Stories</p>
-              <h3>{{ userStories.length }}</h3>
+              <strong class="block text-sm text-slate-900">{{ managerDisplayName }}</strong>
+              <small class="block text-xs text-slate-500">{{ managerRoleLabel }}</small>
             </div>
-            <span class="stat-icon blue">📘</span>
-          </div>
-          <div class="mini-track"><span [style.width.%]="userStoriesProgress"></span></div>
-          
-        </article>
-
-        <article class="stat-card">
-          <div class="stat-head">
-            <div>
-              <p>Sprints Complétés</p>
-              <h3>{{ completedSprintsCount }}</h3>
-            </div>
-            <span class="stat-icon green">📅</span>
-          </div>
-          <div class="mini-track"><span [style.width.%]="sprintProgress"></span></div>
-          <small>{{ sprints.length }} sprints au total</small>
-        </article>
-
-        <article class="stat-card">
-          <div class="stat-head">
-            <div>
-              <p>Tâches</p>
-              <h3>{{ tasks.length }}</h3>
-            </div>
-            <span class="stat-icon purple">☑️</span>
-          </div>
-          <div class="mini-track"><span [style.width.%]="tasksProgress"></span></div>
-          <small>{{ completedTasksCount }} tâches complétées</small>
-        </article>
-
-        <article class="stat-card">
-          <div class="stat-head">
-            <div>
-              <p>Progression</p>
-              <h3>{{ globalProgress }}%</h3>
-            </div>
-            <span class="stat-icon orange">📈</span>
-          </div>
-          <div class="mini-track"><span [style.width.%]="globalProgress"></span></div>
-          <small>Avancement global du projet</small>
-        </article>
-      </section>
-
-      <div class="project-card" *ngIf="currentProject as project; else noProject">
-        <h2>◎ Détails du Projet</h2>
-
-        <div class="project-grid">
-          <div>
-            <p class="label">Description</p>
-            <p class="value">{{ project.description || project.name }}</p>
-          </div>
-          <div>
-            <p class="label">Statut</p>
-            <span class="badge" [ngClass]="projectStatusClass">{{ projectStatusLabel }}</span>
-          </div>
-
-          <div>
-            <p class="label">Date de début</p>
-            <p class="value">{{ formatDate(project.startDate) }}</p>
-          </div>
-          <div>
-            <p class="label">Date de fin</p>
-            <p class="value">{{ formatDate(project.endDate) }}</p>
-          </div>
-
-          <div>
-            <p class="label">Manager</p>
-            <p class="value">🧑 {{ managerDisplayName }}</p>
-          </div>
-          <div>
-            <p class="label">Équipe</p>
-            <div class="chips" *ngIf="teamDisplayMembers.length > 0; else emptyTeam">
-              <span class="chip" *ngFor="let member of teamDisplayMembers">🧑 {{ member }}</span>
-            </div>
-            <ng-template #emptyTeam>
-              <p class="value muted">Aucun membre affecté</p>
-            </ng-template>
+            <span class="grid h-10 w-10 place-items-center rounded-full bg-blue-100 text-lg">🧑</span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <ng-template #noProject>
-        <div class="project-card empty-card">Aucun projet associé à ce chef de projet.</div>
-      </ng-template>
+      <div class="p-4 lg:p-6">
+        <div *ngIf="error" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ error }}</div>
+        <div *ngIf="success" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{{ success }}</div>
 
-      <div class="segment">
-        <button [class.active]="activeProjectTab === 'userStories'" (click)="setProjectTab('userStories')">📖 User Stories</button>
-        <button [class.active]="activeProjectTab === 'sprints'" (click)="setProjectTab('sprints')">🗓️ Sprints</button>
-        <button [class.active]="activeProjectTab === 'tasks'" (click)="setProjectTab('tasks')">☑️ Tâches</button>
-      </div>
-
-      <section class="list-section" *ngIf="activeProjectTab === 'userStories'">
-        <div class="header-row">
-          <h3>Liste des User Stories</h3>
-        </div>
-        <div class="story-list" *ngIf="userStories.length > 0; else noStories">
-          <article class="story-card" *ngFor="let story of userStories">
-            <div class="story-top">
-              <h4>{{ story.name || story.title || ('US #' + story.id) }}</h4>
-              <span class="badge" [class.state-done]="isUserStoryDone(story)">{{ getUserStoryStatusDisplay(story) }}</span>
-            </div>
-            <p>{{ story.description || 'Sans description' }}</p>
-
-            <div class="story-details">
-              <span>🗓️ {{ formatDate(story.startDate) }} - {{ formatDate(story.endDate) }}</span>
-              <span>🏁 {{ getSprintName(+story.sprintId) }}</span>
-              
-             
-            </div>
-
-
-            <div class="story-meta">
-              
-              <span>✔ {{ getUserStoryCompletedTaskCount(story) }}/{{ getUserStoryTaskCount(story) }} tâches</span>
-              <span>⏱️ {{ story.estimatedDuration || 0 }} jours</span>
-            </div>
-          </article>
-        </div>
-        <ng-template #noStories>
-          <div class="empty-line">Aucune user story.</div>
-        </ng-template>
-      </section>
-
-      <section class="list-section" *ngIf="activeProjectTab === 'sprints'">
-        <div class="header-row">
-          <h3>Liste des Sprints</h3>
-          <button class="primary" (click)="openCreateSprint()">+ Nouveau Sprint</button>
-        </div>
-
-        <form *ngIf="showSprintForm" class="form-card" (ngSubmit)="submitSprint()">
-          <div class="form-grid">
-            <input [(ngModel)]="sprintForm.name" name="sprintName" type="text" placeholder="Nom du sprint" />
-            <input
-              [(ngModel)]="sprintForm.startDate"
-              (ngModelChange)="onSprintStartDateChange()"
-              name="sprintStart"
-              type="date"
-              [min]="projectStartDateInput"
-              [max]="projectEndDateInput" />
-            <input
-              [(ngModel)]="sprintForm.endDate"
-              (ngModelChange)="recomputeSprintDuration()"
-              name="sprintEnd"
-              type="date"
-              [min]="sprintForm.startDate || projectStartDateInput"
-              [max]="projectEndDateInput" />
-            <select [(ngModel)]="sprintForm.sprintState" name="sprintState">
-              <option *ngFor="let option of sprintStateOptions" [ngValue]="option.value">{{ option.label }}</option>
-            </select>
-          </div>
-          <textarea [(ngModel)]="sprintForm.description" name="sprintDescription" rows="2" placeholder="Description"></textarea>
-          <div class="form-actions">
-            <button class="primary" type="submit" [disabled]="sprintSaving">{{ sprintEditId ? 'Mettre à jour' : 'Créer' }}</button>
-            <button type="button" (click)="cancelSprintForm()">Annuler</button>
-          </div>
-        </form>
-
-        <div class="item-list" *ngIf="filteredSprints.length > 0; else noSprints">
-          <article class="item-card" *ngFor="let sprint of filteredSprints">
-            <div>
-              <h4>{{ sprint.name }}</h4>
-              <p>{{ sprint.description || 'Sans description' }}</p>
-              <div class="meta-row">
-                <span>🗓️ {{ formatDate(sprint.startDate) }} - {{ formatDate(sprint.endDate) }}</span>
-                <span class="badge" [ngClass]="getSprintStateClass(sprint.sprintState)">{{ getSprintStateLabel(sprint.sprintState) }}</span>
-              </div>
-            </div>
-            <div class="icon-actions">
-              <button (click)="openEditSprint(sprint)">✏️</button>
-              <button class="danger" (click)="deleteSprint(sprint)">🗑️</button>
-            </div>
-          </article>
-        </div>
-        <ng-template #noSprints>
-          <div class="empty-line">Aucun sprint.</div>
-        </ng-template>
-      </section>
-
-      <section class="list-section" *ngIf="activeProjectTab === 'tasks'">
-        <div class="header-row">
-          <h3>Liste des Tâches</h3>
-          <button class="primary" (click)="openCreateTask()">+ Nouvelle Tâche</button>
-        </div>
-
-        <div class="progress-mini">
-          <div class="bar"><span [style.width.%]="progressLineWidth"></span></div>
-          <small>{{ completedTasksCount }} / {{ tasks.length }} tâches complétées</small>
-        </div>
-
-        <form *ngIf="showTaskForm" class="form-card" (ngSubmit)="submitTask()">
-          <div class="form-grid two">
-            <input [(ngModel)]="taskForm.title" name="taskTitle" type="text" placeholder="Titre" />
-            <select [(ngModel)]="taskForm.status" name="taskStatus">
-              <option *ngFor="let status of taskStatusOptions" [ngValue]="status.value">{{ status.label }}</option>
-            </select>
-            <select [(ngModel)]="taskForm.userStoryId" (ngModelChange)="onTaskUserStoryChange()" name="taskUserStoryId">
-              <option [ngValue]="0">User Story</option>
-              <option *ngFor="let story of userStories" [ngValue]="+story.id">{{ story.name || story.title || ('US #' + story.id) }}</option>
-            </select>
-            <div class="field">
-              <label class="field-label">Employé assigné</label>
-              <select [(ngModel)]="taskForm.assignedToUserId" name="taskAssignedToUserId">
-                <option [ngValue]="null">Sélectionner un employé</option>
-                <option *ngFor="let user of employeeUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
-              </select>
-            </div>
-            <div class="field">
-              <label class="field-label">Heures estimées</label>
-              <input [(ngModel)]="taskForm.estimatedHours" name="taskEstimatedHours" type="number" min="1" placeholder="Heures" />
-            </div>
-            <div class="field">
-              <label class="field-label">Complexité</label>
-              <input [(ngModel)]="taskForm.complexity" name="taskComplexity" type="number" min="1" placeholder="Complexité" />
-            </div>
-
-            <div class="field">
-              <label class="field-label">Date début</label>
-              <input
-                [(ngModel)]="taskForm.startDate"
-                (ngModelChange)="onTaskStartDateChange()"
-                name="taskStart"
-                type="date"
-                [min]="taskMinDateInput"
-                [max]="taskMaxDateInput" />
-            </div>
-            <div class="field">
-              <label class="field-label">Date fin</label>
-              <input
-                [(ngModel)]="taskForm.endDate"
-                name="taskEnd"
-                type="date"
-                [min]="taskForm.startDate || taskMinDateInput"
-                [max]="taskMaxDateInput" />
-            </div>
-          </div>
-          <textarea [(ngModel)]="taskForm.description" name="taskDescription" rows="2" placeholder="Description"></textarea>
-          <div class="form-actions">
-            <button class="primary" type="submit" [disabled]="taskSaving">{{ taskEditId ? 'Mettre à jour' : 'Créer' }}</button>
-            <button type="button" (click)="cancelTaskForm()">Annuler</button>
-          </div>
-        </form>
-
-        <div class="item-list" *ngIf="filteredTasks.length > 0; else noTasks">
-          <article class="item-card" *ngFor="let task of filteredTasks">
-            <div>
-              <div class="task-head">
-                <h4>{{ task.title }}</h4>
-                <span class="badge" [ngClass]="getTaskStatusClass(task.status)">{{ getTaskStatusLabel(task.status) }}</span>
-              </div>
-              <p>{{ task.description || 'Sans description' }}</p>
-              <div class="meta-row">
-                <span>⏱ {{ task.estimatedHours }}h</span>
-                <span>📚 {{ getUserStoryName(task.userStoryId) }}</span>
-                
-                <span>👤 {{ getTaskAssigneeName(task) }}</span>
-              </div>
-            </div>
-            <div class="icon-actions">
-              <button (click)="openEditTask(task)">✏️</button>
-              <button class="danger" (click)="deleteTask(task)">🗑️</button>
-            </div>
-          </article>
-        </div>
-        <ng-template #noTasks>
-          <div class="empty-line">Aucune tâche.</div>
-        </ng-template>
-      </section>
-    </section>
-
-    <section *ngIf="activeSection === 'calendar'" class="calendar-section">
-      <article class="project-card calendar-shell">
-        <div class="calendar-toolbar">
-          <div>
-            <h3>Calendrier des Tâches</h3>
-            <p>Planification des tâches de votre projet</p>
-          </div>
-          <div class="calendar-toolbar-actions">
-            <button type="button" (click)="goToPreviousCalendarMonth()">&larr;</button>
-            <span class="calendar-month-label">{{ calendarMonthLabel }}</span>
-            <button type="button" (click)="goToNextCalendarMonth()">&rarr;</button>
-            <button type="button" class="today-btn" (click)="goToCurrentCalendarMonth()">Aujourd'hui</button>
-          </div>
-        </div>
-
-        <div class="calendar-layout-grid">
-          <div class="calendar-main-grid">
-            <div class="calendar-weekdays">
-              <span *ngFor="let dayLabel of calendarWeekdayLabels">{{ dayLabel }}</span>
-            </div>
-
-            <div class="calendar-days-grid">
-              <button
-                type="button"
-                class="calendar-day"
-                *ngFor="let day of calendarDays"
-                [class.outside-month]="!day.inCurrentMonth"
-                [class.today]="day.isToday"
-                [class.selected]="day.isSelected"
-                (click)="selectCalendarDay(day.iso)">
-                <div class="calendar-day-head">
-                  <span>{{ day.dayNumber }}</span>
-                  <small *ngIf="day.events.length > 0">{{ day.events.length }}</small>
+        <section *ngIf="activeSection === 'projects'">
+          <section class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <article class="rounded-2xl border border-slate-200 bg-white p-4">
+              <div class="mb-3 flex items-start justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-600">User Stories</p>
+                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ userStories.length }}</h3>
                 </div>
-                <div class="calendar-day-events" *ngIf="day.events.length > 0">
-                  <p *ngFor="let event of day.events | slice:0:2" [class]="'calendar-event-pill ' + event.className">
-                    {{ event.title }}
-                  </p>
-                  <p class="calendar-more" *ngIf="day.events.length > 2">+{{ day.events.length - 2 }} autres</p>
+                <span class="text-2xl text-blue-600">📘</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+                <span class="block h-full bg-slate-900" [style.width.%]="userStoriesProgress"></span>
+              </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-4">
+              <div class="mb-3 flex items-start justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-600">Sprints Completed</p>
+                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ completedSprintsCount }}</h3>
                 </div>
-              </button>
+                <span class="text-2xl text-emerald-600">📅</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+                <span class="block h-full bg-slate-900" [style.width.%]="sprintProgress"></span>
+              </div>
+              <small class="mt-2 block text-xs text-slate-500">{{ sprints.length }} total sprints</small>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-4">
+              <div class="mb-3 flex items-start justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-600">Tasks</p>
+                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ tasks.length }}</h3>
+                </div>
+                <span class="text-2xl text-violet-600">☑️</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+                <span class="block h-full bg-slate-900" [style.width.%]="tasksProgress"></span>
+              </div>
+              <small class="mt-2 block text-xs text-slate-500">{{ completedTasksCount }} tasks completed</small>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-white p-4">
+              <div class="mb-3 flex items-start justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-600">Progress</p>
+                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ globalProgress }}%</h3>
+                </div>
+                <span class="text-2xl text-orange-600">📈</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+                <span class="block h-full bg-slate-900" [style.width.%]="globalProgress"></span>
+              </div>
+              <small class="mt-2 block text-xs text-slate-500">Overall project progress</small>
+            </article>
+          </section>
+
+          <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-5" *ngIf="currentProject as project; else noProject">
+            <h2 class="mb-5 text-2xl font-black text-slate-900">◎ Project Details</h2>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <p class="mb-1 text-sm text-slate-500">Description</p>
+                <p class="text-sm font-semibold text-slate-900">{{ project.description || project.name }}</p>
+              </div>
+              <div>
+                <p class="mb-1 text-sm text-slate-500">Status</p>
+                <span
+                  class="inline-flex rounded-full px-3 py-1 text-xs font-bold"
+                  [ngClass]="{
+                    'bg-emerald-100 text-emerald-700': projectStatusClass === 'state-done',
+                    'bg-blue-100 text-blue-700': projectStatusClass === 'state-progress',
+                    'bg-slate-200 text-slate-700': projectStatusClass === 'state-pending'
+                  }">
+                  {{ projectStatusLabel }}
+                </span>
+              </div>
+
+              <div>
+                <p class="mb-1 text-sm text-slate-500">Start Date</p>
+                <p class="text-sm font-semibold text-slate-900">{{ formatDate(project.startDate) }}</p>
+              </div>
+              <div>
+                <p class="mb-1 text-sm text-slate-500">End Date</p>
+                <p class="text-sm font-semibold text-slate-900">{{ formatDate(project.endDate) }}</p>
+              </div>
+
+              <div>
+                <p class="mb-1 text-sm text-slate-500">Manager</p>
+                <p class="text-sm font-semibold text-slate-900">🧑 {{ managerDisplayName }}</p>
+              </div>
+              <div>
+                <p class="mb-1 text-sm text-slate-500">Team</p>
+                <div class="flex flex-wrap gap-2" *ngIf="teamDisplayMembers.length > 0; else emptyTeam">
+                  <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs" *ngFor="let member of teamDisplayMembers">🧑 {{ member }}</span>
+                </div>
+                <ng-template #emptyTeam>
+                  <p class="text-sm text-slate-500">No team member assigned</p>
+                </ng-template>
+              </div>
             </div>
           </div>
 
-          <aside class="calendar-details">
-            <h4>{{ selectedCalendarDateLabel }}</h4>
-            <p class="calendar-details-sub">Détails des tâches planifiées</p>
+          <ng-template #noProject>
+            <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">No project is assigned to this project manager.</div>
+          </ng-template>
 
-            <div class="calendar-event-list" *ngIf="selectedCalendarDayEvents.length > 0; else noCalendarEvents">
-              <article *ngFor="let event of selectedCalendarDayEvents" class="calendar-event-card" [class]="'calendar-event-card ' + event.className">
-                <span class="calendar-event-type">{{ getCalendarEventTypeLabel(event.type) }}</span>
-                <h5>{{ event.title }}</h5>
-                <p>{{ event.meta }}</p>
-                <small>{{ formatDate(event.startIso) }} - {{ formatDate(event.endIso) }}</small>
+          <div class="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-slate-200 p-1">
+            <button
+              class="rounded-xl px-3 py-2 text-sm font-semibold transition"
+              [ngClass]="activeProjectTab === 'userStories' ? 'bg-white text-slate-900' : 'text-slate-600 hover:bg-slate-100'"
+              (click)="setProjectTab('userStories')">📖 User Stories</button>
+            <button
+              class="rounded-xl px-3 py-2 text-sm font-semibold transition"
+              [ngClass]="activeProjectTab === 'sprints' ? 'bg-white text-slate-900' : 'text-slate-600 hover:bg-slate-100'"
+              (click)="setProjectTab('sprints')">🗓️ Sprints</button>
+            <button
+              class="rounded-xl px-3 py-2 text-sm font-semibold transition"
+              [ngClass]="activeProjectTab === 'tasks' ? 'bg-white text-slate-900' : 'text-slate-600 hover:bg-slate-100'"
+              (click)="setProjectTab('tasks')">☑️ Tasks</button>
+          </div>
+
+          <section *ngIf="activeProjectTab === 'userStories'">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-2xl font-black text-slate-900">User Story List</h3>
+            </div>
+            <div class="space-y-3" *ngIf="userStories.length > 0; else noStories">
+              <article class="rounded-2xl border border-slate-200 bg-white p-4" *ngFor="let story of userStories">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <h4 class="text-base font-bold text-slate-900">{{ story.name || story.title || ('US #' + story.id) }}</h4>
+                  <span
+                    class="rounded-full px-3 py-1 text-xs font-bold"
+                    [ngClass]="isUserStoryDone(story) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'">
+                    {{ getUserStoryStatusDisplay(story) }}
+                  </span>
+                </div>
+                <p class="text-sm text-slate-600">{{ story.description || 'No description' }}</p>
+
+                <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
+                  <span>🗓️ {{ formatDate(story.startDate) }} - {{ formatDate(story.endDate) }}</span>
+                  <span>🏁 {{ getSprintName(+story.sprintId) }}</span>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-700">
+                  <span>✔ {{ getUserStoryCompletedTaskCount(story) }}/{{ getUserStoryTaskCount(story) }} tasks</span>
+                  <span>⏱️ {{ story.estimatedDuration || 0 }} days</span>
+                </div>
               </article>
             </div>
-
-            <ng-template #noCalendarEvents>
-              <div class="empty-line">Aucun élément planifié pour cette date.</div>
+            <ng-template #noStories>
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">No user story.</div>
             </ng-template>
-          </aside>
-        </div>
-      </article>
-    </section>
+          </section>
 
-    <section *ngIf="activeSection === 'settings'" class="project-card empty-card">
-      Paramètres du dashboard en cours de préparation.
-    </section>
-  </main>
+          <section *ngIf="activeProjectTab === 'sprints'">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-2xl font-black text-slate-900">Sprint List</h3>
+              <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" (click)="openCreateSprint()">+ New Sprint</button>
+            </div>
+
+            <form *ngIf="showSprintForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitSprint()">
+              <div class="mb-2 grid grid-cols-1 gap-2 md:grid-cols-4">
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="sprintForm.name" name="sprintName" type="text" placeholder="Sprint name" />
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="sprintForm.startDate" (ngModelChange)="onSprintStartDateChange()" name="sprintStart" type="date" [min]="projectStartDateInput" [max]="projectEndDateInput" />
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="sprintForm.endDate" (ngModelChange)="recomputeSprintDuration()" name="sprintEnd" type="date" [min]="sprintForm.startDate || projectStartDateInput" [max]="projectEndDateInput" />
+                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="sprintForm.sprintState" name="sprintState">
+                  <option *ngFor="let option of sprintStateOptions" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+              <textarea class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="sprintForm.description" name="sprintDescription" rows="2" placeholder="Description"></textarea>
+              <div class="mt-3 flex gap-2">
+                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" type="submit" [disabled]="sprintSaving">{{ sprintEditId ? 'Update' : 'Create' }}</button>
+                <button class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" type="button" (click)="cancelSprintForm()">Cancel</button>
+              </div>
+            </form>
+
+            <div class="space-y-3" *ngIf="filteredSprints.length > 0; else noSprints">
+              <article class="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4" *ngFor="let sprint of filteredSprints">
+                <div class="min-w-0 flex-1">
+                  <h4 class="text-base font-bold text-slate-900">{{ sprint.name }}</h4>
+                  <p class="mt-1 text-sm text-slate-600">{{ sprint.description || 'No description' }}</p>
+                  <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                    <span>🗓️ {{ formatDate(sprint.startDate) }} - {{ formatDate(sprint.endDate) }}</span>
+                    <span
+                      class="rounded-full px-3 py-1 font-bold"
+                      [ngClass]="{
+                        'bg-emerald-100 text-emerald-700': getSprintStateClass(sprint.sprintState) === 'state-done',
+                        'bg-blue-100 text-blue-700': getSprintStateClass(sprint.sprintState) === 'state-progress',
+                        'bg-slate-200 text-slate-700': getSprintStateClass(sprint.sprintState) === 'state-pending'
+                      }">
+                      {{ getSprintStateLabel(sprint.sprintState) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="openEditSprint(sprint)">✏️</button>
+                  <button class="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm text-rose-700" (click)="deleteSprint(sprint)">🗑️</button>
+                </div>
+              </article>
+            </div>
+            <ng-template #noSprints>
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">No sprint.</div>
+            </ng-template>
+          </section>
+
+          <section *ngIf="activeProjectTab === 'tasks'">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-2xl font-black text-slate-900">Task List</h3>
+              <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" (click)="openCreateTask()">+ New Task</button>
+            </div>
+
+            <div class="mb-3">
+              <div class="h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200">
+                <span class="block h-full bg-slate-900" [style.width.%]="progressLineWidth"></span>
+              </div>
+              <small class="mt-1 block text-xs text-slate-500">{{ completedTasksCount }} / {{ tasks.length }} tasks completed</small>
+            </div>
+
+            <form *ngIf="showTaskForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitTask()">
+              <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.title" name="taskTitle" type="text" placeholder="Title" />
+                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.status" name="taskStatus">
+                  <option *ngFor="let status of taskStatusOptions" [ngValue]="status.value">{{ status.label }}</option>
+                </select>
+                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.userStoryId" (ngModelChange)="onTaskUserStoryChange()" name="taskUserStoryId">
+                  <option [ngValue]="0">User Story</option>
+                  <option *ngFor="let story of userStories" [ngValue]="+story.id">{{ story.name || story.title || ('US #' + story.id) }}</option>
+                </select>
+                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.assignedToUserId" name="taskAssignedToUserId">
+                  <option [ngValue]="null">Select an employee</option>
+                  <option *ngFor="let user of employeeUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
+                </select>
+
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.estimatedHours" name="taskEstimatedHours" type="number" min="1" placeholder="Hours" />
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.complexity" name="taskComplexity" type="number" min="1" placeholder="Complexity" />
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.startDate" (ngModelChange)="onTaskStartDateChange()" name="taskStart" type="date" [min]="taskMinDateInput" [max]="taskMaxDateInput" />
+                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.endDate" name="taskEnd" type="date" [min]="taskForm.startDate || taskMinDateInput" [max]="taskMaxDateInput" />
+              </div>
+              <textarea class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.description" name="taskDescription" rows="2" placeholder="Description"></textarea>
+              <div class="mt-3 flex gap-2">
+                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" type="submit" [disabled]="taskSaving">{{ taskEditId ? 'Update' : 'Create' }}</button>
+                <button class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" type="button" (click)="cancelTaskForm()">Cancel</button>
+              </div>
+            </form>
+
+            <div class="space-y-3" *ngIf="filteredTasks.length > 0; else noTasks">
+              <article class="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4" *ngFor="let task of filteredTasks">
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <h4 class="text-base font-bold text-slate-900">{{ task.title }}</h4>
+                    <span
+                      class="rounded-full px-3 py-1 text-xs font-bold"
+                      [ngClass]="{
+                        'bg-emerald-100 text-emerald-700': getTaskStatusClass(task.status) === 'state-done',
+                        'bg-blue-100 text-blue-700': getTaskStatusClass(task.status) === 'state-progress',
+                        'bg-slate-200 text-slate-700': getTaskStatusClass(task.status) === 'state-pending'
+                      }">
+                      {{ getTaskStatusLabel(task.status) }}
+                    </span>
+                  </div>
+                  <p class="text-sm text-slate-600">{{ task.description || 'No description' }}</p>
+                  <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
+                    <span>⏱ {{ task.estimatedHours }}h</span>
+                    <span>📚 {{ getUserStoryName(task.userStoryId) }}</span>
+                    <span>👤 {{ getTaskAssigneeName(task) }}</span>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="openEditTask(task)">✏️</button>
+                  <button class="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm text-rose-700" (click)="deleteTask(task)">🗑️</button>
+                </div>
+              </article>
+            </div>
+            <ng-template #noTasks>
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">No task.</div>
+            </ng-template>
+          </section>
+        </section>
+
+        <section *ngIf="activeSection === 'calendar'">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 class="text-2xl font-black text-slate-900">Task Calendar</h3>
+                <p class="mt-1 text-sm text-slate-500">Task planning for your project</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="goToPreviousCalendarMonth()">&larr;</button>
+                <span class="text-sm font-semibold text-slate-700">{{ calendarMonthLabel }}</span>
+                <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="goToNextCalendarMonth()">&rarr;</button>
+                <button type="button" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700" (click)="goToCurrentCalendarMonth()">Today</button>
+              </div>
+            </div>
+
+            <div class="grid gap-4 xl:grid-cols-[2fr_1fr]">
+              <div>
+                <div class="mb-2 grid grid-cols-7 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+                  <span *ngFor="let dayLabel of calendarWeekdayLabels">{{ dayLabel }}</span>
+                </div>
+
+                <div class="grid grid-cols-7 gap-2">
+                 <button
+                    type="button"
+                    class="min-h-23 rounded-xl border p-2 text-left transition"
+                    *ngFor="let day of calendarDays"
+                    [ngClass]="{
+                      'border-slate-200 bg-white': day.inCurrentMonth && !day.isSelected && !day.isToday,
+                      'border-slate-200 bg-slate-50 text-slate-400': !day.inCurrentMonth,
+                      'border-blue-400 bg-blue-300': day.isToday && !day.isSelected,
+                      'border-green-500 bg-green-500 text-white': day.isSelected
+                    }"
+                    (click)="selectCalendarDay(day.iso)">
+                    <div class="mb-1 flex items-center justify-between">
+                      <span class="text-xs font-bold">{{ day.dayNumber }}</span>
+                      <small class="rounded-full bg-slate-800/10 px-2 py-0.5 text-[10px]" *ngIf="day.events.length > 0">{{ day.events.length }}</small>
+                    </div>
+                    <div class="space-y-1" *ngIf="day.events.length > 0">
+                      <p
+                        *ngFor="let event of day.events | slice:0:2"
+                        class="truncate rounded-md px-2 py-1 text-[10px] font-semibold"
+                        [ngClass]="{
+                          'bg-emerald-100 text-emerald-700': event.className.includes('validated') || event.className.includes('done'),
+                          'bg-blue-100 text-blue-700': event.className.includes('in-progress'),
+                          'bg-amber-100 text-amber-700': event.className.includes('todo'),
+                          'bg-slate-200 text-slate-700': event.className.includes('pending')
+                        }">
+                        {{ event.title }}
+                      </p>
+                      <p class="text-[10px] font-semibold" *ngIf="day.events.length > 2">+{{ day.events.length - 2 }} more</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <aside class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <h4 class="text-base font-black text-slate-900">{{ selectedCalendarDateLabel }}</h4>
+                <p class="mt-1 text-xs text-slate-500">Scheduled task details</p>
+
+                <div class="mt-3 space-y-2" *ngIf="selectedCalendarDayEvents.length > 0; else noCalendarEvents">
+                  <article
+                    *ngFor="let event of selectedCalendarDayEvents"
+                    class="rounded-xl border p-3"
+                    [ngClass]="{
+                      'border-emerald-200 bg-emerald-50': event.className.includes('validated') || event.className.includes('done'),
+                      'border-blue-200 bg-blue-50': event.className.includes('in-progress'),
+                      'border-amber-200 bg-amber-50': event.className.includes('todo'),
+                      'border-slate-200 bg-white': event.className.includes('pending')
+                    }">
+                    <span class="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold text-slate-600">{{ getCalendarEventTypeLabel(event.type) }}</span>
+                    <h5 class="mt-1 text-sm font-bold text-slate-900">{{ event.title }}</h5>
+                    <p class="mt-1 text-xs text-slate-600">{{ event.meta }}</p>
+                    <small class="mt-1 block text-[11px] text-slate-500">{{ formatDate(event.startIso) }} - {{ formatDate(event.endIso) }}</small>
+                  </article>
+                </div>
+
+                <ng-template #noCalendarEvents>
+                  <div class="mt-3 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">No item scheduled for this date.</div>
+                </ng-template>
+              </aside>
+            </div>
+          </article>
+        </section>
+
+        <section *ngIf="activeSection === 'settings'" class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
+          Dashboard settings are being prepared.
+        </section>
+      </div>
+    </main>
+  </div>
 </div>
