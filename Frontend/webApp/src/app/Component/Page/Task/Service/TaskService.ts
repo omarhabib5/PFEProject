@@ -11,6 +11,7 @@ export interface TaskDto {
 	title: string;
 	description: string;
 	status: TaskState;
+	taskState?: TaskState;
 	estimatedHours: number;
 	actualHours?: number | null;
 	complexity?: number;

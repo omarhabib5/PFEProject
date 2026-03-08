@@ -46,14 +46,14 @@
             <span class="stat-icon blue">📘</span>
           </div>
           <div class="mini-track"><span [style.width.%]="userStoriesProgress"></span></div>
-          <small>{{ completedStoryPoints }} / {{ totalStoryPoints }} points complétés</small>
+          
         </article>
 
         <article class="stat-card">
           <div class="stat-head">
             <div>
-              <p>Sprints Actifs</p>
-              <h3>{{ activeSprintsCount }}</h3>
+              <p>Sprints Complétés</p>
+              <h3>{{ completedSprintsCount }}</h3>
             </div>
             <span class="stat-icon green">📅</span>
           </div>
@@ -153,14 +153,10 @@
              
             </div>
 
-            <div class="story-progress">
-              <div class="bar"><span [style.width.%]="getUserStoryProgress(story)"></span></div>
-              <small>{{ getUserStoryProgress(story) }}% complété</small>
-            </div>
 
             <div class="story-meta">
-              <span>⭐ {{ story.storyPoints || 0 }} pts</span>
-              <span>✔ {{ story.completedTaskCount || 0 }}/{{ story.taskCount || 0 }} tâches</span>
+              
+              <span>✔ {{ getUserStoryCompletedTaskCount(story) }}/{{ getUserStoryTaskCount(story) }} tâches</span>
               <span>⏱️ {{ story.estimatedDuration || 0 }} jours</span>
             </div>
           </article>
@@ -300,7 +296,7 @@
               <div class="meta-row">
                 <span>⏱ {{ task.estimatedHours }}h</span>
                 <span>📚 {{ getUserStoryName(task.userStoryId) }}</span>
-                <span>🗓 {{ getSprintName(task.sprintId) }}</span>
+                
                 <span>👤 {{ getTaskAssigneeName(task) }}</span>
               </div>
             </div>
@@ -316,8 +312,69 @@
       </section>
     </section>
 
-    <section *ngIf="activeSection === 'calendar'" class="project-card empty-card">
-      Vue calendrier en cours de préparation.
+    <section *ngIf="activeSection === 'calendar'" class="calendar-section">
+      <article class="project-card calendar-shell">
+        <div class="calendar-toolbar">
+          <div>
+            <h3>Calendrier des Tâches</h3>
+            <p>Planification des tâches de votre projet</p>
+          </div>
+          <div class="calendar-toolbar-actions">
+            <button type="button" (click)="goToPreviousCalendarMonth()">&larr;</button>
+            <span class="calendar-month-label">{{ calendarMonthLabel }}</span>
+            <button type="button" (click)="goToNextCalendarMonth()">&rarr;</button>
+            <button type="button" class="today-btn" (click)="goToCurrentCalendarMonth()">Aujourd'hui</button>
+          </div>
+        </div>
+
+        <div class="calendar-layout-grid">
+          <div class="calendar-main-grid">
+            <div class="calendar-weekdays">
+              <span *ngFor="let dayLabel of calendarWeekdayLabels">{{ dayLabel }}</span>
+            </div>
+
+            <div class="calendar-days-grid">
+              <button
+                type="button"
+                class="calendar-day"
+                *ngFor="let day of calendarDays"
+                [class.outside-month]="!day.inCurrentMonth"
+                [class.today]="day.isToday"
+                [class.selected]="day.isSelected"
+                (click)="selectCalendarDay(day.iso)">
+                <div class="calendar-day-head">
+                  <span>{{ day.dayNumber }}</span>
+                  <small *ngIf="day.events.length > 0">{{ day.events.length }}</small>
+                </div>
+                <div class="calendar-day-events" *ngIf="day.events.length > 0">
+                  <p *ngFor="let event of day.events | slice:0:2" [class]="'calendar-event-pill ' + event.className">
+                    {{ event.title }}
+                  </p>
+                  <p class="calendar-more" *ngIf="day.events.length > 2">+{{ day.events.length - 2 }} autres</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <aside class="calendar-details">
+            <h4>{{ selectedCalendarDateLabel }}</h4>
+            <p class="calendar-details-sub">Détails des tâches planifiées</p>
+
+            <div class="calendar-event-list" *ngIf="selectedCalendarDayEvents.length > 0; else noCalendarEvents">
+              <article *ngFor="let event of selectedCalendarDayEvents" class="calendar-event-card" [class]="'calendar-event-card ' + event.className">
+                <span class="calendar-event-type">{{ getCalendarEventTypeLabel(event.type) }}</span>
+                <h5>{{ event.title }}</h5>
+                <p>{{ event.meta }}</p>
+                <small>{{ formatDate(event.startIso) }} - {{ formatDate(event.endIso) }}</small>
+              </article>
+            </div>
+
+            <ng-template #noCalendarEvents>
+              <div class="empty-line">Aucun élément planifié pour cette date.</div>
+            </ng-template>
+          </aside>
+        </div>
+      </article>
     </section>
 
     <section *ngIf="activeSection === 'settings'" class="project-card empty-card">

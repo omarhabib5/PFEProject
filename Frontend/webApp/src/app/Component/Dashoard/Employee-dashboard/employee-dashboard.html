@@ -18,6 +18,10 @@
                 (click)="setSidebarSection('notifications')">
                 Notifications
             </button>
+            <button class="menu-item" [class.active]="sidebarSection === 'settings'"
+                (click)="setSidebarSection('settings')">
+                Paramètres
+            </button>
         </div>
 
         <button class="menu-item logout" (click)="logout()">Déconnecter</button>
@@ -33,10 +37,17 @@
                     <strong>{{ userName }}</strong>
                     <small>{{ roleLabel }}</small>
                 </div>
+                <div class="avatar" *ngIf="profileImageUrl; else employeeInitialsAvatar">
+                    <img [src]="profileImageUrl" alt="avatar" class="avatar-img" />
+                </div>
+                <ng-template #employeeInitialsAvatar>
+                    <div class="avatar">{{ userName.charAt(0) || 'E' }}</div>
+                </ng-template>
             </div>
         </header>
 
         <div *ngIf="error" class="error">{{ error }}</div>
+        <div *ngIf="settingsSuccess" class="success">{{ settingsSuccess }}</div>
         <section *ngIf="loading" class="loading">Chargement...</section>
 
         <ng-container *ngIf="!loading && sidebarSection === 'dashboard'">
@@ -263,21 +274,55 @@
         </ng-container>
 
         <section *ngIf="!loading && sidebarSection === 'calendar'" class="page">
-            <article class="card">
-                <div class="card-head">
-                    <button (click)="prevMonth()">‹</button>
-                    <h3>{{ calendarTitle }}</h3>
-                    <button (click)="nextMonth()">›</button>
-                </div>
-                <div class="calendar-head"><span *ngFor="let day of weekdays">{{ day }}</span></div>
-                <div class="calendar-grid">
-                    <div class="day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth"
-                        [class.today]="cell.isToday">
-                        <span>{{ cell.day }}</span>
-                        <i *ngIf="cell.hasDeadline"></i>
+            <div class="calendar-layout-grid">
+                <article class="card">
+                    <div class="card-head">
+                        <button (click)="prevMonth()">‹</button>
+                        <h3>{{ calendarTitle }}</h3>
+                        <button (click)="nextMonth()">›</button>
                     </div>
-                </div>
-            </article>
+                    <div class="calendar-head"><span *ngFor="let day of weekdays">{{ day }}</span></div>
+                    <div class="calendar-grid">
+                        <div class="day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth"
+                            [class.today]="cell.isToday"
+                            [class.selected]="selectedCalendarDate && sameDate(cell.date, selectedCalendarDate)"
+                            (click)="selectedCalendarDate = cell.date">
+                            <span>{{ cell.day }}</span>
+                            <i *ngIf="cell.hasDeadline"></i>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card calendar-details">
+                    <div *ngIf="selectedCalendarDate; else noCalendarSelection">
+                        <div class="card-head">
+                            <h3>{{ selectedCalendarDateLabel }}</h3>
+                            <button (click)="goToCurrentCalendarMonth()">Aujourd'hui</button>
+                        </div>
+                        <div class="calendar-day-tasks">
+                            <div class="task-item" *ngFor="let task of selectedDayTasks"
+                                [ngClass]="getCalendarTaskStateClass(task)">
+                                <div class="task-item-header">
+                                    <strong>{{ task.title }}</strong>
+                                    <span class="task-badge">{{ getTaskStatusLabel(task) }}</span>
+                                </div>
+                                <p>{{ task.projectName }}</p>
+                                <small>User Story: {{ getUserStoryName(task.storyId) }}</small>
+                                <small>Assigné à: {{ getTaskAssigneeName(task) }}</small>
+                                <small>Échéance: {{ formatDate(taskDueDate(task.id)) }}</small>
+                            </div>
+                            <p *ngIf="selectedDayTasks.length === 0" class="empty">
+                                Aucune tâche pour cette date.
+                            </p>
+                        </div>
+                    </div>
+                    <ng-template #noCalendarSelection>
+                        <div class="empty">
+                            <p>Cliquez sur un jour pour voir les tâches</p>
+                        </div>
+                    </ng-template>
+                </article>
+            </div>
         </section>
 
         <section *ngIf="!loading && sidebarSection === 'notifications'" class="page">
@@ -290,6 +335,81 @@
             <article class="card" *ngIf="notifications.length === 0">
                 <div class="empty">Aucune notification</div>
             </article>
+        </section>
+
+        <section *ngIf="!loading && sidebarSection === 'settings'" class="page">
+            <div class="settings-grid">
+                <article class="card settings-card">
+                    <h3>Mon profil</h3>
+                    <p>Modifiez vos informations et votre avatar.</p>
+
+                    <form class="settings-form" (ngSubmit)="saveProfileSettings()">
+                        <div class="settings-form-grid">
+                            <div class="settings-field">
+                                <label>Prénom</label>
+                                <input type="text" [(ngModel)]="profileForm.firstName" name="profileFirstName"
+                                    required />
+                            </div>
+                            <div class="settings-field">
+                                <label>Nom</label>
+                                <input type="text" [(ngModel)]="profileForm.lastName" name="profileLastName" required />
+                            </div>
+                        </div>
+
+                        <div class="settings-field">
+                            <label>Email</label>
+                            <input type="email" [(ngModel)]="profileForm.email" name="profileEmail" required />
+                        </div>
+
+                        <div class="settings-field">
+                            <label>Avatar (URL)</label>
+                            <input type="url" [(ngModel)]="profileForm.avatarUrl" name="profileAvatar"
+                                placeholder="https://..." />
+                        </div>
+
+                        <div class="settings-preview" *ngIf="profileForm.avatarUrl">
+                            <span>Aperçu</span>
+                            <img [src]="profileForm.avatarUrl" alt="avatar preview" />
+                        </div>
+
+                        <div class="task-actions">
+                            <button type="submit" [disabled]="profileSaving">
+                                {{ profileSaving ? 'Enregistrement...' : 'Enregistrer le profil' }}
+                            </button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="card settings-card">
+                    <h3>Sécurité</h3>
+                    <p>Changez votre mot de passe.</p>
+
+                    <form class="settings-form" (ngSubmit)="savePasswordSettings()">
+                        <div class="settings-field">
+                            <label>Mot de passe actuel</label>
+                            <input type="password" [(ngModel)]="passwordForm.currentPassword" name="currentPassword"
+                                required />
+                        </div>
+
+                        <div class="settings-field">
+                            <label>Nouveau mot de passe</label>
+                            <input type="password" [(ngModel)]="passwordForm.newPassword" name="newPassword" required />
+                        </div>
+
+                        <div class="settings-field">
+                            <label>Confirmer le nouveau mot de passe</label>
+                            <input type="password" [(ngModel)]="passwordForm.confirmNewPassword"
+                                name="confirmNewPassword" required />
+                        </div>
+
+                        <div class="task-actions">
+                            <button type="submit" [disabled]="passwordSaving">
+                                {{ passwordSaving ? 'Mise à jour...' : 'Mettre à jour le mot de passe' }}
+                            </button>
+                        </div>
+                    </form>
+                </article>
+            </div>
         </section>
     </main>
 </div>

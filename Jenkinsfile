@@ -234,7 +234,7 @@ pipeline {
                         docker-compose -p pfe-ci-${BUILD_NUMBER} -f docker-compose.yml ps
                         
                         echo "Testing Backend API"
-                        curl -i http://localhost:7219/swagger/index.html || true
+                        curl -i https://localhost:7219/swagger/index.html || true
                     '''
                 }
             }
@@ -265,13 +265,13 @@ pipeline {
                     sh '''
                         echo "Checking Backend API health endpoint"
                         for i in $(seq 1 10); do
-                            if curl -fsS http://localhost:7219/healthz > /dev/null; then
+                            if curl -fsS https://localhost:7219/healthz > /dev/null; then
                                 echo "✓ Backend API is healthy"
                                 exit 0
                             fi
 
                             echo "Health endpoint unavailable, trying Swagger endpoint"
-                            if curl -fsS http://localhost:7219/swagger/index.html > /dev/null; then
+                            if curl -fsS https://localhost:7219/swagger/index.html > /dev/null; then
                                 echo "✓ Backend API is reachable (Swagger)"
                                 exit 0
                             fi

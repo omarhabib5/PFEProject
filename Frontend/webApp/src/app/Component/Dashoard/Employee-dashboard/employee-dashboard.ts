@@ -3,15 +3,17 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
+import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
 import { Sprint as SprintEntity, SprintService } from '../../Page/Sprint/Service/SprintService';
 import { TaskDto, TaskService } from '../../Page/Task/Service/TaskService';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
+import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 
-type SidebarSection = 'dashboard' | 'calendar' | 'notifications';
+type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'settings';
 type EmployeeTab = 'overview' | 'tasks' | 'projects' | 'sprints';
 type TaskBucket = 'todo' | 'inProgress' | 'review' | 'done';
 
@@ -80,11 +82,13 @@ interface CalendarCell {
 })
 export class EmployeeDashboard implements OnInit {
   private router = inject(Router);
+  private authService = inject(AuthService);
   private tokenService = inject(TokenService);
   private taskService = inject(TaskService);
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private userStoryService = inject(UserStoryService);
+  private userApiService = inject(UserApiService);
   private serviceService = inject(ServiceService);
 
   sidebarSection: SidebarSection = 'dashboard';
@@ -99,8 +103,24 @@ export class EmployeeDashboard implements OnInit {
   serviceLabel = 'Service';
   todayLabel = '';
   unreadNotifications = 0;
+  profileImageUrl = '';
 
   currentUserId: number | null = null;
+
+  profileSaving = false;
+  passwordSaving = false;
+  settingsSuccess = '';
+  profileForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    avatarUrl: ''
+  };
+  passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  };
 
   allTasks: TaskDto[] = [];
   myTasks: UiTask[] = [];
@@ -114,6 +134,7 @@ export class EmployeeDashboard implements OnInit {
 
   currentMonth = new Date();
   calendarCells: CalendarCell[] = [];
+  selectedCalendarDate: Date | null = null;
 
   readonly weekdays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
@@ -139,12 +160,14 @@ export class EmployeeDashboard implements OnInit {
       year: 'numeric'
     });
 
+    this.loadSettingsProfile();
     this.loadEmployeeData();
   }
 
   get pageTitle(): string {
     if (this.sidebarSection === 'calendar') return 'Calendrier';
     if (this.sidebarSection === 'notifications') return 'Notifications';
+    if (this.sidebarSection === 'settings') return 'Paramètres';
     return 'Mon Tableau de bord';
   }
 
@@ -196,6 +219,14 @@ export class EmployeeDashboard implements OnInit {
     return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
+  get selectedDayTasks(): UiTask[] {
+    if (!this.selectedCalendarDate) return [];
+    return this.myTasks.filter(task => {
+      const dueDate = this.taskDueDate(task.id);
+      return dueDate && this.sameDate(dueDate, this.selectedCalendarDate);
+    });
+  }
+
   get groupedFilteredTasks(): Array<{ bucket: TaskBucket; label: string; items: UiTask[] }> {
     return this.bucketOrder.map((bucket) => ({
       bucket,
@@ -218,6 +249,10 @@ export class EmployeeDashboard implements OnInit {
 
   setSidebarSection(section: SidebarSection): void {
     this.sidebarSection = section;
+    if (section === 'settings') {
+      this.settingsSuccess = '';
+      this.loadSettingsProfile();
+    }
   }
 
   setTab(tab: EmployeeTab): void {
@@ -230,6 +265,141 @@ export class EmployeeDashboard implements OnInit {
 
   setPriorityFilter(filter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente'): void {
     this.priorityFilter = filter;
+  }
+
+  get selectedCalendarDateLabel(): string {
+    if (!this.selectedCalendarDate) return '';
+    return this.selectedCalendarDate.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+  }
+
+  goToCurrentCalendarMonth(): void {
+    this.currentMonth = new Date();
+    this.buildCalendar();
+  }
+
+  getTaskStatusLabel(task: UiTask): string {
+    return this.bucketLabels[task.bucket] || 'Inconnu';
+  }
+
+  getTaskAssigneeName(task: UiTask): string {
+    const rawTask = this.allTasks.find(t => t.id === task.id);
+    return rawTask?.assignedToName || 'Non assigné';
+  }
+
+  getUserStoryName(storyId: number): string {
+    const story = this.userStories.find(s => Number(s.id) === storyId);
+    return story?.name || `Story #${storyId}`;
+  }
+
+  getCalendarTaskStateClass(task: UiTask): string {
+    if (task.bucket === 'done') return 'done';
+    if (task.bucket === 'inProgress') return 'inprogress';
+    if (task.bucket === 'review') return 'review';
+    return 'todo';
+  }
+
+  formatDate(date: Date | string | null | undefined): string {
+    if (!date) return 'Non défini';
+    const parsed = typeof date === 'string' ? new Date(date) : date;
+    if (Number.isNaN(parsed.getTime())) return 'Non défini';
+    return parsed.toLocaleDateString('fr-FR');
+  }
+
+  saveProfileSettings(): void {
+    const firstName = this.profileForm.firstName.trim();
+    const lastName = this.profileForm.lastName.trim();
+    const email = this.profileForm.email.trim();
+    const avatarUrl = this.profileForm.avatarUrl.trim();
+
+    if (!firstName || !lastName || !email) {
+      this.error = 'Nom, prénom et email sont obligatoires.';
+      return;
+    }
+
+    const userData = this.tokenService.getUserData();
+    const userId = Number(userData?.userId ?? userData?.id ?? 0);
+    const roleNumber = this.resolveRoleNumber(userData?.role);
+
+    if (!userId || roleNumber === null) {
+      this.error = 'Impossible d’identifier votre compte utilisateur.';
+      return;
+    }
+
+    this.profileSaving = true;
+    this.error = '';
+    this.settingsSuccess = '';
+
+    this.userApiService.updateUser({
+      id: userId,
+      firstName,
+      lastName,
+      email,
+      role: roleNumber,
+    }).pipe(finalize(() => (this.profileSaving = false))).subscribe({
+      next: () => {
+        const applySuccess = () => {
+          this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
+          this.hydrateProfile();
+          this.settingsSuccess = 'Profil mis à jour avec succès.';
+        };
+
+        if (avatarUrl) {
+          this.authService.updateProfileImage({ imageUrl: avatarUrl }).subscribe({
+            next: () => applySuccess(),
+            error: () => applySuccess(),
+          });
+          return;
+        }
+
+        applySuccess();
+      },
+      error: () => {
+        this.error = 'Impossible de mettre à jour le profil.';
+      }
+    });
+  }
+
+  savePasswordSettings(): void {
+    if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmNewPassword) {
+      this.error = 'Veuillez remplir les champs du mot de passe.';
+      return;
+    }
+
+    if (this.passwordForm.newPassword.length < 6) {
+      this.error = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
+      return;
+    }
+
+    if (this.passwordForm.newPassword !== this.passwordForm.confirmNewPassword) {
+      this.error = 'La confirmation du mot de passe ne correspond pas.';
+      return;
+    }
+
+    this.passwordSaving = true;
+    this.error = '';
+    this.settingsSuccess = '';
+
+    this.authService.changePassword({
+      currentPassword: this.passwordForm.currentPassword,
+      newPassword: this.passwordForm.newPassword,
+      confirmNewPassword: this.passwordForm.confirmNewPassword
+    }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
+      next: () => {
+        this.settingsSuccess = 'Mot de passe modifié avec succès.';
+        this.passwordForm = {
+          currentPassword: '',
+          newPassword: '',
+          confirmNewPassword: ''
+        };
+      },
+      error: (err: unknown) => {
+        this.error = err instanceof Error ? err.message : 'Impossible de changer le mot de passe.';
+      }
+    });
   }
 
   logout(): void {
@@ -273,6 +443,8 @@ export class EmployeeDashboard implements OnInit {
     if (data?.role) {
       this.roleLabel = data.role;
     }
+
+    this.profileImageUrl = String((data as any)?.profileImageUrl ?? '').trim();
 
     const idRaw = data?.userId ?? data?.id;
     const parsed = Number(idRaw);
@@ -585,14 +757,14 @@ export class EmployeeDashboard implements OnInit {
     });
   }
 
-  private taskDueDate(taskId: number): Date | null {
+  taskDueDate(taskId: number): Date | null {
     const raw = this.allTasks.find((task) => task.id === taskId)?.endDate;
     if (!raw) return null;
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  private sameDate(a: Date, b: Date | null): boolean {
+  sameDate(a: Date, b: Date | null): boolean {
     if (!b) return false;
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
@@ -694,6 +866,70 @@ export class EmployeeDashboard implements OnInit {
     names.push(this.userName.split(' ')[0] || 'Moi');
     if (project?.team?.name) names.push(project.team.name);
     return Array.from(new Set(names)).slice(0, 4);
+  }
+
+  private loadSettingsProfile(): void {
+    const userData = this.tokenService.getUserData();
+    this.profileForm = {
+      firstName: String(userData?.firstName ?? '').trim(),
+      lastName: String(userData?.lastName ?? '').trim(),
+      email: String(userData?.email ?? '').trim(),
+      avatarUrl: String((userData as any)?.profileImageUrl ?? '').trim(),
+    };
+
+    this.authService.getProfile().pipe(catchError(() => of(null))).subscribe((profile) => {
+      if (!profile) {
+        return;
+      }
+
+      this.profileForm = {
+        firstName: String(profile.firstName ?? this.profileForm.firstName).trim(),
+        lastName: String(profile.lastName ?? this.profileForm.lastName).trim(),
+        email: String(profile.email ?? this.profileForm.email).trim(),
+        avatarUrl: String(profile.profileImageUrl ?? this.profileForm.avatarUrl).trim(),
+      };
+
+      this.profileImageUrl = this.profileForm.avatarUrl;
+      this.syncLocalUserProfile(
+        this.profileForm.firstName,
+        this.profileForm.lastName,
+        this.profileForm.email,
+        this.profileForm.avatarUrl || undefined
+      );
+    });
+  }
+
+  private resolveRoleNumber(role: string | number | undefined): number | null {
+    if (typeof role === 'number') {
+      return role;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    if (!normalized) return null;
+    if (normalized === 'admin' || normalized === '0') return 0;
+    if (normalized === 'servicemanager' || normalized === 'service manager' || normalized === '1') return 1;
+    if (normalized === 'projectmanager' || normalized === 'project manager' || normalized === '2') return 2;
+    if (normalized === 'employee' || normalized === 'employe' || normalized === '3') return 3;
+    return null;
+  }
+
+  private syncLocalUserProfile(firstName: string, lastName: string, email: string, profileImageUrl?: string): void {
+    const current = this.tokenService.getUserData();
+    const accessToken = this.tokenService.getAccessToken();
+    if (!current || !accessToken) {
+      return;
+    }
+
+    const merged = {
+      ...current,
+      firstName,
+      lastName,
+      email,
+      profileImageUrl: profileImageUrl ?? (current as any)?.profileImageUrl,
+    };
+
+    this.tokenService.setTokens(accessToken, this.tokenService.getRefreshToken(), merged);
+    this.profileImageUrl = String((merged as any)?.profileImageUrl ?? '').trim();
   }
 
 }
