@@ -55,7 +55,7 @@ export class UserStoryManagerComponent implements OnInit {
 
   loadUserStories(): void {
     if (this.sprintId === null) {
-      this.error = 'Sprint invalide pour charger les user stories';
+      this.error = 'Invalid sprint to load user stories';
       return;
     }
 
@@ -74,7 +74,7 @@ export class UserStoryManagerComponent implements OnInit {
         this.userStories = data;
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement des user stories';
+        this.error = 'Error while loading user stories';
         console.error(err);
       }
       });
@@ -82,13 +82,13 @@ export class UserStoryManagerComponent implements OnInit {
 
   getStatusLabel(status: UserStoryStatus): string {
       const labels: Record<UserStoryStatus, string> = {
-        [UserStoryStatus.TODO]: 'À faire',
-        [UserStoryStatus.IN_PROGRESS]: 'En cours',
+        [UserStoryStatus.TODO]: 'To Do',
+        [UserStoryStatus.IN_PROGRESS]: 'In Progress',
         [UserStoryStatus.REVIEW]: 'Review',
         [UserStoryStatus.TESTING]: 'Testing',
-        [UserStoryStatus.DONE]: 'Terminé',
+        [UserStoryStatus.DONE]: 'Done',
       };
-      return labels[status] || 'Inconnu';
+      return labels[status] || 'Unknown';
   }
 
   getStatusClass(status: UserStoryStatus): string {
@@ -111,11 +111,11 @@ export class UserStoryManagerComponent implements OnInit {
 
   getPriorityLabel(priority: number): string {
     const labels: Record<number, string> = {
-      1: 'Critique',
-      2: 'Élevée',
-      3: 'Moyenne',
-      4: 'Basse',
-      5: 'Très basse'
+      1: 'Critical',
+      2: 'High',
+      3: 'Medium',
+      4: 'Low',
+      5: 'Very Low'
     };
     return labels[priority] || 'N/A';
   }
@@ -137,7 +137,7 @@ export class UserStoryManagerComponent implements OnInit {
 
   createUserStory(): void {
     if (this.sprintId === null) {
-      this.error = 'Sprint invalide pour créer une user story';
+      this.error = 'Invalid sprint to create a user story';
       return;
     }
 
@@ -149,13 +149,13 @@ export class UserStoryManagerComponent implements OnInit {
 
   submitCreateUserStory(): void {
     if (this.sprintId === null) {
-      this.error = 'Sprint invalide pour créer une user story';
+      this.error = 'Invalid sprint to create a user story';
       return;
     }
 
     const title = this.createForm.title?.trim();
     if (!title) {
-      this.error = 'Le titre est obligatoire';
+      this.error = 'Title is required';
       return;
     }
 
@@ -163,7 +163,7 @@ export class UserStoryManagerComponent implements OnInit {
     const priority = Number(this.createForm.priority);
 
     if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
-      this.error = 'Story points ou priorité invalide';
+      this.error = 'Invalid story points or priority';
       return;
     }
 
@@ -198,7 +198,7 @@ export class UserStoryManagerComponent implements OnInit {
           this.loadUserStories();
         },
         error: (err) => {
-          this.error = 'Erreur lors de la création de la user story';
+          this.error = 'Error while creating the user story';
           console.error(err);
         }
       });
@@ -217,18 +217,18 @@ export class UserStoryManagerComponent implements OnInit {
       return;
     }
 
-    const title = window.prompt('Titre de la user story :', story.title);
+    const title = window.prompt('User story title:', story.title);
     if (!title?.trim()) {
       return;
     }
 
-    const description = window.prompt('Description :', story.description) ?? story.description;
-    const acceptanceCriteria = window.prompt('Critères d\'acceptation :', story.acceptanceCriteria) ?? story.acceptanceCriteria;
-    const storyPoints = Number(window.prompt('Story points :', String(story.storyPoints)) ?? String(story.storyPoints));
-    const priority = Number(window.prompt('Priorité (1-5) :', String(story.priority)) ?? String(story.priority));
+    const description = window.prompt('Description:', story.description) ?? story.description;
+    const acceptanceCriteria = window.prompt('Acceptance criteria:', story.acceptanceCriteria) ?? story.acceptanceCriteria;
+    const storyPoints = Number(window.prompt('Story points:', String(story.storyPoints)) ?? String(story.storyPoints));
+    const priority = Number(window.prompt('Priority (1-5):', String(story.priority)) ?? String(story.priority));
 
     if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
-      this.error = 'Story points ou priorité invalide';
+      this.error = 'Invalid story points or priority';
       return;
     }
 
@@ -252,7 +252,7 @@ export class UserStoryManagerComponent implements OnInit {
     this.userStoryService.update(Number(id), updatePayload).subscribe({
       next: () => this.loadUserStories(),
       error: (err) => {
-        this.error = 'Erreur lors de la mise à jour de la user story';
+        this.error = 'Error while updating the user story';
         console.error(err);
       }
     });
@@ -261,13 +261,13 @@ export class UserStoryManagerComponent implements OnInit {
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
+    if (confirm('Are you sure you want to delete this user story and all its tasks?')) {
       this.userStoryService.delete(Number(id)).subscribe({
         next: () => {
           this.loadUserStories();
         },
         error: (err) => {
-          this.error = 'Erreur lors de la suppression';
+          this.error = 'Error while deleting';
           console.error(err);
         }
       });

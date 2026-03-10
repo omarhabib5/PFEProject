@@ -103,7 +103,7 @@ export class TaskManager implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Erreur lors du chargement des tâches';
+        this.error = 'Error while loading tasks';
         this.loading = false;
            this.cdr.detectChanges();
       }
@@ -142,13 +142,13 @@ export class TaskManager implements OnInit {
 
   saveTask(): void {
     if (!this.formModel.title.trim() || !this.formModel.userStoryId) {
-      this.error = 'Titre et User Story sont obligatoires';
+      this.error = 'Title and User Story are required';
       return;
     }
 
     if (!this.isDateInRange(this.formModel.startDate, this.taskMinDateInput, this.taskMaxDateInput)
       || !this.isDateInRange(this.formModel.endDate, this.taskMinDateInput, this.taskMaxDateInput)) {
-      this.error = 'Les dates de tâche doivent être dans l\'intervalle autorisé de la user story';
+      this.error = 'Task dates must be within the allowed user story range';
       return;
     }
 
@@ -168,7 +168,7 @@ export class TaskManager implements OnInit {
         })
       ).subscribe({
         next: () => this.afterSaveSuccess(),
-        error: (error) => this.afterSaveError(this.buildSaveError(error, 'Erreur lors de la mise à jour de la tâche'))
+        error: (error) => this.afterSaveError(this.buildSaveError(error, 'Error while updating task'))
       });
       return;
     }
@@ -183,7 +183,7 @@ export class TaskManager implements OnInit {
       next: () =>{ this.afterSaveSuccess(),
            this.cdr.detectChanges();
       },
-      error: (error) => this.afterSaveError(this.buildSaveError(error, 'Erreur lors de la création de la tâche'))
+      error: (error) => this.afterSaveError(this.buildSaveError(error, 'Error while creating task'))
     });
   }
 
@@ -378,7 +378,7 @@ export class TaskManager implements OnInit {
         this.refreshAssignableUsers();
       },
       error: () => {
-        this.error = 'Impossible de charger la tâche à modifier';
+        this.error = 'Unable to load task for editing';
       }
     });
   }
@@ -501,7 +501,7 @@ export class TaskManager implements OnInit {
   private buildSaveError(error: unknown, fallback: string): string {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 0) {
-        return 'Connexion API impossible. Vérifie que le backend est lancé.';
+        return 'API connection failed. Make sure the backend is running.';
       }
 
       const apiMessage = error.error?.message || error.error?.title;
@@ -513,7 +513,7 @@ export class TaskManager implements OnInit {
     }
 
     if ((error as { name?: string })?.name === 'TimeoutError') {
-      return 'La requête a expiré. Réessaie dans quelques secondes.';
+      return 'The request timed out. Please try again in a few seconds.';
     }
 
     return fallback;

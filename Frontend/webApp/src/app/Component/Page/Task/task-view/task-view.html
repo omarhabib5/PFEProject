@@ -1,7 +1,7 @@
 <div class="task-view">
-    <button class="btn-back" type="button" (click)="goBack()">← Retour</button>
+    <button class="btn-back" type="button" (click)="goBack()">← Back</button>
 
-    <div *ngIf="loading">Chargement de la tâche...</div>
+    <div *ngIf="loading">Loading task...</div>
     <div *ngIf="error" class="error">{{ error }}</div>
 
     <div *ngIf="!loading && !error && task" class="card">
@@ -15,17 +15,17 @@
         <div class="meta-grid">
             <div><strong>ID:</strong> {{ task.id }}</div>
             <div><strong>User Story:</strong> {{ task.userStoryId }}</div>
-            <div><strong>Estimé:</strong> {{ task.estimatedHours }}h</div>
-            <div><strong>Réel:</strong> {{ task.actualHours ?? 0 }}h</div>
-            <div><strong>Complexité:</strong> {{ task.complexity ?? '-' }}</div>
-            <div><strong>Assigné à:</strong> {{ task.assignedToName || '-' }}</div>
-            <div><strong>Début:</strong> {{ task.startDate | date:'dd/MM/yyyy' }}</div>
-            <div><strong>Fin:</strong> {{ task.endDate | date:'dd/MM/yyyy' }}</div>
+            <div><strong>Estimated:</strong> {{ task.estimatedHours }}h</div>
+            <div><strong>Actual:</strong> {{ task.actualHours ?? 0 }}h</div>
+            <div><strong>Complexity:</strong> {{ task.complexity ?? '-' }}</div>
+            <div><strong>Assigned to:</strong> {{ task.assignedToName || '-' }}</div>
+            <div><strong>Start:</strong> {{ task.startDate | date:'dd/MM/yyyy' }}</div>
+            <div><strong>End:</strong> {{ task.endDate | date:'dd/MM/yyyy' }}</div>
         </div>
 
         <div class="actions">
-            <button class="btn-primary" type="button" (click)="goToEdit()">Modifier</button>
-            <button class="btn-danger" type="button" (click)="deleteTask()">Supprimer</button>
+            <button class="btn-primary" type="button" (click)="goToEdit()">Edit</button>
+            <button class="btn-danger" type="button" (click)="deleteTask()">Delete</button>
         </div>
     </div>
 </div>

@@ -98,8 +98,8 @@ export class EmployeeDashboard implements OnInit {
   error = '';
   searchTerm = '';
 
-  userName = 'Employé';
-  roleLabel = 'Membre';
+  userName = 'Employee';
+  roleLabel = 'Member';
   serviceLabel = 'Service';
   todayLabel = '';
   unreadNotifications = 0;
@@ -136,14 +136,14 @@ export class EmployeeDashboard implements OnInit {
   calendarCells: CalendarCell[] = [];
   selectedCalendarDate: Date | null = null;
 
-  readonly weekdays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   readonly bucketOrder: TaskBucket[] = ['todo', 'inProgress', 'review', 'done'];
   readonly bucketLabels: Record<TaskBucket, string> = {
-    todo: 'À faire',
-    inProgress: 'En cours',
-    review: 'En révision',
-    done: 'Terminé'
+    todo: 'To Do',
+    inProgress: 'In Progress',
+    review: 'In Review',
+    done: 'Done'
   };
 
   ngOnInit(): void {
@@ -153,7 +153,7 @@ export class EmployeeDashboard implements OnInit {
     }
 
     this.hydrateProfile();
-    this.todayLabel = new Date().toLocaleDateString('fr-FR', {
+    this.todayLabel = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -165,10 +165,10 @@ export class EmployeeDashboard implements OnInit {
   }
 
   get pageTitle(): string {
-    if (this.sidebarSection === 'calendar') return 'Calendrier';
+    if (this.sidebarSection === 'calendar') return 'Calendar';
     if (this.sidebarSection === 'notifications') return 'Notifications';
-    if (this.sidebarSection === 'settings') return 'Paramètres';
-    return 'Mon Tableau de bord';
+    if (this.sidebarSection === 'settings') return 'Settings';
+    return 'My Dashboard';
   }
 
   get completionPercent(): number {
@@ -216,7 +216,7 @@ export class EmployeeDashboard implements OnInit {
   }
 
   get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   get selectedDayTasks(): UiTask[] {
@@ -269,7 +269,7 @@ export class EmployeeDashboard implements OnInit {
 
   get selectedCalendarDateLabel(): string {
     if (!this.selectedCalendarDate) return '';
-    return this.selectedCalendarDate.toLocaleDateString('fr-FR', {
+    return this.selectedCalendarDate.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
@@ -282,12 +282,12 @@ export class EmployeeDashboard implements OnInit {
   }
 
   getTaskStatusLabel(task: UiTask): string {
-    return this.bucketLabels[task.bucket] || 'Inconnu';
+    return this.bucketLabels[task.bucket] || 'Unknown';
   }
 
   getTaskAssigneeName(task: UiTask): string {
     const rawTask = this.allTasks.find(t => t.id === task.id);
-    return rawTask?.assignedToName || 'Non assigné';
+    return rawTask?.assignedToName || 'Unassigned';
   }
 
   getUserStoryName(storyId: number): string {
@@ -303,10 +303,10 @@ export class EmployeeDashboard implements OnInit {
   }
 
   formatDate(date: Date | string | null | undefined): string {
-    if (!date) return 'Non défini';
+    if (!date) return 'Not defined';
     const parsed = typeof date === 'string' ? new Date(date) : date;
-    if (Number.isNaN(parsed.getTime())) return 'Non défini';
-    return parsed.toLocaleDateString('fr-FR');
+    if (Number.isNaN(parsed.getTime())) return 'Not defined';
+    return parsed.toLocaleDateString('en-US');
   }
 
   saveProfileSettings(): void {
@@ -316,7 +316,7 @@ export class EmployeeDashboard implements OnInit {
     const avatarUrl = this.profileForm.avatarUrl.trim();
 
     if (!firstName || !lastName || !email) {
-      this.error = 'Nom, prénom et email sont obligatoires.';
+      this.error = 'First name, last name, and email are required.'
       return;
     }
 
@@ -325,7 +325,7 @@ export class EmployeeDashboard implements OnInit {
     const roleNumber = this.resolveRoleNumber(userData?.role);
 
     if (!userId || roleNumber === null) {
-      this.error = 'Impossible d’identifier votre compte utilisateur.';
+      this.error = 'Unable to identify your user account.'
       return;
     }
 
@@ -344,7 +344,7 @@ export class EmployeeDashboard implements OnInit {
         const applySuccess = () => {
           this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
           this.hydrateProfile();
-          this.settingsSuccess = 'Profil mis à jour avec succès.';
+          this.settingsSuccess = 'Profile updated successfully.'
         };
 
         if (avatarUrl) {
@@ -358,24 +358,24 @@ export class EmployeeDashboard implements OnInit {
         applySuccess();
       },
       error: () => {
-        this.error = 'Impossible de mettre à jour le profil.';
+        this.error = 'Unable to update profile.'
       }
     });
   }
 
   savePasswordSettings(): void {
     if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmNewPassword) {
-      this.error = 'Veuillez remplir les champs du mot de passe.';
+      this.error = 'Please fill in all password fields.'
       return;
     }
 
     if (this.passwordForm.newPassword.length < 6) {
-      this.error = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
+      this.error = 'The new password must be at least 6 characters long.'
       return;
     }
 
     if (this.passwordForm.newPassword !== this.passwordForm.confirmNewPassword) {
-      this.error = 'La confirmation du mot de passe ne correspond pas.';
+      this.error = 'Password confirmation does not match.'
       return;
     }
 
@@ -389,7 +389,7 @@ export class EmployeeDashboard implements OnInit {
       confirmNewPassword: this.passwordForm.confirmNewPassword
     }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
       next: () => {
-        this.settingsSuccess = 'Mot de passe modifié avec succès.';
+        this.settingsSuccess = 'Password updated successfully.'
         this.passwordForm = {
           currentPassword: '',
           newPassword: '',
@@ -397,7 +397,7 @@ export class EmployeeDashboard implements OnInit {
         };
       },
       error: (err: unknown) => {
-        this.error = err instanceof Error ? err.message : 'Impossible de changer le mot de passe.';
+        this.error = err instanceof Error ? err.message : 'Unable to change password.';
       }
     });
   }
@@ -420,7 +420,7 @@ export class EmployeeDashboard implements OnInit {
           this.loadEmployeeData();
         },
         error: () => {
-          this.error = 'Impossible de mettre à jour le statut de la tâche.';
+          this.error = 'Unable to update task status.'
         }
       });
   }
@@ -511,7 +511,7 @@ export class EmployeeDashboard implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.error = 'Impossible de charger les données employé.';
+          this.error = 'Unable to load employee data.'
         }
       });
   }
@@ -589,14 +589,14 @@ export class EmployeeDashboard implements OnInit {
       const projectSprints = sprints.filter((sprint) => Number((sprint as any).projectId) === projectId);
       const activeSprint = this.toActiveSprint(projectSprints, stories, project?.name ?? 'Projet');
 
-      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Non assigné';
+      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Unassigned';
       const dueDate = this.toFrDate((project as any)?.endDate);
 
       return {
         id: projectId,
         name: project?.name ?? `Projet ${projectId}`,
         description: project?.description ?? 'Aucune description',
-        managerName: manager || 'Non assigné',
+        managerName: manager || 'Unassigned',
         dueDate,
         statusLabel: this.getProjectStateLabel(project?.projectState),
         statusClass: this.getProjectStateClass(project?.projectState),
@@ -634,7 +634,7 @@ export class EmployeeDashboard implements OnInit {
         })
         .filter((name) => name.trim().length > 0)
     ));
-    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service non défini';
+    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Undefined service';
 
     this.notifications = this.buildNotifications();
     this.unreadNotifications = this.notifications.length;
@@ -656,7 +656,7 @@ export class EmployeeDashboard implements OnInit {
     return {
       id: task.id,
       title: task.title,
-      projectName: project?.name ?? 'Projet non assigné',
+      projectName: project?.name ?? 'Unassigned project',
       tags: [
         task.description?.split(' ').slice(0, 2).join(' ') || 'task'
       ],
@@ -709,14 +709,14 @@ export class EmployeeDashboard implements OnInit {
       if (task.priorityClass === 'urgente' || task.priorityClass === 'haute') {
         notifications.push({
           level: 'warning',
-          message: `Priorité ${task.priorityLabel} : ${task.title}`,
+          message: `${task.priorityLabel} priority: ${task.title}`,
           dateLabel: this.todayLabel
         });
       }
-      if (task.delayLabel.startsWith('Retard')) {
+      if (task.delayLabel.startsWith('Late')) {
         notifications.push({
           level: 'info',
-          message: `${task.title} est en ${task.delayLabel.toLowerCase()}`,
+          message: `${task.title} is ${task.delayLabel.toLowerCase()}`,
           dateLabel: this.todayLabel
         });
       }
@@ -725,7 +725,7 @@ export class EmployeeDashboard implements OnInit {
     if (this.doneCount > 0) {
       notifications.push({
         level: 'success',
-        message: `${this.doneCount} tâche(s) terminée(s)` ,
+        message: `${this.doneCount} task(s) completed` ,
         dateLabel: this.todayLabel
       });
     }
@@ -793,21 +793,21 @@ export class EmployeeDashboard implements OnInit {
 
   private mapPriority(complexity: number | undefined): { label: string; class: 'basse' | 'moyenne' | 'haute' | 'urgente' } {
     const value = Number(complexity ?? 1);
-    if (value >= 4) return { label: 'Urgente', class: 'urgente' };
-    if (value >= 3) return { label: 'Haute', class: 'haute' };
-    if (value >= 2) return { label: 'Moyenne', class: 'moyenne' };
-    return { label: 'Basse', class: 'basse' };
+    if (value >= 4) return { label: 'Urgent', class: 'urgente' };
+    if (value >= 3) return { label: 'High', class: 'haute' };
+    if (value >= 2) return { label: 'Medium', class: 'moyenne' };
+    return { label: 'Low', class: 'basse' };
   }
 
   private buildDelayLabel(endDate: string | undefined): string {
-    if (!endDate) return 'Sans échéance';
+    if (!endDate) return 'No deadline';
     const due = new Date(endDate);
-    if (Number.isNaN(due.getTime())) return 'Sans échéance';
+    if (Number.isNaN(due.getTime())) return 'No deadline';
     const now = new Date();
     const diffMs = due.getTime() - now.getTime();
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (days < 0) return `Retard ${Math.abs(days)}j`;
-    return `Dans ${days}j`;
+    if (days < 0) return `Late by ${Math.abs(days)}d`;
+    return `In ${days}d`;
   }
 
   private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
@@ -823,10 +823,10 @@ export class EmployeeDashboard implements OnInit {
   }
 
   private getProjectStateLabel(state: ProjectState | undefined): string {
-    if (state === ProjectState.done || state === ProjectState.validated) return 'Terminé';
-    if (state === ProjectState.inProgress) return 'Actif';
-    if (state === ProjectState.todo) return 'En pause';
-    return 'En attente';
+    if (state === ProjectState.done || state === ProjectState.validated) return 'Done';
+    if (state === ProjectState.inProgress) return 'Active';
+    if (state === ProjectState.todo) return 'Paused';
+    return 'Pending';
   }
 
   private getProjectStateClass(state: ProjectState | undefined): string {
@@ -838,10 +838,10 @@ export class EmployeeDashboard implements OnInit {
 
   private getSprintStateLabel(value: unknown): string {
     const state = Number(value);
-    if (state === 2) return 'Actif';
-    if (state === 3 || state === 4) return 'Terminé';
-    if (state === 1) return 'Planifié';
-    return 'En attente';
+    if (state === 2) return 'Active';
+    if (state === 3 || state === 4) return 'Done';
+    if (state === 1) return 'Planned';
+    return 'Pending';
   }
 
   private isStoryDone(value: unknown): boolean {
@@ -857,13 +857,13 @@ export class EmployeeDashboard implements OnInit {
     if (!value) return '—';
     const date = new Date(value as string);
     if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('fr-FR');
+    return date.toLocaleDateString('en-US');
   }
 
   private extractTeamChips(project: ProjectEntity | undefined, managerName: string): string[] {
     const names: string[] = [];
-    if (managerName && managerName !== 'Non assigné') names.push(managerName.split(' ')[0]);
-    names.push(this.userName.split(' ')[0] || 'Moi');
+    if (managerName && managerName !== 'Unassigned') names.push(managerName.split(' ')[0]);
+    names.push(this.userName.split(' ')[0] || 'Me');
     if (project?.team?.name) names.push(project.team.name);
     return Array.from(new Set(names)).slice(0, 4);
   }

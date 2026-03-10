@@ -25,7 +25,7 @@ export class TaskView implements OnInit {
     this.route.params.subscribe(params => {
       const taskId = Number(params['id']);
       if (!taskId) {
-        this.error = 'ID de tâche invalide';
+        this.error = 'Invalid task ID';
         this.loading = false;
         return;
       }
@@ -43,7 +43,7 @@ export class TaskView implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'Erreur lors du chargement de la tâche';
+        this.error = 'Error while loading the task';
         this.loading = false;
       }
     });
@@ -58,7 +58,7 @@ export class TaskView implements OnInit {
     if (!this.task) return;
     this.taskService.delete(this.task.id).subscribe({
       next: () => this.goBack(),
-      error: () => this.error = 'Erreur lors de la suppression de la tâche'
+      error: () => this.error = 'Error while deleting the task'
     });
   }
 

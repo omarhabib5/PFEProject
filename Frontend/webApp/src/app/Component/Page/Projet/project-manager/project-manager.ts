@@ -531,10 +531,10 @@ export class ProjectManager implements OnInit {
   getStateLabel(state: State): string {
     const labels: Record<number, string> = {
       [State.pending]: 'En attente',
-      [State.todo]: 'À faire',
+      [State.todo]: 'To Do',
       [State.inProgress]: 'Actif',
-      [State.done]: 'Terminé',
-      [State.validated]: 'Validé'
+      [State.done]: 'Done',
+      [State.validated]: 'Validated'
     };
 
     return labels[Number(state)] ?? 'Inconnu';

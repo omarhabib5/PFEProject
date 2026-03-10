@@ -1,141 +1,108 @@
 <div class="max-w-7xl mx-auto p-5">
- 
+
   <div class="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
     <h1 class="text-3xl font-bold text-gray-800">Project Management</h1>
-    <button 
-      class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
-      (click)="toggleCreateProjectForm()" 
-      *ngIf="!selectedProject"
-      [disabled]="loading">
+    <button
+      class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+      (click)="toggleCreateProjectForm()" *ngIf="!selectedProject" [disabled]="loading">
       <span *ngIf="!showCreateProjectForm">+ Create New Project</span>
       <span *ngIf="showCreateProjectForm && !isEditMode">Cancel</span>
       <span *ngIf="showCreateProjectForm && isEditMode">Cancel Edit</span>
     </button>
     <button
       class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg"
-      type="button"
-      (click)="goBackToServicesList()"
-      *ngIf="!selectedProject">
+      type="button" (click)="goBackToServicesList()" *ngIf="!selectedProject">
       ← Back to Services List
     </button>
-    <button 
-      class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg" 
-      (click)="backToProjectsList()" 
-      *ngIf="selectedProject">
+    <button
+      class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg"
+      (click)="backToProjectsList()" *ngIf="selectedProject">
       ← Back to Service Projects
     </button>
   </div>
 
- 
-  <div class="p-4 mb-5 bg-green-100 text-green-800 border border-green-200 rounded-lg animate-slideDown" *ngIf="successMessage">
+
+  <div class="p-4 mb-5 bg-green-100 text-green-800 border border-green-200 rounded-lg animate-slideDown"
+    *ngIf="successMessage">
     {{ successMessage }}
   </div>
 
- 
+
   <div class="p-4 mb-5 bg-red-100 text-red-800 border border-red-200 rounded-lg relative" *ngIf="error">
     {{ error }}
-    <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-red-800 hover:opacity-70" (click)="error = null">×</button>
+    <button
+      class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-red-800 hover:opacity-70"
+      (click)="error = null">×</button>
   </div>
 
- 
+
   <div class="bg-gray-50 p-6 rounded-lg mb-8 shadow-sm" *ngIf="showCreateProjectForm && !selectedProject">
     <h2 class="text-xl font-semibold text-gray-800 mb-5">{{ isEditMode ? 'Edit Project' : 'Create New Project' }}</h2>
     <form (ngSubmit)="isEditMode ? updateProject() : createProject()">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      
+
         <div class="mb-5">
           <label for="projectName" class="block mb-2 text-gray-700 font-medium">Project Name *</label>
-          <input 
-            type="text" 
-            id="projectName" 
-            [(ngModel)]="newProject.name" 
-            name="projectName"
-            placeholder="Enter project name"
-            required
+          <input type="text" id="projectName" [(ngModel)]="newProject.name" name="projectName"
+            placeholder="Enter project name" required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
         </div>
 
-    
+
         <div class="mb-5">
           <label for="projectManager" class="block mb-2 text-gray-700 font-medium">Project Manager *</label>
-          <select 
-            id="projectManager" 
-            [(ngModel)]="newProject.projectManagerId" 
-            name="projectManagerId"
-            required
+          <select id="projectManager" [(ngModel)]="newProject.projectManagerId" name="projectManagerId" required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="0" disabled>Select a project manager</option>
-            <option *ngFor="let user of projectManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            <option *ngFor="let user of projectManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}
+            </option>
           </select>
         </div>
       </div>
 
       <div class="mb-5">
         <label for="description" class="block mb-2 text-gray-700 font-medium">Description</label>
-        <textarea 
-          id="description" 
-          [(ngModel)]="newProject.description" 
-          name="description"
-          placeholder="Enter project description"
-          rows="3"
+        <textarea id="description" [(ngModel)]="newProject.description" name="description"
+          placeholder="Enter project description" rows="3"
           class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
           [disabled]="loading"></textarea>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      
+
         <div class="mb-5">
           <label for="startDate" class="block mb-2 text-gray-700 font-medium">Start Date *</label>
-          <input 
-            type="date" 
-            id="startDate" 
-            [(ngModel)]="newProject.startDate" 
-            (ngModelChange)="onProjectDatesChange()"
-            name="startDate"
-            required
+          <input type="date" id="startDate" [(ngModel)]="newProject.startDate" (ngModelChange)="onProjectDatesChange()"
+            name="startDate" required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
         </div>
 
-       
+
         <div class="mb-5">
           <label for="endDate" class="block mb-2 text-gray-700 font-medium">End Date *</label>
-          <input 
-            type="date" 
-            id="endDate" 
-            [(ngModel)]="newProject.endDate" 
-            (ngModelChange)="onProjectDatesChange()"
-            name="endDate"
-            required
+          <input type="date" id="endDate" [(ngModel)]="newProject.endDate" (ngModelChange)="onProjectDatesChange()"
+            name="endDate" required
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-       
+
         <div class="mb-5">
           <label for="estimatedDuration" class="block mb-2 text-gray-700 font-medium">Estimated Duration (days)</label>
-          <input 
-            type="number" 
-            id="estimatedDuration" 
-            [(ngModel)]="newProject.estimatedDuration" 
-            name="estimatedDuration"
-            placeholder="0"
-            min="0"
-            readonly
+          <input type="number" id="estimatedDuration" [(ngModel)]="newProject.estimatedDuration"
+            name="estimatedDuration" placeholder="0" min="0" readonly
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
         </div>
 
         <div class="mb-5">
           <label for="serviceId" class="block mb-2 text-gray-700 font-medium">Service</label>
-          <select 
-            id="serviceId" 
-            [(ngModel)]="newProject.serviceId" 
-            name="serviceId"
+          <select id="serviceId" [(ngModel)]="newProject.serviceId" name="serviceId"
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="undefined">No service</option>
@@ -143,13 +110,10 @@
           </select>
         </div>
 
-     
+
         <div class="mb-5">
           <label for="teamId" class="block mb-2 text-gray-700 font-medium">Team</label>
-          <select 
-            id="teamId" 
-            [(ngModel)]="newProject.teamId" 
-            name="teamId"
+          <select id="teamId" [(ngModel)]="newProject.teamId" name="teamId"
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="undefined">No team</option>
@@ -158,14 +122,10 @@
         </div>
       </div>
 
-    
+
       <div class="mb-5">
         <label for="projectState" class="block mb-2 text-gray-700 font-medium">Project State *</label>
-        <select 
-          id="projectState" 
-          [(ngModel)]="newProject.projectState" 
-          name="projectState"
-          required
+        <select id="projectState" [(ngModel)]="newProject.projectState" name="projectState" required
           class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
           [disabled]="loading">
           <option *ngFor="let state of stateOptions" [ngValue]="state.value">{{ state.label }}</option>
@@ -173,10 +133,14 @@
       </div>
 
       <div class="flex gap-2.5 mt-5">
-        <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed" [disabled]="loading">
+        <button type="submit"
+          class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          [disabled]="loading">
           {{ isEditMode ? 'Update Project' : 'Create Project' }}
         </button>
-        <button type="button" class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="toggleCreateProjectForm()" [disabled]="loading">
+        <button type="button"
+          class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          (click)="toggleCreateProjectForm()" [disabled]="loading">
           Cancel
         </button>
       </div>
@@ -186,24 +150,28 @@
 
   <div *ngIf="!selectedProject && !showCreateProjectForm">
     <h2 class="text-2xl font-semibold text-gray-800 mb-5">All Projects ({{ projects.length }})</h2>
-    
+
 
     <div class="flex justify-center items-center py-20" *ngIf="loading">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 
-   
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" *ngIf="projects.length > 0 && !loading">
-      <div class="bg-white border border-gray-200 rounded-lg p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" *ngFor="let project of projects">
+      <div
+        class="bg-white border border-gray-200 rounded-lg p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+        *ngFor="let project of projects">
         <div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
           <h3 class="text-xl font-semibold text-gray-800">{{ project.name }}</h3>
-          <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">{{ getStateName(project.projectState) }}</span>
+          <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">{{
+            getStateName(project.projectState) }}</span>
         </div>
-        
+
         <div class="mb-4 space-y-2">
           <p class="text-gray-600 text-sm"><strong>PM:</strong> {{ getUserName(project.projectManagerId) }}</p>
           <p class="text-gray-600 text-sm" *ngIf="project.description">
-            <strong>Description:</strong> {{ project.description.length > 60 ? project.description.substring(0, 60) + '...' : project.description }}
+            <strong>Description:</strong> {{ project.description.length > 60 ? project.description.substring(0, 60) +
+            '...' : project.description }}
           </p>
           <p class="text-gray-600 text-sm"><strong>Service:</strong> {{ getServiceName(project.serviceId) }}</p>
           <p class="text-gray-600 text-sm"><strong>Team:</strong> {{ getTeamName(project.teamId) }}</p>
@@ -211,29 +179,35 @@
           <p class="text-gray-600 text-sm"><strong>Start:</strong> {{ formatDate(project.startDate) }}</p>
           <p class="text-gray-600 text-sm"><strong>End:</strong> {{ formatDate(project.endDate) }}</p>
         </div>
-        
+
         <div class="flex gap-2.5">
-          <button class="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-cyan-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="viewProjectDetails(project)" [disabled]="loading">
+          <button
+            class="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-cyan-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            (click)="viewProjectDetails(project)" [disabled]="loading">
             View Details
           </button>
-          <button class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="startEditProject(project)" [disabled]="loading">
+          <button
+            class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            (click)="startEditProject(project)" [disabled]="loading">
             Edit
           </button>
-          <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="deleteProject(project.id!)" [disabled]="loading">
+          <button
+            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            (click)="deleteProject(project.id!)" [disabled]="loading">
             Delete
           </button>
         </div>
       </div>
     </div>
 
-    
+
     <div class="text-center py-20 text-gray-500" *ngIf="projects.length === 0 && !loading">
       <p class="text-xl mb-2">No projects found</p>
       <p>Click "Create New Project" to add your first project</p>
     </div>
   </div>
 
- 
+
   <div *ngIf="selectedProject" class="space-y-6">
     <section class="bg-white rounded-2xl shadow border border-gray-200 p-6">
       <p class="text-gray-500 text-sm mb-4">{{ currentDateLabel }}</p>
@@ -242,9 +216,11 @@
         <div>
           <div class="flex items-center gap-3 mb-1">
             <h2 class="text-3xl font-bold text-slate-900">{{ selectedProject.name }}</h2>
-            <span class="px-4 py-1 rounded-full font-semibold text-sm" [ngClass]="getStatusBadgeClasses(selectedProject.projectState)">{{ getStateLabel(selectedProject.projectState) }}</span>
+            <span class="px-4 py-1 rounded-full font-semibold text-sm"
+              [ngClass]="getStatusBadgeClasses(selectedProject.projectState)">{{
+              getStateLabel(selectedProject.projectState) }}</span>
           </div>
-          <p class="text-lg text-slate-600 mb-1">{{ selectedProject.description || 'Aucune description' }}</p>
+          <p class="text-lg text-slate-600 mb-1">{{ selectedProject.description || 'No description' }}</p>
           <p class="text-lg text-slate-600">Service: {{ getServiceName(selectedProject.serviceId) }}</p>
         </div>
       </div>
@@ -260,7 +236,7 @@
         </div>
         <div>
           <p class="text-3xl font-bold text-slate-900">{{ getProjectTasksCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">Tâsks</p>
+          <p class="text-base text-slate-600">Tasks</p>
         </div>
         <div>
           <p class="text-3xl font-bold text-slate-900">{{ getProjectMembersCount(selectedProject) }}</p>
@@ -281,13 +257,19 @@
 
     <section class="bg-white rounded-2xl shadow border border-gray-200 overflow-hidden">
       <div class="flex border-b border-gray-200">
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'overview'" [class.border-b-2]="detailTab === 'overview'" [class.border-blue-600]="detailTab === 'overview'" (click)="setDetailTab('overview')">
-          Vue d'ensemble
+        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors"
+          [class.text-blue-600]="detailTab === 'overview'" [class.border-b-2]="detailTab === 'overview'"
+          [class.border-blue-600]="detailTab === 'overview'" (click)="setDetailTab('overview')">
+          Overview
         </button>
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'stories'" [class.border-b-2]="detailTab === 'stories'" [class.border-blue-600]="detailTab === 'stories'" (click)="setDetailTab('stories')">
+        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors"
+          [class.text-blue-600]="detailTab === 'stories'" [class.border-b-2]="detailTab === 'stories'"
+          [class.border-blue-600]="detailTab === 'stories'" (click)="setDetailTab('stories')">
           User Stories ({{ getProjectUserStoriesCount(selectedProject) }})
         </button>
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'sprints'" [class.border-b-2]="detailTab === 'sprints'" [class.border-blue-600]="detailTab === 'sprints'" (click)="setDetailTab('sprints')">
+        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors"
+          [class.text-blue-600]="detailTab === 'sprints'" [class.border-b-2]="detailTab === 'sprints'"
+          [class.border-blue-600]="detailTab === 'sprints'" (click)="setDetailTab('sprints')">
           Sprints ({{ getProjectSprintsCount(selectedProject) }})
         </button>
       </div>
@@ -297,17 +279,23 @@
           <div>
             <h3 class="text-2xl font-bold text-slate-900 mb-4">Project information</h3>
             <div class="space-y-2 text-base">
-              <p><span class="text-slate-500">Start Date:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.startDate) }}</strong></p>
-              <p><span class="text-slate-500">End Date:</span> <strong class="ml-2 text-slate-900">{{ formatDate(selectedProject.endDate) }}</strong></p>
-              <p><span class="text-slate-500">project Manager: </span> <strong class="ml-2 text-slate-900">{{ getUserName(selectedProject.projectManagerId) }}</strong></p>
+              <p><span class="text-slate-500">Start Date:</span> <strong class="ml-2 text-slate-900">{{
+                  formatDate(selectedProject.startDate) }}</strong></p>
+              <p><span class="text-slate-500">End Date:</span> <strong class="ml-2 text-slate-900">{{
+                  formatDate(selectedProject.endDate) }}</strong></p>
+              <p><span class="text-slate-500">project Manager: </span> <strong class="ml-2 text-slate-900">{{
+                  getUserName(selectedProject.projectManagerId) }}</strong></p>
             </div>
           </div>
 
           <div>
             <h3 class="text-2xl font-bold text-slate-900 mb-4">Team</h3>
             <div class="flex flex-wrap gap-3">
-              <div *ngFor="let member of selectedProjectMembers" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-800">
-                <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">{{ getMemberInitials(member) }}</span>
+              <div *ngFor="let member of selectedProjectMembers"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-800">
+                <span
+                  class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">{{
+                  getMemberInitials(member) }}</span>
                 <span class="text-base">{{ member.firstName }} {{ member.lastName }}</span>
               </div>
               <p *ngIf="selectedProjectMembers.length === 0" class="text-slate-500">No members assigned.</p>
@@ -315,15 +303,19 @@
           </div>
         </div>
 
-        <button type="button" class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
-         See the Kanban board for tasks
+        <button type="button"
+          class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold"
+          (click)="openKanbanBoard()">
+          See the Kanban board for tasks
         </button>
       </div>
 
       <div class="p-6" *ngIf="detailTab === 'stories'">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-bold text-slate-900">Project User Stories</h3>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700" (click)="toggleDetailUserStoryForm()" [disabled]="loading">
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700"
+            (click)="toggleDetailUserStoryForm()" [disabled]="loading">
             <span *ngIf="!showCreateUserStoryFormInDetails">+ Create User Story</span>
             <span *ngIf="showCreateUserStoryFormInDetails && !isEditingUserStoryInDetails">Cancel</span>
             <span *ngIf="showCreateUserStoryFormInDetails && isEditingUserStoryInDetails">Cancel Edit</span>
@@ -331,29 +323,21 @@
         </div>
 
         <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateUserStoryFormInDetails">
-          <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingUserStoryInDetails ? 'Edit User Story' : 'Create User Story' }}</h4>
+          <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingUserStoryInDetails ? 'Edit User Story' :
+            'Create User Story' }}</h4>
           <form (ngSubmit)="isEditingUserStoryInDetails ? updateDetailUserStory() : createDetailUserStory()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="mb-4">
                 <label for="storyName" class="block mb-2 text-gray-700 font-medium">Name *</label>
-                <input
-                  type="text"
-                  id="storyName"
-                  [(ngModel)]="newDetailUserStory.name"
-                  name="storyName"
-                  required
+                <input type="text" id="storyName" [(ngModel)]="newDetailUserStory.name" name="storyName" required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
               </div>
 
               <div class="mb-4">
                 <label for="storySprint" class="block mb-2 text-gray-700 font-medium">Sprint *</label>
-                <select
-                  id="storySprint"
-                  [(ngModel)]="newDetailUserStory.sprintId"
-                  (ngModelChange)="onDetailUserStorySprintChange()"
-                  name="storySprint"
-                  required
+                <select id="storySprint" [(ngModel)]="newDetailUserStory.sprintId"
+                  (ngModelChange)="onDetailUserStorySprintChange()" name="storySprint" required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading || projectSprints.length === 0">
                   <option value="" disabled>Select sprint</option>
@@ -364,10 +348,7 @@
 
             <div class="mb-4">
               <label for="storyDescription" class="block mb-2 text-gray-700 font-medium">Description</label>
-              <textarea
-                id="storyDescription"
-                [(ngModel)]="newDetailUserStory.description"
-                name="storyDescription"
+              <textarea id="storyDescription" [(ngModel)]="newDetailUserStory.description" name="storyDescription"
                 rows="3"
                 class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 [disabled]="loading"></textarea>
@@ -376,51 +357,33 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div class="mb-4">
                 <label for="storyStartDate" class="block mb-2 text-gray-700 font-medium">Start Date *</label>
-                <input
-                  type="date"
-                  id="storyStartDate"
-                  [(ngModel)]="newDetailUserStory.startDate"
-                  (ngModelChange)="onDetailUserStoryDatesChange()"
-                  name="storyStartDate"
+                <input type="date" id="storyStartDate" [(ngModel)]="newDetailUserStory.startDate"
+                  (ngModelChange)="onDetailUserStoryDatesChange()" name="storyStartDate"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  [min]="detailUserStoryMinDateInput"
-                  [max]="detailUserStoryMaxDateInput"
-                  [disabled]="loading">
+                  [min]="detailUserStoryMinDateInput" [max]="detailUserStoryMaxDateInput" [disabled]="loading">
               </div>
 
               <div class="mb-4">
                 <label for="storyEndDate" class="block mb-2 text-gray-700 font-medium">End Date *</label>
-                <input
-                  type="date"
-                  id="storyEndDate"
-                  [(ngModel)]="newDetailUserStory.endDate"
-                  (ngModelChange)="onDetailUserStoryDatesChange()"
-                  name="storyEndDate"
+                <input type="date" id="storyEndDate" [(ngModel)]="newDetailUserStory.endDate"
+                  (ngModelChange)="onDetailUserStoryDatesChange()" name="storyEndDate"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [min]="newDetailUserStory.startDate || detailUserStoryMinDateInput"
-                  [max]="detailUserStoryMaxDateInput"
-                  [disabled]="loading">
+                  [max]="detailUserStoryMaxDateInput" [disabled]="loading">
               </div>
 
               <div class="mb-4">
-                <label for="storyEstimatedDuration" class="block mb-2 text-gray-700 font-medium">Estimated Duration (days)</label>
-                <input
-                  type="number"
-                  id="storyEstimatedDuration"
-                  [(ngModel)]="newDetailUserStory.estimatedDuration"
-                  name="storyEstimatedDuration"
-                  min="1"
-                  readonly
+                <label for="storyEstimatedDuration" class="block mb-2 text-gray-700 font-medium">Estimated Duration
+                  (days)</label>
+                <input type="number" id="storyEstimatedDuration" [(ngModel)]="newDetailUserStory.estimatedDuration"
+                  name="storyEstimatedDuration" min="1" readonly
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
               </div>
 
               <div class="mb-4">
                 <label for="storyStatus" class="block mb-2 text-gray-700 font-medium">Status</label>
-                <select
-                  id="storyStatus"
-                  [(ngModel)]="newDetailUserStory.userStoryState"
-                  name="storyStatus"
+                <select id="storyStatus" [(ngModel)]="newDetailUserStory.userStoryState" name="storyStatus"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
                   <option *ngFor="let state of userStoryStateOptions" [ngValue]="state.value">{{ state.label }}</option>
@@ -429,51 +392,63 @@
             </div>
 
             <div class="flex gap-2.5 mt-4">
-              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed" [disabled]="loading || projectSprints.length === 0">
+              <button type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                [disabled]="loading || projectSprints.length === 0">
                 {{ isEditingUserStoryInDetails ? 'Update User Story' : 'Create User Story' }}
               </button>
-              <button type="button" class="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="toggleDetailUserStoryForm()" [disabled]="loading">
+              <button type="button"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                (click)="toggleDetailUserStoryForm()" [disabled]="loading">
                 Cancel
               </button>
             </div>
           </form>
         </div>
 
-        <div *ngIf="projectSprints.length === 0" class="p-4 mb-4 bg-amber-100 text-amber-800 border border-amber-200 rounded-lg">
+        <div *ngIf="projectSprints.length === 0"
+          class="p-4 mb-4 bg-amber-100 text-amber-800 border border-amber-200 rounded-lg">
           Create at least one sprint before creating a user story.
         </div>
 
-        <h3 class="text-xl font-bold text-slate-900 mb-4">Liste des User Stories</h3>
-        <div *ngIf="projectUserStories.length === 0" class="text-slate-500 text-base">Aucune user story pour ce projet.</div>
-        <div *ngFor="let story of projectUserStories" class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
+        <h3 class="text-xl font-bold text-slate-900 mb-4">User Stories List</h3>
+        <div *ngIf="projectUserStories.length === 0" class="text-slate-500 text-base">No user stories for this project.
+        </div>
+        <div *ngFor="let story of projectUserStories"
+          class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
           <div class="flex justify-between items-start gap-3 mb-2">
             <div class="flex items-center gap-3">
               <p class="font-semibold text-slate-900 text-lg leading-none">{{ story.name || story.title }}</p>
-              <span class="px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="getUserStoryStatusBadgeClasses(story)">{{ getUserStoryStatusDisplay(story) }}</span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="getUserStoryStatusBadgeClasses(story)">{{ getUserStoryStatusDisplay(story) }}</span>
             </div>
 
             <div class="relative">
-              <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200" (click)="toggleUserStoryMenu(story.id)">⋮</button>
-              <div *ngIf="openUserStoryMenuId === story.id" class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1.5">
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg" (click)="startEditDetailUserStory(story); closeUserStoryMenu()">Modifier</button>
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg" (click)="deleteDetailUserStory(story.id); closeUserStoryMenu()">Supprimer</button>
+              <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200"
+                (click)="toggleUserStoryMenu(story.id)">⋮</button>
+              <div *ngIf="openUserStoryMenuId === story.id"
+                class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1.5">
+                <button class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg"
+                  (click)="startEditDetailUserStory(story); closeUserStoryMenu()">Edit</button>
+                <button class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                  (click)="deleteDetailUserStory(story.id); closeUserStoryMenu()">Delete</button>
               </div>
             </div>
           </div>
 
-          <p class="text-slate-700 text-sm mb-4">Description: {{ story.description || 'Aucune description' }}</p>
+          <p class="text-slate-700 text-sm mb-4">Description: {{ story.description || 'No description' }}</p>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <p class="text-slate-500 mb-0.5">Début:</p>
+              <p class="text-slate-500 mb-0.5">Start:</p>
               <p class="font-semibold text-slate-900">{{ story.startDate ? formatDate(story.startDate) : '-' }}</p>
             </div>
             <div>
-              <p class="text-slate-500 mb-0.5">Fin:</p>
+              <p class="text-slate-500 mb-0.5">End:</p>
               <p class="font-semibold text-slate-900">{{ story.endDate ? formatDate(story.endDate) : '-' }}</p>
             </div>
             <div>
-              <p class="text-slate-500 mb-0.5">Durée estimée:</p>
+              <p class="text-slate-500 mb-0.5">Estimated Duration:</p>
               <p class="font-semibold text-slate-900">{{ story.estimatedDuration ?? '-' }} j</p>
             </div>
             <div>
@@ -487,7 +462,9 @@
       <div class="p-6" *ngIf="detailTab === 'sprints'">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-bold text-slate-900">Project Sprints</h3>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700" (click)="toggleDetailSprintForm()" [disabled]="loading">
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700"
+            (click)="toggleDetailSprintForm()" [disabled]="loading">
             <span *ngIf="!showCreateSprintFormInDetails">+ Create Sprint</span>
             <span *ngIf="showCreateSprintFormInDetails && !isEditingSprintInDetails">Cancel</span>
             <span *ngIf="showCreateSprintFormInDetails && isEditingSprintInDetails">Cancel Edit</span>
@@ -495,16 +472,13 @@
         </div>
 
         <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateSprintFormInDetails">
-          <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingSprintInDetails ? 'Edit Sprint' : 'Create Sprint' }}</h4>
+          <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingSprintInDetails ? 'Edit Sprint' : 'Create
+            Sprint' }}</h4>
           <form (ngSubmit)="isEditingSprintInDetails ? updateDetailSprint() : createDetailSprint()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="mb-4">
                 <label for="detailSprintName" class="block mb-2 text-gray-700 font-medium">Sprint Name *</label>
-                <input
-                  type="text"
-                  id="detailSprintName"
-                  [(ngModel)]="newDetailSprint.name"
-                  name="detailSprintName"
+                <input type="text" id="detailSprintName" [(ngModel)]="newDetailSprint.name" name="detailSprintName"
                   required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
@@ -512,10 +486,7 @@
 
               <div class="mb-4">
                 <label for="detailSprintState" class="block mb-2 text-gray-700 font-medium">Sprint State *</label>
-                <select
-                  id="detailSprintState"
-                  [(ngModel)]="newDetailSprint.sprintState"
-                  name="detailSprintState"
+                <select id="detailSprintState" [(ngModel)]="newDetailSprint.sprintState" name="detailSprintState"
                   required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
@@ -526,11 +497,8 @@
 
             <div class="mb-4">
               <label for="detailSprintDescription" class="block mb-2 text-gray-700 font-medium">Description</label>
-              <textarea
-                id="detailSprintDescription"
-                [(ngModel)]="newDetailSprint.description"
-                name="detailSprintDescription"
-                rows="3"
+              <textarea id="detailSprintDescription" [(ngModel)]="newDetailSprint.description"
+                name="detailSprintDescription" rows="3"
                 class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 [disabled]="loading"></textarea>
             </div>
@@ -538,87 +506,81 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="mb-4">
                 <label for="detailSprintStartDate" class="block mb-2 text-gray-700 font-medium">Start Date *</label>
-                <input
-                  type="date"
-                  id="detailSprintStartDate"
-                  [(ngModel)]="newDetailSprint.startDate"
-                  (ngModelChange)="onDetailSprintDatesChange()"
-                  name="detailSprintStartDate"
-                  required
+                <input type="date" id="detailSprintStartDate" [(ngModel)]="newDetailSprint.startDate"
+                  (ngModelChange)="onDetailSprintDatesChange()" name="detailSprintStartDate" required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  [min]="detailSprintMinDateInput"
-                  [max]="detailSprintMaxDateInput"
-                  [disabled]="loading">
+                  [min]="detailSprintMinDateInput" [max]="detailSprintMaxDateInput" [disabled]="loading">
               </div>
 
               <div class="mb-4">
                 <label for="detailSprintEndDate" class="block mb-2 text-gray-700 font-medium">End Date *</label>
-                <input
-                  type="date"
-                  id="detailSprintEndDate"
-                  [(ngModel)]="newDetailSprint.endDate"
-                  (ngModelChange)="onDetailSprintDatesChange()"
-                  name="detailSprintEndDate"
-                  required
+                <input type="date" id="detailSprintEndDate" [(ngModel)]="newDetailSprint.endDate"
+                  (ngModelChange)="onDetailSprintDatesChange()" name="detailSprintEndDate" required
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  [min]="newDetailSprint.startDate || detailSprintMinDateInput"
-                  [max]="detailSprintMaxDateInput"
+                  [min]="newDetailSprint.startDate || detailSprintMinDateInput" [max]="detailSprintMaxDateInput"
                   [disabled]="loading">
               </div>
 
               <div class="mb-4">
-                <label for="detailSprintDuration" class="block mb-2 text-gray-700 font-medium">Estimated Duration (days)</label>
-                <input
-                  type="number"
-                  id="detailSprintDuration"
-                  [(ngModel)]="newDetailSprint.estimatedDuration"
-                  name="detailSprintDuration"
-                  min="0"
-                  readonly
+                <label for="detailSprintDuration" class="block mb-2 text-gray-700 font-medium">Estimated Duration
+                  (days)</label>
+                <input type="number" id="detailSprintDuration" [(ngModel)]="newDetailSprint.estimatedDuration"
+                  name="detailSprintDuration" min="0" readonly
                   class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   [disabled]="loading">
               </div>
             </div>
 
             <div class="flex gap-2.5 mt-4">
-              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed" [disabled]="loading">
+              <button type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                [disabled]="loading">
                 {{ isEditingSprintInDetails ? 'Update Sprint' : 'Create Sprint' }}
               </button>
-              <button type="button" class="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="toggleDetailSprintForm()" [disabled]="loading">
+              <button type="button"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                (click)="toggleDetailSprintForm()" [disabled]="loading">
                 Cancel
               </button>
             </div>
           </form>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-900 mb-4">Liste des Sprints</h3>
+        <h3 class="text-xl font-bold text-slate-900 mb-4">Sprints List</h3>
         <div *ngIf="projectSprints.length === 0" class="text-slate-500 text-base">Aucun sprint pour ce projet.</div>
-        <div *ngFor="let sprint of projectSprints" class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
+        <div *ngFor="let sprint of projectSprints"
+          class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
           <div class="flex justify-between items-start gap-3 mb-2">
             <div class="flex items-center gap-3">
               <p class="font-semibold text-slate-900 text-lg leading-none">{{ sprint.name }}</p>
-              <span class="px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="getSprintStatusBadgeClasses(sprint.sprintState)">{{ getSprintStateName(sprint.sprintState) }}</span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="getSprintStatusBadgeClasses(sprint.sprintState)">{{ getSprintStateName(sprint.sprintState)
+                }}</span>
             </div>
 
             <div class="relative">
-              <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200" (click)="toggleSprintMenu(sprint.id)">⋮</button>
-              <div *ngIf="openSprintMenuId === sprint.id" class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1.5">
-       
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg" (click)="startEditDetailSprint(sprint); closeSprintMenu()">Modifier</button>
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg" (click)="deleteDetailSprint(sprint.id); closeSprintMenu()">Supprimer</button>
+              <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200"
+                (click)="toggleSprintMenu(sprint.id)">⋮</button>
+              <div *ngIf="openSprintMenuId === sprint.id"
+                class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1.5">
+
+                <button class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg"
+                  (click)="startEditDetailSprint(sprint); closeSprintMenu()">Edit</button>
+                <button class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                  (click)="deleteDetailSprint(sprint.id); closeSprintMenu()">Delete</button>
               </div>
             </div>
           </div>
 
-          <p class="text-slate-700 text-sm mb-4">Description: {{ sprint.description || 'Aucune description' }}</p>
+          <p class="text-slate-700 text-sm mb-4">Description: {{ sprint.description || 'No description' }}</p>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <p class="text-slate-500 mb-0.5">Début:</p>
+              <p class="text-slate-500 mb-0.5">Start:</p>
               <p class="font-semibold text-slate-900">{{ formatDate(sprint.startDate) }}</p>
             </div>
             <div>
-              <p class="text-slate-500 mb-0.5">Fin:</p>
+              <p class="text-slate-500 mb-0.5">End:</p>
               <p class="font-semibold text-slate-900">{{ formatDate(sprint.endDate) }}</p>
             </div>
             <div>
@@ -635,10 +597,14 @@
     </section>
 
     <div class="flex gap-3">
-      <button class="px-5 py-2.5 bg-yellow-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700" (click)="startEditProject(selectedProject); backToProjectsList()">
+      <button
+        class="px-5 py-2.5 bg-yellow-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700"
+        (click)="startEditProject(selectedProject); backToProjectsList()">
         Edit Project
       </button>
-      <button class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-red-700" (click)="deleteProject(selectedProject.id!); backToProjectsList()">
+      <button
+        class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-red-700"
+        (click)="deleteProject(selectedProject.id!); backToProjectsList()">
         Delete Project
       </button>
     </div>

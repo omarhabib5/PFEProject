@@ -65,6 +65,7 @@ export class ResponsableServiceDashboard implements OnInit {
   serviceTeams: TeamEntity[] = [];
   allProjects: ProjectEntity[] = [];
   serviceTasks: TaskDto[] = [];
+  serviceUsers: Array<{ id?: number | string; firstName?: string; lastName?: string; email?: string; serviceId?: number | string }> = [];
   selectedServiceMemberIds = new Set<number>();
   selectedServiceMembers: TeamUser[] = [];
   selectedServiceId: number | null = null;
@@ -145,7 +146,7 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get pageTitle(): string {
-    if (this.activeSection === 'calendar') return 'Calendrier';
+    if (this.activeSection === 'calendar') return 'Calendar';
     if (this.serviceViewMode === 'detail') return 'Mon Service';
     return 'Gestion des Services';
   }
@@ -166,7 +167,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
   get selectedService(): Service | null {
     if (!this.selectedServiceId) return null;
-    return this.services.find((service) => service.id === this.selectedServiceId) ?? null;
+    return this.services.find((service) => this.areSameIds(service.id, this.selectedServiceId)) ?? null;
   }
 
   get filteredServices(): Service[] {
@@ -180,12 +181,12 @@ export class ResponsableServiceDashboard implements OnInit {
 
   get selectedServiceTeams(): TeamEntity[] {
     if (!this.selectedServiceId) return [];
-    return this.serviceTeams.filter((team) => this.getTeamServiceId(team) === this.selectedServiceId);
+    return this.serviceTeams.filter((team) => this.areSameIds(this.getTeamServiceId(team), this.selectedServiceId));
   }
 
   get selectedServiceProjects(): ProjectEntity[] {
     if (!this.selectedServiceId) return [];
-    return this.allProjects.filter((project) => this.getProjectServiceId(project) === this.selectedServiceId);
+    return this.allProjects.filter((project) => this.belongsToSelectedService(project));
   }
 
   get teamRows(): TeamMemberRow[] {
@@ -221,7 +222,22 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   get membersCount(): number {
-    return this.selectedServiceMemberIds.size;
+    if (this.selectedServiceMemberIds.size > 0) {
+      return this.selectedServiceMemberIds.size;
+    }
+
+    if (!this.selectedServiceId) {
+      return 0;
+    }
+
+    const ids = new Set<number>();
+    this.serviceUsers.forEach((user) => {
+      if (!this.areSameIds(this.getUserServiceId(user), this.selectedServiceId)) return;
+      const userId = this.normalizeId(user.id);
+      if (userId !== null) ids.add(userId);
+    });
+
+    return ids.size;
   }
 
   get teamsCount(): number {
@@ -306,7 +322,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
     if (this.currentResponsibleId === null) {
       this.loading = false;
-      this.error = 'Utilisateur chef de service non identifié.';
+      this.error = 'Service manager user not identified.';
       this.services = [];
       return;
     }
@@ -329,14 +345,14 @@ export class ResponsableServiceDashboard implements OnInit {
             this.serviceViewMode = this.selectedServiceId ? 'detail' : 'list';
           } else if (this.services.length === 0) {
             this.serviceViewMode = 'list';
-            this.error = 'Aucun service ne vous est attribué.';
+            this.error = 'No service is assigned to you.';
             this.selectedServiceId = null;
           }
           this.loadTeams();
           this.loadProjects();
         },
         error: () => {
-          this.error = 'Impossible de charger les services. Vérifiez que le backend est démarré.';
+          this.error = 'Unable to load services. Check that the backend is running.';
           this.services = [];
         }
       });
@@ -354,6 +370,7 @@ export class ResponsableServiceDashboard implements OnInit {
     this.serviceViewMode = 'detail';
     this.activeSection = 'services';
     this.activeTab = 'dashboard';
+    this.loadUsersForSelectedService();
     this.loadMembersForSelectedService();
     this.loadTeams();
     this.loadProjects();
@@ -374,6 +391,11 @@ export class ResponsableServiceDashboard implements OnInit {
 
   setTab(tab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'settings'): void {
     this.activeTab = tab;
+    if (tab === 'dashboard') {
+      this.loadUsersForSelectedService();
+      this.loadTeams();
+      this.loadProjects();
+    }
     if (tab === 'userStories') {
       this.loadServiceUserStories();
     }
@@ -388,7 +410,7 @@ export class ResponsableServiceDashboard implements OnInit {
         this.selectedServiceId = Number(this.services[0].id);
         this.serviceViewMode = 'detail';
       } else {
-        this.error = 'Aucun service disponible pour ouvrir le dashboard.';
+        this.error = 'No service available to open the dashboard.';
         return;
       }
     }
@@ -426,7 +448,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
   saveService(): void {
     if (!this.newService.name.trim()) {
-      this.error = 'Le nom du service est obligatoire';
+      this.error = 'Service name is required';
       return;
     }
 
@@ -445,13 +467,13 @@ export class ResponsableServiceDashboard implements OnInit {
         ...payload
       }).pipe(finalize(() => (this.serviceSubmitting = false))).subscribe({
         next: () => {
-          this.success = 'Service mis à jour avec succès.';
+          this.success = 'Service updated successfully.';
           this.closeServiceModal();
           this.loadServices();
           this.cdr.detectChanges();
         },
         error: () => {
-          this.error = 'Impossible de modifier le service';
+          this.error = 'Unable to update service';
         }
       });
       return;
@@ -459,7 +481,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
     this.serviceApi.createService(payload).pipe(finalize(() => (this.serviceSubmitting = false))).subscribe({
       next: (created) => {
-        this.success = 'Service créé avec succès.';
+        this.success = 'Service created successfully.';
         const createdId = Number((created as any)?.id ?? 0);
         this.closeServiceModal();
         this.loadServices();
@@ -470,7 +492,7 @@ export class ResponsableServiceDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de créer le service';
+        this.error = 'Unable to create service';
       }
     });
   }
@@ -480,7 +502,7 @@ export class ResponsableServiceDashboard implements OnInit {
       return;
     }
 
-    if (!confirm(`Supprimer le service "${service.name}" ?`)) {
+    if (!confirm(`Delete service "${service.name}"?`)) {
       return;
     }
 
@@ -492,12 +514,12 @@ export class ResponsableServiceDashboard implements OnInit {
         if (Number(this.selectedServiceId) === Number(service.id)) {
           this.backToServiceList();
         }
-        this.success = 'Service supprimé avec succès.';
+        this.success = 'Service deleted successfully.';
         this.loadServices();
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Impossible de supprimer le service';
+        this.error = 'Unable to delete service';
       }
     });
   }
@@ -559,7 +581,7 @@ export class ResponsableServiceDashboard implements OnInit {
     this.error = '';
     const firstProjectId = this.selectedServiceProjects[0]?.id;
     if (!firstProjectId) {
-      this.error = 'Ajoutez un projet à ce service pour gérer les user stories.';
+      this.error = 'Add a project to this service to manage user stories.';
       return;
     }
 
@@ -576,7 +598,7 @@ export class ResponsableServiceDashboard implements OnInit {
         next: (sprints) => {
           this.availableSprints = sprints ?? [];
           if (this.availableSprints.length === 0) {
-            this.error = 'Aucun sprint trouvé. Créez un sprint pour gérer les user stories.';
+            this.error = 'No sprint found. Create a sprint to manage user stories.';
             this.router.navigate(['/SprintManage', firstProjectId], {
               queryParams: { source: 'service-manager' }
             });
@@ -594,7 +616,7 @@ export class ResponsableServiceDashboard implements OnInit {
           this.showUserStoryModal = true;
         },
         error: () => {
-          this.error = 'Impossible de charger les sprints du projet.';
+          this.error = 'Unable to load project sprints.';
         }
       });
   }
@@ -610,7 +632,7 @@ export class ResponsableServiceDashboard implements OnInit {
     const avatarUrl = this.profileForm.avatarUrl.trim();
 
     if (!firstName || !lastName || !email) {
-      this.error = 'Nom, prénom et email sont obligatoires.';
+      this.error = 'First name, last name, and email are required.';
       return;
     }
 
@@ -619,7 +641,7 @@ export class ResponsableServiceDashboard implements OnInit {
     const roleNumber = this.resolveRoleNumber(currentUserData?.role);
 
     if (!userId || !roleNumber) {
-      this.error = 'Impossible d’identifier votre compte utilisateur.';
+      this.error = 'Unable to identify your user account.';
       return;
     }
 
@@ -637,7 +659,7 @@ export class ResponsableServiceDashboard implements OnInit {
       next: () => {
         const applySuccess = () => {
           this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
-          this.success = 'Profil mis à jour avec succès.';
+          this.success = 'Profile updated successfully.';
           this.setUserProfile();
           this.cdr.detectChanges();
         };
@@ -653,24 +675,24 @@ export class ResponsableServiceDashboard implements OnInit {
         applySuccess();
       },
       error: () => {
-        this.error = 'Impossible de mettre à jour le profil.';
+        this.error = 'Unable to update profile.';
       }
     });
   }
 
   savePasswordSettings(): void {
     if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmNewPassword) {
-      this.error = 'Veuillez remplir les champs du mot de passe.';
+      this.error = 'Please fill in all password fields.';
       return;
     }
 
     if (this.passwordForm.newPassword.length < 6) {
-      this.error = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
+      this.error = 'The new password must be at least 6 characters long.';
       return;
     }
 
     if (this.passwordForm.newPassword !== this.passwordForm.confirmNewPassword) {
-      this.error = 'La confirmation du mot de passe ne correspond pas.';
+      this.error = 'Password confirmation does not match.';
       return;
     }
 
@@ -684,7 +706,7 @@ export class ResponsableServiceDashboard implements OnInit {
       confirmNewPassword: this.passwordForm.confirmNewPassword,
     }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
       next: () => {
-        this.success = 'Mot de passe modifié avec succès.';
+        this.success = 'Password updated successfully.';
         this.passwordForm = {
           currentPassword: '',
           newPassword: '',
@@ -692,20 +714,20 @@ export class ResponsableServiceDashboard implements OnInit {
         };
       },
       error: (err: unknown) => {
-        this.error = err instanceof Error ? err.message : 'Impossible de changer le mot de passe.';
+        this.error = err instanceof Error ? err.message : 'Unable to change password.';
       }
     });
   }
 
   submitCreateUserStory(): void {
     if (!this.selectedServiceProjects[0]?.id || !this.userStoryForm.sprintId || !this.userStoryForm.title.trim()) {
-      this.error = 'Veuillez remplir les champs obligatoires de la user story.';
+      this.error = 'Please fill in required user story fields.';
       return;
     }
 
     const selectedSprint = this.getSelectedSprint();
     if (!selectedSprint) {
-      this.error = 'Sprint sélectionné introuvable.';
+      this.error = 'Selected sprint not found.';
       return;
     }
 
@@ -726,7 +748,7 @@ export class ResponsableServiceDashboard implements OnInit {
       || !this.isDateInRange(endDateInput, projectStartInput, projectEndInput)
       || !this.isDateInRange(endDateInput, sprintStartInput, sprintEndInput)
       || endDateInput < startDateInput) {
-      this.error = 'Les dates de la user story sont hors intervalle du sprint/projet.';
+      this.error = 'User story dates are outside sprint/project range.';
       return;
     }
 
@@ -764,7 +786,7 @@ export class ResponsableServiceDashboard implements OnInit {
           this.loadServiceUserStories();
         },
         error: () => {
-          this.error = 'Impossible de créer la user story.';
+          this.error = 'Unable to create user story.';
         }
       });
   }
@@ -813,7 +835,7 @@ export class ResponsableServiceDashboard implements OnInit {
 
     const assignedId = Number((task as any)?.assignedToId ?? 0);
     if (!assignedId) {
-      return 'Non assigné';
+      return 'Unassigned';
     }
 
     const member = this.selectedServiceMembers.find((item) => Number(item.userId) === assignedId);
@@ -870,7 +892,7 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   getServiceAvatars(service: Service): string[] {
-    if (this.selectedServiceId === service.id && this.teamRows.length > 0) {
+    if (this.areSameIds(this.selectedServiceId, service.id) && this.teamRows.length > 0) {
       return this.teamRows.slice(0, 3).map((row) => row.avatar);
     }
     return [this.getInitials(service.name)];
@@ -887,25 +909,58 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   getServiceProjectsCount(service: Service): number {
-    return this.allProjects.filter((project) => this.getProjectServiceId(project) === service.id).length;
+    const serviceId = this.normalizeId(service.id);
+    if (serviceId === null) return 0;
+
+    return this.allProjects.filter((project) => {
+      const projectServiceId = this.getProjectServiceId(project);
+      if (this.areSameIds(projectServiceId, serviceId)) {
+        return true;
+      }
+
+      const projectTeamId = this.getProjectTeamId(project);
+      if (projectTeamId === null) {
+        return false;
+      }
+
+      return this.serviceTeams.some((team) => this.areSameIds(team.id, projectTeamId) && this.areSameIds(this.getTeamServiceId(team), serviceId));
+    }).length;
   }
 
   getMembersCountForService(service: Service): number {
     if (!service?.id) return 0;
-    if (this.selectedServiceId === service.id && this.selectedServiceMemberIds.size > 0) {
+    const serviceId = this.normalizeId(service.id);
+    if (serviceId === null) return 0;
+
+    if (this.areSameIds(this.selectedServiceId, serviceId) && this.selectedServiceMemberIds.size > 0) {
       return this.selectedServiceMemberIds.size;
     }
 
     const teamIds = this.serviceTeams
-      .filter((team) => this.getTeamServiceId(team) === service.id)
+      .filter((team) => this.areSameIds(this.getTeamServiceId(team), serviceId))
       .map((team) => team.id);
 
-    if (teamIds.length === 0) return 0;
-    return this.selectedServiceMembers.filter((member) => teamIds.includes(member.teamId)).length;
+    const ids = new Set<number>();
+
+    if (teamIds.length > 0) {
+      this.selectedServiceMembers.forEach((member) => {
+        if (teamIds.includes(member.teamId) && typeof member.userId === 'number') {
+          ids.add(member.userId);
+        }
+      });
+    }
+
+    this.serviceUsers.forEach((user) => {
+      if (!this.areSameIds(this.getUserServiceId(user), serviceId)) return;
+      const userId = this.normalizeId(user.id);
+      if (userId !== null) ids.add(userId);
+    });
+
+    return ids.size;
   }
 
   getResponsibleLabel(service: Service): string {
-    if (!service?.responsibleId) return 'Non assigné';
+    if (!service?.responsibleId) return 'Unassigned';
     const manager = this.selectedServiceMembers.find((member) => member.userId === service.responsibleId)?.user;
     if (manager) return `${manager.firstName} ${manager.lastName}`.trim();
     return `User #${service.responsibleId}`;
@@ -913,10 +968,10 @@ export class ResponsableServiceDashboard implements OnInit {
 
   getProjectStatusLabel(project: ProjectEntity): string {
     const state = Number(project.projectState);
-    if (state === ProjectState.done || state === ProjectState.validated) return 'Terminé';
-    if (state === ProjectState.inProgress) return 'Actif';
-    if (state === ProjectState.todo) return 'Planifié';
-    return 'En attente';
+    if (state === ProjectState.done || state === ProjectState.validated) return 'Done';
+    if (state === ProjectState.inProgress) return 'Active';
+    if (state === ProjectState.todo) return 'Planned';
+    return 'Pending';
   }
 
   getProjectStatusClass(project: ProjectEntity): string {
@@ -978,7 +1033,7 @@ export class ResponsableServiceDashboard implements OnInit {
         this.loadServiceUserStories();
       },
       error: () => {
-        this.error = 'Impossible de mettre à jour le statut de la user story.';
+        this.error = 'Unable to update user story status.';
       }
     });
   }
@@ -987,11 +1042,11 @@ export class ResponsableServiceDashboard implements OnInit {
     if (typeof role === 'number') {
       if (role === 0) return 'Administrateur';
       if (role === 1) return 'Service Manager';
-      if (role === 2) return 'Chef de projet';
-      if (role === 3) return 'Employé';
+      if (role === 2) return 'Project Manager';
+      if (role === 3) return 'Employee';
     }
     if (typeof role === 'string' && role.trim().length > 0) return role;
-    return isManager ? 'Manager' : 'Employé';
+    return isManager ? 'Manager' : 'Employee';
   }
 
   private getRoleClass(role: unknown, isManager: boolean): string {
@@ -1163,6 +1218,19 @@ export class ResponsableServiceDashboard implements OnInit {
         this.selectedServiceMemberIds = new Set<number>();
       }
     });
+  }
+
+  private loadUsersForSelectedService(): void {
+    if (!this.selectedServiceId) {
+      this.serviceUsers = [];
+      return;
+    }
+
+    this.userApiService.getUsers()
+      .pipe(catchError(() => of([] as Array<{ id?: number | string; serviceId?: number | string }>)))
+      .subscribe((users) => {
+        this.serviceUsers = (users ?? []) as Array<{ id?: number | string; firstName?: string; lastName?: string; email?: string; serviceId?: number | string }>;
+      });
   }
 
   private loadMembersForSelectedService(): void {
@@ -1433,14 +1501,111 @@ export class ResponsableServiceDashboard implements OnInit {
   }
 
   private getProjectServiceId(project: ProjectEntity): number | null {
-    const typedProject = project as ProjectEntity & { ServiceId?: number; serviceID?: number };
-    const serviceIdValue = typedProject.serviceId ?? typedProject.ServiceId ?? typedProject.serviceID;
-    return typeof serviceIdValue === 'number' && Number.isFinite(serviceIdValue) ? serviceIdValue : null;
+    const typedProject = project as ProjectEntity & {
+      ServiceId?: number | string;
+      serviceID?: number | string;
+      serviceid?: number | string;
+      Serviceid?: number | string;
+      service?: { id?: number | string } | number | string;
+      Service?: { id?: number | string } | number | string;
+    };
+
+    const rawValue = typedProject.serviceId
+      ?? typedProject.ServiceId
+      ?? typedProject.serviceID
+      ?? typedProject.serviceid
+      ?? typedProject.Serviceid
+      ?? (typeof typedProject.service === 'object' ? typedProject.service?.id : typedProject.service)
+      ?? (typeof typedProject.Service === 'object' ? typedProject.Service?.id : typedProject.Service);
+
+    return this.normalizeId(rawValue);
   }
 
   private getTeamServiceId(team: TeamEntity): number | null {
-    const typedTeam = team as TeamEntity & { ServiceId?: number; serviceID?: number };
-    const serviceIdValue = typedTeam.serviceId ?? typedTeam.ServiceId ?? typedTeam.serviceID;
-    return typeof serviceIdValue === 'number' && Number.isFinite(serviceIdValue) ? serviceIdValue : null;
+    const typedTeam = team as TeamEntity & {
+      ServiceId?: number | string;
+      serviceID?: number | string;
+      serviceid?: number | string;
+      Serviceid?: number | string;
+      service?: { id?: number | string } | number | string;
+      Service?: { id?: number | string } | number | string;
+    };
+
+    const rawValue = typedTeam.serviceId
+      ?? typedTeam.ServiceId
+      ?? typedTeam.serviceID
+      ?? typedTeam.serviceid
+      ?? typedTeam.Serviceid
+      ?? (typeof typedTeam.service === 'object' ? typedTeam.service?.id : typedTeam.service)
+      ?? (typeof typedTeam.Service === 'object' ? typedTeam.Service?.id : typedTeam.Service);
+
+    return this.normalizeId(rawValue);
+  }
+
+  private getProjectTeamId(project: ProjectEntity): number | null {
+    const typedProject = project as ProjectEntity & {
+      TeamId?: number | string;
+      teamID?: number | string;
+      teamid?: number | string;
+      Team?: { id?: number | string } | number | string;
+      team?: { id?: number | string } | number | string;
+    };
+
+    const rawValue = typedProject.teamId
+      ?? typedProject.TeamId
+      ?? typedProject.teamID
+      ?? typedProject.teamid
+      ?? (typeof typedProject.team === 'object' ? typedProject.team?.id : typedProject.team)
+      ?? (typeof typedProject.Team === 'object' ? typedProject.Team?.id : typedProject.Team);
+
+    return this.normalizeId(rawValue);
+  }
+
+  private getUserServiceId(user: { serviceId?: number | string }): number | null {
+    const typedUser = user as {
+      serviceId?: number | string;
+      ServiceId?: number | string;
+      serviceid?: number | string;
+      Serviceid?: number | string;
+      service?: { id?: number | string } | number | string;
+      Service?: { id?: number | string } | number | string;
+    };
+
+    const rawValue = typedUser.serviceId
+      ?? typedUser.ServiceId
+      ?? typedUser.serviceid
+      ?? typedUser.Serviceid
+      ?? (typeof typedUser.service === 'object' ? typedUser.service?.id : typedUser.service)
+      ?? (typeof typedUser.Service === 'object' ? typedUser.Service?.id : typedUser.Service);
+
+    return this.normalizeId(rawValue);
+  }
+
+  private belongsToSelectedService(project: ProjectEntity): boolean {
+    if (!this.selectedServiceId) return false;
+
+    const selectedServiceId = this.normalizeId(this.selectedServiceId);
+    if (selectedServiceId === null) return false;
+
+    const projectServiceId = this.getProjectServiceId(project);
+    if (this.areSameIds(projectServiceId, selectedServiceId)) return true;
+
+    const projectTeamId = this.getProjectTeamId(project);
+    if (projectTeamId === null) return false;
+
+    return this.serviceTeams.some((team) =>
+      this.areSameIds(team.id, projectTeamId) && this.areSameIds(this.getTeamServiceId(team), selectedServiceId)
+    );
+  }
+
+  private normalizeId(value: unknown): number | null {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  }
+
+  private areSameIds(left: unknown, right: unknown): boolean {
+    const leftId = this.normalizeId(left);
+    const rightId = this.normalizeId(right);
+    return leftId !== null && rightId !== null && leftId === rightId;
   }
 }
