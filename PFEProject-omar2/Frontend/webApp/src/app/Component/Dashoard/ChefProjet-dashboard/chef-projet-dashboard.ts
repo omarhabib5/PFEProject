@@ -1328,6 +1328,5 @@ export class ChefProjetDashboard implements OnInit {
       }
     });
   }
-  
 
 }

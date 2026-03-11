@@ -12,5 +12,7 @@ namespace Projet.Domain.Model
         ServiceManager,
         ProjectManager,
         Employee
+
+
     }
 }

@@ -31,9 +31,6 @@ namespace Projet.Domain.Handler.TaskHandler
                 throw new KeyNotFoundException($"Task with ID {request.id} not found.");
             }
 
-            var originalTaskSprintId = task.SprintId;
-            var originalUserStoryId = task.UserStoryId;
-
             var userStory = await _context.UserStories
                 .FirstOrDefaultAsync(us => us.id == request.UserStoryId, cancellationToken);
 
@@ -56,31 +53,6 @@ namespace Projet.Domain.Handler.TaskHandler
             task.complexity = request.complexity;
             task.UserStoryId = request.UserStoryId;
             task.AssignedToId = request.AssignedToId;
-
-            var affectedUserStoryIds = new HashSet<int> { originalUserStoryId, request.UserStoryId };
-            var affectedSprintIds = await _context.UserStories
-                .Where(us => affectedUserStoryIds.Contains(us.id))
-                .Select(us => us.SprintId)
-                .Distinct()
-                .ToListAsync(cancellationToken);
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var sprintIdsToSync = new HashSet<int>(affectedSprintIds);
-            if (originalTaskSprintId.HasValue)
-            {
-                sprintIdsToSync.Add(originalTaskSprintId.Value);
-            }
-
-            if (task.SprintId.HasValue)
-            {
-                sprintIdsToSync.Add(task.SprintId.Value);
-            }
-
-            foreach (var sprintId in sprintIdsToSync)
-            {
-                await SprintStateSyncHelper.SyncSprintStateFromTasksAsync(_context, sprintId, cancellationToken);
-            }
 
             await _context.SaveChangesAsync(cancellationToken);
 
