@@ -15,6 +15,7 @@ environment {
     BACKEND_HEALTH_URL = 'https://localhost:7219'
     BACKEND_INTERNAL_HEALTH_URL = 'http://backend:8080'
     CURL_IMAGE = 'curlimages/curl:8.12.1'
+    SONAR_PROJECT_KEY = 'pfeproject-backend'
 }
 
 stages {
@@ -53,6 +54,30 @@ stages {
 
                 echo "Using compose command: ${env.COMPOSE_CMD}"
             }
+        }
+    }
+
+    stage('SonarQube Analysis (Optional)') {
+        steps {
+            sh '''
+                if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then
+                    echo "Skipping SonarQube: SONAR_HOST_URL or SONAR_TOKEN is not set."
+                    exit 0
+                fi
+
+                docker run --rm --network host \
+                -e SONAR_HOST_URL="${SONAR_HOST_URL}" \
+                -e SONAR_TOKEN="${SONAR_TOKEN}" \
+                -e SONAR_PROJECT_KEY="${SONAR_PROJECT_KEY}" \
+                -v "$PWD:/workspace" -w /workspace/backend \
+                mcr.microsoft.com/dotnet/sdk:9.0 bash -lc '
+                    dotnet tool install --global dotnet-sonarscanner || dotnet tool update --global dotnet-sonarscanner
+                    export PATH="$PATH:/root/.dotnet/tools"
+                    dotnet sonarscanner begin /k:"${SONAR_PROJECT_KEY}" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.token="${SONAR_TOKEN}"
+                    dotnet build backend.sln --no-incremental
+                    dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
+                '
+            '''
         }
     }
 
@@ -122,22 +147,6 @@ stages {
         }
     }
 
-    // 🚀 Deploy (main branch only)
-    stage('Deploy') {
-        when {
-            branch 'main'
-        }
-        steps {
-            echo "🚀 Deploying..."
-            sh '''
-                ${COMPOSE_CMD} -p pfe-prod \
-                -f docker-compose.yml up -d
-
-                ${COMPOSE_CMD} -p pfe-prod ps
-            '''
-        }
-    }
-
     // ❤️ Health Check
     stage('Health Check') {
         steps {
@@ -160,6 +169,34 @@ stages {
 
                 echo "❌ Health check failed"
                 ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} logs backend || true
+                exit 1
+            '''
+        }
+    }
+
+    // 🚀 Deploy (main branch only, after checks)
+    stage('Deploy') {
+        when {
+            branch 'main'
+        }
+        steps {
+            echo "🚀 Deploying to production stack..."
+            sh '''
+                ${COMPOSE_CMD} -p pfe-prod \
+                -f docker-compose.yml up -d
+
+                ${COMPOSE_CMD} -p pfe-prod ps
+
+                for i in $(seq 1 12); do
+                    if docker run --rm --network host ${CURL_IMAGE} -ksS --connect-timeout 2 --max-time 5 ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
+                        echo "✓ Production backend reachable on ${BACKEND_HEALTH_URL}"
+                        exit 0
+                    fi
+                    sleep 5
+                done
+
+                echo "❌ Production health check failed"
+                ${COMPOSE_CMD} -p pfe-prod logs backend || true
                 exit 1
             '''
         }
