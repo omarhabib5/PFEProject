@@ -12,6 +12,7 @@ environment {
     IMAGE_NAME_BACKEND = 'pfe-backend'
     IMAGE_NAME_FRONTEND = 'pfe-frontend'
     IMAGE_TAG = "${BUILD_NUMBER}"
+    BACKEND_HEALTH_URL = 'http://localhost:7219'
 }
 
 stages {
@@ -20,6 +21,36 @@ stages {
         steps {
             checkout scm
             echo "✓ Code checked out"
+        }
+    }
+
+    stage('Preflight (Docker)') {
+        steps {
+            script {
+                sh '''
+                    if ! command -v docker >/dev/null 2>&1; then
+                        echo "Docker CLI not found in Jenkins executor PATH."
+                        echo "Install Docker on the agent or run Jenkins on a Docker-enabled node."
+                        exit 127
+                    fi
+                '''
+
+                env.COMPOSE_CMD = sh(
+                    script: '''
+                        if docker compose version >/dev/null 2>&1; then
+                            echo "docker compose"
+                        elif command -v docker-compose >/dev/null 2>&1; then
+                            echo "docker-compose"
+                        else
+                            echo "Neither docker compose plugin nor docker-compose binary was found."
+                            exit 127
+                        fi
+                    ''',
+                    returnStdout: true
+                ).trim()
+
+                echo "Using compose command: ${env.COMPOSE_CMD}"
+            }
         }
     }
 
@@ -59,16 +90,16 @@ stages {
             sh '''
                 docker rm -f pfe-db pfe-backend pfe-frontend || true
 
-                docker-compose -p pfe-ci-${BUILD_NUMBER} \
+                ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} \
                 -f docker-compose.yml up -d
 
                 echo "⏳ Waiting services..."
                 sleep 30
 
-                docker-compose -p pfe-ci-${BUILD_NUMBER} ps
+                ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} ps
 
                 echo "🌐 Testing API..."
-                curl -f http://localhost:5000 || exit 1
+                curl -f ${BACKEND_HEALTH_URL} || exit 1
             '''
         }
     }
@@ -81,10 +112,10 @@ stages {
         steps {
             echo "🚀 Deploying..."
             sh '''
-                docker-compose -p pfe-prod \
+                ${COMPOSE_CMD} -p pfe-prod \
                 -f docker-compose.yml up -d
 
-                docker-compose -p pfe-prod ps
+                ${COMPOSE_CMD} -p pfe-prod ps
             '''
         }
     }
@@ -96,7 +127,7 @@ stages {
 
             sh '''
                 for i in $(seq 1 10); do
-                    if curl -fsS http://localhost:5000 > /dev/null; then
+                    if curl -fsS ${BACKEND_HEALTH_URL} > /dev/null; then
                         echo "✓ Backend OK"
                         exit 0
                     fi
@@ -114,7 +145,7 @@ post {
     always {
         echo "🧹 Cleaning..."
         sh '''
-            docker-compose -p pfe-ci-${BUILD_NUMBER} \
+            ${COMPOSE_CMD:-docker compose} -p pfe-ci-${BUILD_NUMBER} \
             -f docker-compose.yml down --volumes || true
         '''
         cleanWs()
