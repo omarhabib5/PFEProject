@@ -30,3 +30,19 @@ C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\refint\Projet.Application.dll
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.pdb
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\ref\Projet.Application.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\bin\Debug\net9.0\Projet.Application.deps.json
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\bin\Debug\net9.0\Projet.Application.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\bin\Debug\net9.0\Projet.Application.pdb
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\bin\Debug\net9.0\Projet.Domain.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\bin\Debug\net9.0\Projet.Domain.pdb
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.csproj.AssemblyReference.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.AssemblyInfoInputs.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.AssemblyInfo.cs
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.csproj.CoreCompileInputs.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.sourcelink.json
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.A.05C45881.Up2Date
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\refint\Projet.Application.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\Projet.Application.pdb
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Application\obj\Debug\net9.0\ref\Projet.Application.dll

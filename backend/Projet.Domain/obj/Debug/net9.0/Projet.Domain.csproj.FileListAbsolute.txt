@@ -24,3 +24,16 @@ C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherc
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\refint\Projet.Domain.dll
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.pdb
 C:\Users\RAYEN\OneDrive - Ministere de l'Enseignement Superieur et de la Recherche Scientifique\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\ref\Projet.Domain.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.deps.json
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\bin\Debug\net9.0\Projet.Domain.pdb
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.csproj.AssemblyReference.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.AssemblyInfoInputs.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.AssemblyInfo.cs
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.sourcelink.json
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\refint\Projet.Domain.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\Projet.Domain.pdb
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Domain\obj\Debug\net9.0\ref\Projet.Domain.dll
