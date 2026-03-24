@@ -102,12 +102,12 @@ stages {
 
                 echo "🌐 Testing API..."
                 for i in $(seq 1 12); do
-                    if docker run --rm --network host ${CURL_IMAGE} -kfsS ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
+                    if docker run --rm --network host ${CURL_IMAGE} -ksS --connect-timeout 2 --max-time 5 ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
                         echo "✓ Backend reachable on ${BACKEND_HEALTH_URL}"
                         exit 0
                     fi
 
-                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -fsS ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
+                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -sS --connect-timeout 2 --max-time 5 ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
                         echo "✓ Backend reachable on ${BACKEND_INTERNAL_HEALTH_URL}"
                         exit 0
                     fi
@@ -145,12 +145,12 @@ stages {
 
             sh '''
                 for i in $(seq 1 12); do
-                    if docker run --rm --network host ${CURL_IMAGE} -kfsS ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
+                    if docker run --rm --network host ${CURL_IMAGE} -ksS --connect-timeout 2 --max-time 5 ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
                         echo "✓ Backend OK on ${BACKEND_HEALTH_URL}"
                         exit 0
                     fi
 
-                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -fsS ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
+                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -sS --connect-timeout 2 --max-time 5 ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
                         echo "✓ Backend OK on ${BACKEND_INTERNAL_HEALTH_URL}"
                         exit 0
                     fi
