@@ -12,7 +12,9 @@ environment {
     IMAGE_NAME_BACKEND = 'pfe-backend'
     IMAGE_NAME_FRONTEND = 'pfe-frontend'
     IMAGE_TAG = "${BUILD_NUMBER}"
-    BACKEND_HEALTH_URL = 'http://localhost:7219'
+    BACKEND_HEALTH_URL = 'https://localhost:7219'
+    BACKEND_INTERNAL_HEALTH_URL = 'http://backend:8080'
+    CURL_IMAGE = 'curlimages/curl:8.12.1'
 }
 
 stages {
@@ -99,7 +101,23 @@ stages {
                 ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} ps
 
                 echo "🌐 Testing API..."
-                curl -f ${BACKEND_HEALTH_URL} || exit 1
+                for i in $(seq 1 12); do
+                    if docker run --rm --network host ${CURL_IMAGE} -kfsS ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
+                        echo "✓ Backend reachable on ${BACKEND_HEALTH_URL}"
+                        exit 0
+                    fi
+
+                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -fsS ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
+                        echo "✓ Backend reachable on ${BACKEND_INTERNAL_HEALTH_URL}"
+                        exit 0
+                    fi
+
+                    sleep 5
+                done
+
+                echo "❌ API check failed after retries"
+                ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} logs backend || true
+                exit 1
             '''
         }
     }
@@ -126,15 +144,22 @@ stages {
             echo "❤️ Checking health..."
 
             sh '''
-                for i in $(seq 1 10); do
-                    if curl -fsS ${BACKEND_HEALTH_URL} > /dev/null; then
-                        echo "✓ Backend OK"
+                for i in $(seq 1 12); do
+                    if docker run --rm --network host ${CURL_IMAGE} -kfsS ${BACKEND_HEALTH_URL} > /dev/null 2>&1; then
+                        echo "✓ Backend OK on ${BACKEND_HEALTH_URL}"
                         exit 0
                     fi
+
+                    if docker run --rm --network pfe-ci-${BUILD_NUMBER}_default ${CURL_IMAGE} -fsS ${BACKEND_INTERNAL_HEALTH_URL} > /dev/null 2>&1; then
+                        echo "✓ Backend OK on ${BACKEND_INTERNAL_HEALTH_URL}"
+                        exit 0
+                    fi
+
                     sleep 5
                 done
 
                 echo "❌ Health check failed"
+                ${COMPOSE_CMD} -p pfe-ci-${BUILD_NUMBER} logs backend || true
                 exit 1
             '''
         }
