@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/Component/Page/Sprint/sprint-manager/sprint-manager.css"],
+  "sourcesContent": ["/* Custom animations for sprint manager */\r\n@keyframes slideDown {\r\n  from {\r\n    opacity: 0;\r\n    transform: translateY(-10px);\r\n  }\r\n  to {\r\n    opacity: 1;\r\n    transform: translateY(0);\r\n  }\r\n}\r\n\r\n.animate-slideDown {\r\n  animation: slideDown 0.3s ease-out;\r\n}\r\n\r\n/* Additional hover effects */\r\n.hover\\:shadow-lg:hover {\r\n  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);\r\n}\r\n"],
+  "mappings": ";AACA,WAAA;AACE;AACE,aAAA;AACA,eAAA,WAAA;AACF;AACA;AACE,aAAA;AACA,eAAA,WAAA;AACF;AACF;AAEA,CAAA;AACE,aAAA,UAAA,KAAA;AACF;AAGA,CAAA,gBAAA;AACE,cAAA,EAAA,KAAA,KAAA,KAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,IAAA,EAAA,EAAA,IAAA,IAAA,KAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACF;",
+  "names": []
+}

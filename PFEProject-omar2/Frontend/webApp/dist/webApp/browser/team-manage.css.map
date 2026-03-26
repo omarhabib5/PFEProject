@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/Component/Page/Team/team-manage/team-manage.css"],
+  "sourcesContent": ["/* Custom animations for Tailwind */\r\n@keyframes slideDown {\r\n  from {\r\n    opacity: 0;\r\n    transform: translateY(-10px);\r\n  }\r\n  to {\r\n    opacity: 1;\r\n    transform: translateY(0);\r\n  }\r\n}\r\n\r\n@keyframes fadeIn {\r\n  from {\r\n    opacity: 0;\r\n  }\r\n  to {\r\n    opacity: 1;\r\n  }\r\n}\r\n\r\n.animate-slideDown {\r\n  animation: slideDown 0.3s ease;\r\n}\r\n\r\n.animate-fadeIn {\r\n  animation: fadeIn 0.3s ease;\r\n}\r\n"],
+  "mappings": ";AACA,WAAA;AACE;AACE,aAAA;AACA,eAAA,WAAA;AACF;AACA;AACE,aAAA;AACA,eAAA,WAAA;AACF;AACF;AAEA,WAAA;AACE;AACE,aAAA;AACF;AACA;AACE,aAAA;AACF;AACF;AAEA,CAAA;AACE,aAAA,UAAA,KAAA;AACF;AAEA,CAAA;AACE,aAAA,OAAA,KAAA;AACF;",
+  "names": []
+}

@@ -1,0 +1,27 @@
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Projet.Domain.Querie.Sprint;
+namespace Projet.Api.Controller
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SprintController : ControllerBase
+    {
+        private readonly IMediator mediator;
+        public SprintController(IMediator mediator)
+        {
+            this.mediator = mediator;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var sprint = await mediator.Send(new GetAllSprintQuery());
+            return Ok(sprint);
+
+   
+
+        }
+
+    }
+}
