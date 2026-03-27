@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
+import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
@@ -36,7 +36,7 @@ interface ServiceUserStoryRow extends UserStoryDto {
   templateUrl: './responsable-service-dashboard.html',
   styleUrl: './responsable-service-dashboard.css',
 })
-export class ResponsableServiceDashboard implements OnInit {
+export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private serviceApi = inject(ServiceService);
   private teamService = inject(TeamService);
@@ -50,6 +50,8 @@ export class ResponsableServiceDashboard implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   private currentResponsibleId: number | null = null;
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   activeSection: 'services' | 'calendar' = 'services';
   serviceViewMode: 'list' | 'detail' = 'list';
@@ -143,6 +145,11 @@ export class ResponsableServiceDashboard implements OnInit {
     this.generateCalendar();
     this.loadUserSettings();
     this.loadServices();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   get pageTitle(): string {
@@ -314,15 +321,19 @@ export class ResponsableServiceDashboard implements OnInit {
     });
   }
 
-  loadServices(): void {
-    this.loading = true;
-    this.error = '';
-    this.success = '';
+  loadServices(silent = false): void {
+    if (!silent) {
+      this.loading = true;
+      this.error = '';
+      this.success = '';
+    }
     this.currentResponsibleId = this.resolveCurrentResponsibleId();
 
     if (this.currentResponsibleId === null) {
-      this.loading = false;
-      this.error = 'Service manager user not identified.';
+      if (!silent) {
+        this.loading = false;
+        this.error = 'Service manager user not identified.';
+      }
       this.services = [];
       return;
     }
@@ -330,7 +341,11 @@ export class ResponsableServiceDashboard implements OnInit {
     this.serviceApi.getServices()
       .pipe(
         timeout(10000),
-        finalize(() => (this.loading = false))
+        finalize(() => {
+          if (!silent) {
+            this.loading = false;
+          }
+        })
       )
       .subscribe({
         next: (data) => {
@@ -352,7 +367,9 @@ export class ResponsableServiceDashboard implements OnInit {
           this.loadProjects();
         },
         error: () => {
-          this.error = 'Unable to load services. Check that the backend is running.';
+          if (!silent) {
+            this.error = 'Unable to load services. Check that the backend is running.';
+          }
           this.services = [];
         }
       });
@@ -959,8 +976,29 @@ export class ResponsableServiceDashboard implements OnInit {
     return ids.size;
   }
 
+  hasTeamsForService(service: Service): boolean {
+    if (!service?.id) return false;
+    const serviceId = this.normalizeId(service.id);
+    if (serviceId === null) return false;
+
+    return this.serviceTeams.some((team) => this.areSameIds(this.getTeamServiceId(team), serviceId));
+  }
+
   getResponsibleLabel(service: Service): string {
     if (!service?.responsibleId) return 'Unassigned';
+
+    if (this.areSameIds(service.responsibleId, this.currentResponsibleId) && this.userName.trim()) {
+      return this.userName;
+    }
+
+    const serviceUser = this.serviceUsers.find((user) =>
+      this.areSameIds(user.id, service.responsibleId)
+    );
+    if (serviceUser) {
+      const fullName = `${serviceUser.firstName ?? ''} ${serviceUser.lastName ?? ''}`.trim();
+      if (fullName) return fullName;
+    }
+
     const manager = this.selectedServiceMembers.find((member) => member.userId === service.responsibleId)?.user;
     if (manager) return `${manager.firstName} ${manager.lastName}`.trim();
     return `User #${service.responsibleId}`;
@@ -1230,6 +1268,7 @@ export class ResponsableServiceDashboard implements OnInit {
       .pipe(catchError(() => of([] as Array<{ id?: number | string; serviceId?: number | string }>)))
       .subscribe((users) => {
         this.serviceUsers = (users ?? []) as Array<{ id?: number | string; firstName?: string; lastName?: string; email?: string; serviceId?: number | string }>;
+        this.cdr.detectChanges();
       });
   }
 
@@ -1261,10 +1300,12 @@ export class ResponsableServiceDashboard implements OnInit {
 
         this.selectedServiceMemberIds = ids;
         this.selectedServiceMembers = members;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.selectedServiceMemberIds = new Set<number>();
         this.selectedServiceMembers = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1369,11 +1410,39 @@ export class ResponsableServiceDashboard implements OnInit {
         this.serviceUserStories.forEach((story) => {
           this.selectedUserStoryStatuses[story.numericId] = story.status;
         });
+        this.cdr.detectChanges();
       },
       error: () => {
         this.serviceUserStories = [];
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadServices(true);
+
+      if (this.selectedServiceId) {
+        this.loadUsersForSelectedService();
+        this.loadTeams();
+        this.loadProjects();
+      }
+
+      if (this.activeTab === 'settings') {
+        this.loadUserSettings();
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
   private resolveCurrentResponsibleId(): number | null {

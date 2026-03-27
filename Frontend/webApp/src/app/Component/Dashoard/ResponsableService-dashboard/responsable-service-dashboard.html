@@ -3,7 +3,7 @@
         <div>
             <div class="brand">
                 <h1>TaskFlow Pro</h1>
-                <p>Project Management</p>
+                <p>Service Management</p>
             </div>
 
             <nav class="menu">
@@ -97,7 +97,8 @@
                     <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
                     <p class="meta-line">Chef de service: {{ getResponsibleLabel(service) }}</p>
 
-                    <div class="members-block">
+                    <div class="members-block"
+                        *ngIf="hasTeamsForService(service) || getMembersCountForService(service) > 0">
                         <span>Team Members</span>
                         <div class="avatars">
                             <span class="mini-avatar" *ngFor="let avatar of getServiceAvatars(service)">{{ avatar

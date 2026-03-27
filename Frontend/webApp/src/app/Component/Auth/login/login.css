@@ -1,77 +1,58 @@
-:host {
-        display: block;
-      }
+/* index.html → <head> :
+   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+*/
 
-.login-shell {
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 24px;
+.sf-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.85);
+  caret-color: #818cf8;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.18);
+  }
+
+  &:focus {
+    border-color: rgba(99, 102, 241, 0.5);
+    background: rgba(99, 102, 241, 0.06);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+  }
 }
 
-.login-card {
-        width: 100%;
-        max-width: 360px;
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 16px 32px rgba(18, 24, 40, 0.12);
+.sf-checkbox {
+  width: 20px;
+  height: 20px;
+
+  &:checked ~ .sf-checkbox-box {
+    background: #6366f1;
+    border-color: #6366f1;
+
+    .sf-check { display: block; }
+  }
+
+  &:focus ~ .sf-checkbox-box {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
 }
 
-h2 {
-        margin: 0 0 16px;
-        font-size: 20px;
+.sf-btn--active {
+  background: #6366f1;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
 }
 
-form {
-        display: grid;
-        gap: 12px;
+.sf-btn--active:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(99, 102, 241, 0.4);
 }
 
-label {
-        display: grid;
-        gap: 6px;
-        font-size: 13px;
-        color: #42526d;
+.sf-btn--active:active {
+  transform: translateY(0);
 }
 
-.checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-}
-
-input {
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid #d8dee9;
-        padding: 10px 12px;
-        font-size: 14px;
-}
-
-button {
-        border: none;
-        border-radius: 10px;
-        background: #2563eb;
-        color: #ffffff;
-        padding: 10px 12px;
-        font-size: 14px;
-        cursor: pointer;
-}
-
-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-}
-
-.helper-text {
-        margin: 16px 0 0;
-        font-size: 13px;
-        color: #52607a;
-        text-align: center;
-}
-
-.helper-text a {
-        color: #2563eb;
-        text-decoration: none;
+.sf-btn--disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
 }

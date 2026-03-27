@@ -103,7 +103,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 var app = builder.Build();
 var useHttpsRedirection = builder.Configuration.GetValue("UseHttpsRedirection", true);
 

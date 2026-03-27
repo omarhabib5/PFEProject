@@ -1,8 +1,8 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject,ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
+import { Subscription, forkJoin, interval, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TokenService } from '../../Auth/Service/token.service';
 import { project, ProjectService } from '../../Page/Projet/Service/ProjectService';
@@ -77,9 +77,9 @@ interface CalendarDayCell {
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
   templateUrl: './chef-projet-dashboard.html',
-  
+  styleUrl: './chef-projet-dashboard.css',
 })
-export class ChefProjetDashboard implements OnInit {
+export class ChefProjetDashboard implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private taskService = inject(TaskService);
@@ -93,6 +93,8 @@ export class ChefProjetDashboard implements OnInit {
   private scopedSprintIds = new Set<number>();
   private scopedUserStoryIds = new Set<number>();
   private cdr=inject(ChangeDetectorRef);
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   activeSection: DashboardSection = 'projects';
   activeProjectTab: ProjectTab = 'tasks';
@@ -145,6 +147,11 @@ export class ChefProjetDashboard implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   setSection(section: DashboardSection): void {
@@ -1329,6 +1336,22 @@ export class ChefProjetDashboard implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadDashboardData();
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

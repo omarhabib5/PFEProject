@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
+import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
@@ -80,7 +80,7 @@ interface CalendarCell {
   templateUrl: './employee-dashboard.html',
   styleUrl: './employee-dashboard.css',
 })
-export class EmployeeDashboard implements OnInit {
+export class EmployeeDashboard implements OnInit, OnDestroy {
   private router = inject(Router);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
@@ -90,6 +90,8 @@ export class EmployeeDashboard implements OnInit {
   private userStoryService = inject(UserStoryService);
   private userApiService = inject(UserApiService);
   private serviceService = inject(ServiceService);
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   sidebarSection: SidebarSection = 'dashboard';
   activeTab: EmployeeTab = 'overview';
@@ -162,6 +164,11 @@ export class EmployeeDashboard implements OnInit {
 
     this.loadSettingsProfile();
     this.loadEmployeeData();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   get pageTitle(): string {
@@ -930,6 +937,25 @@ export class EmployeeDashboard implements OnInit {
 
     this.tokenService.setTokens(accessToken, this.tokenService.getRefreshToken(), merged);
     this.profileImageUrl = String((merged as any)?.profileImageUrl ?? '').trim();
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadEmployeeData();
+      if (this.sidebarSection === 'settings') {
+        this.loadSettingsProfile();
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

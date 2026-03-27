@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
 import { SprintService, Sprint, CreateSprintDto, UpdateSprintDto, State as SprintState } from '../../Sprint/Service/SprintService';
 import { UserStoryService } from '../../UserStory/Service/UserStoryService';
 import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../UserStory/Models/userstory.model';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-project-manager',
@@ -16,7 +17,7 @@ import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStory
   templateUrl: './project-manager.html',
   styleUrl: './project-manager.css',
 })
-export class ProjectManager implements OnInit {
+export class ProjectManager implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);
   private teamService = inject(TeamService);
   private serviceService = inject(ServiceService);
@@ -36,6 +37,8 @@ export class ProjectManager implements OnInit {
   selectedServiceFilter: number | null = null;
   private requestedProjectId: number | null = null;
   private requestedDetailTab: 'overview' | 'stories' | 'sprints' = 'overview';
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   
   loading = false;
@@ -145,6 +148,11 @@ export class ProjectManager implements OnInit {
     this.loadTeams();
     this.loadServices();
     this.loadUsers();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadProjects(): void {
@@ -1250,5 +1258,30 @@ export class ProjectManager implements OnInit {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadProjects();
+      this.loadTeams();
+      this.loadServices();
+      this.loadUsers();
+
+      if (this.selectedProject?.id) {
+        this.loadSelectedProjectMembers(this.selectedProject);
+        this.loadProjectSprints(this.selectedProject.id);
+        this.loadProjectUserStories(this.selectedProject.id);
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 }

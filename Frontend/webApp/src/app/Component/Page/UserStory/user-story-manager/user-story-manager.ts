@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserStoryService } from '../Service/UserStoryService';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
 import { NgIf, NgForOf } from '@angular/common';
-import { finalize, timeout } from 'rxjs';
+import { Subscription, finalize, interval, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -13,13 +13,15 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './user-story-manager.html',
   styleUrl: './user-story-manager.css',
 })
-export class UserStoryManagerComponent implements OnInit {
+export class UserStoryManagerComponent implements OnInit, OnDestroy {
   userStories: UserStoryDto[] = [];
   sprintId: number | null = null;
   loading: boolean = false;
   error: string = '';
   showCreateForm = false;
   createSubmitting = false;
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
   State = UserStoryStatus;
   createForm: {
     title: string;
@@ -49,8 +51,13 @@ export class UserStoryManagerComponent implements OnInit {
       if (this.sprintId !== null) {
         this.createForm.sprintId = this.sprintId;
         this.loadUserStories();
+        this.startAutoRefresh();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadUserStories(): void {
@@ -293,6 +300,24 @@ export class UserStoryManagerComponent implements OnInit {
       priority: 3,
       sprintId: this.sprintId ?? 0,
     };
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      if (this.sprintId !== null) {
+        this.loadUserStories();
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

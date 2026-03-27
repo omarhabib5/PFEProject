@@ -1,0 +1,93 @@
+<div
+  class="absolute right-0 top-12 w-96 bg-[#0a0f1a] border border-[#1a1f2e] rounded-lg shadow-2xl z-50 overflow-hidden"
+  (click)="$event.stopPropagation()"
+>
+  <!-- Header -->
+  <div class="bg-[#0f1419] border-b border-[#1a1f2e] px-4 py-3 flex items-center justify-between">
+    <div>
+      <h3 class="text-sm font-semibold text-gray-100">Notifications</h3>
+      <p class="text-xs text-gray-400">{{ notifications.length }} total</p>
+    </div>
+    <button
+      *ngIf="hasUnreadInDisplayed"
+      (click)="markAllAsRead()"
+      class="text-xs px-3 py-1 bg-[#4ade80]/20 hover:bg-[#4ade80]/30 text-[#4ade80] rounded transition-colors"
+    >
+      Mark all read
+    </button>
+  </div>
+
+  <!-- Notifications List -->
+  <div class="max-h-96 overflow-y-auto">
+    <div *ngIf="notifications.length === 0" class="px-4 py-8 text-center">
+      <p class="text-gray-400 text-sm">No notifications</p>
+    </div>
+
+    <div *ngFor="let notification of getDisplayedNotifications()" class="border-b border-[#1a1f2e] last:border-b-0">
+      <div
+        (click)="onNotificationClick(notification)"
+        [class.bg-[#1a1f2e]/50]="!notification.isRead"
+        class="px-4 py-3 hover:bg-[#0f1419] cursor-pointer transition-colors group"
+      >
+        <!-- Content -->
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          <div
+            class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+            [style.background-color]="getNotificationColor(notification.type)"
+          >
+            {{ getNotificationIcon(notification.type) }}
+          </div>
+
+          <!-- Text Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex-1">
+                <h4 class="text-sm font-medium text-gray-100 truncate">
+                  {{ notification.title }}
+                </h4>
+                <p class="text-xs text-gray-400 line-clamp-2 mt-1">
+                  {{ notification.message }}
+                </p>
+              </div>
+
+              <!-- Delete Button -->
+              <button
+                (click)="deleteNotification($event, notification)"
+                class="flex-shrink-0 text-gray-500 hover:text-[#ef4444] transition-colors opacity-0 group-hover:opacity-100"
+                aria-label="Delete notification"
+              >
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Meta Info -->
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs text-gray-500">{{ formatDate(notification.createdAt) }}</span>
+              <span
+                *ngIf="!notification.isRead"
+                class="inline-block w-2 h-2 rounded-full bg-[#4ade80]"
+              ></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer - Load More -->
+  <div *ngIf="hasMore()" class="border-t border-[#1a1f2e] px-4 py-3">
+    <button
+      (click)="loadMore()"
+      class="w-full text-sm text-[#4ade80] hover:text-[#4ade80]/80 transition-colors font-medium"
+    >
+      Load more notifications
+    </button>
+  </div>
+</div>

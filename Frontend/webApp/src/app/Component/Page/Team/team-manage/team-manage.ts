@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TeamService, Team, TeamUser, CreateTeamRequest, UpdateTeamRequest, AddMemberRequest, Role, UserInTeam } from '../Service/TeamService';
 import { ServiceService, Service } from '../Service/ServiceService';
 import { UserApiService, UserDto } from '../Service/UserApiService';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-team-manage',
@@ -12,11 +13,13 @@ import { UserApiService, UserDto } from '../Service/UserApiService';
   templateUrl: './team-manage.html',
   styleUrl: './team-manage.css',
 })
-export class TeamManage implements OnInit {
+export class TeamManage implements OnInit, OnDestroy {
   private teamService = inject(TeamService);
   private serviceService = inject(ServiceService);
   private userApiService = inject(UserApiService);
   private cdr = inject(ChangeDetectorRef); 
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   
   teams: Team[] = [];
@@ -26,6 +29,10 @@ export class TeamManage implements OnInit {
   
   services: Service[] = [];
   users: UserDto[] = [];
+
+  get nonAdminUsers(): UserDto[] {
+    return this.users.filter((user) => !this.isAdminUser(user));
+  }
 
   showCreateTeamForm = false;
   isEditMode = false;
@@ -58,6 +65,11 @@ export class TeamManage implements OnInit {
     this.loadTeams();
     this.loadServices();
     this.loadUsers();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadServices(): void {
@@ -93,6 +105,16 @@ export class TeamManage implements OnInit {
   getUserFullName(userId: number): string {
     const user = this.users.find(u => u.id === userId);
     return user ? `${user.firstName} ${user.lastName}` : `User ${userId}`;
+  }
+
+  getUserRoleLabel(user: UserDto): string {
+    const normalized = this.normalizeRoleValue(user.role);
+
+    if (normalized === '0' || normalized === 'admin') return 'Admin';
+    if (normalized === '1' || normalized === 'service manager' || normalized === 'servicemanager') return 'Service Manager';
+    if (normalized === '2' || normalized === 'project manager' || normalized === 'projectmanager') return 'Project Manager';
+    if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 'Employee';
+    return user.role ? String(user.role) : 'Unknown';
   }
 
   loadTeams(): void {
@@ -247,6 +269,12 @@ export class TeamManage implements OnInit {
       this.error = 'Please select a user';
       return;
 
+    }
+
+    const selectedUserForValidation = this.users.find((u) => u.id === this.newMember.userId);
+    if (selectedUserForValidation && this.isAdminUser(selectedUserForValidation)) {
+      this.error = 'Admin users cannot be added to teams.';
+      return;
     }
 
     const selectedUser = this.users.find(u => u.id === this.newMember.userId);
@@ -503,5 +531,38 @@ export class TeamManage implements OnInit {
 
   trackByMemberId(index: number, member: TeamUser): number {
     return member.id;
+  }
+
+  private isAdminUser(user: UserDto): boolean {
+    const normalized = this.normalizeRoleValue(user.role);
+    return normalized === '0' || normalized === 'admin';
+  }
+
+  private normalizeRoleValue(role: unknown): string {
+    return String(role ?? '').trim().toLowerCase();
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadUsers();
+      this.loadServices();
+
+      if (this.selectedTeam) {
+        this.loadTeamMembers(this.selectedTeam.id);
+        return;
+      }
+
+      this.loadTeams();
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 }
