@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit,ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CreateTaskRequest, TaskDto, TaskService, TaskState, UpdateTaskRequest } from '../Service/TaskService';
@@ -11,7 +11,7 @@ import { finalize, timeout, catchError } from 'rxjs/operators';
 import { TeamService, TeamUser } from '../../Team/Service/TeamService';
 import { ProjectService, project } from '../../Projet/Service/ProjectService';
 import { SprintService, Sprint } from '../../Sprint/Service/SprintService';
-import { forkJoin, of } from 'rxjs';
+import { Subscription, forkJoin, interval, of } from 'rxjs';
 
 @Component({
   selector: 'app-task-manager',
@@ -20,7 +20,7 @@ import { forkJoin, of } from 'rxjs';
   templateUrl: './task-manager.html',
   styleUrl: './task-manager.css',
 })
-export class TaskManager implements OnInit {
+export class TaskManager implements OnInit, OnDestroy {
   tasks: TaskDto[] = [];
   loading = false;
   saving = false;
@@ -38,6 +38,8 @@ export class TaskManager implements OnInit {
   private projectTeamIdMap: Record<number, number> = {};
   private sprintProjectIdMap: Record<number, number> = {};
   private loadingTeamIds = new Set<number>();
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   statusOptions: { value: TaskState; label: string }[] = [
     { value: 'pending', label: 'Pending' },
@@ -88,6 +90,12 @@ export class TaskManager implements OnInit {
         this.loadTaskForEdit(Number(taskIdParam));
       }
     });
+
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadTasks(): void {
@@ -572,6 +580,29 @@ export class TaskManager implements OnInit {
     if (minDate && value < minDate) return false;
     if (maxDate && value > maxDate) return false;
     return true;
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadUserStories();
+      this.loadUsers();
+      this.loadProjectContext();
+      this.loadTasks();
+
+      if (this.editMode && this.editingTaskId) {
+        this.loadTaskForEdit(this.editingTaskId);
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

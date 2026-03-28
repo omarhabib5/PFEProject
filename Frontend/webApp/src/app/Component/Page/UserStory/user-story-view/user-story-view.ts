@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserStoryService } from '../Service/UserStoryService';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
 import { NgIf, NgForOf } from '@angular/common';
-import { finalize, timeout } from 'rxjs';
+import { Subscription, finalize, interval, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './user-story-view.html',
   styleUrl: './user-story-view.css',
 })
-export class UserStoryViewComponent implements OnInit {
+export class UserStoryViewComponent implements OnInit, OnDestroy {
   userStories: UserStoryDto[] = [];
   sprintId: number | null = null;
   projectId: number | null = null;
@@ -22,6 +22,8 @@ export class UserStoryViewComponent implements OnInit {
   error: string = '';
   createSubmitting = false;
   showCreateForm = false;
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
   State = UserStoryStatus;
   createForm: {
     title: string;
@@ -60,11 +62,13 @@ export class UserStoryViewComponent implements OnInit {
 
         if (this.sprintId !== null) {
           this.loadUserStories();
+          this.startAutoRefresh();
           return;
         }
 
         if (this.userStoryId !== null) {
           this.loadUserStoryById(this.userStoryId);
+          this.startAutoRefresh();
           return;
         }
 
@@ -72,6 +76,10 @@ export class UserStoryViewComponent implements OnInit {
         this.error = 'Invalid parameters to display user stories';
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadUserStories(): void {
@@ -310,6 +318,29 @@ export class UserStoryViewComponent implements OnInit {
     if (Number.isNaN(value) || value < min) return false;
     if (max !== undefined && value > max) return false;
     return true;
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      if (this.sprintId !== null) {
+        this.loadUserStories();
+        return;
+      }
+
+      if (this.userStoryId !== null) {
+        this.loadUserStoryById(this.userStoryId);
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

@@ -29,6 +29,7 @@ namespace Projet.Domain.Model
         public virtual ICollection<Project> ManagedProjects { get; set; }
         public virtual ICollection<Task> AssignedTasks { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
         public void UpdatePassword(string passwordHash)
         {

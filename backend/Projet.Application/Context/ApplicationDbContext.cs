@@ -19,6 +19,7 @@ namespace Projet.Application.Context
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<UserStory> UserStories { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<Sprint> Sprints { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -169,6 +170,25 @@ namespace Projet.Application.Context
                     .WithMany(p => p.UserStories)
                     .HasForeignKey(e => e.ProjectId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Message).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.Type).IsRequired();
+                entity.Property(e => e.IsRead).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.Link).HasMaxLength(500);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => new { e.UserId, e.IsRead });
+                entity.HasIndex(e => e.CreatedAt);
             });
         }
     }

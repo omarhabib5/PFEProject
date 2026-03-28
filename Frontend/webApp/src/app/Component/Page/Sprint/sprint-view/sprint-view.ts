@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Sprint, SprintService, State } from '../Service/SprintService';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-sprint-view',
@@ -10,10 +11,13 @@ import { Sprint, SprintService, State } from '../Service/SprintService';
   templateUrl: './sprint-view.html',
   styleUrl: './sprint-view.css',
 })
-export class SprintView implements OnInit {
+export class SprintView implements OnInit, OnDestroy {
   sprint: Sprint | null = null;
   loading = true;
   error = '';
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
+  private currentSprintId: number | null = null;
 
   constructor(
     private sprintService: SprintService,
@@ -29,8 +33,14 @@ export class SprintView implements OnInit {
         this.loading = false;
         return;
       }
+      this.currentSprintId = sprintId;
       this.loadSprint(sprintId);
+      this.startAutoRefresh();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadSprint(id: number): void {
@@ -77,6 +87,24 @@ export class SprintView implements OnInit {
       [State.validated]: 'Validated'
     };
     return labels[Number(state)] ?? String(state);
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      if (this.currentSprintId) {
+        this.loadSprint(this.currentSprintId);
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

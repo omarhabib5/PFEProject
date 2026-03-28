@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TaskDto, TaskService, TaskState } from '../Service/TaskService';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-task-view',
@@ -10,10 +11,13 @@ import { TaskDto, TaskService, TaskState } from '../Service/TaskService';
   templateUrl: './task-view.html',
   styleUrl: './task-view.css',
 })
-export class TaskView implements OnInit {
+export class TaskView implements OnInit, OnDestroy {
   task: TaskDto | null = null;
   loading = true;
   error = '';
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
+  private currentTaskId: number | null = null;
 
   constructor(
     private taskService: TaskService,
@@ -29,8 +33,14 @@ export class TaskView implements OnInit {
         this.loading = false;
         return;
       }
+      this.currentTaskId = taskId;
       this.loadTask(taskId);
+      this.startAutoRefresh();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadTask(id: number): void {
@@ -84,6 +94,24 @@ export class TaskView implements OnInit {
       '4': 'Validated'
     };
     return values[String(status)] ?? String(status);
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      if (this.currentTaskId) {
+        this.loadTask(this.currentTaskId);
+      }
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 
 }

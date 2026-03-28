@@ -65,6 +65,15 @@ export class Login implements OnInit {
       });
   }
 
+  onLinkHover(event: Event, isEnter: boolean): void {
+    const target = event.target as HTMLElement;
+    if (isEnter) {
+      target.style.color = '#818cf8';
+    } else {
+      target.style.color = 'rgba(129,140,248,0.7)';
+    }
+  }
+
   private extractErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       if (typeof error.error === 'string' && error.error.trim().length > 0) {

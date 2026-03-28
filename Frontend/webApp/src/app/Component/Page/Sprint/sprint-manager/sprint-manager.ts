@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { SprintService, Sprint, CreateSprintDto, UpdateSprintDto, State } from '../Service/SprintService';
 import { ProjectService, project } from '../../Projet/Service/ProjectService';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-sprint-manager',
@@ -11,11 +12,13 @@ import { ProjectService, project } from '../../Projet/Service/ProjectService';
   templateUrl: './sprint-manager.html',
   styleUrl: './sprint-manager.css',
 })
-export class SprintManager implements OnInit {
+export class SprintManager implements OnInit, OnDestroy {
   private sprintService = inject(SprintService);
   private projectService = inject(ProjectService);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   sprints: Sprint[] = [];
   projects: project[] = [];
@@ -66,6 +69,11 @@ export class SprintManager implements OnInit {
 
     this.loadSprints();
     this.loadProjects();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   private prefillEdit(id: number): void {
@@ -314,5 +322,22 @@ export class SprintManager implements OnInit {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadSprints();
+      this.loadProjects();
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 }

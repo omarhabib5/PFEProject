@@ -1,4 +1,4 @@
-import {Component,OnInit,AfterViewInit,inject,ChangeDetectorRef} from '@angular/core';
+import {Component,OnInit,AfterViewInit,OnDestroy,inject,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,7 +10,7 @@ import { ProjectService, project, State } from '../../Page/Projet/Service/Projec
 import { TaskService, TaskDto } from '../../Page/Task/Service/TaskService';
 import { ServiceService, Service, CreateServiceDto, UpdateServiceDto } from '../../Page/Team/Service/ServiceService';
 import { TeamService, Team, TeamUser, Role } from '../../Page/Team/Service/TeamService';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 type DashboardTab = 'dashboard' | 'services' | 'calendar' | 'users';
@@ -47,7 +47,7 @@ interface CalendarProjectEntry {
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
-export class AdminDashboard implements OnInit, AfterViewInit {
+export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -142,6 +142,8 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   private tasksPieChart?: Chart;
   private priorityBarChart?: Chart;
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   ngOnInit(): void {
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
@@ -166,12 +168,17 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     this.loadUsers();
     this.loadServices();
     this.loadTeams();
+    this.startAutoRefresh();
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initCharts();
     }, 500);
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
 
@@ -1092,5 +1099,25 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         this.serviceFormLoading = false;
       }
     });
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadProjects();
+      this.loadTasks();
+      this.loadUsers();
+      this.loadServices();
+      this.loadTeams();
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 }

@@ -16,6 +16,8 @@ namespace Projet.Domain.Interface
         DbSet<TeamUser> TeamUser { get; }
         DbSet<User> Users { get; }
         DbSet<RefreshToken> RefreshTokens { get; }
+        DbSet<Notification> Notifications { get; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
         DbSet<T> Set<T>() where T : class;

@@ -1,8 +1,9 @@
-import { Component, OnInit, inject,ChangeDetectorRef  } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject,ChangeDetectorRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service, CreateServiceDto, UpdateServiceDto, ServicePage } from './Service/ServicePage';
 import { UserApiService, UserDto } from '../Team/Service/UserApiService';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-service-page',
@@ -11,10 +12,12 @@ import { UserApiService, UserDto } from '../Team/Service/UserApiService';
   templateUrl: './service-page.html',
   styleUrl: './service-page.css',
 })
-export class servicepage implements OnInit {
+export class servicepage implements OnInit, OnDestroy {
   private servicePageService = inject(ServicePage);
   private userApiService = inject(UserApiService);
   private cdr = inject(ChangeDetectorRef); 
+  private autoRefreshSubscription: Subscription | null = null;
+  private readonly autoRefreshMs = 15000;
 
   services: Service[] = [];
   users: UserDto[] = [];
@@ -38,6 +41,11 @@ export class servicepage implements OnInit {
   ngOnInit(): void {
     this.loadServices();
     this.loadUsers();
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
   }
 
   loadServices(): void {
@@ -189,5 +197,22 @@ export class servicepage implements OnInit {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      this.loadServices();
+      this.loadUsers();
+    });
+  }
+
+  private stopAutoRefresh(): void {
+    this.autoRefreshSubscription?.unsubscribe();
+    this.autoRefreshSubscription = null;
   }
 }
