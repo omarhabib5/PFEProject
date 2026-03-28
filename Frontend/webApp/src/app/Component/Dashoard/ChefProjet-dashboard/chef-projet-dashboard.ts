@@ -24,6 +24,7 @@ import { UserStoryDto } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserApiService, UserDto } from '../../Page/Team/Service/UserApiService';
 import { TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
+import { NotificationService } from '../../Page/Notification/Service/NotificationService';
 
 type DashboardSection = 'projects' | 'calendar' | 'settings';
 type ProjectTab = 'userStories' | 'sprints' | 'tasks';
@@ -87,6 +88,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   private userApiService = inject(UserApiService);
   private teamService = inject(TeamService);
   private tokenService = inject(TokenService);
+  private notificationService = inject(NotificationService);
 
   private currentManagerId: number | null = null;
   private scopedProjectIds = new Set<number>();
@@ -94,7 +96,10 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   private scopedUserStoryIds = new Set<number>();
   private cdr=inject(ChangeDetectorRef);
   private autoRefreshSubscription: Subscription | null = null;
+  private notificationCountSubscription: Subscription | null = null;
   private readonly autoRefreshMs = 15000;
+
+  notificationCount = 0;
 
   activeSection: DashboardSection = 'projects';
   activeProjectTab: ProjectTab = 'tasks';
@@ -147,11 +152,14 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDashboardData();
+    this.initializeNotifications();
     this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = null;
   }
 
   setSection(section: DashboardSection): void {
@@ -1346,12 +1354,39 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       }
 
       this.loadDashboardData();
+      this.refreshNotifications();
     });
   }
 
   private stopAutoRefresh(): void {
     this.autoRefreshSubscription?.unsubscribe();
     this.autoRefreshSubscription = null;
+  }
+
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.notificationCount = count;
+      this.cdr.markForCheck();
+    });
+
+    this.refreshNotifications();
+  }
+
+  private refreshNotifications(): void {
+    const userId = this.resolveCurrentUserId();
+    if (!userId) {
+      this.notificationCount = 0;
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
+  }
+
+  private resolveCurrentUserId(): number | null {
+    const userData = this.tokenService.getUserData();
+    const parsed = Number(userData?.userId ?? userData?.id ?? 0);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
   }
 
 }

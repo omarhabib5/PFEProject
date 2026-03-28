@@ -714,10 +714,10 @@ C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwe
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.development.json
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.build.endpoints.json
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\swae.build.ex.cache
-C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.csproj.Up2Date
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.dll
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\refint\Projet.Api.dll
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.pdb
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\Projet.Api.genruntimeconfig.cache
 C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\ref\Projet.Api.dll
+C:\Users\Rayen\Documents\PFEProject\backend\Projet.Api\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

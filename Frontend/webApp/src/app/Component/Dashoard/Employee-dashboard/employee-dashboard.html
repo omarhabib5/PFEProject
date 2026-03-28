@@ -3,16 +3,16 @@
         <div>
             <div class="brand">
                 <h1>TaskFlow Pro</h1>
-                <p>Project Management</p>
+                <p>Gestion de projets</p>
             </div>
 
             <button class="menu-item" [class.active]="sidebarSection === 'dashboard'"
                 (click)="setSidebarSection('dashboard')">
-                My Dashboard
+                Mon tableau de bord
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'calendar'"
                 (click)="setSidebarSection('calendar')">
-                Calendar
+                Calendrier
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'notifications'"
                 (click)="setSidebarSection('notifications')">
@@ -20,18 +20,19 @@
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'settings'"
                 (click)="setSidebarSection('settings')">
-                Settings
+                Parametres
             </button>
         </div>
 
-        <button class="menu-item logout" (click)="logout()">Logout</button>
+        <button class="menu-item logout" (click)="logout()">Se deconnecter</button>
     </aside>
 
     <main class="content">
         <header class="topbar">
             <p>{{ todayLabel }}</p>
             <div class="topbar-right">
-                <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." />
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher..." />
+
                 <div class="notif">{{ unreadNotifications }}</div>
                 <div class="profile">
                     <strong>{{ userName }}</strong>
@@ -48,16 +49,16 @@
 
         <div *ngIf="error" class="error">{{ error }}</div>
         <div *ngIf="settingsSuccess" class="success">{{ settingsSuccess }}</div>
-        <section *ngIf="loading" class="loading">Loading...</section>
+        <section *ngIf="loading" class="loading">Chargement...</section>
 
         <ng-container *ngIf="!loading && sidebarSection === 'dashboard'">
             <section class="hero">
                 <div class="hero-main">
-                    <h2>Hello, {{ userName }} 👋</h2>
+                    <h2>Bonjour, {{ userName }} 👋</h2>
                     <p>Service: {{ serviceLabel }} · {{ roleLabel }}</p>
                     <p>{{ todayLabel }}</p>
                     <div class="progress-wrap">
-                        <span>Overall progress of my tasks</span>
+                        <span>Progression globale de mes taches</span>
                         <div class="progress-line">
                             <div class="fill" [style.width.%]="completionPercent"></div>
                         </div>
@@ -65,55 +66,55 @@
                     </div>
                 </div>
                 <div class="hero-stats">
-                    <article><strong>{{ inProgressCount }}</strong><span>In progress</span></article>
-                    <article><strong>{{ reviewCount }}</strong><span>To review</span></article>
-                    <article><strong>{{ doneCount }}</strong><span>Completed</span></article>
+                    <article><strong>{{ inProgressCount }}</strong><span>En cours</span></article>
+                    <article><strong>{{ reviewCount }}</strong><span>A valider</span></article>
+                    <article><strong>{{ doneCount }}</strong><span>Terminees</span></article>
                 </div>
             </section>
 
             <section class="tabs-row">
-                <button [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Overview</button>
-                <button [class.active]="activeTab === 'tasks'" (click)="setTab('tasks')">My Tasks</button>
-                <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">My Projects</button>
-                <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints & Stories</button>
+                <button [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Vue generale</button>
+                <button [class.active]="activeTab === 'tasks'" (click)="setTab('tasks')">Mes taches</button>
+                <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Mes projets</button>
+                <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints et stories</button>
             </section>
 
             <section *ngIf="activeTab === 'overview'" class="page">
                 <div class="kpi-grid">
                     <article class="kpi blue">
-                        <h4>Total tasks</h4><strong>{{ myTasks.length }}</strong><small>{{ projectCards.length }}
-                            projects</small>
+                        <h4>Taches totales</h4><strong>{{ myTasks.length }}</strong><small>{{ projectCards.length }}
+                            projets</small>
                     </article>
                     <article class="kpi green">
-                        <h4>Completion rate</h4><strong>{{ completionPercent }}%</strong><small>{{ doneCount }}
-                            completed</small>
+                        <h4>Taux d'avancement</h4><strong>{{ completionPercent }}%</strong><small>{{ doneCount }}
+                            terminees</small>
                     </article>
                     <article class="kpi purple">
-                        <h4>Estimated hours</h4><strong>{{ totalEstimatedHours }}h</strong><small>planned
-                            workload</small>
+                        <h4>Heures estimees</h4><strong>{{ totalEstimatedHours }}h</strong><small>charge
+                            planifiee</small>
                     </article>
                     <article class="kpi red">
-                        <h4>High priority</h4><strong>{{ highPriorityCount }}</strong><small>to monitor</small>
+                        <h4>Haute priorite</h4><strong>{{ highPriorityCount }}</strong><small>a surveiller</small>
                     </article>
                 </div>
 
                 <div class="overview-grid">
                     <article class="card">
-                        <h3>My tasks by status</h3>
+                        <h3>Mes taches par statut</h3>
                         <div class="status-list">
-                            <div><span class="dot todo"></span> To Do <strong>{{ countByBucket('todo') }}</strong>
+                            <div><span class="dot todo"></span> A faire <strong>{{ countByBucket('todo') }}</strong>
                             </div>
-                            <div><span class="dot progress"></span> In progress <strong>{{ countByBucket('inProgress')
+                            <div><span class="dot progress"></span> En cours <strong>{{ countByBucket('inProgress')
                                     }}</strong></div>
-                            <div><span class="dot review"></span> In review <strong>{{ countByBucket('review')
+                            <div><span class="dot review"></span> A valider <strong>{{ countByBucket('review')
                                     }}</strong></div>
-                            <div><span class="dot done"></span> Done <strong>{{ countByBucket('done') }}</strong>
+                            <div><span class="dot done"></span> Termine <strong>{{ countByBucket('done') }}</strong>
                             </div>
                         </div>
                     </article>
 
                     <article class="card">
-                        <h3>Activity this week</h3>
+                        <h3>Activite de la semaine</h3>
                         <div class="bars">
                             <div class="bar-col" *ngFor="let value of activityWeekly; let i = index">
                                 <div class="bar" [style.height.px]="20 + value * 12"></div>
@@ -123,22 +124,22 @@
                     </article>
 
                     <article class="card">
-                        <h3>Upcoming deadlines</h3>
+                        <h3>Echeances a venir</h3>
                         <div *ngIf="nearestDueTask; else noDue">
                             <p>{{ nearestDueTask.title }}</p>
                             <small>{{ nearestDueTask.delayLabel }}</small>
                         </div>
                         <ng-template #noDue>
-                            <p>No deadline within 7 days</p>
+                            <p>Aucune echeance dans les 7 prochains jours</p>
                         </ng-template>
                     </article>
                 </div>
 
                 <article class="card large">
                     <div class="card-head">
-                        <h3>Tasks in progress</h3>
+                        <h3>Taches en cours</h3>
                     </div>
-                    <div *ngIf="inProgressTasks.length === 0" class="empty">No tasks in progress</div>
+                    <div *ngIf="inProgressTasks.length === 0" class="empty">Aucune tache en cours</div>
                     <div *ngFor="let task of inProgressTasks" class="task-line">
                         <div>
                             <strong>{{ task.title }}</strong>
@@ -150,7 +151,7 @@
 
                 <article class="card large">
                     <div class="card-head">
-                        <h3>My projects</h3>
+                        <h3>Mes projets</h3>
                     </div>
                     <div class="project-mini-grid">
                         <div class="project-mini" *ngFor="let project of projectCards">
@@ -159,7 +160,7 @@
                             <div class="progress-line">
                                 <div class="fill" [style.width.%]="project.progress"></div>
                             </div>
-                            <small>My tasks: {{ project.counts.done }} / {{ project.myTasks.length }}</small>
+                            <small>Mes taches: {{ project.counts.done }} / {{ project.myTasks.length }}</small>
                         </div>
                     </div>
                 </article>
@@ -168,26 +169,26 @@
             <section *ngIf="activeTab === 'tasks'" class="page">
                 <article class="card">
                     <div class="filters">
-                        <strong>Status:</strong>
-                        <button [class.active]="statusFilter==='all'" (click)="setStatusFilter('all')">All</button>
-                        <button [class.active]="statusFilter==='todo'" (click)="setStatusFilter('todo')">To Do</button>
-                        <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">In
-                            progress</button>
-                        <button [class.active]="statusFilter==='review'" (click)="setStatusFilter('review')">In
-                            review</button>
-                        <button [class.active]="statusFilter==='done'" (click)="setStatusFilter('done')">Done</button>
+                        <strong>Statut:</strong>
+                        <button [class.active]="statusFilter==='all'" (click)="setStatusFilter('all')">Tous</button>
+                        <button [class.active]="statusFilter==='todo'" (click)="setStatusFilter('todo')">A faire</button>
+                        <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">En
+                            cours</button>
+                        <button [class.active]="statusFilter==='review'" (click)="setStatusFilter('review')">A
+                            valider</button>
+                        <button [class.active]="statusFilter==='done'" (click)="setStatusFilter('done')">Termine</button>
 
-                        <strong>Priority:</strong>
-                        <button [class.active]="priorityFilter==='all'" (click)="setPriorityFilter('all')">All</button>
+                        <strong>Priorite:</strong>
+                        <button [class.active]="priorityFilter==='all'" (click)="setPriorityFilter('all')">Toutes</button>
                         <button [class.active]="priorityFilter==='basse'"
-                            (click)="setPriorityFilter('basse')">Low</button>
+                            (click)="setPriorityFilter('basse')">Basse</button>
                         <button [class.active]="priorityFilter==='moyenne'"
-                            (click)="setPriorityFilter('moyenne')">Medium</button>
+                            (click)="setPriorityFilter('moyenne')">Moyenne</button>
                         <button [class.active]="priorityFilter==='haute'"
-                            (click)="setPriorityFilter('haute')">High</button>
+                            (click)="setPriorityFilter('haute')">Haute</button>
                         <button [class.active]="priorityFilter==='urgente'"
-                            (click)="setPriorityFilter('urgente')">Urgent</button>
-                        <span class="task-count">{{ filteredTasks.length }} tasks</span>
+                            (click)="setPriorityFilter('urgente')">Urgente</button>
+                        <span class="task-count">{{ filteredTasks.length }} taches</span>
                     </div>
                 </article>
 
@@ -197,7 +198,7 @@
                         <span>{{ group.items.length }}</span>
                     </header>
 
-                    <div *ngIf="group.items.length === 0" class="empty">No tasks in this category</div>
+                    <div *ngIf="group.items.length === 0" class="empty">Aucune tache dans cette categorie</div>
 
                     <div class="task-line" *ngFor="let task of group.items">
                         <div>
@@ -206,7 +207,7 @@
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
-                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance →</button>
+                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Avancer →</button>
                         </div>
                     </div>
                 </article>
@@ -232,12 +233,12 @@
 
                     <div class="project-body">
                         <div>
-                            <h4>My tasks ({{ project.myTasks.length }})</h4>
+                            <h4>Mes taches ({{ project.myTasks.length }})</h4>
                             <div class="status-boxes">
-                                <span>To Do {{ project.counts.todo }}</span>
-                                <span>In progress {{ project.counts.inProgress }}</span>
-                                <span>Review {{ project.counts.review }}</span>
-                                <span>Done {{ project.counts.done }}</span>
+                                <span>A faire {{ project.counts.todo }}</span>
+                                <span>En cours {{ project.counts.inProgress }}</span>
+                                <span>A valider {{ project.counts.review }}</span>
+                                <span>Termine {{ project.counts.done }}</span>
                             </div>
                             <p *ngFor="let task of project.myTasks | slice:0:4">• {{ task.title }}</p>
                         </div>
@@ -245,11 +246,11 @@
                         <div class="sprint-box" *ngIf="project.activeSprint; else noSprint">
                             <h4>{{ project.activeSprint.name }}</h4>
                             <p>{{ project.activeSprint.periodLabel }}</p>
-                            <small>{{ project.activeSprint.storyCount }} user stories · Velocity {{
+                            <small>{{ project.activeSprint.storyCount }} stories utilisateur · Vitesse {{
                                 project.activeSprint.velocity }}</small>
                         </div>
                         <ng-template #noSprint>
-                            <div class="sprint-box empty">No active sprint</div>
+                            <div class="sprint-box empty">Aucun sprint actif</div>
                         </ng-template>
                     </div>
 
@@ -266,7 +267,7 @@
                         <span class="status active">{{ sprint.statusLabel }}</span>
                     </div>
                     <p>{{ sprint.periodLabel }}</p>
-                    <small>{{ sprint.storyCount }} user stories · Velocity {{ sprint.velocity }}</small>
+                    <small>{{ sprint.storyCount }} stories utilisateur · Vitesse {{ sprint.velocity }}</small>
                 </article>
             </section>
         </ng-container>
@@ -295,7 +296,7 @@
                     <div *ngIf="selectedCalendarDate; else noCalendarSelection">
                         <div class="card-head">
                             <h3>{{ selectedCalendarDateLabel }}</h3>
-                            <button (click)="goToCurrentCalendarMonth()">Today</button>
+                            <button (click)="goToCurrentCalendarMonth()">Aujourd'hui</button>
                         </div>
                         <div class="calendar-day-tasks">
                             <div class="task-item" *ngFor="let task of selectedDayTasks"
@@ -305,18 +306,18 @@
                                     <span class="task-badge">{{ getTaskStatusLabel(task) }}</span>
                                 </div>
                                 <p>{{ task.projectName }}</p>
-                                <small>User Story: {{ getUserStoryName(task.storyId) }}</small>
-                                <small>Assigned to: {{ getTaskAssigneeName(task) }}</small>
-                                <small>Due date: {{ formatDate(taskDueDate(task.id)) }}</small>
+                                <small>User story : {{ getUserStoryName(task.storyId) }}</small>
+                                <small>Assigne a : {{ getTaskAssigneeName(task) }}</small>
+                                <small>Date limite : {{ formatDate(taskDueDate(task.id)) }}</small>
                             </div>
                             <p *ngIf="selectedDayTasks.length === 0" class="empty">
-                                No tasks for this date.
+                                Aucune tache pour cette date.
                             </p>
                         </div>
                     </div>
                     <ng-template #noCalendarSelection>
                         <div class="empty">
-                            <p>Click a day to see tasks</p>
+                            <p>Cliquez sur un jour pour voir les taches</p>
                         </div>
                     </ng-template>
                 </article>
@@ -331,25 +332,25 @@
                 </div>
             </article>
             <article class="card" *ngIf="notifications.length === 0">
-                <div class="empty">No notifications</div>
+                <div class="empty">Aucune notification</div>
             </article>
         </section>
 
         <section *ngIf="!loading && sidebarSection === 'settings'" class="page">
             <div class="settings-grid">
                 <article class="card settings-card">
-                    <h3>My profile</h3>
-                    <p>Update your profile details and avatar.</p>
+                    <h3>Mon profil</h3>
+                    <p>Mettre a jour vos informations et votre avatar.</p>
 
                     <form class="settings-form" (ngSubmit)="saveProfileSettings()">
                         <div class="settings-form-grid">
                             <div class="settings-field">
-                                <label>First name</label>
+                                <label>Prenom</label>
                                 <input type="text" [(ngModel)]="profileForm.firstName" name="profileFirstName"
                                     required />
                             </div>
                             <div class="settings-field">
-                                <label>Last name</label>
+                                <label>Nom</label>
                                 <input type="text" [(ngModel)]="profileForm.lastName" name="profileLastName" required />
                             </div>
                         </div>
@@ -366,43 +367,43 @@
                         </div>
 
                         <div class="settings-preview" *ngIf="profileForm.avatarUrl">
-                            <span>Preview</span>
-                            <img [src]="profileForm.avatarUrl" alt="avatar preview" />
+                            <span>Apercu</span>
+                            <img [src]="profileForm.avatarUrl" alt="apercu avatar" />
                         </div>
 
                         <div class="task-actions">
                             <button type="submit" [disabled]="profileSaving">
-                                {{ profileSaving ? 'Saving...' : 'Save profile' }}
+                                {{ profileSaving ? 'Enregistrement...' : 'Enregistrer le profil' }}
                             </button>
                         </div>
                     </form>
                 </article>
 
                 <article class="card settings-card">
-                    <h3>Security</h3>
-                    <p>Change your password.</p>
+                    <h3>Securite</h3>
+                    <p>Modifier votre mot de passe.</p>
 
                     <form class="settings-form" (ngSubmit)="savePasswordSettings()">
                         <div class="settings-field">
-                            <label>Current password</label>
+                            <label>Mot de passe actuel</label>
                             <input type="password" [(ngModel)]="passwordForm.currentPassword" name="currentPassword"
                                 required />
                         </div>
 
                         <div class="settings-field">
-                            <label>New password</label>
+                            <label>Nouveau mot de passe</label>
                             <input type="password" [(ngModel)]="passwordForm.newPassword" name="newPassword" required />
                         </div>
 
                         <div class="settings-field">
-                            <label>Confirm new password</label>
+                            <label>Confirmer le nouveau mot de passe</label>
                             <input type="password" [(ngModel)]="passwordForm.confirmNewPassword"
                                 name="confirmNewPassword" required />
                         </div>
 
                         <div class="task-actions">
                             <button type="submit" [disabled]="passwordSaving">
-                                {{ passwordSaving ? 'Updating...' : 'Update password' }}
+                                {{ passwordSaving ? 'Mise a jour...' : 'Mettre a jour le mot de passe' }}
                             </button>
                         </div>
                     </form>

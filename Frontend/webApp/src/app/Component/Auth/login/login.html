@@ -1,257 +1,79 @@
-<div
-  class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-  style="background:#070b12; font-family:'DM Sans',sans-serif;"
->
-
-  <!-- Grid texture -->
-  <div
-    class="absolute inset-0 pointer-events-none"
-    style="background-image:linear-gradient(rgba(99,102,241,0.06) 1px,transparent 1px),
-           linear-gradient(90deg,rgba(99,102,241,0.06) 1px,transparent 1px);
-           background-size:48px 48px;"
-  ></div>
-
-  <!-- Glow orbs -->
-  <div class="absolute -top-40 -left-40 w-125 h-125 rounded-full pointer-events-none"
-       style="background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);"></div>
-  <div class="absolute -bottom-40 -right-40 w-100 h-100 rounded-full pointer-events-none"
-       style="background:radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 70%);"></div>
-  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-100 h-100 rounded-full pointer-events-none"
-       style="background:radial-gradient(circle,rgba(99,102,241,0.05) 0%,transparent 60%);"></div>
-
-  <!-- Card -->
-  <div
-    class="relative z-10 w-full"
-    style="max-width:460px;"
-  >
-
-    <!-- Logo top -->
-    <div class="flex items-center justify-center gap-3 mb-8">
-      <div
-        class="flex items-center justify-center w-10 h-10 rounded-xl"
-        style="background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.35);"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+<div class="login-page">
+  <div class="login-shell">
+    <aside class="login-side">
+      <div class="brand-block">
+        <h1>TaskFlow Pro</h1>
+        <p>Project Management</p>
       </div>
-      <span
-        class="text-white font-bold text-xl"
-        style="font-family:'Syne',sans-serif; letter-spacing:-0.03em;"
-      >ScrumFlow</span>
-    </div>
 
-    <!-- Glass card -->
-    <div
-      class="relative overflow-hidden rounded-2xl p-8"
-      style="background:rgba(255,255,255,0.03);
-             border:1px solid rgba(255,255,255,0.08);
-             box-shadow:0 0 0 1px rgba(99,102,241,0.08),
-                        0 40px 80px rgba(0,0,0,0.6),
-                        inset 0 1px 0 rgba(255,255,255,0.06);"
-    >
-      <!-- Card top accent -->
-      <div
-        class="absolute top-0 left-0 right-0 h-px"
-        style="background:linear-gradient(90deg,transparent,rgba(99,102,241,0.7),transparent);"
-      ></div>
-
-      <!-- Header -->
-      <div class="mb-8">
-        <p
-          class="text-xs font-semibold uppercase tracking-[0.2em] mb-2"
-          style="color:rgba(129,140,248,0.7);"
-        >Accès sécurisé</p>
-        <h1
-          class="text-white mb-1"
-          style="font-family:'Syne',sans-serif; font-size:1.9rem;
-                 font-weight:800; letter-spacing:-0.04em; line-height:1.1;"
-        >Bon retour 👋</h1>
-        <p class="text-sm" style="color:rgba(255,255,255,0.35);">
-          Entrez vos identifiants pour accéder à votre espace.
+      <div class="side-content">
+        <h2>Bienvenue</h2>
+        <p>
+          Connectez-vous pour suivre vos projets, user stories et sprints dans la meme interface que vos dashboards.
         </p>
+
+        <div class="role-chips">
+          <span class="chip">Admin</span>
+          <span class="chip">ServiceManager</span>
+          <span class="chip">ProjectManager</span>
+          <span class="chip">Employee</span>
+        </div>
       </div>
+    </aside>
 
-      <!-- Error -->
-      <div
-        *ngIf="errorMessage"
-        class="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl text-sm"
-        style="background:rgba(239,68,68,0.08);
-               border:1px solid rgba(239,68,68,0.2);
-               color:#f87171;"
-      >
-        <svg class="w-4 h-4 flex-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        {{ errorMessage }}
-      </div>
+    <main class="login-main">
+      <section class="login-card">
+        <header class="login-header">
+          <h3>Connexion</h3>
+          <p>Entrez vos identifiants pour acceder a votre espace.</p>
+        </header>
 
-      <!-- Form -->
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+        <div *ngIf="errorMessage" class="message error-message">
+          {{ errorMessage }}
+        </div>
 
-        <!-- EMAIL -->
-        <div>
-          <label
-            for="email"
-            class="block text-xs font-semibold uppercase tracking-[0.18em] mb-2"
-            style="color:rgba(255,255,255,0.3);"
-          >Adresse email</label>
-          <div class="relative">
-            <svg
-              class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style="color:rgba(255,255,255,0.2);"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            >
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+          <div class="field">
+            <label for="email">Adresse email</label>
             <input
               id="email"
               type="email"
               formControlName="email"
               placeholder="vous@exemple.com"
               [disabled]="isLoading"
-              class="sf-input w-full pl-11 pr-4 py-3 text-sm rounded-xl outline-none transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             />
+            <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Adresse email invalide</small>
           </div>
-          <p
-            *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
-            class="mt-1.5 text-xs"
-            style="color:#f87171;"
-          >Adresse email invalide</p>
-        </div>
 
-        <!-- PASSWORD -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label
-              for="password"
-              class="text-xs font-semibold uppercase tracking-[0.18em]"
-              style="color:rgba(255,255,255,0.3);"
-            >Mot de passe</label>
-            <a
-              href="#"
-              class="text-xs font-medium transition-colors duration-150 hover:text-indigo-400"
-              style="color:rgba(129,140,248,0.7);"
-            >Mot de passe oublié ?</a>
-          </div>
-          <div class="relative">
-            <svg
-              class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style="color:rgba(255,255,255,0.2);"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
+          <div class="field">
+            <div class="field-head">
+              <label for="password">Mot de passe</label>
+            </div>
             <input
               id="password"
               type="password"
               formControlName="password"
-              placeholder="••••••••"
+              placeholder="Minimum 6 caracteres"
               [disabled]="isLoading"
-              class="sf-input w-full pl-11 pr-4 py-3 text-sm rounded-xl outline-none transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             />
+            <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 caracteres requis</small>
           </div>
-          <p
-            *ngIf="form.get('password')?.invalid && form.get('password')?.touched"
-            class="mt-1.5 text-xs"
-            style="color:#f87171;"
-          >Minimum 6 caractères requis</p>
-        </div>
 
-        <!-- REMEMBER ME -->
-        <div class="flex items-center justify-between py-1">
-          <div class="flex items-center gap-3">
-            <div class="relative flex-0">
-              <input
-                id="rememberMe"
-                type="checkbox"
-                formControlName="rememberMe"
-                [disabled]="isLoading"
-                class="sf-checkbox absolute opacity-0 w-5 h-5 cursor-pointer z-10"
-              />
-              <div
-                class="sf-checkbox-box w-5 h-5 rounded-md flex items-center justify-center transition-all duration-150"
-                style="border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.04);"
-              >
-                <svg
-                  class="sf-check w-3 h-3 hidden"
-                  viewBox="0 0 12 12" fill="none"
-                  stroke="#070b12" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round"
-                >
-                  <polyline points="2 6 5 9 10 3"/>
-                </svg>
-              </div>
-            </div>
-            <label
-              for="rememberMe"
-              class="text-sm cursor-pointer select-none"
-              style="color:rgba(255,255,255,0.4);"
-            >Se souvenir de moi</label>
-          </div>
-        </div>
+          <label class="remember-row" for="rememberMe">
+            <input id="rememberMe" type="checkbox" formControlName="rememberMe" [disabled]="isLoading" />
+            <span>Se souvenir de moi</span>
+          </label>
 
-        <!-- SUBMIT -->
-        <button
-          type="submit"
-          [disabled]="form.invalid || isLoading"
-          class="sf-btn w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2.5 transition-all duration-200 disabled:cursor-not-allowed mt-2"
-          [class.sf-btn--active]="!form.invalid && !isLoading"
-          [class.sf-btn--disabled]="form.invalid || isLoading"
-        >
-          <ng-container *ngIf="!isLoading">
-            <span style="font-family:'Syne',sans-serif; letter-spacing:0.01em;">
-              Se connecter
-            </span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-              <path d="M5 12h14M13 6l6 6-6 6"/>
-            </svg>
-          </ng-container>
-          <ng-container *ngIf="isLoading">
-            <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor"
-                      stroke-width="3" stroke-dasharray="32"
-                      stroke-dashoffset="10" stroke-linecap="round"/>
-            </svg>
-            <span style="font-family:'Syne',sans-serif;">Connexion...</span>
-          </ng-container>
-        </button>
-
-      </form>
-
-      <!-- Role badges -->
-      <div class="mt-7 pt-6" style="border-top:1px solid rgba(255,255,255,0.05);">
-        <p class="text-xs text-center mb-3" style="color:rgba(255,255,255,0.15);">
-          Rôles disponibles
-        </p>
-        <div class="flex flex-wrap justify-center gap-2">
-          <span class="px-2.5 py-1 rounded-lg text-xs font-medium"
-                style="background:rgba(99,102,241,0.1); color:rgba(129,140,248,0.7); border:1px solid rgba(99,102,241,0.15);">
-            Admin
-          </span>
-          <span class="px-2.5 py-1 rounded-lg text-xs font-medium"
-                style="background:rgba(16,185,129,0.08); color:rgba(52,211,153,0.65); border:1px solid rgba(16,185,129,0.12);">
-            ServiceManager
-          </span>
-          <span class="px-2.5 py-1 rounded-lg text-xs font-medium"
-                style="background:rgba(245,158,11,0.08); color:rgba(251,191,36,0.65); border:1px solid rgba(245,158,11,0.12);">
-            ProjectManager
-          </span>
-          <span class="px-2.5 py-1 rounded-lg text-xs font-medium"
-                style="background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.3); border:1px solid rgba(255,255,255,0.08);">
-            Employee
-          </span>
-        </div>
-      </div>
-
-    </div>
-    <!-- end glass card -->
-
+          <button
+            type="submit"
+            class="submit-btn"
+            [disabled]="form.invalid || isLoading"
+          >
+            <ng-container *ngIf="!isLoading">Se connecter</ng-container>
+            <ng-container *ngIf="isLoading">Connexion...</ng-container>
+          </button>
+        </form>
+      </section>
+    </main>
   </div>
 </div>
