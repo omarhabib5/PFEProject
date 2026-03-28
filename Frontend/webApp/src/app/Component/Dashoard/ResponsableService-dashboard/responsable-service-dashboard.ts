@@ -13,6 +13,7 @@ import { CreateServiceDto, Service, ServiceService } from '../../Page/Team/Servi
 import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
+import { NotificationService } from '../../Page/Notification/Service/NotificationService';
 
 interface TeamMemberRow {
   fullName: string;
@@ -45,12 +46,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   private taskService = inject(TaskService);
   private userStoryService = inject(UserStoryService);
   private userApiService = inject(UserApiService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
   private tokenService = inject(TokenService);
   private cdr = inject(ChangeDetectorRef);
 
   private currentResponsibleId: number | null = null;
   private autoRefreshSubscription: Subscription | null = null;
+  private notificationCountSubscription: Subscription | null = null;
   private readonly autoRefreshMs = 15000;
 
   activeSection: 'services' | 'calendar' = 'services';
@@ -145,11 +148,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.generateCalendar();
     this.loadUserSettings();
     this.loadServices();
+    this.initializeNotifications();
     this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = null;
   }
 
   get pageTitle(): string {
@@ -1437,12 +1443,34 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       if (this.activeTab === 'settings') {
         this.loadUserSettings();
       }
+
+      this.refreshNotifications();
     });
   }
 
   private stopAutoRefresh(): void {
     this.autoRefreshSubscription?.unsubscribe();
     this.autoRefreshSubscription = null;
+  }
+
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.notificationCount = count;
+      this.cdr.markForCheck();
+    });
+
+    this.refreshNotifications();
+  }
+
+  private refreshNotifications(): void {
+    const userId = this.resolveCurrentResponsibleId();
+    if (!userId) {
+      this.notificationCount = 0;
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
   }
 
   private resolveCurrentResponsibleId(): number | null {

@@ -183,7 +183,7 @@ namespace Projet.Application.Context
                 entity.Property(e => e.Link).HasMaxLength(500);
 
                 entity.HasOne(e => e.User)
-                    .WithMany()
+                    .WithMany(u => u.Notifications)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 

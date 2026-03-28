@@ -12,6 +12,8 @@ import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService'
 import { UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
 import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { Service, ServiceService } from '../../Page/Team/Service/ServiceService';
+import { NotificationService } from '../../Page/Notification/Service/NotificationService';
+import { Notification } from '../../Page/Notification/Models/notification.model';
 
 type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'settings';
 type EmployeeTab = 'overview' | 'tasks' | 'projects' | 'sprints';
@@ -90,7 +92,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   private userStoryService = inject(UserStoryService);
   private userApiService = inject(UserApiService);
   private serviceService = inject(ServiceService);
+  private notificationService = inject(NotificationService);
   private autoRefreshSubscription: Subscription | null = null;
+  private refreshTickerSubscription: Subscription | null = null;
+  private notificationCountSubscription: Subscription | null = null;
+  private notificationsSubscription: Subscription | null = null;
   private readonly autoRefreshMs = 15000;
 
   sidebarSection: SidebarSection = 'dashboard';
@@ -100,12 +106,15 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   error = '';
   searchTerm = '';
 
-  userName = 'Employee';
-  roleLabel = 'Member';
+  userName = 'Employe';
+  roleLabel = 'Membre';
   serviceLabel = 'Service';
   todayLabel = '';
   unreadNotifications = 0;
   profileImageUrl = '';
+  isRefreshing = false;
+  nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
+  lastUpdatedAt: Date | null = null;
 
   currentUserId: number | null = null;
 
@@ -130,6 +139,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   sprintCards: UiSprintCard[] = [];
   userStories: UserStoryDto[] = [];
   notifications: UiNotification[] = [];
+  private apiNotifications: Notification[] = [];
 
   statusFilter: 'all' | TaskBucket = 'all';
   priorityFilter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente' = 'all';
@@ -138,14 +148,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   calendarCells: CalendarCell[] = [];
   selectedCalendarDate: Date | null = null;
 
-  readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  readonly weekdays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
   readonly bucketOrder: TaskBucket[] = ['todo', 'inProgress', 'review', 'done'];
   readonly bucketLabels: Record<TaskBucket, string> = {
-    todo: 'To Do',
-    inProgress: 'In Progress',
-    review: 'In Review',
-    done: 'Done'
+    todo: 'A faire',
+    inProgress: 'En cours',
+    review: 'A valider',
+    done: 'Termine'
   };
 
   ngOnInit(): void {
@@ -155,7 +165,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     }
 
     this.hydrateProfile();
-    this.todayLabel = new Date().toLocaleDateString('en-US', {
+    this.todayLabel = new Date().toLocaleDateString('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -163,19 +173,24 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     });
 
     this.loadSettingsProfile();
+    this.initializeNotifications();
     this.loadEmployeeData();
     this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = null;
+    this.notificationsSubscription?.unsubscribe();
+    this.notificationsSubscription = null;
   }
 
   get pageTitle(): string {
-    if (this.sidebarSection === 'calendar') return 'Calendar';
+    if (this.sidebarSection === 'calendar') return 'Calendrier';
     if (this.sidebarSection === 'notifications') return 'Notifications';
-    if (this.sidebarSection === 'settings') return 'Settings';
-    return 'My Dashboard';
+    if (this.sidebarSection === 'settings') return 'Parametres';
+    return 'Mon tableau de bord';
   }
 
   get completionPercent(): number {
@@ -223,7 +238,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
   get selectedDayTasks(): UiTask[] {
@@ -276,11 +291,36 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   get selectedCalendarDateLabel(): string {
     if (!this.selectedCalendarDate) return '';
-    return this.selectedCalendarDate.toLocaleDateString('en-US', {
+    return this.selectedCalendarDate.toLocaleDateString('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
     });
+  }
+
+  get refreshStatusLabel(): string {
+    if (this.isRefreshing) {
+      return 'Actualisation...';
+    }
+
+    return `Rafraichissement auto dans ${this.nextRefreshInSeconds}s`;
+  }
+
+  get lastUpdatedLabel(): string {
+    if (!this.lastUpdatedAt) {
+      return 'Pas encore mis a jour';
+    }
+
+    return `Mis a jour a ${this.lastUpdatedAt.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    })}`;
+  }
+
+  manualRefresh(): void {
+    this.refreshDashboardData();
   }
 
   goToCurrentCalendarMonth(): void {
@@ -289,17 +329,17 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   getTaskStatusLabel(task: UiTask): string {
-    return this.bucketLabels[task.bucket] || 'Unknown';
+    return this.bucketLabels[task.bucket] || 'Inconnu';
   }
 
   getTaskAssigneeName(task: UiTask): string {
     const rawTask = this.allTasks.find(t => t.id === task.id);
-    return rawTask?.assignedToName || 'Unassigned';
+    return rawTask?.assignedToName || 'Non assigne';
   }
 
   getUserStoryName(storyId: number): string {
     const story = this.userStories.find(s => Number(s.id) === storyId);
-    return story?.name || `Story #${storyId}`;
+    return story?.name || `US #${storyId}`;
   }
 
   getCalendarTaskStateClass(task: UiTask): string {
@@ -310,10 +350,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   formatDate(date: Date | string | null | undefined): string {
-    if (!date) return 'Not defined';
+    if (!date) return 'Non definie';
     const parsed = typeof date === 'string' ? new Date(date) : date;
-    if (Number.isNaN(parsed.getTime())) return 'Not defined';
-    return parsed.toLocaleDateString('en-US');
+    if (Number.isNaN(parsed.getTime())) return 'Non definie';
+    return parsed.toLocaleDateString('fr-FR');
   }
 
   saveProfileSettings(): void {
@@ -323,7 +363,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const avatarUrl = this.profileForm.avatarUrl.trim();
 
     if (!firstName || !lastName || !email) {
-      this.error = 'First name, last name, and email are required.'
+      this.error = 'Le prenom, le nom et l email sont obligatoires.'
       return;
     }
 
@@ -332,7 +372,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const roleNumber = this.resolveRoleNumber(userData?.role);
 
     if (!userId || roleNumber === null) {
-      this.error = 'Unable to identify your user account.'
+      this.error = 'Impossible d identifier votre compte utilisateur.'
       return;
     }
 
@@ -351,7 +391,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         const applySuccess = () => {
           this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
           this.hydrateProfile();
-          this.settingsSuccess = 'Profile updated successfully.'
+          this.settingsSuccess = 'Profil mis a jour avec succes.'
         };
 
         if (avatarUrl) {
@@ -365,24 +405,24 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         applySuccess();
       },
       error: () => {
-        this.error = 'Unable to update profile.'
+        this.error = 'Impossible de mettre a jour le profil.'
       }
     });
   }
 
   savePasswordSettings(): void {
     if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmNewPassword) {
-      this.error = 'Please fill in all password fields.'
+      this.error = 'Veuillez remplir tous les champs du mot de passe.'
       return;
     }
 
     if (this.passwordForm.newPassword.length < 6) {
-      this.error = 'The new password must be at least 6 characters long.'
+      this.error = 'Le nouveau mot de passe doit contenir au moins 6 caracteres.'
       return;
     }
 
     if (this.passwordForm.newPassword !== this.passwordForm.confirmNewPassword) {
-      this.error = 'Password confirmation does not match.'
+      this.error = 'La confirmation du mot de passe ne correspond pas.'
       return;
     }
 
@@ -396,7 +436,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       confirmNewPassword: this.passwordForm.confirmNewPassword
     }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
       next: () => {
-        this.settingsSuccess = 'Password updated successfully.'
+        this.settingsSuccess = 'Mot de passe mis a jour avec succes.'
         this.passwordForm = {
           currentPassword: '',
           newPassword: '',
@@ -404,7 +444,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         };
       },
       error: (err: unknown) => {
-        this.error = err instanceof Error ? err.message : 'Unable to change password.';
+        this.error = err instanceof Error ? err.message : 'Impossible de changer le mot de passe.';
       }
     });
   }
@@ -427,7 +467,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
           this.loadEmployeeData();
         },
         error: () => {
-          this.error = 'Unable to update task status.'
+          this.error = 'Impossible de mettre a jour le statut de la tache.'
         }
       });
   }
@@ -518,7 +558,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         },
         error: () => {
           this.loading = false;
-          this.error = 'Unable to load employee data.'
+          this.isRefreshing = false;
+          this.error = 'Impossible de charger les donnees employe.'
         }
       });
   }
@@ -596,14 +637,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       const projectSprints = sprints.filter((sprint) => Number((sprint as any).projectId) === projectId);
       const activeSprint = this.toActiveSprint(projectSprints, stories, project?.name ?? 'Projet');
 
-      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Unassigned';
+      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Non assigne';
       const dueDate = this.toFrDate((project as any)?.endDate);
 
       return {
         id: projectId,
         name: project?.name ?? `Projet ${projectId}`,
         description: project?.description ?? 'Aucune description',
-        managerName: manager || 'Unassigned',
+        managerName: manager || 'Non assigne',
         dueDate,
         statusLabel: this.getProjectStateLabel(project?.projectState),
         statusClass: this.getProjectStateClass(project?.projectState),
@@ -641,11 +682,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         })
         .filter((name) => name.trim().length > 0)
     ));
-    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Undefined service';
+    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service non defini';
 
-    this.notifications = this.buildNotifications();
-    this.unreadNotifications = this.notifications.length;
+    this.syncNotificationsForView();
     this.buildCalendar();
+    this.lastUpdatedAt = new Date();
+    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
+    this.isRefreshing = false;
   }
 
   private toUiTask(
@@ -663,9 +706,9 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     return {
       id: task.id,
       title: task.title,
-      projectName: project?.name ?? 'Unassigned project',
+      projectName: project?.name ?? 'Projet non assigne',
       tags: [
-        task.description?.split(' ').slice(0, 2).join(' ') || 'task'
+        task.description?.split(' ').slice(0, 2).join(' ') || 'tache'
       ],
       bucket,
       bucketLabel: this.bucketLabels[bucket],
@@ -716,14 +759,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       if (task.priorityClass === 'urgente' || task.priorityClass === 'haute') {
         notifications.push({
           level: 'warning',
-          message: `${task.priorityLabel} priority: ${task.title}`,
+          message: `Priorite ${task.priorityLabel} : ${task.title}`,
           dateLabel: this.todayLabel
         });
       }
-      if (task.delayLabel.startsWith('Late')) {
+      if (task.delayLabel.startsWith('En retard')) {
         notifications.push({
           level: 'info',
-          message: `${task.title} is ${task.delayLabel.toLowerCase()}`,
+          message: `${task.title} est ${task.delayLabel.toLowerCase()}`,
           dateLabel: this.todayLabel
         });
       }
@@ -732,12 +775,73 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     if (this.doneCount > 0) {
       notifications.push({
         level: 'success',
-        message: `${this.doneCount} task(s) completed` ,
+        message: `${this.doneCount} tache(s) terminee(s)` ,
         dateLabel: this.todayLabel
       });
     }
 
     return notifications.slice(0, 8);
+  }
+
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
+
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.unreadNotifications = count;
+    });
+
+    this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
+      this.apiNotifications = items;
+      this.syncNotificationsForView();
+    });
+
+    this.refreshNotifications();
+  }
+
+  private refreshNotifications(): void {
+    const userId = this.currentUserId ?? this.resolveCurrentUserId();
+    if (!userId) {
+      this.apiNotifications = [];
+      this.syncNotificationsForView();
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
+  }
+
+  private syncNotificationsForView(): void {
+    if (this.apiNotifications.length > 0) {
+      this.notifications = this.apiNotifications.slice(0, 8).map((item) => ({
+        level: this.mapNotificationLevel(item.type),
+        message: item.message || item.title || 'Notification',
+        dateLabel: this.formatDate(item.createdAt)
+      }));
+
+      this.unreadNotifications = this.apiNotifications.filter((item) => !item.isRead).length;
+      return;
+    }
+
+    this.notifications = this.buildNotifications();
+    this.unreadNotifications = this.notifications.length;
+  }
+
+  private mapNotificationLevel(type: string | undefined): 'warning' | 'info' | 'success' {
+    const normalized = String(type ?? '').toLowerCase();
+    if (normalized === 'success') return 'success';
+    if (normalized === 'warning' || normalized === 'alert') return 'warning';
+    return 'info';
+  }
+
+  private resolveCurrentUserId(): number | null {
+    const userData = this.tokenService.getUserData();
+    const parsed = Number(userData?.userId ?? userData?.id ?? 0);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return null;
+    }
+
+    this.currentUserId = parsed;
+    return parsed;
   }
 
   private buildCalendar(): void {
@@ -800,21 +904,21 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   private mapPriority(complexity: number | undefined): { label: string; class: 'basse' | 'moyenne' | 'haute' | 'urgente' } {
     const value = Number(complexity ?? 1);
-    if (value >= 4) return { label: 'Urgent', class: 'urgente' };
-    if (value >= 3) return { label: 'High', class: 'haute' };
-    if (value >= 2) return { label: 'Medium', class: 'moyenne' };
-    return { label: 'Low', class: 'basse' };
+    if (value >= 4) return { label: 'Urgente', class: 'urgente' };
+    if (value >= 3) return { label: 'Haute', class: 'haute' };
+    if (value >= 2) return { label: 'Moyenne', class: 'moyenne' };
+    return { label: 'Basse', class: 'basse' };
   }
 
   private buildDelayLabel(endDate: string | undefined): string {
-    if (!endDate) return 'No deadline';
+    if (!endDate) return 'Aucune echeance';
     const due = new Date(endDate);
-    if (Number.isNaN(due.getTime())) return 'No deadline';
+    if (Number.isNaN(due.getTime())) return 'Aucune echeance';
     const now = new Date();
     const diffMs = due.getTime() - now.getTime();
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (days < 0) return `Late by ${Math.abs(days)}d`;
-    return `In ${days}d`;
+    if (days < 0) return `En retard de ${Math.abs(days)}j`;
+    return `Dans ${days}j`;
   }
 
   private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
@@ -830,10 +934,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   private getProjectStateLabel(state: ProjectState | undefined): string {
-    if (state === ProjectState.done || state === ProjectState.validated) return 'Done';
-    if (state === ProjectState.inProgress) return 'Active';
-    if (state === ProjectState.todo) return 'Paused';
-    return 'Pending';
+    if (state === ProjectState.done || state === ProjectState.validated) return 'Termine';
+    if (state === ProjectState.inProgress) return 'Actif';
+    if (state === ProjectState.todo) return 'En pause';
+    return 'En attente';
   }
 
   private getProjectStateClass(state: ProjectState | undefined): string {
@@ -845,10 +949,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   private getSprintStateLabel(value: unknown): string {
     const state = Number(value);
-    if (state === 2) return 'Active';
-    if (state === 3 || state === 4) return 'Done';
-    if (state === 1) return 'Planned';
-    return 'Pending';
+    if (state === 2) return 'Actif';
+    if (state === 3 || state === 4) return 'Termine';
+    if (state === 1) return 'Planifie';
+    return 'En attente';
   }
 
   private isStoryDone(value: unknown): boolean {
@@ -864,13 +968,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     if (!value) return '—';
     const date = new Date(value as string);
     if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('en-US');
+    return date.toLocaleDateString('fr-FR');
   }
 
   private extractTeamChips(project: ProjectEntity | undefined, managerName: string): string[] {
     const names: string[] = [];
-    if (managerName && managerName !== 'Unassigned') names.push(managerName.split(' ')[0]);
-    names.push(this.userName.split(' ')[0] || 'Me');
+    if (managerName && managerName !== 'Non assigne') names.push(managerName.split(' ')[0]);
+    names.push(this.userName.split(' ')[0] || 'Moi');
     if (project?.team?.name) names.push(project.team.name);
     return Array.from(new Set(names)).slice(0, 4);
   }
@@ -941,21 +1045,57 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   private startAutoRefresh(): void {
     this.stopAutoRefresh();
+    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
+
+    this.refreshTickerSubscription = interval(1000).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+
+      if (this.loading || this.isRefreshing) {
+        return;
+      }
+
+      this.nextRefreshInSeconds = Math.max(0, this.nextRefreshInSeconds - 1);
+      if (this.nextRefreshInSeconds === 0) {
+        this.refreshDashboardData();
+      }
+    });
+
     this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
       if (typeof document !== 'undefined' && document.hidden) {
         return;
       }
 
-      this.loadEmployeeData();
-      if (this.sidebarSection === 'settings') {
-        this.loadSettingsProfile();
+      if (this.loading || this.isRefreshing) {
+        return;
       }
+
+      this.refreshDashboardData();
+      this.refreshNotifications();
     });
   }
 
   private stopAutoRefresh(): void {
     this.autoRefreshSubscription?.unsubscribe();
     this.autoRefreshSubscription = null;
+    this.refreshTickerSubscription?.unsubscribe();
+    this.refreshTickerSubscription = null;
+  }
+
+  private refreshDashboardData(): void {
+    if (this.loading || this.isRefreshing) {
+      return;
+    }
+
+    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
+    this.isRefreshing = true;
+    this.loadEmployeeData();
+    this.refreshNotifications();
+
+    if (this.sidebarSection === 'settings') {
+      this.loadSettingsProfile();
+    }
   }
 
 }

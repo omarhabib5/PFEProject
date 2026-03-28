@@ -10,6 +10,7 @@ import { ProjectService, project, State } from '../../Page/Projet/Service/Projec
 import { TaskService, TaskDto } from '../../Page/Task/Service/TaskService';
 import { ServiceService, Service, CreateServiceDto, UpdateServiceDto } from '../../Page/Team/Service/ServiceService';
 import { TeamService, Team, TeamUser, Role } from '../../Page/Team/Service/TeamService';
+import { NotificationService } from '../../Page/Notification/Service/NotificationService';
 import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -57,6 +58,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   private taskService = inject(TaskService);
   private serviceService = inject(ServiceService);
   private teamService = inject(TeamService);
+  private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
 
   userName = 'Administrator';
@@ -86,7 +88,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   completedTasks = 0;
   inProgressTasks = 0;
   urgentTasks = 0;
-  unreadNotifications = 3;
+  unreadNotifications = 0;
 
   recentProjects: UiProjectCard[] = [];
   activeTeam: UserDto[] = [];
@@ -143,6 +145,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   private tasksPieChart?: Chart;
   private priorityBarChart?: Chart;
   private autoRefreshSubscription: Subscription | null = null;
+  private notificationCountSubscription: Subscription | null = null;
   private readonly autoRefreshMs = 15000;
 
   ngOnInit(): void {
@@ -168,6 +171,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     this.loadUsers();
     this.loadServices();
     this.loadTeams();
+    this.initializeNotifications();
     this.startAutoRefresh();
   }
 
@@ -179,6 +183,8 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = null;
   }
 
 
@@ -1113,11 +1119,38 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
       this.loadUsers();
       this.loadServices();
       this.loadTeams();
+      this.refreshNotifications();
     });
   }
 
   private stopAutoRefresh(): void {
     this.autoRefreshSubscription?.unsubscribe();
     this.autoRefreshSubscription = null;
+  }
+
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.unreadNotifications = count;
+      this.cdr.markForCheck();
+    });
+
+    this.refreshNotifications();
+  }
+
+  private refreshNotifications(): void {
+    const userId = this.resolveCurrentUserId();
+    if (!userId) {
+      this.unreadNotifications = 0;
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
+  }
+
+  private resolveCurrentUserId(): number | null {
+    const userData = this.tokenService.getUserData();
+    const parsed = Number(userData?.userId ?? userData?.id ?? 0);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
   }
 }
