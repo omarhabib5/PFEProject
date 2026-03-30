@@ -1,0 +1,79 @@
+<div class="login-page">
+  <div class="login-shell">
+    <aside class="login-side">
+      <div class="brand-block">
+        <h1>TaskFlow Pro</h1>
+        <p>Project Management</p>
+      </div>
+
+      <div class="side-content">
+        <h2>Bienvenue</h2>
+        <p>
+          Connectez-vous pour suivre vos projets, user stories et sprints dans la meme interface que vos dashboards.
+        </p>
+
+        <div class="role-chips">
+          <span class="chip">Admin</span>
+          <span class="chip">ServiceManager</span>
+          <span class="chip">ProjectManager</span>
+          <span class="chip">Employee</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="login-main">
+      <section class="login-card">
+        <header class="login-header">
+          <h3>Connexion</h3>
+          <p>Entrez vos identifiants pour acceder a votre espace.</p>
+        </header>
+
+        <div *ngIf="errorMessage" class="message error-message">
+          {{ errorMessage }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+          <div class="field">
+            <label for="email">Adresse email</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="vous@exemple.com"
+              [disabled]="isLoading"
+            />
+            <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Adresse email invalide</small>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label for="password">Mot de passe</label>
+            </div>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="Minimum 6 caracteres"
+              [disabled]="isLoading"
+            />
+            <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 caracteres requis</small>
+          </div>
+
+          <label class="remember-row" for="rememberMe">
+            <input id="rememberMe" type="checkbox" formControlName="rememberMe" [disabled]="isLoading" />
+            <span>Se souvenir de moi</span>
+          </label>
+
+          <button
+            type="submit"
+            class="submit-btn"
+            [disabled]="form.invalid || isLoading"
+          >
+            <ng-container *ngIf="!isLoading">Se connecter</ng-container>
+            <ng-container *ngIf="isLoading">Connexion...</ng-container>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+﻿using MediatR;
+using Projet.Domain.comment;
+
+namespace Projet.Domain.Command.Auth
+{
+    public class RegisterCommand : IRequest<AuthResponse>
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = "Employee";
+    }
+}
