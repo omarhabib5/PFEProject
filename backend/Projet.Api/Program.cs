@@ -81,6 +81,11 @@ builder.Services.AddAuthorization();
 var defaultConnection = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
+if (string.IsNullOrWhiteSpace(defaultConnection))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is missing. Set it in .env or appsettings.");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(defaultConnection,
         b => b.MigrationsAssembly("Projet.Api")));
