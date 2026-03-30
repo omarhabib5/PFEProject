@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: pfe-db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
+      MSSQL_PID: "Developer"
+    ports:
+      - "${MSSQL_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD:-YourStrong!Passw0rd}", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Projet.Api/Dockerfile
+    container_name: pfe-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+      UseHttpsRedirection: "false"
+      ConnectionStrings__DefaultConnection: Server=db;Database=${MSSQL_DB:-ProjetPFE};User Id=sa;Password=${SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True;
+
+    ports:
+      - "${BACKEND_PORT:-7219}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./Frontend/webApp
+      dockerfile: Dockerfile
+      args:
+        FRONTEND_API_URL: /api
+    container_name: pfe-frontend
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - backend
+
+volumes:
+  sqlserver_data:
