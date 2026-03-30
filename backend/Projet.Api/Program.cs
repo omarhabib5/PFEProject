@@ -11,6 +11,8 @@ using Projet.Domain.Interface;
 using Projet.Infrastructure.Repository;
 using Projet.Infrastructure.Service;
 
+LoadEnvFile();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
@@ -76,8 +78,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+var defaultConnection = Environment.GetEnvironmentVariable("DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseSqlServer(defaultConnection,
         b => b.MigrationsAssembly("Projet.Api")));
 
 builder.Services.AddScoped<IApplicationDbSet>(provider => provider.GetRequiredService<ApplicationDbContext>());
@@ -123,3 +128,42 @@ app.UseMiddleware<JwtMiddleware>();
 app.MapControllers();
 
 app.Run();
+
+static void LoadEnvFile()
+{
+    var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+    while (directory != null)
+    {
+        var envFilePath = Path.Combine(directory.FullName, ".env");
+        if (File.Exists(envFilePath))
+        {
+            foreach (var rawLine in File.ReadAllLines(envFilePath))
+            {
+                var line = rawLine.Trim();
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                {
+                    continue;
+                }
+
+                var separatorIndex = line.IndexOf('=');
+                if (separatorIndex <= 0)
+                {
+                    continue;
+                }
+
+                var key = line[..separatorIndex].Trim();
+                var value = line[(separatorIndex + 1)..].Trim().Trim('"');
+
+                if (!string.IsNullOrWhiteSpace(key) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                {
+                    Environment.SetEnvironmentVariable(key, value);
+                }
+            }
+
+            break;
+        }
+
+        directory = directory.Parent;
+    }
+}
