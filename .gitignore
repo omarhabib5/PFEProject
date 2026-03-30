@@ -1,0 +1,19 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# .NET build outputs
+**/bin/
+**/obj/
+
+# Node/Angular
+**/node_modules/
+
+# Logs and temp
+*.log
+*.tmp
+
+# Environment files
+.env

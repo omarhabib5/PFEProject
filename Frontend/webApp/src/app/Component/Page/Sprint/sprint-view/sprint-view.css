@@ -1,0 +1,83 @@
+.sprint-view {
+	max-width: 900px;
+	margin: 20px auto;
+	padding: 0 16px;
+}
+
+.btn-back {
+	border: none;
+	background: #e2e8f0;
+	color: #1e293b;
+	border-radius: 8px;
+	padding: 8px 12px;
+	cursor: pointer;
+	margin-bottom: 12px;
+}
+
+.card {
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	padding: 16px;
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: center;
+}
+
+.card-header h1 {
+	margin: 0;
+	font-size: 1.7rem;
+}
+
+.status {
+	background: #dbeafe;
+	color: #1d4ed8;
+	border-radius: 999px;
+	padding: 4px 10px;
+	font-weight: 700;
+	font-size: 0.8rem;
+}
+
+.description {
+	color: #334155;
+}
+
+.meta-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 10px;
+}
+
+.actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 14px;
+}
+
+.btn-primary,
+.btn-danger {
+	border: none;
+	border-radius: 8px;
+	padding: 8px 14px;
+	cursor: pointer;
+	color: #fff;
+	font-weight: 600;
+}
+
+.btn-primary {
+	background: #2563eb;
+}
+
+.btn-danger {
+	background: #dc2626;
+}
+
+.error {
+	color: #b91c1c;
+	margin: 8px 0;
+}
