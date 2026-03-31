@@ -450,17 +450,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.error = '';
   }
 
-  openEditServiceModal(service: Service): void {
-    const fallbackResponsibleId = Number(service.responsibleId ?? 0);
-    this.serviceModalMode = 'edit';
-    this.editingServiceId = Number(service.id);
-    this.newService = {
-      name: String(service.name ?? '').trim(),
-      responsibleId: this.currentResponsibleId ?? (fallbackResponsibleId > 0 ? fallbackResponsibleId : undefined)
-    };
-    this.showCreateModal = true;
-    this.error = '';
-  }
+
 
   closeServiceModal(): void {
     this.showCreateModal = false;
@@ -520,32 +510,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
-  deleteService(service: Service): void {
-    if (!service?.id) {
-      return;
-    }
 
-    if (!confirm(`Delete service "${service.name}"?`)) {
-      return;
-    }
-
-    this.error = '';
-    this.success = '';
-
-    this.serviceApi.deleteService(Number(service.id)).subscribe({
-      next: () => {
-        if (Number(this.selectedServiceId) === Number(service.id)) {
-          this.backToServiceList();
-        }
-        this.success = 'Service deleted successfully.';
-        this.loadServices();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Unable to delete service';
-      }
-    });
-  }
 
   openProjects(): void {
     this.router.navigate(['/ProjectManage'], {
