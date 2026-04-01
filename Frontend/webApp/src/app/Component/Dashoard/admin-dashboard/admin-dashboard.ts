@@ -1,4 +1,4 @@
-import {Component,OnInit,AfterViewInit,inject,ChangeDetectorRef} from '@angular/core';
+import {Component,OnDestroy,OnInit,AfterViewInit,inject,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,8 +14,10 @@ import { TeamService, Team, TeamUser, Role } from '../../Page/Team/Service/TeamS
 import { TeamManage } from '../../Page/Team/team-manage/team-manage';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
+import type { Notification } from '../../Page/Notifiation/Models/Notification.Model';
+import { Observable, Subscription, forkJoin, of } from 'rxjs';
+import { catchError, finalize, map } from 'rxjs/operators';
 
 type DashboardTab = 'dashboard' | 'services' | 'calendar' | 'users' | 'teams';
 
@@ -61,7 +63,7 @@ interface DeadlineNotification {
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
-export class AdminDashboard implements OnInit, AfterViewInit {
+export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -73,6 +75,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   private userStoryService = inject(UserStoryService);
   private serviceService = inject(ServiceService);
   private teamService = inject(TeamService);
+  private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
   teamManageComponent = TeamManage;
 
@@ -92,9 +95,12 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   tasks: TaskDto[] = [];
   sprints: Sprint[] = [];
   userStories: UserStoryDto[] = [];
+  notifications: Notification[] = [];
   deadlineNotifications: DeadlineNotification[] = [];
   showNotificationsPanel = false;
+  showDeadlineNotificationsPanel = false;
   private sentNotificationIds = new Set<string>();
+  private currentUserId: number | null = null;
 
   searchTerm = '';
   selectedStatus = 'all';
@@ -109,6 +115,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   inProgressTasks = 0;
   urgentTasks = 0;
   unreadNotifications = 0;
+  adminUnreadNotifications = 0;
 
   recentProjects: UiProjectCard[] = [];
   activeTeam: UserDto[] = [];
@@ -164,6 +171,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   private tasksPieChart?: Chart;
   private priorityBarChart?: Chart;
+  private adminNotificationsSubscription: Subscription | null = null;
 
   ngOnInit(): void {
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
@@ -181,8 +189,12 @@ export class AdminDashboard implements OnInit, AfterViewInit {
       this.userRole = userData.role;
     }
 
+    const userId = Number(userData?.userId ?? userData?.id ?? 0);
+    this.currentUserId = Number.isFinite(userId) && userId > 0 ? userId : null;
+
     this.setCurrentDate();
     this.buildCalendar();
+    this.initializeNotifications();
     this.loadProjects();
     this.loadTasks();
     this.loadSprints();
@@ -196,6 +208,11 @@ export class AdminDashboard implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.initCharts();
     }, 500);
+  }
+
+  ngOnDestroy(): void {
+    this.adminNotificationsSubscription?.unsubscribe();
+    this.adminNotificationsSubscription = null;
   }
 
 
@@ -327,6 +344,68 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         this.serviceManagerUsers = [];
         console.error(err);
       }
+    });
+  }
+
+  private initializeNotifications(): void {
+    const userId = this.currentUserId;
+    if (!userId) {
+      this.notifications = [];
+      this.adminUnreadNotifications = 0;
+      return;
+    }
+
+    this.adminNotificationsSubscription?.unsubscribe();
+    this.adminNotificationsSubscription = this.notificationService.notifications$.subscribe({
+      next: (items) => {
+        this.notifications = (items ?? []).slice(0, 8);
+        this.adminUnreadNotifications = (items ?? []).filter((item) => !item.isRead).length;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.notifications = [];
+        this.adminUnreadNotifications = 0;
+      }
+    });
+
+    this.refreshAdminNotifications();
+  }
+
+  private refreshAdminNotifications(): void {
+    const userId = this.currentUserId;
+    if (!userId) {
+      this.notifications = [];
+      this.adminUnreadNotifications = 0;
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
+  }
+
+  toggleAdminNotificationsPanel(): void {
+    this.showNotificationsPanel = !this.showNotificationsPanel;
+  }
+
+  toggleDeadlineNotificationsPanel(): void {
+    this.showDeadlineNotificationsPanel = !this.showDeadlineNotificationsPanel;
+  }
+
+  markAdminNotificationAsRead(notificationId: number): void {
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => this.refreshAdminNotifications(),
+      error: () => console.error('Unable to mark admin notification as read')
+    });
+  }
+
+  markAllAdminNotificationsAsRead(): void {
+    const userId = this.currentUserId;
+    if (!userId) {
+      return;
+    }
+
+    this.notificationService.markAllAsRead(userId).subscribe({
+      next: () => this.refreshAdminNotifications(),
+      error: () => console.error('Unable to mark all admin notifications as read')
     });
   }
 

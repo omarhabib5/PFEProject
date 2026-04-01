@@ -39,15 +39,22 @@
 
             <div class="topbar-right">
                 <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()" placeholder="Search..." />
-                <div class="notif" (click)="toggleNotificationsPanel()" title="Deadline notifications">
-                    🔔<span *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
-                    <div class="notif-panel" *ngIf="showNotificationsPanel">
-                        <p class="notif-title">Upcoming deadlines (≤ 3 days)</p>
-                        <div class="notif-item" *ngFor="let notif of deadlineNotifications | slice:0:8">
-                            <strong>{{ notif.title }}</strong>
-                            <small>{{ notif.message }}</small>
+                <div class="notif-group">
+                    <div class="notif" (click)="toggleAdminNotificationsPanel()" title="Notifications">
+                        🔔<span *ngIf="adminUnreadNotifications > 0">{{ adminUnreadNotifications }}</span>
+                        <div class="notif-panel notif-panel--messages" *ngIf="showNotificationsPanel">
+                            <div class="notif-panel-head">
+                                <p class="notif-title">Notifications</p>
+                                <button type="button" class="notif-action" (click)="markAllAdminNotificationsAsRead(); $event.stopPropagation()">
+                                    Tout lire
+                                </button>
+                            </div>
+                            <div class="notif-item clickable" *ngFor="let notif of notifications" (click)="markAdminNotificationAsRead(notif.id); $event.stopPropagation()">
+                                <strong>{{ notif.title }}</strong>
+                                <small>{{ notif.message }}</small>
+                            </div>
+                            <small class="notif-empty" *ngIf="notifications.length === 0">Aucune notification.</small>
                         </div>
-                        <small class="notif-empty" *ngIf="deadlineNotifications.length === 0">No upcoming deadlines.</small>
                     </div>
                 </div>
                 <div class="profile">
