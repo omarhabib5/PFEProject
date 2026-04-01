@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Projet.Application.Context;
+using Projet.Domain.Model;
 using Projet.Infrastructure.Service;
 
 namespace Projet.Api.BackgroundJobs
@@ -33,7 +33,7 @@ namespace Projet.Api.BackgroundJobs
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Service de notifications de fond en cours de démarrage...");
 
@@ -44,10 +44,10 @@ namespace Projet.Api.BackgroundJobs
                 dueTime: TimeSpan.Zero, 
                 period: TimeSpan.FromMinutes(UNREAD_REMINDER_CHECK_INTERVAL));
 
-            await Task.CompletedTask;
+            await System.Threading.Tasks.Task.CompletedTask;
         }
 
-        private async Task CheckAndSendNotificationsAsync()
+        private async System.Threading.Tasks.Task CheckAndSendNotificationsAsync()
         {
             try
             {
@@ -113,15 +113,63 @@ namespace Projet.Api.BackgroundJobs
             }
         }
 
-        private async Task SendUpcomingDeadlineAlertsAsync(INotificationService notificationService)
+        private async System.Threading.Tasks.Task SendUpcomingDeadlineAlertsAsync(INotificationService notificationService)
         {
-            
-            
-            
-            await Task.CompletedTask;
+            var now = DateTime.UtcNow;
+            var cutoff = now.AddDays(3);
+
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var upcomingTasks = await dbContext.Tasks
+                .Include(task => task.AssignedTo)
+                .Include(task => task.UserStory)
+                    .ThenInclude(userStory => userStory.Project)
+                .Where(task =>
+                    task.EndDate >= now &&
+                    task.EndDate <= cutoff &&
+                    task.Status != State.done &&
+                    task.Status != State.validated)
+                .ToListAsync();
+
+            foreach (var task in upcomingTasks)
+            {
+                var projectManagerId = task.UserStory?.Project?.ProjectManagerId;
+                if (!projectManagerId.HasValue || projectManagerId.Value <= 0)
+                {
+                    continue;
+                }
+
+                var assignedToId = task.AssignedToId ?? 0;
+
+                var alreadyNotified = await dbContext.Set<Notification>()
+                    .AnyAsync(notification =>
+                        notification.RelatedTaskId == task.Id &&
+                        notification.UserId == projectManagerId.Value &&
+                        notification.Type == NotificationType.TaskDeadlineApproaching &&
+                        notification.NewValue == "UPCOMING");
+
+                if (alreadyNotified)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    await notificationService.NotifyTaskDeadlineAsync(
+                        taskId: task.Id,
+                        assignedToId: assignedToId,
+                        projectManagerId: projectManagerId.Value,
+                        urgencyLevel: "UPCOMING");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erreur lors de l'envoi de l'alerte de date limite pour la tache {TaskId}", task.Id);
+                }
+            }
         }
 
-        public override async Task StopAsync(CancellationToken cancellationToken)
+        public override async System.Threading.Tasks.Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Service de notifications de fond en cours d'arrêt...");
             _timer?.Change(Timeout.Infinite, 0);

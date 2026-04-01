@@ -242,7 +242,9 @@ namespace Projet.Infrastructure.Service
             var link = $"/tasks/{taskId}";
             var notificationType = urgencyLevel == "OVERDUE" ? NotificationType.TaskOverdue : NotificationType.TaskDeadlineApproaching;
 
-            var assignedUser = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == assignedToId);
+            var assignedUser = assignedToId > 0
+                ? await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == assignedToId)
+                : null;
             var pmMessage = $"La tâche '{task.Title}' assignée à {assignedUser?.FirstName ?? "l'utilisateur"} " +
                             (urgencyLevel == "OVERDUE" ? "a dépassé sa date limite!" : "approche de sa date limite!");
 
@@ -254,7 +256,7 @@ namespace Projet.Infrastructure.Service
                 category: NotificationCategory.Deadline,
                 link: link,
                 relatedTaskId: taskId,
-                relatedUserId: assignedToId,
+                relatedUserId: assignedToId > 0 ? assignedToId : null,
                 newValue: urgencyLevel);
 
             return pmNotification;
