@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject,ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { TokenService } from '../../Auth/Service/token.service';
@@ -26,8 +27,10 @@ import { TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { Router } from '@angular/router';
 import { ChangePasswordRequest } from '../../Auth/model/auth.model';
+import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
+import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
 
-type DashboardSection = 'projects' | 'calendar' | 'settings';
+type DashboardSection = 'projects' | 'calendar' | 'notifications' | 'settings';
 type ProjectTab = 'userStories' | 'sprints' | 'tasks';
 
 interface SprintFormModel {
@@ -86,7 +89,7 @@ interface CalendarDayCell {
   imports: [CommonModule, FormsModule],
   templateUrl: './chef-projet-dashboard.html',
 })
-export class ChefProjetDashboard implements OnInit {
+export class ChefProjetDashboard implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private taskService = inject(TaskService);
@@ -96,6 +99,10 @@ export class ChefProjetDashboard implements OnInit {
   private tokenService = inject(TokenService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
+
+  private notificationCountSubscription: Subscription | null = null;
+  private notificationsSubscription: Subscription | null = null;
 
   private currentManagerId: number | null = null;
   private scopedProjectIds = new Set<number>();
@@ -113,6 +120,8 @@ export class ChefProjetDashboard implements OnInit {
   isLoggingOut = false;
   error = '';
   success = '';
+  notificationCount = 0;
+  notifications: AppNotification[] = [];
 
   projects: project[] = [];
   sprints: Sprint[] = [];
@@ -156,7 +165,15 @@ export class ChefProjetDashboard implements OnInit {
   selectedCalendarDateIso = this.toIsoDateLocal(new Date());
 
   ngOnInit(): void {
+    this.initializeNotifications();
     this.loadDashboardData();
+  }
+
+  ngOnDestroy(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationCountSubscription = null;
+    this.notificationsSubscription?.unsubscribe();
+    this.notificationsSubscription = null;
   }
 
   logout(): void {
@@ -184,7 +201,41 @@ export class ChefProjetDashboard implements OnInit {
 
   setSection(section: DashboardSection): void {
     this.activeSection = section;
+    if (section === 'notifications') {
+      this.refreshNotifications();
+    }
     this.clearMessages();
+  }
+
+  markNotificationAsRead(notificationId: number): void {
+    this.clearMessages();
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => {
+        this.success = 'Notification marquee bien recue.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Unable to mark notification as read.';
+      }
+    });
+  }
+
+  markAllNotificationsAsRead(): void {
+    const userId = this.resolveCurrentManagerId();
+    if (!userId) {
+      return;
+    }
+
+    this.clearMessages();
+    this.notificationService.markAllAsRead(userId).subscribe({
+      next: () => {
+        this.success = 'Toutes les notifications sont marquees bien recues.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Unable to mark all notifications as read.';
+      }
+    });
   }
 
   submitPasswordChange(): void {
@@ -1503,6 +1554,34 @@ export class ChefProjetDashboard implements OnInit {
   private clearMessages(): void {
     this.error = '';
     this.success = '';
+  }
+
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
+
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.notificationCount = count;
+      this.cdr.detectChanges();
+    });
+
+    this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
+      this.notifications = items;
+      this.cdr.detectChanges();
+    });
+
+    this.refreshNotifications();
+  }
+
+  private refreshNotifications(): void {
+    const userId = this.resolveCurrentManagerId();
+    if (!userId) {
+      this.notificationCount = 0;
+      this.notifications = [];
+      return;
+    }
+
+    this.notificationService.loadNotifications(userId);
   }
 
   private getCurrentProjectTeamId(): number {

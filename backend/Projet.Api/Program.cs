@@ -1,10 +1,11 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Projet.Api.Middlware;
+using Projet.Api.BackgroundJobs;
 using Projet.Application.Context;
 using Projet.Domain.comment;
 using Projet.Domain.Interface;
@@ -99,6 +100,20 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+
+
+
+
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+
+builder.Services.AddHostedService<NotificationBackgroundJobService>();
+
+
+
+
+
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Load("Projet.Domain")));
 
 builder.Services.AddCors(options =>
@@ -112,6 +127,21 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+        app.Logger.LogInformation("Migrations EF appliquées avec succès.");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Impossible d'appliquer les migrations au démarrage. L'application continue, mais certaines fonctionnalités BD peuvent échouer tant que la base n'est pas prête.");
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {

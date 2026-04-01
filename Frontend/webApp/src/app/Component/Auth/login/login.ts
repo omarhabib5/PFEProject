@@ -18,7 +18,9 @@ export class Login implements OnInit {
   private roleNavigator = inject(RoleGuard);
 
   errorMessage: string = '';
+  infoMessage: string = '';
   isLoading: boolean = false;
+  isForgotLoading: boolean = false;
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -63,6 +65,43 @@ export class Login implements OnInit {
           this.errorMessage = this.extractErrorMessage(error);
         }
       });
+  }
+
+  onForgotPassword(): void {
+    if (this.isLoading || this.isForgotLoading) {
+      return;
+    }
+
+    const emailControl = this.form.get('email');
+    emailControl?.markAsTouched();
+
+    if (!emailControl || emailControl.invalid) {
+      this.errorMessage = 'Entrez une adresse email valide pour reinitialiser le mot de passe.';
+      this.infoMessage = '';
+      return;
+    }
+
+    const email = (emailControl.value ?? '').toString().trim();
+    if (!email) {
+      this.errorMessage = 'Adresse email obligatoire.';
+      this.infoMessage = '';
+      return;
+    }
+
+    this.isForgotLoading = true;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.auth.forgotPassword({ email }).subscribe({
+      next: () => {
+        this.isForgotLoading = false;
+        this.infoMessage = 'Si un compte existe avec cet email, un lien de reinitialisation a ete envoye.';
+      },
+      error: (error: unknown) => {
+        this.isForgotLoading = false;
+        this.errorMessage = this.extractErrorMessage(error);
+      }
+    });
   }
 
   private setLoadingState(isLoading: boolean): void {

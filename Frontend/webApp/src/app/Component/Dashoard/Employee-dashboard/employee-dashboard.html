@@ -325,13 +325,46 @@
         </section>
 
         <section *ngIf="!loading && sidebarSection === 'notifications'" class="page">
-            <article class="card" *ngFor="let item of notifications">
-                <div class="notif-line" [ngClass]="item.level">
-                    <strong>{{ item.message }}</strong>
-                    <small>{{ item.dateLabel }}</small>
+            <article class="card">
+                <div class="card-head">
+                    <h3>Notifications</h3>
+                    <button type="button" (click)="markAllNotificationsAsRead()" [disabled]="unreadNotifications === 0">
+                        Tout marquer bien recu
+                    </button>
                 </div>
             </article>
-            <article class="card" *ngIf="notifications.length === 0">
+
+            <article class="card" *ngFor="let item of apiNotifications">
+                <div class="notif-line" [ngClass]="mapNotificationLevel(item.type)">
+                    <strong>{{ item.title || 'Notification' }}</strong>
+                    <small>{{ formatDate(item.createdAt) }}</small>
+                </div>
+                <p class="notif-message">{{ item.message }}</p>
+                <div class="notif-actions">
+                    <span *ngIf="item.isRead" class="ack-badge">
+                        <span class="ack-icon" aria-hidden="true">&#10003;</span>
+                        Bien recu
+                    </span>
+                    <span *ngIf="!item.isRead" class="ack-badge pending">
+                        <span class="ack-icon" aria-hidden="true">&#128276;</span>
+                        Non lu
+                    </span>
+                    <button type="button" *ngIf="!item.isRead" (click)="markNotificationAsRead(item.id)">
+                        Marquer bien recu
+                    </button>
+                </div>
+            </article>
+
+            <ng-container *ngIf="apiNotifications.length === 0 && notifications.length > 0">
+                <article class="card" *ngFor="let item of notifications">
+                    <div class="notif-line" [ngClass]="item.level">
+                        <strong>{{ item.message }}</strong>
+                        <small>{{ item.dateLabel }}</small>
+                    </div>
+                </article>
+            </ng-container>
+
+            <article class="card" *ngIf="apiNotifications.length === 0 && notifications.length === 0">
                 <div class="empty">Aucune notification</div>
             </article>
         </section>

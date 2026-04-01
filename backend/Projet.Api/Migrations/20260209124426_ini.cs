@@ -4,16 +4,16 @@
 
 namespace Projet.Api.Migrations
 {
-    /// <inheritdoc />
-    public partial class ini : Migration
+    
+    public partial class Ini : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
 
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
 

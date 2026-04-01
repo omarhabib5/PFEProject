@@ -5,76 +5,65 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Projet.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AutoMigration_20260324 : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Name",
-                table: "Tasks",
-                newName: "Title");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'[Tasks]', N'U') IS NULL
+    THROW 50000, 'Table [Tasks] was not found.', 1;
 
-            migrationBuilder.RenameColumn(
-                name: "EstimationDuration",
-                table: "Tasks",
-                newName: "EstimatedHours");
+IF COL_LENGTH('Tasks', 'Name') IS NOT NULL AND COL_LENGTH('Tasks', 'Title') IS NULL
+    EXEC sp_rename N'[dbo].[Tasks].[Name]', N'Title', 'COLUMN';
 
-            migrationBuilder.RenameColumn(
-                name: "taskState",
-                table: "Tasks",
-                newName: "Status");
+IF COL_LENGTH('Tasks', 'EstimationDuration') IS NOT NULL AND COL_LENGTH('Tasks', 'EstimatedHours') IS NULL
+    EXEC sp_rename N'[dbo].[Tasks].[EstimationDuration]', N'EstimatedHours', 'COLUMN';
 
-            migrationBuilder.AddColumn<int>(
-                name: "ActualHours",
-                table: "Tasks",
-                type: "int",
-                nullable: true);
+IF COL_LENGTH('Tasks', 'taskState') IS NOT NULL AND COL_LENGTH('Tasks', 'Status') IS NULL
+    EXEC sp_rename N'[dbo].[Tasks].[taskState]', N'Status', 'COLUMN';
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Tasks",
-                type: "datetime2",
-                nullable: false,
-                defaultValueSql: "GETUTCDATE()");
+IF COL_LENGTH('Tasks', 'ActualHours') IS NULL
+    ALTER TABLE [Tasks] ADD [ActualHours] int NULL;
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "Tasks",
-                type: "datetime2",
-                nullable: true);
+IF COL_LENGTH('Tasks', 'CreatedAt') IS NULL
+    ALTER TABLE [Tasks] ADD [CreatedAt] datetime2 NOT NULL CONSTRAINT [DF_Tasks_CreatedAt] DEFAULT (GETUTCDATE());
+
+IF COL_LENGTH('Tasks', 'UpdatedAt') IS NULL
+    ALTER TABLE [Tasks] ADD [UpdatedAt] datetime2 NULL;
+");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ActualHours",
-                table: "Tasks");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'[Tasks]', N'U') IS NOT NULL
+BEGIN
+    IF COL_LENGTH('Tasks', 'UpdatedAt') IS NOT NULL
+        ALTER TABLE [Tasks] DROP COLUMN [UpdatedAt];
 
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Tasks");
+    IF COL_LENGTH('Tasks', 'CreatedAt') IS NOT NULL
+    BEGIN
+        IF EXISTS (SELECT 1 FROM sys.default_constraints WHERE name = 'DF_Tasks_CreatedAt')
+            ALTER TABLE [Tasks] DROP CONSTRAINT [DF_Tasks_CreatedAt];
+        ALTER TABLE [Tasks] DROP COLUMN [CreatedAt];
+    END
 
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "Tasks");
+    IF COL_LENGTH('Tasks', 'ActualHours') IS NOT NULL
+        ALTER TABLE [Tasks] DROP COLUMN [ActualHours];
 
-            migrationBuilder.RenameColumn(
-                name: "Title",
-                table: "Tasks",
-                newName: "Name");
+    IF COL_LENGTH('Tasks', 'Title') IS NOT NULL AND COL_LENGTH('Tasks', 'Name') IS NULL
+        EXEC sp_rename N'[dbo].[Tasks].[Title]', N'Name', 'COLUMN';
 
-            migrationBuilder.RenameColumn(
-                name: "EstimatedHours",
-                table: "Tasks",
-                newName: "EstimationDuration");
+    IF COL_LENGTH('Tasks', 'EstimatedHours') IS NOT NULL AND COL_LENGTH('Tasks', 'EstimationDuration') IS NULL
+        EXEC sp_rename N'[dbo].[Tasks].[EstimatedHours]', N'EstimationDuration', 'COLUMN';
 
-            migrationBuilder.RenameColumn(
-                name: "Status",
-                table: "Tasks",
-                newName: "taskState");
+    IF COL_LENGTH('Tasks', 'Status') IS NOT NULL AND COL_LENGTH('Tasks', 'taskState') IS NULL
+        EXEC sp_rename N'[dbo].[Tasks].[Status]', N'taskState', 'COLUMN';
+END
+");
         }
     }
 }

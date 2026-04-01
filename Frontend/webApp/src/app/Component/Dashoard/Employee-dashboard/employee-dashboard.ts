@@ -139,7 +139,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   sprintCards: UiSprintCard[] = [];
   userStories: UserStoryDto[] = [];
   notifications: UiNotification[] = [];
-  private apiNotifications: Notification[] = [];
+  apiNotifications: Notification[] = [];
 
   statusFilter: 'all' | TaskBucket = 'all';
   priorityFilter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente' = 'all';
@@ -826,7 +826,42 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.unreadNotifications = this.notifications.length;
   }
 
-  private mapNotificationLevel(type: string | undefined): 'warning' | 'info' | 'success' {
+  markNotificationAsRead(notificationId: number): void {
+    this.error = '';
+    this.settingsSuccess = '';
+
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => {
+        this.settingsSuccess = 'Notification marquee bien recue.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Impossible de marquer la notification comme recue.';
+      }
+    });
+  }
+
+  markAllNotificationsAsRead(): void {
+    const userId = this.currentUserId ?? this.resolveCurrentUserId();
+    if (!userId) {
+      return;
+    }
+
+    this.error = '';
+    this.settingsSuccess = '';
+
+    this.notificationService.markAllAsRead(userId).subscribe({
+      next: () => {
+        this.settingsSuccess = 'Toutes les notifications sont marquees bien recues.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Impossible de marquer toutes les notifications comme recues.';
+      }
+    });
+  }
+
+  mapNotificationLevel(type: string | undefined): 'warning' | 'info' | 'success' {
     const normalized = String(type ?? '').toLowerCase();
     if (normalized === 'success') return 'success';
     if (normalized === 'warning' || normalized === 'alert') return 'warning';

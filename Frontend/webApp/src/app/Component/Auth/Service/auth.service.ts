@@ -5,6 +5,8 @@ import {
   AuthResponse,
   ChangePasswordRequest,
   LoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
   UpdateProfileImageRequest,
   UserProfile
 } from '../model/auth.model';
@@ -43,6 +45,24 @@ export class AuthService {
   changePassword(payload: ChangePasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/change-password`, payload).pipe(
       catchError((error: unknown) => throwError(() => this.toDomainError(error, 'Unable to change password.')))
+    );
+  }
+
+  forgotPassword(request: ForgotPasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/forgot-password`, request).pipe(
+      catchError((error) => {
+        console.error('Forgot password error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/reset-password`, request).pipe(
+      catchError((error) => {
+        console.error('Reset password error:', error);
+        return throwError(() => error);
+      })
     );
   }
 

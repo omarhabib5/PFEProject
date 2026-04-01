@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Projet.Application.DTOs.Auth;
 using Projet.Domain.Command.Auth;
 using Projet.Domain.Querie.Auth;
+using System.Security.Claims;
 
 namespace Projet.Api.Controller
 {
@@ -16,6 +17,19 @@ namespace Projet.Api.Controller
         public AuthController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        private int? GetAuthenticatedUserId()
+        {
+            var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+
+            if (int.TryParse(claimValue, out var userIdFromClaims))
+            {
+                return userIdFromClaims;
+            }
+
+            return HttpContext.Items["UserId"] as int?;
         }
 
         [HttpPost("register")]
@@ -134,13 +148,62 @@ namespace Projet.Api.Controller
             }
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            try
+            {
+                var command = new ForgotPasswordCommand
+                {
+                    Email = request.Email
+                };
+
+                await _mediator.Send(command);
+
+                return Ok(new { message = "If the account exists, a reset link has been sent." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing forgot password", error = ex.Message });
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            try
+            {
+                var command = new ResetPasswordCommand
+                {
+                    Token = request.Token,
+                    NewPassword = request.NewPassword,
+                    ConfirmNewPassword = request.ConfirmNewPassword
+                };
+
+                await _mediator.Send(command);
+                return Ok(new { message = "Password has been reset successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while resetting password", error = ex.Message });
+            }
+        }
+
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
             try
             {
-                var userId = HttpContext.Items["UserId"] as int?;
+                var userId = GetAuthenticatedUserId();
 
                 if (userId == null)
                 {
@@ -159,6 +222,47 @@ namespace Projet.Api.Controller
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred during logout", error = ex.Message });
+            }
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            try
+            {
+                var userId = GetAuthenticatedUserId();
+                if (userId == null)
+                {
+                    return Unauthorized(new { message = "User not authenticated" });
+                }
+
+                var command = new ChangePasswordCommand
+                {
+                    UserId = userId.Value,
+                    CurrentPassword = request.CurrentPassword,
+                    NewPassword = request.NewPassword,
+                    ConfirmNewPassword = request.ConfirmNewPassword
+                };
+
+                await _mediator.Send(command);
+                return Ok(new { message = "Password changed successfully" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while changing password", error = ex.Message });
             }
         }
 
@@ -218,7 +322,7 @@ namespace Projet.Api.Controller
         {
             try
             {
-                var userId = HttpContext.Items["UserId"] as int?;
+                var userId = GetAuthenticatedUserId();
 
                 if (userId == null)
                 {

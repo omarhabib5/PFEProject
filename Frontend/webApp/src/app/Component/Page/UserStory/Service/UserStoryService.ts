@@ -80,31 +80,105 @@ export class UserStoryService {
     );
   }
 
+  private toOptionalNumber(value: unknown): number | undefined {
+    if (value === null || value === undefined || value === '') {
+      return undefined;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  private normalizeCreatePayload(request: CreateUserStoryRequest): {
+    title: string;
+    description: string;
+    acceptanceCriteria: string;
+    storyPoints: number;
+    priority: number;
+    sprintId: number;
+    assignedToId?: number;
+  } {
+    const title = (request.title ?? request.name ?? '').trim();
+    const description = (request.description ?? title).trim();
+
+    const storyPointsSource = this.toOptionalNumber(request.storyPoints)
+      ?? this.toOptionalNumber(request.estimatedDuration)
+      ?? 1;
+    const prioritySource = this.toOptionalNumber(request.priority) ?? 1;
+
+    const sprintId = this.toOptionalNumber(request.sprintId) ?? 0;
+    const assignedToId = this.toOptionalNumber(request.assignedToId);
+
+    return {
+      title,
+      description,
+      acceptanceCriteria: (request.acceptanceCriteria ?? '').trim(),
+      storyPoints: this.clamp(Math.round(storyPointsSource), 1, 100),
+      priority: this.clamp(Math.round(prioritySource), 1, 5),
+      sprintId,
+      ...(assignedToId !== undefined ? { assignedToId } : {})
+    };
+  }
+
+  private normalizeUpdatePayload(request: UpdateUserStoryRequest): {
+    title?: string;
+    description?: string;
+    acceptanceCriteria?: string;
+    storyPoints?: number;
+    priority?: number;
+    assignedToId?: number;
+  } {
+    const title = (request.title ?? request.name ?? '').trim();
+    const description = (request.description ?? '').trim();
+    const acceptanceCriteria = (request.acceptanceCriteria ?? '').trim();
+
+    const storyPoints = this.toOptionalNumber(request.storyPoints);
+    const priority = this.toOptionalNumber(request.priority);
+    const assignedToId = this.toOptionalNumber(request.assignedToId);
+
+    return {
+      ...(title ? { title } : {}),
+      ...(description ? { description } : {}),
+      ...(acceptanceCriteria ? { acceptanceCriteria } : {}),
+      ...(storyPoints !== undefined ? { storyPoints: this.clamp(Math.round(storyPoints), 1, 100) } : {}),
+      ...(priority !== undefined ? { priority: this.clamp(Math.round(priority), 1, 5) } : {}),
+      ...(assignedToId !== undefined ? { assignedToId } : {})
+    };
+  }
+
   create(request: CreateUserStoryRequest): Observable<number> {
+    const payload = this.normalizeCreatePayload(request);
+
     return this.withFallback(
       this.http.post<number>(
         this.apiUrl,
-        request,
+        payload,
         { headers: this.getAuthHeaders() }
       ),
       () => this.http.post<number>(
         this.fallbackApiUrl,
-        request,
+        payload,
         { headers: this.getAuthHeaders() }
       )
     );
   }
 
   update(id: number, request: UpdateUserStoryRequest): Observable<void> {
+    const payload = this.normalizeUpdatePayload(request);
+
     return this.withFallback(
       this.http.put<void>(
         `${this.apiUrl}/${id}`,
-        request,
+        payload,
         { headers: this.getAuthHeaders() }
       ),
       () => this.http.put<void>(
         `${this.fallbackApiUrl}/${id}`,
-        request,
+        payload,
         { headers: this.getAuthHeaders() }
       )
     );

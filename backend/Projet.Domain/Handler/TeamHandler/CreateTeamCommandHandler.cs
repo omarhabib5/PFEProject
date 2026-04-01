@@ -26,7 +26,7 @@ namespace Projet.Domain.Handler.TeamHandler
             var team = new Model.Team
             {
                 name = request.name,
-                ServiceId = request.ServiceId  // ⚠️ AJOUTER
+                ServiceId = request.ServiceId  
             };
 
             _context.Teams.Add(team);

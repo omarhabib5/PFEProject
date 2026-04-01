@@ -32,6 +32,10 @@
           {{ errorMessage }}
         </div>
 
+        <div *ngIf="infoMessage" class="message success-message">
+          {{ infoMessage }}
+        </div>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
           <div class="field">
             <label for="email">Adresse email</label>
@@ -48,6 +52,15 @@
           <div class="field">
             <div class="field-head">
               <label for="password">Mot de passe</label>
+              <button
+                type="button"
+                class="forgot-link"
+                [disabled]="isLoading || isForgotLoading"
+                (click)="onForgotPassword()"
+              >
+                <ng-container *ngIf="!isForgotLoading">Mot de passe oublie ?</ng-container>
+                <ng-container *ngIf="isForgotLoading">Envoi...</ng-container>
+              </button>
             </div>
             <input
               id="password"

@@ -16,7 +16,7 @@ namespace Projet.Domain.Handler.TeamUser
 
         public async Task<int> Handle(CreateTeamUserCommand request, CancellationToken cancellationToken)
         {
-            // Validate that User exists
+            
             var userExists = await _context.Users.AnyAsync(u => u.Id == request.UserId, cancellationToken);
             if (!userExists)
             {
@@ -29,7 +29,7 @@ namespace Projet.Domain.Handler.TeamUser
                 throw new KeyNotFoundException($"Team with ID {request.TeamId.Value} not found.");
             }
 
-            // Check if TeamUser already exists
+            
             var existingTeamUser = await _context.Set<Model.TeamUser>()
                 .FirstOrDefaultAsync(tu => tu.UserId == request.UserId && tu.TeamId == request.TeamId && tu.LeftAt == null, cancellationToken);
 

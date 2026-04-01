@@ -17,12 +17,14 @@ import { TeamManage } from './Component/Page/Team/team-manage/team-manage';
 import { TaskManager } from './Component/Page/Task/task-manager/task-manager';
 import { UserStoryManagerComponent } from './Component/Page/UserStory/user-story-manager/user-story-manager';
 import { KanbanComponent } from './Component/kanban/kanban';
+import { ResetPassword } from './Component/Auth/reset-password/reset-password';
 import { AppRole } from './Component/Auth/model/auth.model';
 import { authGuard, guestGuard, roleGuard } from './Component/Auth/Service/auth.guards';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', component: Login, canActivate: [guestGuard] },
     { path: 'login', component: Login, canActivate: [guestGuard] },
+    { path: 'reset-password', component: ResetPassword, canActivate: [guestGuard] },
     {
         path: '',
         canActivate: [authGuard],

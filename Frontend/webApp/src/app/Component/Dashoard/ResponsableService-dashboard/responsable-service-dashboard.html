@@ -48,7 +48,7 @@
                 <div class="search-box">
                     <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" />
                 </div>
-                <div class="notification">{{ notificationCount }}</div>
+                <button class="notification" type="button" (click)="openNotifications()">{{ notificationCount }}</button>
                 <div class="user-block">
                     <strong>{{ userName }}</strong>
                     <span>{{ userRole }}</span>
@@ -153,6 +153,8 @@
                     <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Team &
                         membres</button>
                     <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendrier</button>
+                    <button [class.active]="activeTab === 'notifications'"
+                        (click)="setTab('notifications')">Notifications</button>
                     <button [class.active]="activeTab === 'settings'" (click)="setTab('settings')">Settings</button>
                 </div>
 
@@ -395,6 +397,57 @@
                             </ng-template>
                         </aside>
                     </div>
+                </div>
+
+                <div *ngIf="activeTab === 'notifications'" class="dashboard-tab-content">
+                    <div class="section-title-row">
+                        <h4>Notifications</h4>
+                        <button class="secondary-btn" type="button" (click)="markAllNotificationsAsRead()"
+                            [disabled]="notificationCount === 0">
+                            Tout marquer bien recu
+                        </button>
+                    </div>
+
+                    <div class="team-table-wrap" *ngIf="notifications.length > 0; else noNotifications">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of notifications">
+                                    <td>{{ item.title || 'Notification' }}</td>
+                                    <td>{{ item.message }}</td>
+                                    <td>{{ formatDate(item.createdAt) }}</td>
+                                    <td>
+                                        <span *ngIf="item.isRead" class="ack-badge">
+                                            <span class="ack-icon" aria-hidden="true">&#10003;</span>
+                                            Bien recu
+                                        </span>
+                                        <span *ngIf="!item.isRead" class="status-chip status-pending">
+                                            <span class="ack-icon" aria-hidden="true">&#128276;</span>
+                                            Non lu
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="tiny-btn" type="button" *ngIf="!item.isRead"
+                                            (click)="markNotificationAsRead(item.id)">
+                                            Marquer bien recu
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <ng-template #noNotifications>
+                        <p class="empty-team">No notifications available.</p>
+                    </ng-template>
                 </div>
 
                 <div *ngIf="activeTab === 'settings'" class="dashboard-tab-content settings-tab-content">

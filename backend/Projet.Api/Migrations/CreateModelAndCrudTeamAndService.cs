@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Projet.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class InitialCreateWithOptionalFields : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -319,7 +319,7 @@ namespace Projet.Api.Migrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

@@ -4,10 +4,10 @@
 
 namespace Projet.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class MakeTokenNullable : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -19,7 +19,7 @@ namespace Projet.Api.Migrations
                 oldType: "nvarchar(max)");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(

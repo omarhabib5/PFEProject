@@ -4,10 +4,10 @@
 
 namespace Projet.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class RemovePasswordAndPasswordSalt : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -19,7 +19,7 @@ namespace Projet.Api.Migrations
                 table: "Users");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(

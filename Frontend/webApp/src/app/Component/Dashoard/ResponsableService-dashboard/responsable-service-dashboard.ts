@@ -14,6 +14,7 @@ import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
+import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
 
 interface TeamMemberRow {
   fullName: string;
@@ -54,11 +55,12 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   private currentResponsibleId: number | null = null;
   private autoRefreshSubscription: Subscription | null = null;
   private notificationCountSubscription: Subscription | null = null;
+  private notificationsSubscription: Subscription | null = null;
   private readonly autoRefreshMs = 15000;
 
   activeSection: 'services' | 'calendar' = 'services';
   serviceViewMode: 'list' | 'detail' = 'list';
-  activeTab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings' = 'dashboard';
 
   loading = false;
   error = '';
@@ -85,6 +87,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   userName = '';
   userRole = '';
   notificationCount = 0;
+  notifications: AppNotification[] = [];
   profileImageUrl = '';
 
   currentMonth = new Date();
@@ -156,6 +159,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.stopAutoRefresh();
     this.notificationCountSubscription?.unsubscribe();
     this.notificationCountSubscription = null;
+    this.notificationsSubscription?.unsubscribe();
+    this.notificationsSubscription = null;
   }
 
   get pageTitle(): string {
@@ -412,7 +417,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.backToServiceList();
   }
 
-  setTab(tab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'settings'): void {
+  setTab(tab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings'): void {
     this.activeTab = tab;
     if (tab === 'dashboard') {
       this.loadUsersForSelectedService();
@@ -424,6 +429,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     }
     if (tab === 'settings') {
       this.loadUserSettings();
+    }
+    if (tab === 'notifications') {
+      this.refreshNotifications();
     }
   }
 
@@ -440,6 +448,56 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
     this.activeTab = 'settings';
     this.loadUserSettings();
+  }
+
+  openNotifications(): void {
+    if (this.serviceViewMode === 'list') {
+      if (this.services.length > 0) {
+        this.selectedServiceId = Number(this.services[0].id);
+        this.serviceViewMode = 'detail';
+      } else {
+        this.error = 'No service available to open notifications.';
+        return;
+      }
+    }
+
+    this.activeTab = 'notifications';
+    this.refreshNotifications();
+  }
+
+  markNotificationAsRead(notificationId: number): void {
+    this.error = '';
+    this.success = '';
+
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => {
+        this.success = 'Notification marquee bien recue.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Unable to mark notification as read.';
+      }
+    });
+  }
+
+  markAllNotificationsAsRead(): void {
+    const userId = this.resolveCurrentResponsibleId();
+    if (!userId) {
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+
+    this.notificationService.markAllAsRead(userId).subscribe({
+      next: () => {
+        this.success = 'Toutes les notifications sont marquees bien recues.';
+        this.refreshNotifications();
+      },
+      error: () => {
+        this.error = 'Unable to mark all notifications as read.';
+      }
+    });
   }
 
   openCreateServiceModal(): void {
@@ -1420,8 +1478,15 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   private initializeNotifications(): void {
     this.notificationCountSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
+
     this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
       this.notificationCount = count;
+      this.cdr.markForCheck();
+    });
+
+    this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
+      this.notifications = items;
       this.cdr.markForCheck();
     });
 
@@ -1432,6 +1497,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     const userId = this.resolveCurrentResponsibleId();
     if (!userId) {
       this.notificationCount = 0;
+      this.notifications = [];
       return;
     }
 

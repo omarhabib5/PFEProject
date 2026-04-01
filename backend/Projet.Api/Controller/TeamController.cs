@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command.Team;
 using Projet.Domain.Command.TeamUser;
@@ -96,7 +96,7 @@ namespace Projet.Api.Controller
 
         #region Team Members Management
 
-        // GET: api/teams/{teamId}/members
+        
         [HttpGet("{teamId}/members")]
         public async Task<IActionResult> GetMembers(int teamId)
         {
@@ -104,7 +104,7 @@ namespace Projet.Api.Controller
             return Ok(members);
         }
 
-        // GET: api/teams/{teamId}/members/leaders
+        
         [HttpGet("{teamId}/members/leaders")]
         public async Task<IActionResult> GetLeaders(int teamId)
         {
@@ -112,7 +112,7 @@ namespace Projet.Api.Controller
             return Ok(leaders);
         }
 
-        // GET: api/teams/{teamId}/members/employees
+        
         [HttpGet("{teamId}/members/employees")]
         public async Task<IActionResult> GetEmployees(int teamId)
         {
@@ -120,11 +120,11 @@ namespace Projet.Api.Controller
             return Ok(employees);
         }
 
-        // POST: api/teams/{teamId}/members
+        
         [HttpPost("{teamId}/members")]
         public async Task<IActionResult> AddMember(int teamId, [FromBody] CreateTeamUserCommand command)
         {
-            // Ensure teamId from route matches command
+            
             command.TeamId = teamId;
 
             try
@@ -142,11 +142,11 @@ namespace Projet.Api.Controller
             }
         }
 
-        // PUT: api/teams/{teamId}/members/{memberId}/role
+        
         [HttpPut("{teamId}/members/{memberId}/role")]
         public async Task<IActionResult> UpdateMemberRole(int teamId, int memberId, [FromBody] UpdateTeamUserCommand command)
         {
-            // Ensure memberId from route matches command
+            
             command.Id = memberId;
 
             try
@@ -160,7 +160,7 @@ namespace Projet.Api.Controller
             }
         }
 
-        // DELETE: api/teams/{teamId}/members/{memberId}
+        
         [HttpDelete("{teamId}/members/{memberId}")]
         public async Task<IActionResult> RemoveMember(int teamId, int memberId)
         {

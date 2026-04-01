@@ -1,7 +1,9 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command.User;
 using Projet.Domain.Querie.User;
+using Projet.Infrastructure.Service;
+using System.Security.Claims;
 
 namespace Projet.Api.Controller
 {
@@ -10,10 +12,12 @@ namespace Projet.Api.Controller
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly INotificationService _notificationService;
 
-        public UserController(IMediator mediator)
+        public UserController(IMediator mediator, INotificationService notificationService)
         {
             _mediator = mediator;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -60,11 +64,36 @@ namespace Projet.Api.Controller
 
             try
             {
+                var existingUser = await _mediator.Send(new GetUserByIdQuery(id));
+                var oldRole = existingUser?.role;
+
                 var user = await _mediator.Send(command);
                 
                 if (user == null)
                 {
                     return NotFound(new { message = "User not found" });
+                }
+
+                if (oldRole.HasValue && oldRole.Value != user.role)
+                {
+                    var actorClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? User.FindFirst("sub")?.Value;
+                    var changedByUserId = int.TryParse(actorClaim, out var parsedUserId)
+                        ? parsedUserId
+                        : user.Id;
+
+                    try
+                    {
+                        await _notificationService.NotifyUserRoleChangedAsync(
+                            changedUserId: user.Id,
+                            changedByUserId: changedByUserId,
+                            oldRole: oldRole.Value.ToString(),
+                            newRole: user.role.ToString());
+                    }
+                    catch
+                    {
+                        
+                    }
                 }
 
                 return Ok(user);

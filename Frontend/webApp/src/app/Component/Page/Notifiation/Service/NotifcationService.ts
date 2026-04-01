@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { Observable, BehaviorSubject, interval } from "rxjs";
+import { Observable, BehaviorSubject, interval, forkJoin, of } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 import { environment } from "../../../environment";
 import { Notification, CreateNotificationDto, NotificationType } from "../Models/Notification.Model";
 
@@ -9,7 +10,7 @@ import { Notification, CreateNotificationDto, NotificationType } from "../Models
     providedIn: "root",
 })
 export class NotificationService {
-    private apiUrl = `${environment.apiUrl}/Notification`;
+    private apiUrl = `${environment.apiUrl}/notification`;
     private http = inject(HttpClient);
     
     private unreadCountSubject = new BehaviorSubject<number>(0);
@@ -24,21 +25,35 @@ export class NotificationService {
 
  
     getUserNotifications(userId: number): Observable<Notification[]> {
-        return this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}`);
+        // API récente: GET /api/notification (utilisateur courant depuis token)
+        // API legacy: GET /api/notification/user/{userId}
+        return this.http.get<Notification[]>(`${this.apiUrl}`).pipe(
+            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}`)),
+            map((items) => this.normalizeNotifications(items))
+        );
     }
 
     /**
      * Get unread notifications for a user
      */
     getUnreadNotifications(userId: number): Observable<Notification[]> {
-        return this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}/unread`);
+        // API récente: GET /api/notification?onlyUnread=true
+        // API legacy: GET /api/notification/user/{userId}/unread
+        return this.http.get<Notification[]>(`${this.apiUrl}?onlyUnread=true`).pipe(
+            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}/unread`)),
+            map((items) => this.normalizeNotifications(items))
+        );
     }
 
     /**
      * Mark a notification as read
      */
     markAsRead(notificationId: number): Observable<void> {
-        return this.http.patch<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {});
+        // API récente: PUT /api/notification/{id}/mark-as-read
+        // API legacy: PATCH /api/notification/{id}/mark-as-read
+        return this.http.put<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}).pipe(
+            catchError(() => this.http.patch<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}))
+        );
     }
 
     /**
@@ -75,33 +90,20 @@ export class NotificationService {
      * Mark all notifications as read
      */
     markAllAsRead(userId: number): Observable<void> {
-        return new Observable((observer) => {
-            const notifications = this.notificationsSubject.value;
-            const unreadNotifications = notifications.filter(n => !n.isRead);
-            
-            if (unreadNotifications.length === 0) {
-                observer.next();
-                observer.complete();
-                return;
-            }
+        const unreadNotifications = this.notificationsSubject.value.filter((n) => !n.isRead);
 
-            let completed = 0;
-            unreadNotifications.forEach(notification => {
-                this.markAsRead(notification.id).subscribe({
-                    next: () => {
-                        completed++;
-                        if (completed === unreadNotifications.length) {
-                            this.loadNotifications(userId);
-                            observer.next();
-                            observer.complete();
-                        }
-                    },
-                    error: (error) => {
-                        observer.error(error);
-                    }
-                });
-            });
-        });
+        if (unreadNotifications.length === 0) {
+            return of(void 0);
+        }
+
+        return forkJoin(unreadNotifications.map((n) => this.markAsRead(n.id))).pipe(
+            switchMap(() => this.getUserNotifications(userId)),
+            map((notifications) => {
+                this.notificationsSubject.next(notifications);
+                this.unreadCountSubject.next(notifications.filter((n) => !n.isRead).length);
+                return void 0;
+            })
+        );
     }
 
     /**
@@ -117,14 +119,22 @@ export class NotificationService {
      * Get notification type color for UI
      */
     getNotificationTypeColor(type: NotificationType | string): string {
-        switch (type?.toString().toLowerCase()) {
+        switch (this.normalizeType(type)) {
             case 'success':
                 return '#4ade80'; // Green
             case 'warning':
                 return '#facc15'; // Yellow
             case 'alert':
+            case 'taskoverdue':
                 return '#ef4444'; // Red
+            case 'taskdeadlineapproaching':
+                return '#f97316'; // Orange
             case 'info':
+            case 'taskstatuschanged':
+            case 'ticketstatuschanged':
+            case 'userstoryadded':
+            case 'projectadded':
+            case 'userrolechanged':
             default:
                 return '#60a5fa'; // Blue
         }
@@ -134,16 +144,79 @@ export class NotificationService {
      * Get notification type icon
      */
     getNotificationTypeIcon(type: NotificationType | string): string {
-        switch (type?.toString().toLowerCase()) {
+        switch (this.normalizeType(type)) {
             case 'success':
                 return '✓';
             case 'warning':
                 return '⚠';
             case 'alert':
+            case 'taskoverdue':
                 return '✕';
+            case 'taskdeadlineapproaching':
+                return '⏰';
+            case 'taskstatuschanged':
+            case 'ticketstatuschanged':
+                return '↻';
+            case 'projectadded':
+                return '📁';
+            case 'userstoryadded':
+                return '📝';
+            case 'userrolechanged':
+                return '👤';
             case 'info':
             default:
                 return 'ⓘ';
         }
+    }
+
+    private normalizeNotifications(items: Notification[] | null | undefined): Notification[] {
+        if (!items || items.length === 0) {
+            return [];
+        }
+
+        return items
+            .map((item) => ({
+                ...item,
+                type: this.normalizeType(item.type),
+                createdAt: item.createdAt ?? new Date().toISOString()
+            }))
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    private normalizeType(type: NotificationType | string | number | null | undefined): string {
+        if (type === null || type === undefined) {
+            return 'info';
+        }
+
+        if (typeof type === 'number') {
+            switch (type) {
+                case 0:
+                    return 'info';
+                case 1:
+                    return 'success';
+                case 2:
+                    return 'warning';
+                case 3:
+                    return 'alert';
+                case 4:
+                    return 'taskstatuschanged';
+                case 5:
+                    return 'userstoryadded';
+                case 6:
+                    return 'projectadded';
+                case 7:
+                    return 'userrolechanged';
+                case 8:
+                    return 'taskdeadlineapproaching';
+                case 9:
+                    return 'taskoverdue';
+                case 10:
+                    return 'ticketstatuschanged';
+                default:
+                    return 'info';
+            }
+        }
+
+        return String(type).trim().toLowerCase();
     }
 }
