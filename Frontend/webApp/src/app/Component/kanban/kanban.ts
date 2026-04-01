@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   CdkDragDrop,
@@ -8,6 +8,7 @@ import {
   transferArrayItem
 } from '@angular/cdk/drag-drop';
 import { AuthService } from '../Auth/Service/auth.service'
+import { TokenService } from '../Auth/Service/token.service';
 import { TaskDto, TaskService, TaskState, UpdateTaskRequest } from '../Page/Task/Service/TaskService';
 import { UserStoryService } from '../Page/UserStory/Service/UserStoryService';
 import { UserApiService, UserDto } from '../Page/Team/Service/UserApiService';
@@ -22,10 +23,13 @@ import { catchError, forkJoin, of } from 'rxjs';
 })
 
 export class KanbanComponent implements OnInit {
+  @Input() employeeMode = false;
   private readonly projectContextStorageKey = 'kanban:lastProjectId';
+  private currentUserId: number | null = null;
 
   constructor(
     private auth: AuthService,
+    private tokenService: TokenService,
     private router: Router,
     private route: ActivatedRoute,
     private taskService: TaskService,
@@ -69,6 +73,8 @@ export class KanbanComponent implements OnInit {
   projectId: number | null = null;
 
   ngOnInit(): void {
+    this.currentUserId = this.resolveCurrentUserId();
+
     const projectIdParam = this.route.snapshot.queryParamMap.get('projectId');
     this.projectId = this.resolveProjectId(projectIdParam);
 
@@ -130,6 +136,12 @@ export class KanbanComponent implements OnInit {
 
     const movedTask = event.previousContainer.data[event.previousIndex];
     if (!movedTask) {
+      return;
+    }
+
+    if (this.employeeMode && !this.isCurrentUserTask(movedTask)) {
+      this.error = 'Vous ne pouvez modifier que vos propres taches.';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -238,7 +250,11 @@ export class KanbanComponent implements OnInit {
     this.columns.forEach((column) => (column.tasks = []));
     this.cdr.detectChanges();
 
-    (Array.isArray(tasks) ? tasks : []).forEach((task) => {
+    const visibleTasks = this.employeeMode
+      ? (Array.isArray(tasks) ? tasks : []).filter((task) => this.isCurrentUserTask(task))
+      : (Array.isArray(tasks) ? tasks : []);
+
+    visibleTasks.forEach((task) => {
       const taskStatus = this.normalizeTaskStatus(task.status);
       const column = this.columns.find((item) => this.columnIdToStatus(item.id) === taskStatus);
       if (column) {
@@ -337,6 +353,35 @@ export class KanbanComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private resolveCurrentUserId(): number | null {
+    const user = this.tokenService.getUserData();
+    const fromUserData = Number(user?.userId ?? user?.id ?? 0);
+    if (Number.isFinite(fromUserData) && fromUserData > 0) {
+      return fromUserData;
+    }
+
+    const payload = this.tokenService.getTokenPayload();
+    const fromNameId = Number((payload?.['nameid'] as string | number | undefined) ?? 0);
+    if (Number.isFinite(fromNameId) && fromNameId > 0) {
+      return fromNameId;
+    }
+
+    const fromSub = Number((payload?.['sub'] as string | number | undefined) ?? 0);
+    if (Number.isFinite(fromSub) && fromSub > 0) {
+      return fromSub;
+    }
+
+    return null;
+  }
+
+  private isCurrentUserTask(task: TaskDto): boolean {
+    if (!this.currentUserId) {
+      return false;
+    }
+
+    return Number(task.assignedToId ?? 0) === this.currentUserId;
   }
 }
 

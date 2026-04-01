@@ -1,10 +1,10 @@
 <div class="kanban-page">
     <header class="kanban-header">
         <div class="kanban-title-wrap">
-            <h1>Kanban Board</h1>
-            <p>Track your tasks and progress</p>
+            <h1>{{ employeeMode ? 'Mon Kanban' : 'Kanban Board' }}</h1>
+            <p>{{ employeeMode ? 'Modifiez le statut de vos taches uniquement' : 'Track your tasks and progress' }}</p>
         </div>
-        <div class="kanban-actions">
+        <div class="kanban-actions" *ngIf="!employeeMode">
             <a class="ghost-button" routerLink="/TaskManage" [queryParams]="hasProjectContext() ? { projectId: projectId } : null">Task Manager</a>
             <button type="button" class="ghost-button" (click)="goToProjectDetails()" [disabled]="!hasProjectContext()">Project Details</button>
  

@@ -14,9 +14,10 @@ import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
 import { Notification } from '../../Page/Notifiation/Models/Notification.Model';
+import { KanbanComponent } from '../../kanban/kanban';
 
 type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'settings';
-type EmployeeTab = 'overview' | 'tasks' | 'projects' | 'sprints';
+type EmployeeTab = 'overview' | 'tasks' | 'kanban' | 'projects' | 'sprints';
 type TaskBucket = 'todo' | 'inProgress' | 'review' | 'done';
 
 interface UiTask {
@@ -78,7 +79,7 @@ interface CalendarCell {
 @Component({
   selector: 'app-employee-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, KanbanComponent],
   templateUrl: './employee-dashboard.html',
   styleUrl: './employee-dashboard.css',
 })

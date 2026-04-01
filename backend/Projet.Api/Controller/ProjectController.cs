@@ -9,6 +9,7 @@ using Projet.Infrastructure.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Projet.Api.Controller
@@ -59,12 +60,15 @@ namespace Projet.Api.Controller
                 var users = await _mediator.Send(new GetAllUsersQuery());
                 var serviceManagerId = users.FirstOrDefault(u => u.role == UserRole.ServiceManager)?.Id;
                 var adminUserId = users.FirstOrDefault(u => u.role == UserRole.Admin)?.Id;
+                var creatorClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+                var createdByUserId = int.TryParse(creatorClaim, out var parsedCreatorId) ? parsedCreatorId : (int?)null;
 
                 await _notificationService.NotifyProjectAddedAsync(
                     projectId: projectId,
                     projectManagerId: command.ProjectManagerId,
                     serviceManagerId: serviceManagerId,
-                    adminUserId: adminUserId);
+                    adminUserId: adminUserId,
+                    createdByUserId: createdByUserId);
             }
             catch
             {

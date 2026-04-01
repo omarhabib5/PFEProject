@@ -225,6 +225,11 @@
 	padding: 1rem;
 }
 
+.kanban-panel {
+	padding: 0.5rem;
+	overflow: hidden;
+}
+
 .loading {
 	margin: 1rem;
 	border-radius: var(--radius);

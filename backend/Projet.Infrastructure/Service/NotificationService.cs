@@ -26,7 +26,7 @@ namespace Projet.Infrastructure.Service
             int assignedToId);
 
         System.Threading.Tasks.Task<Notification> NotifyProjectAddedAsync(int projectId, int projectManagerId,
-            int? serviceManagerId = null, int? adminUserId = null);
+            int? serviceManagerId = null, int? adminUserId = null, int? createdByUserId = null);
 
         System.Threading.Tasks.Task<Notification> NotifyUserRoleChangedAsync(int changedUserId, int changedByUserId, 
             string oldRole, string newRole);
@@ -147,7 +147,7 @@ namespace Projet.Infrastructure.Service
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyProjectAddedAsync(int projectId, int projectManagerId,
-            int? serviceManagerId = null, int? adminUserId = null)
+            int? serviceManagerId = null, int? adminUserId = null, int? createdByUserId = null)
         {
             var project = await _context.Set<Project>().FirstOrDefaultAsync(p => p.id == projectId);
             if (project == null)
@@ -155,6 +155,15 @@ namespace Projet.Infrastructure.Service
 
             var link = $"/projects/{projectId}";
             var message = $"Un nouveau projet '{project.name}' a été créé.";
+
+            if (createdByUserId.HasValue)
+            {
+                var creator = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == createdByUserId.Value);
+                if (creator != null)
+                {
+                    message = $"Un nouveau projet '{project.name}' a été créé par {creator.FirstName} {creator.LastName} ({creator.role}).";
+                }
+            }
 
             
             var pmNotification = await CreateNotificationAsync(
@@ -182,7 +191,7 @@ namespace Projet.Infrastructure.Service
             {
                 await CreateNotificationAsync(
                     userId: adminUserId.Value,
-                    title: "Nouveau Projet Créé (Admin)",
+                    title: "Nouveau Projet Créé",
                     message: message,
                     type: NotificationType.ProjectAdded,
                     category: NotificationCategory.ProjectUpdate,

@@ -75,6 +75,7 @@
             <section class="tabs-row">
                 <button [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Vue generale</button>
                 <button [class.active]="activeTab === 'tasks'" (click)="setTab('tasks')">Mes taches</button>
+                <button [class.active]="activeTab === 'kanban'" (click)="setTab('kanban')">Kanban</button>
                 <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Mes projets</button>
                 <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints et stories</button>
             </section>
@@ -257,6 +258,12 @@
                     <div class="chips">
                         <span *ngFor="let chip of project.teamChips">{{ chip }}</span>
                     </div>
+                </article>
+            </section>
+
+            <section *ngIf="activeTab === 'kanban'" class="page">
+                <article class="card kanban-panel">
+                    <app-kanban [employeeMode]="true"></app-kanban>
                 </article>
             </section>
 
