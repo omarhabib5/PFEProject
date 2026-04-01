@@ -221,9 +221,7 @@ export class TaskManager implements OnInit {
     });
   }
 
-  openTask(task: TaskDto): void {
-    this.router.navigate(['/task/view', task.id]);
-  }
+
 
   deleteTask(task: TaskDto, event: Event): void {
     event.stopPropagation();

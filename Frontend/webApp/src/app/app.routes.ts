@@ -9,7 +9,7 @@ import { servicepage } from './Component/Page/service-page/service-page';
 import { ProjectView } from './Component/Page/Projet/project-view/project-view';
 import { SprintView } from './Component/Page/Sprint/sprint-view/sprint-view';
 import { TeamView } from './Component/Page/Team/team-view/team-view';
-import { TaskView } from './Component/Page/Task/task-view/task-view';
+
 import { UserStoryViewComponent } from './Component/Page/UserStory/user-story-view/user-story-view';
 import { ProjectManager } from './Component/Page/Projet/project-manager/project-manager';
 import { SprintManager } from './Component/Page/Sprint/sprint-manager/sprint-manager';
@@ -64,8 +64,7 @@ export const routes: Routes = [
             { path: 'SprintView', component: SprintView },
             { path: 'sprint/view/:id', component: SprintView },
             { path: 'TeamView', component: TeamView },
-            { path: 'TaskView', component: TaskView },
-            { path: 'task/view/:id', component: TaskView },
+
             { path: 'UserStoryView', component: UserStoryViewComponent },
             { path: 'userstory/view/:id', component: UserStoryViewComponent },
 

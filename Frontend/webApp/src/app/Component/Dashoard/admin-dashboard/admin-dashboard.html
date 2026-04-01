@@ -17,6 +17,9 @@
         <button class="menu-item" [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">
             <span>👥</span> Users
         </button>
+        <button class="menu-item" [class.active]="activeTab === 'teams'" (click)="setActiveTab('teams')">
+            <span>👥</span> Teams
+        </button>
   
 
         <div class="sidebar-bottom">
@@ -29,7 +32,7 @@
             <div>
                 <h1>
                     {{ activeTab === 'dashboard' ? 'Dashboard' : activeTab === 'services' ? 'Services & Projects'
-                    : activeTab === 'calendar' ? 'Calendar' : 'Users' }}
+                    : activeTab === 'calendar' ? 'Calendar' : activeTab === 'users' ? 'Users' : 'Teams' }}
                 </h1>
                 <p>{{ currentDate }}</p>
             </div>
@@ -260,6 +263,10 @@
                     </div>
                 </article>
             </div>
+        </section>
+        <section class="page" *ngIf="activeTab ==='teams'">
+            <ng-container *ngComponentOutlet="teamManageComponent"></ng-container>
+
         </section>
 
     </main>

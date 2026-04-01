@@ -11,12 +11,13 @@ import { TaskService, TaskDto } from '../../Page/Task/Service/TaskService';
 import { SprintService, Sprint, State as SprintState } from '../../Page/Sprint/Service/SprintService';
 import { ServiceService, Service, CreateServiceDto, UpdateServiceDto } from '../../Page/Team/Service/ServiceService';
 import { TeamService, Team, TeamUser, Role } from '../../Page/Team/Service/TeamService';
+import { TeamManage } from '../../Page/Team/team-manage/team-manage';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-type DashboardTab = 'dashboard' | 'services' | 'calendar' | 'users';
+type DashboardTab = 'dashboard' | 'services' | 'calendar' | 'users' | 'teams';
 
 interface UiProjectCard {
   id: number;
@@ -73,6 +74,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   private serviceService = inject(ServiceService);
   private teamService = inject(TeamService);
   private cdr = inject(ChangeDetectorRef);
+  teamManageComponent = TeamManage;
 
   userName = 'Administrator';
   userRole = 'Admin';
@@ -165,7 +167,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
-    if (tabParam === 'services' || tabParam === 'dashboard' || tabParam === 'calendar' || tabParam === 'users') {
+    if (tabParam === 'services' || tabParam === 'dashboard' || tabParam === 'calendar' || tabParam === 'users' || tabParam === 'teams') {
       this.activeTab = tabParam;
     }
 
