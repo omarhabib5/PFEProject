@@ -429,96 +429,165 @@
     grid-template-columns: repeat(7, minmax(0, 1fr))
 }
 
+.calendar-head {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem 0;
+    border-radius: 8px 8px 0 0;
+}
+
 .calendar-head span {
     text-align: center;
-    padding: .5rem 0;
+    padding: .8rem 0;
     font-weight: 700;
-    color: #334155
+    color: #ffffff;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .day {
-    min-height: 150px;
-    border: 1px solid #e2e8f0;
-    padding: .4rem;
+    min-height: 160px;
+    border: 2px solid #e2e8f0;
+    padding: .6rem;
     position: relative;
-    background: #fff
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+}
+
+.day:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);
 }
 
 .day.project-end-day {
-    border-color: #fca5a5;
-    box-shadow: inset 0 0 0 1px #fecaca;
+    border-color: #f87171;
+    box-shadow: inset 0 0 0 1px #fca5a5, 0 4px 12px rgba(248, 113, 113, 0.1);
+    background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+}
+
+.day.project-end-day:hover {
+    box-shadow: inset 0 0 0 1px #fca5a5, 0 8px 16px rgba(248, 113, 113, 0.2);
 }
 
 .day.outside {
     background: #f8fafc;
-    color: #94a3b8
+    color: #cbd5e1;
+    opacity: 0.6;
+}
+
+.day.outside:hover {
+    cursor: default;
+    transform: none;
+    box-shadow: none;
 }
 
 .dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 999px;
-    background: #22c55e;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     position: absolute;
     right: 8px;
-    top: 8px
+    top: 8px;
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .calendar-projects {
-    margin-top: .35rem;
+    margin-top: .5rem;
     display: flex;
     flex-direction: column;
-    gap: .25rem;
-    max-height: 108px;
+    gap: .35rem;
+    max-height: 120px;
     overflow-y: auto;
-    padding-right: .15rem;
+    padding-right: .2rem;
 }
 
 .calendar-project-item {
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
-    padding: .22rem .32rem;
+    gap: 2px;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 10px;
+    padding: .35rem .45rem;
+    transition: all 0.2s ease;
+}
+
+.calendar-project-item:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+    border-color: #93c5fd;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
 }
 
 .calendar-project-item.project-end {
-    background: #fef2f2;
+    background: linear-gradient(135deg, #fef2f2 0%, #fef9f3 100%);
     border-color: #fca5a5;
+}
+
+.calendar-project-item.project-end:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fed7aa 100%);
+    border-color: #f87171;
+    box-shadow: 0 4px 8px rgba(248, 113, 113, 0.1);
 }
 
 .calendar-project-item.project-end strong {
     color: #991b1b;
+    font-weight: 700;
 }
 
 .calendar-project-item.project-end small {
     color: #b91c1c;
+    font-weight: 600;
 }
 
 .calendar-project-item strong {
-    font-size: .7rem;
-    line-height: 1.1;
+    font-size: .75rem;
+    line-height: 1.2;
     color: #1e3a8a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 700;
 }
 
 .calendar-project-item small {
-    font-size: .64rem;
-    line-height: 1.1;
+    font-size: .68rem;
+    line-height: 1.2;
     color: #1d4ed8;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 600;
 }
 
 .calendar-project-more {
     color: #475569;
-    font-size: .67rem;
-    font-weight: 600;
+    font-size: .75rem;
+    font-weight: 700;
+    padding: .2rem .35rem;
+    background: #f1f5f9;
+    border-radius: 6px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.calendar-project-more:hover {
+    background: #e2e8f0;
+    color: #1e293b;
 }
 
 .user-grid .project-card {
