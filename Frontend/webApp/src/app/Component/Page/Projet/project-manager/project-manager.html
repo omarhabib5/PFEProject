@@ -315,7 +315,7 @@
           </div>
         </div>
 
-        <button type="button" class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
+        <button *ngIf="canViewKanban" type="button" class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
          See the Kanban board for tasks
         </button>
       </div>

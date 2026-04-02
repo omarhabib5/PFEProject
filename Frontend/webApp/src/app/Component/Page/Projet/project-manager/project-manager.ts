@@ -9,6 +9,8 @@ import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
 import { SprintService, Sprint, CreateSprintDto, UpdateSprintDto, State as SprintState } from '../../Sprint/Service/SprintService';
 import { UserStoryService } from '../../UserStory/Service/UserStoryService';
 import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../UserStory/Models/userstory.model';
+import { TokenService } from '../../../Auth/Service/token.service';
+import { AppRole } from '../../../Auth/model/auth.model';
 
 @Component({
   selector: 'app-project-manager',
@@ -26,6 +28,7 @@ export class ProjectManager implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private tokenService = inject(TokenService);
   
   projects: project[] = [];
   allProjects: project[] = [];
@@ -63,6 +66,10 @@ export class ProjectManager implements OnInit {
   });
   error: string | null = null;
   successMessage: string | null = null;
+
+  get canViewKanban(): boolean {
+    return this.tokenService.getUserRole() !== AppRole.ServiceManager;
+  }
 
  
   newProject: any = {
@@ -394,6 +401,11 @@ export class ProjectManager implements OnInit {
 
   
   openKanbanBoard(): void {
+    if (!this.canViewKanban) {
+      this.error = 'Le tableau Kanban n est pas disponible pour le chef de service.';
+      return;
+    }
+
     const projectId = this.selectedProject?.id;
     this.router.navigate(['/kanban'], { queryParams: projectId ? { projectId } : {} });
   }
