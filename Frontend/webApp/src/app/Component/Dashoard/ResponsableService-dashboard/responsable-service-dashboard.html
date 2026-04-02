@@ -367,10 +367,11 @@
                                     (click)="day.inCurrentMonth && selectCalendarDay(day.iso)">
                                     <div class="calendar-day-head">
                                         <span>{{ day.day }}</span>
-                                        <small *ngIf="day.hasTask">{{ day.taskCount }}</small>
+                                        <small *ngIf="day.hasTask || day.hasProject">{{ day.taskCount + day.projectDeadlineCount }}</small>
                                     </div>
-                                    <div class="calendar-day-events" *ngIf="day.hasTask">
+                                    <div class="calendar-day-events" *ngIf="day.hasTask || day.hasProject">
                                         <p class="calendar-event-pill">{{ day.taskCount }} task(s)</p>
+                                        <p class="calendar-event-pill" *ngIf="day.hasProject">{{ day.projectDeadlineCount }} project deadline(s)</p>
                                     </div>
                                 </button>
                             </div>
@@ -381,7 +382,13 @@
                             <p class="calendar-details-sub">Planned task details</p>
 
                             <div class="calendar-event-list"
-                                *ngIf="selectedCalendarDayTasks.length > 0; else noCalendarTasks">
+                                *ngIf="selectedCalendarDayTasks.length > 0 || selectedCalendarDayProjectDeadlines.length > 0; else noCalendarTasks">
+                                <article *ngFor="let project of selectedCalendarDayProjectDeadlines" class="calendar-event-card cal-task-validated">
+                                    <span class="calendar-event-type">Project deadline</span>
+                                    <h5>{{ project.name }}</h5>
+                                    <p>{{ getProjectStatusLabel(project) }}</p>
+                                    <small>Deadline: {{ formatDate(project.endDate) }}</small>
+                                </article>
                                 <article *ngFor="let task of selectedCalendarDayTasks" class="calendar-event-card"
                                     [class]="'calendar-event-card ' + getCalendarTaskStateClass(task.status)">
                                     <span class="calendar-event-type">Task</span>

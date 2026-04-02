@@ -99,6 +99,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     isToday: boolean;
     inCurrentMonth: boolean;
     hasProject: boolean;
+    projectDeadlineCount: number;
     hasTask: boolean;
     taskCount: number;
   }> = [];
@@ -329,6 +330,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         return false;
       }
       return selectedIso >= startIso && selectedIso <= endIso;
+    });
+  }
+
+  get selectedCalendarDayProjectDeadlines(): ProjectEntity[] {
+    const selectedIso = this.selectedCalendarDateIso;
+    return this.selectedServiceProjects.filter((project) => {
+      const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
+      return !!deadlineIso && deadlineIso === selectedIso;
     });
   }
 
@@ -1229,15 +1238,21 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         isToday,
         inCurrentMonth,
         hasProject: false,
+        projectDeadlineCount: 0,
         hasTask: false,
         taskCount: 0,
       });
     }
 
-    const projectDates = this.selectedServiceProjects
-      .map((project) => this.getSafeIsoDate(project.endDate as Date | string | null | undefined))
-      .filter((iso) => !!iso)
-      .map((iso) => this.parseToLocalDate(iso));
+    const projectDeadlineCountByIso: Record<string, number> = {};
+    this.selectedServiceProjects.forEach((project) => {
+      const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
+      if (!deadlineIso) {
+        return;
+      }
+
+      projectDeadlineCountByIso[deadlineIso] = (projectDeadlineCountByIso[deadlineIso] ?? 0) + 1;
+    });
 
     const taskCountByIso: Record<string, number> = {};
     this.serviceTasks.forEach((task) => {
@@ -1264,13 +1279,15 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       if (!cell.inCurrentMonth || cell.day <= 0) return cell;
       const cellDate = new Date(year, month, cell.day);
       const iso = this.toIsoDateLocal(cellDate);
-      const hasProject = projectDates.some((date) =>
-        date.getFullYear() === cellDate.getFullYear()
-        && date.getMonth() === cellDate.getMonth()
-        && date.getDate() === cellDate.getDate()
-      );
+      const projectDeadlineCount = projectDeadlineCountByIso[iso] ?? 0;
       const taskCount = taskCountByIso[iso] ?? 0;
-      return { ...cell, hasProject, hasTask: taskCount > 0, taskCount };
+      return {
+        ...cell,
+        hasProject: projectDeadlineCount > 0,
+        projectDeadlineCount,
+        hasTask: taskCount > 0,
+        taskCount
+      };
     });
   }
 
