@@ -120,7 +120,7 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   adminUnreadNotifications = 0;
 
   recentProjects: UiProjectCard[] = [];
-  activeTeam: UserDto[] = [];
+  activeTeam: Team[] = [];
 
   showAddUserForm = false;
   showEditUserForm = false;
@@ -171,9 +171,17 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   calendarCells: CalendarCell[] = [];
   calendarProjectsByDate: Record<string, CalendarProjectEntry[]> = {};
 
+
 private projectStatusPieChart?: Chart;
 private projectProgressBarChart?: Chart;
 private adminNotificationsSubscription: Subscription | null = null;
+
+
+  private tasksPieChart?: Chart;
+  private priorityBarChart?: Chart;
+
+
+
 
   ngOnInit(): void {
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
@@ -341,7 +349,6 @@ private adminNotificationsSubscription: Subscription | null = null;
         this.users = data;
         this.serviceManagerUsers = data.filter((user) => this.isServiceManagerRole(user.role));
         this.totalUsers = data.length;
-        this.activeTeam = data.slice(0, 3);
            this.cdr.detectChanges();
       },
       error: (err) => {
@@ -429,9 +436,16 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.teamService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
+        this.activeTeam = data.slice(0, 3);
+        this.cdr.detectChanges();
       },
       error: (err) => console.error(err)
     });
+  }
+
+  getServiceNameById(serviceId?: number): string {
+    const service = this.services.find((item) => Number(item.id) === Number(serviceId ?? -1));
+    return service?.name ?? 'No service assigned';
   }
 
 

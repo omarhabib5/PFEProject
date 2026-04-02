@@ -107,13 +107,13 @@
 
             <div class="bottom-grid">
                 <div class="card">
-                    <h3>active Team</h3>
-                    <div class="line-item" *ngFor="let member of activeTeam">
+                    <h3>Active Teams</h3>
+                    <div class="line-item" *ngFor="let team of activeTeam">
                         <div class="line-main">
-                            <strong>{{ member.firstName }} {{ member.lastName }}</strong>
-                            <span class="badge">{{ getRoleDisplay(member.role) }}</span>
+                            <strong>{{ team.name }}</strong>
+                            <span class="badge">Team</span>
                         </div>
-                        <small>{{ member.email }}</small>
+                        <small>{{ getServiceNameById(team.serviceId) }}</small>
                     </div>
                 </div>
             </div>
