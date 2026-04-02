@@ -69,34 +69,34 @@
                 <div class="stat-card">
                     <div class="stat-icon green">✅</div>
                     <div>
-                        <strong>{{ completedTasks }}</strong>
-                        <p>Tasks completed</p>
+                        <strong>{{ completedProjects }}</strong>
+                        <p>Completed projects</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange">⏳</div>
                     <div>
-                        <strong>{{ inProgressTasks }}</strong>
-                        <p>In Progress</p>
+                        <strong>{{ inProgressProjects }}</strong>
+                        <p>Projects in progress</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon red">❗</div>
                     <div>
-                        <strong>{{ urgentTasks }}</strong>
-                        <p>Urgent tasks</p>
+                        <strong>{{ delayedProjects }}</strong>
+                        <p>Delayed projects</p>
                     </div>
                 </div>
             </div>
 
             <div class="charts-grid">
                 <div class="card">
-                    <h3>Task allocation</h3>
-                    <canvas id="tasksPieChart"></canvas>
+                    <h3>Project status</h3>
+                    <canvas id="projectStatusPieChart"></canvas>
                 </div>
                 <div class="card">
-                    <h3>Tasks by priority</h3>
-                    <canvas id="priorityBarChart"></canvas>
+                    <h3>Project progress</h3>
+                    <canvas id="projectProgressBarChart"></canvas>
                 </div>
             </div>
 

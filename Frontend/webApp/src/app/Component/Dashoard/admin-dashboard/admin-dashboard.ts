@@ -110,6 +110,8 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
 
   activeProjects = 0;
   completedProjects = 0;
+  inProgressProjects = 0;
+  delayedProjects = 0;
   totalUsers = 0;
   completedTasks = 0;
   inProgressTasks = 0;
@@ -169,9 +171,14 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   calendarCells: CalendarCell[] = [];
   calendarProjectsByDate: Record<string, CalendarProjectEntry[]> = {};
 
+<<<<<<< Updated upstream
   private tasksPieChart?: Chart;
   private priorityBarChart?: Chart;
   private adminNotificationsSubscription: Subscription | null = null;
+=======
+  private projectStatusPieChart?: Chart;
+  private projectProgressBarChart?: Chart;
+>>>>>>> Stashed changes
 
   ngOnInit(): void {
     const tabParam = this.route.snapshot.queryParamMap.get('tab');
@@ -267,6 +274,8 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
         this.completedProjects = data.filter((item) =>
           item.projectState === State.done || item.projectState === State.validated
         ).length;
+        this.inProgressProjects = data.filter((item) => item.projectState === State.inProgress).length;
+        this.delayedProjects = data.filter((item) => this.isProjectDelayed(item)).length;
         this.recentProjects = this.projectCards.slice(0, 3);
 
         this.filterProjects();
@@ -826,44 +835,46 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.tasksPieChart?.destroy();
-    this.priorityBarChart?.destroy();
+    this.projectStatusPieChart?.destroy();
+    this.projectProgressBarChart?.destroy();
 
-    const statusCounts = this.getTaskStatusCounts();
-    const priorityCounts = this.getTaskPriorityCounts();
+    const statusCounts = this.getProjectStatusCounts();
+    const progressCounts = this.getProjectProgressCounts();
 
-    this.tasksPieChart = new Chart('tasksPieChart', {
+    this.projectStatusPieChart = new Chart('projectStatusPieChart', {
       type: 'pie',
       data: {
-        labels: ['In progress', 'In review', 'Done', 'To do'],
+        labels: ['In progress', 'Validated', 'Done', 'To do', 'Pending'],
         datasets: [{
           data: [
             statusCounts.inProgress,
             statusCounts.validated,
             statusCounts.done,
-            statusCounts.todo
+            statusCounts.todo,
+            statusCounts.pending
           ],
           backgroundColor: [
             '#3b82f6',
             '#f59e0b',
             '#10b981',
-            '#94a3b8'
+            '#94a3b8',
+            '#64748b'
           ]
         }]
       }
     });
 
-    this.priorityBarChart = new Chart('priorityBarChart', {
+    this.projectProgressBarChart = new Chart('projectProgressBarChart', {
       type: 'bar',
       data: {
-        labels: ['Low', 'Medium', 'High', 'Urgent'],
+        labels: ['0-25%', '26-50%', '51-75%', '76-100%'],
         datasets: [{
-          label: 'Tasks',
+          label: 'Projects',
           data: [
-            priorityCounts.low,
-            priorityCounts.medium,
-            priorityCounts.high,
-            priorityCounts.urgent
+            progressCounts.veryLow,
+            progressCounts.low,
+            progressCounts.medium,
+            progressCounts.high
           ],
           backgroundColor: '#3b82f6'
         }]
@@ -1027,32 +1038,45 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
     return `${year}-${month}-${day}`;
   }
 
-  private getTaskStatusCounts(): { todo: number; inProgress: number; done: number; validated: number } {
-    const counts = { todo: 0, inProgress: 0, done: 0, validated: 0 };
+  private getProjectStatusCounts(): { pending: number; todo: number; inProgress: number; done: number; validated: number } {
+    const counts = { pending: 0, todo: 0, inProgress: 0, done: 0, validated: 0 };
 
-    this.tasks.forEach((task) => {
-      const status = this.normalizeStatus(task.status);
-      if (status === 'todo') counts.todo += 1;
-      if (status === 'inProgress') counts.inProgress += 1;
-      if (status === 'done') counts.done += 1;
-      if (status === 'validated') counts.validated += 1;
+    this.projects.forEach((item) => {
+      const state = Number(item.projectState);
+      if (state === State.pending) counts.pending += 1;
+      else if (state === State.todo) counts.todo += 1;
+      else if (state === State.inProgress) counts.inProgress += 1;
+      else if (state === State.done) counts.done += 1;
+      else if (state === State.validated) counts.validated += 1;
     });
 
     return counts;
   }
 
-  private getTaskPriorityCounts(): { low: number; medium: number; high: number; urgent: number } {
-    const counts = { low: 0, medium: 0, high: 0, urgent: 0 };
+  private getProjectProgressCounts(): { veryLow: number; low: number; medium: number; high: number } {
+    const counts = { veryLow: 0, low: 0, medium: 0, high: 0 };
 
-    this.tasks.forEach((task) => {
-      const complexity = Number(task.complexity ?? 0);
-      if (complexity <= 1) counts.low += 1;
-      else if (complexity <= 2) counts.medium += 1;
-      else if (complexity <= 3) counts.high += 1;
-      else counts.urgent += 1;
+    this.projectCards.forEach((item) => {
+      if (item.progress <= 25) counts.veryLow += 1;
+      else if (item.progress <= 50) counts.low += 1;
+      else if (item.progress <= 75) counts.medium += 1;
+      else counts.high += 1;
     });
 
     return counts;
+  }
+
+  private isProjectDelayed(item: project): boolean {
+    const state = Number(item.projectState);
+    if (state === State.done || state === State.validated) {
+      return false;
+    }
+
+    if (!item.endDate) {
+      return false;
+    }
+
+    return new Date(item.endDate).getTime() < Date.now();
   }
 
   private normalizeStatus(status: TaskDto['status']): 'pending' | 'todo' | 'inProgress' | 'done' | 'validated' {
