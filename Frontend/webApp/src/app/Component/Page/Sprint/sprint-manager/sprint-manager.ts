@@ -229,6 +229,13 @@ export class SprintManager implements OnInit {
   }
 
   deleteSprint(sprintId: number): void {
+    const sprint = this.sprints.find((item) => item.id === sprintId);
+    if (!sprint || sprint.sprintState !== State.pending) {
+      this.error = 'You can delete a sprint only when it is pending.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this sprint? This action cannot be undone.')) {
       return;
     }
@@ -239,6 +246,9 @@ export class SprintManager implements OnInit {
     this.sprintService.deleteSprint(sprintId).subscribe({
       next: () => {
         this.successMessage = 'Sprint deleted successfully!';
+        if (this.selectedSprint?.id === sprintId) {
+          this.backToSprintsList();
+        }
         this.loadSprints();
         this.loading = false;
         this.cdr.detectChanges();
@@ -297,6 +307,10 @@ export class SprintManager implements OnInit {
   getStateName(state: State): string {
     const option = this.stateOptions.find(opt => opt.value === state);
     return option ? option.label : State[state];
+  }
+
+  canDeleteSprint(sprint: Sprint): boolean {
+    return sprint.sprintState === State.pending;
   }
 
   getProjectName(projectId: number): string {

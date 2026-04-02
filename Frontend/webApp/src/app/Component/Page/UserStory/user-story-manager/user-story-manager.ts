@@ -131,6 +131,14 @@ export class UserStoryManagerComponent implements OnInit {
     return classes[priority] || '';
   }
 
+  canDeleteUserStory(userStory?: UserStoryDto): boolean {
+    if (!userStory) {
+      return false;
+    }
+
+    return userStory.status === UserStoryStatus.TODO || Number(userStory.userStoryState ?? 1) === 1;
+  }
+
   viewUserStory(id: string): void {
     this.route.navigate(['/userstory/view', id]);
   }
@@ -260,6 +268,12 @@ export class UserStoryManagerComponent implements OnInit {
 
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
+
+    const story = this.userStories.find((item) => String(item.id) === String(id));
+    if (!this.canDeleteUserStory(story)) {
+      this.error = 'You can delete a user story only when it is pending.';
+      return;
+    }
 
     if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
       this.userStoryService.delete(Number(id)).subscribe({

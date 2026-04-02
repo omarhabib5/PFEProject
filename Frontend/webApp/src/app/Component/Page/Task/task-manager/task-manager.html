@@ -104,7 +104,7 @@
                     </div>
                     <div class="item-actions">
                         <button class="btn-link" type="button" (click)="startEdit(task, $event)">Edit</button>
-                        <button class="btn-link" type="button" (click)="deleteTask(task, $event)">Delete</button>
+                        <button class="btn-link" type="button" (click)="deleteTask(task, $event)" [disabled]="!canDeleteTask(task)">Delete</button>
                     </div>
                 </div>
             </div>

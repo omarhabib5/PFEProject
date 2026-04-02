@@ -17,3 +17,5 @@
 
 # Environment files
 .env
+*.ts
+Frontend/webApp/src/app/Component/Dashoard/admin-dashboard/admin-dashboard.html

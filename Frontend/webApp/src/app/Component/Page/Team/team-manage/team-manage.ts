@@ -26,6 +26,7 @@ export class TeamManage implements OnInit {
   
   services: Service[] = [];
   users: UserDto[] = [];
+  employeeUsers: UserDto[] = [];
 
   showCreateTeamForm = false;
   isEditMode = false;
@@ -76,6 +77,7 @@ export class TeamManage implements OnInit {
     this.userApiService.getUsers().subscribe({
       next: (data) => {
         this.users = data;
+        this.employeeUsers = data.filter((user) => this.isEmployeeUser(user));
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -93,6 +95,30 @@ export class TeamManage implements OnInit {
   getUserFullName(userId: number): string {
     const user = this.users.find(u => u.id === userId);
     return user ? `${user.firstName} ${user.lastName}` : `User ${userId}`;
+  }
+
+  private isEmployeeUser(user: UserDto): boolean {
+    const role = user.role;
+
+    if (typeof role === 'number') {
+      return role === Role.Employer;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === 'employee'
+      || normalized === 'employer'
+      || normalized === '0'
+      || normalized === 'role.employer';
+  }
+
+  hasProjectLeader(memberIdToIgnore?: number): boolean {
+    return this.teamMembers.some((member) =>
+      member.role === Role.ProjectLeader && member.id !== memberIdToIgnore
+    );
+  }
+
+  canAssignProjectLeader(memberIdToIgnore?: number): boolean {
+    return !this.hasProjectLeader(memberIdToIgnore);
   }
 
   loadTeams(): void {
@@ -249,6 +275,11 @@ export class TeamManage implements OnInit {
 
     }
 
+    if (this.newMember.role === Role.ProjectLeader && !this.canAssignProjectLeader()) {
+      this.error = 'Only one project leader is allowed per team.';
+      return;
+    }
+
     const selectedUser = this.users.find(u => u.id === this.newMember.userId);
     const tempMember: TeamUser = {
       id: -Date.now(), 
@@ -334,6 +365,11 @@ export class TeamManage implements OnInit {
 
   updateMemberRole(memberId: number): void {
     if (!this.selectedTeam) return;
+
+    if (this.editMemberRole === Role.ProjectLeader && !this.canAssignProjectLeader(memberId)) {
+      this.error = 'Only one project leader is allowed per team.';
+      return;
+    }
 
     this.loading = true;
     this.error = null;

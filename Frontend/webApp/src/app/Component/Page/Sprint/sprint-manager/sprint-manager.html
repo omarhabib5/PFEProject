@@ -200,7 +200,7 @@
           <button class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="startEditSprint(sprint)" [disabled]="loading">
             Edit
           </button>
-          <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="deleteSprint(sprint.id)" [disabled]="loading">
+          <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="deleteSprint(sprint.id)" [disabled]="loading || !canDeleteSprint(sprint)">
             Delete
           </button>
         </div>
@@ -247,7 +247,7 @@
       <button class="px-5 py-2.5 bg-yellow-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700" (click)="startEditSprint(selectedSprint); backToSprintsList()">
         Edit Sprint
       </button>
-      <button class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-red-700" (click)="deleteSprint(selectedSprint.id); backToSprintsList()">
+      <button class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-red-700" (click)="deleteSprint(selectedSprint.id)" [disabled]="!canDeleteSprint(selectedSprint)">
         Delete Sprint
       </button>
     </div>

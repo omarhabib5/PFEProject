@@ -126,7 +126,7 @@
         <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Modifier">
           ✏️ Modifier
         </button>
-        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Supprimer">
+        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Supprimer" [disabled]="!canDeleteUserStory(story)">
           🗑️ Supprimer
         </button>
       </div>

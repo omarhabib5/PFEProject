@@ -771,6 +771,12 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   deleteSprint(sprint: Sprint): void {
+    if (!this.canDeleteSprint(sprint)) {
+      this.error = 'You can delete a sprint only when it is pending.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (!confirm(`Delete sprint "${sprint.name}" ?`)) {
       return;
     }
@@ -902,6 +908,12 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   deleteTask(task: TaskDto): void {
+    if (!this.canDeleteTask(task)) {
+      this.error = 'You can delete a task only when it is pending.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (!confirm(`Delete task "${task.title}" ?`)) {
       return;
     }
@@ -1105,6 +1117,14 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return 'state-progress';
     }
     return 'state-pending';
+  }
+
+  canDeleteSprint(sprint: Sprint): boolean {
+    return sprint.sprintState === State.pending;
+  }
+
+  canDeleteTask(task: TaskDto): boolean {
+    return this.normalizeTaskState(task.status) === 'pending';
   }
 
   formatDate(value?: Date | string): string {

@@ -141,7 +141,7 @@
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="0" disabled selected>Select a user</option>
-            <option *ngFor="let user of users" [value]="user.id">
+            <option *ngFor="let user of employeeUsers" [value]="user.id">
               {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
             </option>
           </select>
@@ -159,6 +159,7 @@
             <option [ngValue]="0">Employee</option>
             <option [ngValue]="1">Project Leader</option>
           </select>
+            <p class="mt-1 text-xs text-gray-500" *ngIf="!canAssignProjectLeader()">This team already has a project leader.</p>
         </div>
 
         <div class="flex gap-2.5 mt-5">

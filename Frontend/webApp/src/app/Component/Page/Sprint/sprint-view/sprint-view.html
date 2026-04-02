@@ -22,7 +22,7 @@
 
 		<div class="actions">
 			<button class="btn-primary" type="button" (click)="goToEdit()">Modifier</button>
-			<button class="btn-danger" type="button" (click)="deleteSprint()">Supprimer</button>
+			<button class="btn-danger" type="button" (click)="deleteSprint()" [disabled]="!canDeleteSprint()">Supprimer</button>
 		</div>
 	</div>
 </div>

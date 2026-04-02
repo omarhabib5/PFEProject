@@ -272,6 +272,12 @@ export class UserStoryViewComponent implements OnInit {
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
+    const story = this.userStories.find((item) => String(item.id) === String(id));
+    if (!this.canDeleteUserStory(story)) {
+      this.error = 'Vous pouvez supprimer cette user story uniquement lorsqu’elle est en attente.';
+      return;
+    }
+
     if (confirm('Êtes-vous sûr de vouloir supprimer cette user story et toutes ses tâches ?')) {
       this.userStoryService.delete(Number(id)).subscribe({
         next: () => {
@@ -304,6 +310,14 @@ export class UserStoryViewComponent implements OnInit {
       priority: 3,
       sprintId: this.sprintId ?? 0,
     };
+  }
+
+  canDeleteUserStory(userStory?: UserStoryDto): boolean {
+    if (!userStory) {
+      return false;
+    }
+
+    return userStory.status === UserStoryStatus.TODO || Number(userStory.userStoryState ?? 1) === 1;
   }
 
   private isValidNumber(value: number, min: number, max?: number): boolean {

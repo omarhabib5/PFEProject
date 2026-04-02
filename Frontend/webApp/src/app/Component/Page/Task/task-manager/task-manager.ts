@@ -226,6 +226,12 @@ export class TaskManager implements OnInit {
   deleteTask(task: TaskDto, event: Event): void {
     event.stopPropagation();
 
+    if (!this.canDeleteTask(task)) {
+      this.error = 'You can delete a task only when it is pending.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (!confirm(`Delete task "${task.title}"?`)) {
       return;
     }
@@ -605,6 +611,10 @@ export class TaskManager implements OnInit {
 
   private getSelectedUserStory(): UserStoryDto | undefined {
     return this.userStories.find((story) => Number(story.id) === Number(this.formModel.userStoryId));
+  }
+
+  canDeleteTask(task: TaskDto): boolean {
+    return this.normalizeStatus(task.status) === 'pending';
   }
 
   private isDateInRange(value: string, minDate?: string, maxDate?: string): boolean {

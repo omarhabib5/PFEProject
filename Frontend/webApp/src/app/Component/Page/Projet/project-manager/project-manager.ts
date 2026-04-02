@@ -331,6 +331,12 @@ export class ProjectManager implements OnInit {
   }
 
   deleteProject(projectId: number): void {
+    const project = this.allProjects.find((item) => item.id === projectId);
+    if (!this.canDeleteProject(project)) {
+      alert('You cannot delete this project unless it is pending.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
       return;
     }
@@ -768,6 +774,12 @@ export class ProjectManager implements OnInit {
   }
 
   deleteDetailSprint(sprintId: number): void {
+    const sprint = this.projectSprints.find((item) => item.id === sprintId);
+    if (!this.canDeleteSprint(sprint)) {
+      alert('You cannot delete this sprint unless it is pending.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this sprint? This action cannot be undone.')) {
       return;
     }
@@ -907,6 +919,12 @@ export class ProjectManager implements OnInit {
   }
 
   deleteDetailUserStory(storyId: string): void {
+    const story = this.projectUserStories.find((item) => String(item.id) === String(storyId));
+    if (!this.canDeleteUserStory(story)) {
+      alert('You cannot delete this user story unless it is pending.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this user story? This action cannot be undone.')) {
       return;
     }
@@ -987,6 +1005,18 @@ export class ProjectManager implements OnInit {
     }
 
     return 'text-slate-700 bg-slate-100';
+  }
+
+  canDeleteProject(project?: project | null): boolean {
+    return !!project && Number(project.projectState) === State.pending;
+  }
+
+  canDeleteSprint(sprint?: Sprint | null): boolean {
+    return !!sprint && Number(sprint.sprintState) === SprintState.pending;
+  }
+
+  canDeleteUserStory(story?: UserStoryDto | null): boolean {
+    return !!story && this.getUserStoryStateValue(story) === State.pending;
   }
 
   private loadProjectSprints(projectId: number): void {
@@ -1198,6 +1228,15 @@ export class ProjectManager implements OnInit {
     };
 
     return mapping[status] ?? State.todo;
+  }
+
+  private getUserStoryStateValue(story: UserStoryDto): State {
+    const numericState = Number(story.userStoryState);
+    if (Number.isFinite(numericState)) {
+      return numericState as State;
+    }
+
+    return this.mapStatusToState(story.status);
   }
 
   private loadSelectedProjectMembers(project: project): void {

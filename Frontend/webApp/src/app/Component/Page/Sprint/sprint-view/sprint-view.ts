@@ -58,10 +58,18 @@ export class SprintView implements OnInit {
 
   deleteSprint(): void {
     if (!this.sprint) return;
+    if (this.sprint.sprintState !== State.pending) {
+      this.error = 'Vous pouvez supprimer ce sprint uniquement lorsqu’il est en attente.';
+      return;
+    }
     this.sprintService.deleteSprint(this.sprint.id).subscribe({
       next: () => this.router.navigate(['/SprintManage']),
       error: () => this.error = 'Erreur lors de la suppression du sprint'
     });
+  }
+
+  canDeleteSprint(): boolean {
+    return !!this.sprint && this.sprint.sprintState === State.pending;
   }
 
   goBack(): void {

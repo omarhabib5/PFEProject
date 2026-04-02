@@ -38,7 +38,12 @@
             </div>
 
             <div class="topbar-right">
-                <input type="text" [(ngModel)]="searchTerm" (input)="filterProjects()" placeholder="Search..." />
+                <input
+                    *ngIf="activeTab === 'calendar'"
+                    type="text"
+                    [(ngModel)]="searchTerm"
+                    (input)="filterProjects()"
+                    placeholder="Search project in calendar..." />
                 <div class="notif-group">
                     <div class="notif" (click)="toggleAdminNotificationsPanel()" title="Notifications">
                         🔔<span *ngIf="adminUnreadNotifications > 0">{{ adminUnreadNotifications }}</span>
