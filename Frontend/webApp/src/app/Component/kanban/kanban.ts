@@ -145,6 +145,12 @@ export class KanbanComponent implements OnInit {
       return;
     }
 
+    if (this.employeeMode && this.normalizeTaskStatus(this.columnIdToStatus(targetColumn.id)) === 'validated') {
+      this.error = 'Vous ne pouvez pas deplacer une tache vers la colonne validee.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     transferArrayItem(
       event.previousContainer.data,
       event.container.data,

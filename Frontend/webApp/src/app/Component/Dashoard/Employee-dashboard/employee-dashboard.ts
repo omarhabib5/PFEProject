@@ -833,6 +833,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
     this.notificationService.markAsRead(notificationId).subscribe({
       next: () => {
+        this.updateNotificationReadState(notificationId);
         this.settingsSuccess = 'Notification marquee bien recue.';
         this.refreshNotifications();
       },
@@ -853,6 +854,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
     this.notificationService.markAllAsRead(userId).subscribe({
       next: () => {
+        this.apiNotifications = this.apiNotifications.map((item) => ({
+          ...item,
+          isRead: true
+        }));
+        this.syncNotificationsForView();
         this.settingsSuccess = 'Toutes les notifications sont marquees bien recues.';
         this.refreshNotifications();
       },
@@ -967,6 +973,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   countByBucket(bucket: TaskBucket): number {
     return this.myTasks.filter((task) => task.bucket === bucket).length;
+  }
+
+  private updateNotificationReadState(notificationId: number): void {
+    this.apiNotifications = this.apiNotifications.map((item) =>
+      item.id === notificationId ? { ...item, isRead: true } : item
+    );
+    this.syncNotificationsForView();
   }
 
   private getProjectStateLabel(state: ProjectState | undefined): string {
