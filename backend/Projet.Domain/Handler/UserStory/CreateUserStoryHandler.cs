@@ -39,7 +39,7 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, in
             ProjectId = sprint.ProjectId,
             AssignedToId = request.AssignedToId,
             CreatedById = request.CreatedById,
-            CreatedAt = DateTime.UtcNow,
+        
             Status = State.todo
         };
 

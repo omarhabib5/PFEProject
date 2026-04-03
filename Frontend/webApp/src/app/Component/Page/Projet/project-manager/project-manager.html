@@ -432,7 +432,11 @@
       
             <div>
               <p class="text-slate-500 mb-0.5">Sprint:</p>
-              <p class="font-semibold text-slate-900">#{{ story.sprintId }}</p>
+              <p class="font-semibold text-slate-900">{{ getProjectSprintName(story.sprintId) }}</p>
+            </div>
+            <div>
+              <p class="text-slate-500 mb-0.5">State:</p>
+              <p class="font-semibold text-slate-900">{{ getUserStoryStatusDisplay(story) }}</p>
             </div>
           </div>
         </div>
@@ -582,6 +586,10 @@
             <div>
               <p class="text-slate-500 mb-0.5">ID Sprint:</p>
               <p class="font-semibold text-slate-900">#{{ sprint.id }}</p>
+            </div>
+            <div>
+              <p class="text-slate-500 mb-0.5">Tasks:</p>
+              <p class="font-semibold text-slate-900">{{ getSprintTaskCountInProject(sprint.id) }}</p>
             </div>
           </div>
         </div>

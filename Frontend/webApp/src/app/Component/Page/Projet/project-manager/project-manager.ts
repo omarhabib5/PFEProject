@@ -480,7 +480,7 @@ export class ProjectManager implements OnInit {
       this.newDetailUserStory.startDate = minDate || this.newDetailUserStory.startDate;
     }
 
-    if (!this.isDateInRange(this.newDetailUserStory.endDate, minDate, maxDate) || this.newDetailUserStory.endDate < this.newDetailUserStory.startDate) {
+    if (!this.isDateInRange(this.newDetailUserStory.endDate, minDate, maxDate)) {
       this.newDetailUserStory.endDate = this.newDetailUserStory.startDate;
     }
 
@@ -669,6 +669,27 @@ export class ProjectManager implements OnInit {
     };
 
     return labels[status] ?? 'Unknown';
+  }
+
+  getProjectSprintName(sprintId: number | string | undefined): string {
+    const normalizedSprintId = Number(sprintId ?? 0);
+    if (!normalizedSprintId) {
+      return 'No sprint';
+    }
+
+    const sprint = this.projectSprints.find((item) => Number(item.id) === normalizedSprintId);
+    return sprint?.name ?? `Sprint #${normalizedSprintId}`;
+  }
+
+  getSprintTaskCountInProject(sprintId: number): number {
+    const normalizedSprintId = Number(sprintId);
+    if (!normalizedSprintId) {
+      return 0;
+    }
+
+    return this.projectUserStories
+      .filter((story) => Number(story.sprintId) === normalizedSprintId)
+      .reduce((total, story) => total + Number(story.taskCount ?? 0), 0);
   }
 
   toggleDetailSprintForm(): void {
@@ -1093,13 +1114,6 @@ export class ProjectManager implements OnInit {
 
     if (!this.newDetailUserStory.sprintId || this.newDetailUserStory.sprintId === '') {
       this.error = 'Sprint is required for user story';
-      return false;
-    }
-
-    const startDate = new Date(this.newDetailUserStory.startDate);
-    const endDate = new Date(this.newDetailUserStory.endDate);
-    if (startDate >= endDate) {
-      this.error = 'User story end date must be after start date';
       return false;
     }
 
