@@ -3,12 +3,12 @@
         <div>
             <div class="brand">
                 <h1>TaskFlow Pro</h1>
-                <p>Service Management</p>
+                <p>Gestion de service</p>
             </div>
 
             <nav class="menu">
                 <button class="menu-item" [class.active]="serviceViewMode === 'list'" (click)="openServicesList()">
-                    Services
+                    Mes services
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
@@ -46,7 +46,7 @@
 
             <div class="topbar-right">
                 <div class="search-box">
-                    <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" />
+                    <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" />
                 </div>
                 <button class="notification" type="button" (click)="openNotifications()">{{ notificationCount }}</button>
                 <div class="user-block">
@@ -71,7 +71,7 @@
             <div class="list-header">
                 <div>
                     <h3>Services</h3>
-                    <p>Manage your services and explore their projects</p>
+                    <p>Gerez vos services et accedez a leur performance</p>
                 </div>
                 <button class="primary-btn" (click)="openCreateServiceModal()">+ New Service</button>
             </div>
@@ -159,20 +159,49 @@
                 </div>
 
                 <div *ngIf="activeTab === 'dashboard'" class="dashboard-tab-content">
+                    <section class="overview-hero">
+                        <div class="overview-hero-main">
+                            <h4>{{ selectedService.name }}</h4>
+                            <p>Chef de service: {{ getResponsibleLabel(selectedService) }}</p>
+                            <p>Vue d'ensemble de l'activite du service</p>
+                            <div class="overview-progress-wrap">
+                                <span>Progression globale</span>
+                                <div class="overview-progress-line">
+                                    <div class="overview-progress-fill" [style.width.%]="globalProgressPercent"></div>
+                                </div>
+                                <small>{{ globalProgressPercent }}%</small>
+                            </div>
+                        </div>
+                        <div class="overview-hero-stats">
+                            <article>
+                                <strong>{{ projectsCount }}</strong>
+                                <span>Projets</span>
+                            </article>
+                            <article>
+                                <strong>{{ membersCount }}</strong>
+                                <span>Membres</span>
+                            </article>
+                            <article>
+                                <strong>{{ activeTasksCount }}</strong>
+                                <span>Taches actives</span>
+                            </article>
+                        </div>
+                    </section>
+
                     <div class="kpi-grid">
-                        <article class="kpi-card">
+                        <article class="kpi-card kpi-card-blue">
                             <h4>Projets actifs</h4><strong>{{ projectsCount }}</strong>
                         </article>
-                        <article class="kpi-card">
+                        <article class="kpi-card kpi-card-cyan">
                             <h4>Teams</h4><strong>{{ teamsCount }}</strong>
                         </article>
-                        <article class="kpi-card">
+                        <article class="kpi-card kpi-card-green">
                             <h4>Completed tasks</h4><strong>{{ completedTasksCount }}</strong>
                         </article>
-                        <article class="kpi-card">
+                        <article class="kpi-card kpi-card-amber">
                             <h4>Tasks in progress</h4><strong>{{ activeTasksCount }}</strong>
                         </article>
-                        <article class="kpi-card">
+                        <article class="kpi-card kpi-card-indigo">
                             <h4>Overall progress</h4><strong>{{ globalProgressPercent }}%</strong>
                         </article>
                     </div>
@@ -379,7 +408,7 @@
 
                         <aside class="calendar-details">
                             <h4>{{ selectedCalendarDateLabel }}</h4>
-                            <p class="calendar-details-sub">Planned task details</p>
+                            <p class="calendar-details-sub">Taches et dates limites des projets</p>
 
                             <div class="calendar-event-list"
                                 *ngIf="selectedCalendarDayTasks.length > 0 || selectedCalendarDayProjectDeadlines.length > 0; else noCalendarTasks">

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Command.TeamUser;
 using Projet.Domain.Interface;
+using Projet.Domain.Model;
 
 namespace Projet.Domain.Handler.TeamUser
 {
@@ -45,6 +46,12 @@ namespace Projet.Domain.Handler.TeamUser
                 role = request.role,
                 JoinedAt = DateTime.UtcNow
             };
+
+            var user = await _context.Users.FirstAsync(u => u.Id == request.UserId, cancellationToken);
+            if (request.role == Model.Role.ProjectLeader && user.role == UserRole.Employee)
+            {
+                user.role = UserRole.ProjectManager;
+            }
 
             _context.Set<Model.TeamUser>().Add(teamUser);
             await _context.SaveChangesAsync(cancellationToken);
