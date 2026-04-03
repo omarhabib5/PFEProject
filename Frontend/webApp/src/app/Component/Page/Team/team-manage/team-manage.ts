@@ -1,9 +1,12 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TeamService, Team, TeamUser, CreateTeamRequest, UpdateTeamRequest, AddMemberRequest, Role, UserInTeam } from '../Service/TeamService';
 import { ServiceService, Service } from '../Service/ServiceService';
 import { UserApiService, UserDto } from '../Service/UserApiService';
+import { TokenService } from '../../../Auth/Service/token.service';
+import { AppRole } from '../../../Auth/model/auth.model';
 
 @Component({
   selector: 'app-team-manage',
@@ -13,9 +16,11 @@ import { UserApiService, UserDto } from '../Service/UserApiService';
   styleUrl: './team-manage.css',
 })
 export class TeamManage implements OnInit {
+  private router = inject(Router);
   private teamService = inject(TeamService);
   private serviceService = inject(ServiceService);
   private userApiService = inject(UserApiService);
+  private tokenService = inject(TokenService);
   private cdr = inject(ChangeDetectorRef); 
 
   
@@ -119,6 +124,34 @@ export class TeamManage implements OnInit {
 
   canAssignProjectLeader(memberIdToIgnore?: number): boolean {
     return !this.hasProjectLeader(memberIdToIgnore);
+  }
+  get availableUsersForTeam(): UserDto[] {
+    const currentMemberIds = new Set(this.teamMembers.map((member) => Number(member.userId)));
+    return this.users.filter((user) => {
+      const isAdmin = this.isAdminRole(user.role);
+      const alreadyInTeam = currentMemberIds.has(Number(user.id));
+      return !isAdmin && !alreadyInTeam;
+    });
+  }
+
+  getUserRoleDisplay(role: string | number | undefined): string {
+    const normalized = String(role ?? '').trim().toLowerCase();
+    if (normalized === '0' || normalized === 'admin') return 'Admin';
+    if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 'Service Manager';
+    if (normalized === '2' || normalized === 'projectmanager' || normalized === 'project manager') return 'Project Manager';
+    if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 'Employee';
+    return normalized ? String(role) : 'Employee';
+  }
+
+  getMemberUserRole(member: TeamUser): string {
+    const directRole = (member.user as { role?: string | number } | undefined)?.role;
+    if (directRole !== undefined && directRole !== null) {
+      return this.getUserRoleDisplay(directRole);
+    }
+
+    const user = this.users.find((item) => Number(item.id) === Number(member.userId));
+    return this.getUserRoleDisplay(user?.role);
+
   }
 
   loadTeams(): void {
@@ -281,6 +314,10 @@ export class TeamManage implements OnInit {
     }
 
     const selectedUser = this.users.find(u => u.id === this.newMember.userId);
+    if (selectedUser && this.isAdminRole(selectedUser.role)) {
+      this.error = 'Admin users cannot be added to a team.';
+      return;
+    }
     const tempMember: TeamUser = {
       id: -Date.now(), 
       userId: this.newMember.userId,
@@ -291,7 +328,8 @@ export class TeamManage implements OnInit {
         id: this.newMember.userId,
         firstName: selectedUser.firstName,
         lastName: selectedUser.lastName,
-        email: selectedUser.email
+        email: selectedUser.email,
+        role: this.toUserRoleNumber(selectedUser.role)
       } : undefined
     };
 
@@ -520,7 +558,25 @@ export class TeamManage implements OnInit {
   getRoleName(role: Role): string {
     if (role === Role.Employer) return 'Employee';
     if (role === Role.ProjectLeader) return 'Project Leader';
-    return 'Unknown Role';  // Handle invalid/unknown roles gracefully
+    return 'Unknown Role';  
+  }
+
+  private isAdminRole(role: string | number | undefined): boolean {
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === '0' || normalized === 'admin';
+  }
+
+  private toUserRoleNumber(role: string | number | undefined): number | undefined {
+    if (typeof role === 'number' && Number.isFinite(role)) {
+      return role;
+    }
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    if (normalized === '0' || normalized === 'admin') return 0;
+    if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 1;
+    if (normalized === '2' || normalized === 'projectmanager' || normalized === 'project manager') return 2;
+    if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 3;
+    return undefined;
   }
 
   backToTeamsList(): void {
@@ -530,6 +586,32 @@ export class TeamManage implements OnInit {
     this.memberFilter = 'all';
     this.editingMemberId = null;
     this.cdr.detectChanges();
+  }
+
+  goToDashboard(): void {
+    const role = this.tokenService.getUserRole();
+
+    if (role === AppRole.Admin) {
+      this.router.navigate(['/AdminDashboard']);
+      return;
+    }
+
+    if (role === AppRole.ServiceManager) {
+      this.router.navigate(['/ResponsableServiceDashboard']);
+      return;
+    }
+
+    if (role === AppRole.ProjectManager) {
+      this.router.navigate(['/ChefProjetDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Employee) {
+      this.router.navigate(['/EmployeeDashboard']);
+      return;
+    }
+
+    this.router.navigate(['/login']);
   }
 
   

@@ -339,6 +339,8 @@
                         Tout marquer bien recu
                     </button>
                 </div>
+                <p *ngIf="settingsSuccess" class="success-message">{{ settingsSuccess }}</p>
+                <p *ngIf="error" class="error-message">{{ error }}</p>
             </article>
 
             <article class="card" *ngFor="let item of apiNotifications">

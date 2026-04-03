@@ -99,6 +99,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     isToday: boolean;
     inCurrentMonth: boolean;
     hasProject: boolean;
+    projectDeadlineCount: number;
     hasTask: boolean;
     taskCount: number;
   }> = [];
@@ -329,6 +330,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         return false;
       }
       return selectedIso >= startIso && selectedIso <= endIso;
+    });
+  }
+
+  get selectedCalendarDayProjectDeadlines(): ProjectEntity[] {
+    const selectedIso = this.selectedCalendarDateIso;
+    return this.selectedServiceProjects.filter((project) => {
+      const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
+      return !!deadlineIso && deadlineIso === selectedIso;
     });
   }
 
@@ -1106,24 +1115,32 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
-    if (typeof role === 'number') {
-      if (role === 0) return 'Administrateur';
-      if (role === 1) return 'Service Manager';
-      if (role === 2) return 'Project Manager';
-      if (role === 3) return 'Employee';
+    if (isManager) {
+      return 'Chef de service';
     }
-    if (typeof role === 'string' && role.trim().length > 0) return role;
-    return isManager ? 'Manager' : 'Employee';
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    if (normalized === '1' || normalized === 'projectleader' || normalized === 'project leader') {
+      return 'Project Leader';
+    }
+    if (normalized === '0' || normalized === 'employer' || normalized === 'employee') {
+      return 'Employee';
+    }
+
+    return 'Employee';
   }
 
   private getRoleClass(role: unknown, isManager: boolean): string {
-    if (typeof role === 'number') {
-      if (role === 0) return 'role-admin';
-      if (role === 1) return 'role-manager';
-      if (role === 2) return 'role-lead';
-      if (role === 3) return 'role-employee';
+    if (isManager) {
+      return 'role-manager';
     }
-    return isManager ? 'role-manager' : 'role-employee';
+
+    const normalized = String(role ?? '').trim().toLowerCase();
+    if (normalized === '1' || normalized === 'projectleader' || normalized === 'project leader') {
+      return 'role-lead';
+    }
+
+    return 'role-employee';
   }
 
   private setCurrentDate(): void {
@@ -1209,35 +1226,41 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const startOffset = (firstDay.getDay() + 6) % 7;
     const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+    const calendarStartDate = new Date(year, month, 1 - startOffset);
 
     const today = new Date();
     this.calendarDays = [];
 
     for (let index = 0; index < totalCells; index++) {
-      const dayNumber = index - startOffset + 1;
-      const inCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
-      const isToday = inCurrentMonth
-        && dayNumber === today.getDate()
-        && month === today.getMonth()
-        && year === today.getFullYear();
-      const cellDate = inCurrentMonth ? new Date(year, month, dayNumber) : new Date(year, month, 1);
+      const cellDate = this.addDays(calendarStartDate, index);
+      const inCurrentMonth = cellDate.getMonth() === month && cellDate.getFullYear() === year;
+      const dayNumber = cellDate.getDate();
+      const isToday = dayNumber === today.getDate()
+        && cellDate.getMonth() === today.getMonth()
+        && cellDate.getFullYear() === today.getFullYear();
       const iso = this.toIsoDateLocal(cellDate);
 
       this.calendarDays.push({
-        day: inCurrentMonth ? dayNumber : 0,
+        day: dayNumber,
         iso,
         isToday,
         inCurrentMonth,
         hasProject: false,
+        projectDeadlineCount: 0,
         hasTask: false,
         taskCount: 0,
       });
     }
 
-    const projectDates = this.selectedServiceProjects
-      .map((project) => this.getSafeIsoDate(project.endDate as Date | string | null | undefined))
-      .filter((iso) => !!iso)
-      .map((iso) => this.parseToLocalDate(iso));
+    const projectDeadlineCountByIso: Record<string, number> = {};
+    this.selectedServiceProjects.forEach((project) => {
+      const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
+      if (!deadlineIso) {
+        return;
+      }
+
+      projectDeadlineCountByIso[deadlineIso] = (projectDeadlineCountByIso[deadlineIso] ?? 0) + 1;
+    });
 
     const taskCountByIso: Record<string, number> = {};
     this.serviceTasks.forEach((task) => {
@@ -1261,16 +1284,18 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
 
     this.calendarDays = this.calendarDays.map((cell) => {
-      if (!cell.inCurrentMonth || cell.day <= 0) return cell;
+      if (!cell.inCurrentMonth) return cell;
       const cellDate = new Date(year, month, cell.day);
       const iso = this.toIsoDateLocal(cellDate);
-      const hasProject = projectDates.some((date) =>
-        date.getFullYear() === cellDate.getFullYear()
-        && date.getMonth() === cellDate.getMonth()
-        && date.getDate() === cellDate.getDate()
-      );
+      const projectDeadlineCount = projectDeadlineCountByIso[iso] ?? 0;
       const taskCount = taskCountByIso[iso] ?? 0;
-      return { ...cell, hasProject, hasTask: taskCount > 0, taskCount };
+      return {
+        ...cell,
+        hasProject: projectDeadlineCount > 0,
+        projectDeadlineCount,
+        hasTask: taskCount > 0,
+        taskCount
+      };
     });
   }
 

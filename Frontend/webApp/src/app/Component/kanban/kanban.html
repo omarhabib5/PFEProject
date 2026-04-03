@@ -25,7 +25,8 @@
             </header>
 
             <div class="card-list" cdkDropList [id]="column.id" [cdkDropListData]="column.tasks"
-                [cdkDropListConnectedTo]="connectedIds" (cdkDropListDropped)="drop($event, column)">
+                [cdkDropListConnectedTo]="connectedIds" [cdkDropListDisabled]="employeeMode && column.id === 'validated'"
+                (cdkDropListDropped)="drop($event, column)">
                 <div class="card" *ngFor="let task of column.tasks; trackBy: trackByTask" cdkDrag>
                     <div class="card-head">
                         <strong>{{ task.title }}</strong>

@@ -2,6 +2,13 @@
  
   <div class="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
     <h1 class="text-3xl font-bold text-gray-800">Team Management</h1>
+    <div class="flex items-center gap-3">
+      <button
+        class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-lg"
+        type="button"
+        (click)="goToDashboard()">
+        Back to Dashboard
+      </button>
     <button 
       class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
       (click)="toggleCreateTeamForm()" 
@@ -17,6 +24,7 @@
       *ngIf="selectedTeam">
       ← Back to Teams
     </button>
+    </div>
   </div>
 
   
@@ -141,10 +149,15 @@
             class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
             [disabled]="loading">
             <option [value]="0" disabled selected>Select a user</option>
-            <option *ngFor="let user of employeeUsers" [value]="user.id">
+ <option *ngFor="let user of employeeUsers" [value]="user.id">
               {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+
+            <option *ngFor="let user of availableUsersForTeam" [value]="user.id">
+              {{ user.firstName }} {{ user.lastName }} - {{ getUserRoleDisplay(user.role) }} ({{ user.email }})
+
             </option>
           </select>
+          <p class="mt-1 text-xs text-gray-500">Admin users are excluded from this list.</p>
         </div>
         
         <div class="mb-5">
@@ -211,6 +224,7 @@
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Member ID</th>
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">User ID</th>
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">User Name</th>
+              <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">User Role</th>
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Role</th>
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Joined At</th>
               <th class="p-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Actions</th>
@@ -221,6 +235,7 @@
               <td class="p-3 border-b border-gray-200 text-gray-600">{{ member.id }}</td>
               <td class="p-3 border-b border-gray-200 text-gray-600">{{ member.userId }}</td>
               <td class="p-3 border-b border-gray-200 text-gray-600">{{ getUserFullName(member.userId) }}</td>
+              <td class="p-3 border-b border-gray-200 text-gray-600">{{ getMemberUserRole(member) }}</td>
               <td class="p-3 border-b border-gray-200">
                
                 <span *ngIf="editingMemberId !== member.id" class="inline-block px-3 py-1 rounded-full text-xs font-medium" 

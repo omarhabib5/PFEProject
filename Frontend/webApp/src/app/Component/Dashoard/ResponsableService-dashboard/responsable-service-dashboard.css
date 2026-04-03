@@ -490,6 +490,11 @@ select {
 	color: #1d4ed8;
 }
 
+.role-pill.role-lead {
+	background: #fef3c7;
+	color: #92400e;
+}
+
 .role-pill.role-employee {
 	background: #dcfce7;
 	color: #166534;
@@ -1696,6 +1701,93 @@ select {
 	padding: 16px;
 }
 
+.overview-hero {
+	margin-bottom: 12px;
+	padding: 1rem 1.1rem;
+	border-radius: 16px;
+	color: #ffffff;
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	background:
+		radial-gradient(240px 120px at 100% 0, rgba(255, 255, 255, 0.2), transparent 60%),
+		linear-gradient(110deg, #1d4ed8, #2563eb 55%, #0ea5e9);
+	box-shadow: var(--sm-shadow);
+}
+
+.overview-hero-main {
+	flex: 1;
+}
+
+.overview-hero-main h4 {
+	margin: 0;
+	font-size: 1.45rem;
+	letter-spacing: -0.02em;
+}
+
+.overview-hero-main p {
+	margin: 0.25rem 0;
+	font-size: 0.88rem;
+}
+
+.overview-progress-wrap {
+	margin-top: 0.6rem;
+}
+
+.overview-progress-wrap span,
+.overview-progress-wrap small {
+	display: block;
+	font-weight: 600;
+}
+
+.overview-progress-wrap span {
+	margin-bottom: 6px;
+}
+
+.overview-progress-wrap small {
+	margin-top: 6px;
+}
+
+.overview-progress-line {
+	width: 100%;
+	height: 8px;
+	border-radius: 999px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.overview-progress-fill {
+	height: 100%;
+	border-radius: 999px;
+	background: linear-gradient(90deg, #93c5fd, #ffffff);
+}
+
+.overview-hero-stats {
+	min-width: 270px;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+}
+
+.overview-hero-stats article {
+	border-radius: 12px;
+	padding: 0.72rem;
+	text-align: center;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	background: rgba(255, 255, 255, 0.14);
+}
+
+.overview-hero-stats strong {
+	display: block;
+	font-size: 1.35rem;
+	margin-bottom: 2px;
+}
+
+.overview-hero-stats span {
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
 .kpi-grid {
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 10px;
@@ -1731,6 +1823,31 @@ select {
 	font-size: 1.8rem;
 	color: #0f172a;
 	letter-spacing: -0.02em;
+}
+
+.kpi-card-blue {
+	border-color: #bfdbfe;
+	background: linear-gradient(180deg, #eff6ff, #dbeafe);
+}
+
+.kpi-card-cyan {
+	border-color: #bae6fd;
+	background: linear-gradient(180deg, #ecfeff, #cffafe);
+}
+
+.kpi-card-green {
+	border-color: #bbf7d0;
+	background: linear-gradient(180deg, #f0fdf4, #dcfce7);
+}
+
+.kpi-card-amber {
+	border-color: #fde68a;
+	background: linear-gradient(180deg, #fffbeb, #fef3c7);
+}
+
+.kpi-card-indigo {
+	border-color: #c7d2fe;
+	background: linear-gradient(180deg, #eef2ff, #e0e7ff);
 }
 
 .stats-grid {
@@ -2119,6 +2236,14 @@ select {
 		grid-template-columns: 1fr;
 	}
 
+	.overview-hero {
+		flex-direction: column;
+	}
+
+	.overview-hero-stats {
+		min-width: 0;
+	}
+
 	.calendar-main-grid {
 		overflow-x: auto;
 	}
@@ -2173,6 +2298,10 @@ select {
 
 	.kpi-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.overview-hero-stats {
+		grid-template-columns: 1fr;
 	}
 
 	.cards-grid {
