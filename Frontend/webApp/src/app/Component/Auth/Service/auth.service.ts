@@ -51,8 +51,7 @@ export class AuthService {
   forgotPassword(request: ForgotPasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/forgot-password`, request).pipe(
       catchError((error) => {
-        console.error('Forgot password error:', error);
-        return throwError(() => error);
+        return throwError(() => this.toDomainError(error, 'Unable to process forgot password request.'));
       })
     );
   }
@@ -60,8 +59,7 @@ export class AuthService {
   resetPassword(request: ResetPasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/reset-password`, request).pipe(
       catchError((error) => {
-        console.error('Reset password error:', error);
-        return throwError(() => error);
+        return throwError(() => this.toDomainError(error, 'Unable to reset password.'));
       })
     );
   }

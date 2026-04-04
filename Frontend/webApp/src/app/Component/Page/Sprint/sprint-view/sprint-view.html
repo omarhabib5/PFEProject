@@ -1,7 +1,7 @@
 <div class="sprint-view">
-	<button class="btn-back" type="button" (click)="goBack()">← Retour</button>
+	<button class="btn-back" type="button" (click)="goBack()">← Back</button>
 
-	<div *ngIf="loading">Chargement du sprint...</div>
+	<div *ngIf="loading">Loading sprint...</div>
 	<div *ngIf="error" class="error">{{ error }}</div>
 
 	<div *ngIf="!loading && !error && sprint" class="card">
@@ -10,19 +10,18 @@
 			<span class="status">{{ getStateLabel(sprint.sprintState) }}</span>
 		</div>
 
-		<p class="description">{{ sprint.description || 'Aucune description' }}</p>
+		<p class="description">{{ sprint.description || 'No description' }}</p>
 
 		<div class="meta-grid">
 			<div><strong>ID:</strong> {{ sprint.id }}</div>
-			<div><strong>Projet:</strong> {{ sprint.projectId }}</div>
-			<div><strong>Estimé:</strong> {{ sprint.estimatedDuration }} jours</div>
-			<div><strong>Début:</strong> {{ sprint.startDate | date:'dd/MM/yyyy' }}</div>
-			<div><strong>Fin:</strong> {{ sprint.endDate | date:'dd/MM/yyyy' }}</div>
+			<div><strong>Estimated:</strong> {{ sprint.estimatedDuration }} days</div>
+			<div><strong>Start:</strong> {{ sprint.startDate | date:'dd/MM/yyyy' }}</div>
+			<div><strong>End:</strong> {{ sprint.endDate | date:'dd/MM/yyyy' }}</div>
 		</div>
 
 		<div class="actions">
-			<button class="btn-primary" type="button" (click)="goToEdit()">Modifier</button>
-			<button class="btn-danger" type="button" (click)="deleteSprint()" [disabled]="!canDeleteSprint()">Supprimer</button>
+			<button class="btn-primary" type="button" (click)="goToEdit()">Edit</button>
+			<button class="btn-danger" type="button" (click)="deleteSprint()" [disabled]="!canDeleteSprint()">Delete</button>
 		</div>
 	</div>
 </div>

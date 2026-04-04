@@ -408,7 +408,7 @@ export class ProjectManager implements OnInit {
   
   openKanbanBoard(): void {
     if (!this.canViewKanban) {
-      this.error = 'Le tableau Kanban n est pas disponible pour le chef de service.';
+      this.error = 'The Kanban board is not available for the service manager.';
       return;
     }
 

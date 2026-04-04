@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -16,6 +16,7 @@ import { RoleGuard } from '../Service/role.guard';
 export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private roleNavigator = inject(RoleGuard);
+  private cdr = inject(ChangeDetectorRef);
 
   errorMessage: string = '';
   infoMessage: string = '';
@@ -59,10 +60,12 @@ export class Login implements OnInit {
           }
 
           this.setLoadingState(false);
+          this.cdr.detectChanges();
         },
         error: (error: unknown) => {
           this.setLoadingState(false);
           this.errorMessage = this.extractErrorMessage(error);
+          this.cdr.detectChanges();
         }
       });
   }
@@ -76,7 +79,7 @@ export class Login implements OnInit {
     emailControl?.markAsTouched();
 
     if (!emailControl || emailControl.invalid) {
-      this.errorMessage = 'Entrez une adresse email valide pour reinitialiser le mot de passe.';
+      this.errorMessage = 'Enter a valid email address to reset your password.';
       this.infoMessage = '';
       return;
     }
@@ -96,10 +99,12 @@ export class Login implements OnInit {
       next: () => {
         this.isForgotLoading = false;
         this.infoMessage = 'Si un compte existe avec cet email, un lien de reinitialisation a ete envoye.';
+        this.cdr.detectChanges();
       },
       error: (error: unknown) => {
         this.isForgotLoading = false;
         this.errorMessage = this.extractErrorMessage(error);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -109,10 +114,12 @@ export class Login implements OnInit {
 
     if (isLoading) {
       this.form.disable({ emitEvent: false });
+      this.cdr.detectChanges();
       return;
     }
 
     this.form.enable({ emitEvent: false });
+    this.cdr.detectChanges();
   }
 
   private extractErrorMessage(error: unknown): string {

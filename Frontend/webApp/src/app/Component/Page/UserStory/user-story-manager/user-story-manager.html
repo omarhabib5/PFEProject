@@ -3,52 +3,52 @@
   <div class="manager-header">
     <div class="header-left">
       <button class="btn-back" (click)="goBack()">
-        ← Retour
+        ← Back
       </button>
-      <h1>Gestion des User Stories</h1>
+      <h1>User Story Management</h1>
     </div>
     <button class="btn-create" (click)="createUserStory()">
       <span class="icon">+</span>
-      {{ showCreateForm ? 'Fermer création' : 'Nouvelle User Story' }}
+      {{ showCreateForm ? 'Close form' : 'New User Story' }}
     </button>
   </div>
 
   <div class="story-form-card" *ngIf="showCreateForm && sprintId !== null">
-    <h2>Créer une User Story</h2>
+    <h2>Create a User Story</h2>
 
     <div class="story-form-grid">
       <div class="form-group full-width">
-        <label>Titre *</label>
-        <input type="text" [(ngModel)]="createForm.title" placeholder="Ex: Authentification utilisateur" />
+        <label>Title *</label>
+        <input type="text" [(ngModel)]="createForm.title" placeholder="e.g. User authentication" />
       </div>
 
       <div class="form-group">
-        <label>Story Points *</label>
+        <label>Story points *</label>
         <input type="number" min="1" [(ngModel)]="createForm.storyPoints" />
       </div>
 
       <div class="form-group">
-        <label>Priorité (1-5) *</label>
+        <label>Priority (1-5) *</label>
         <input type="number" min="1" max="5" [(ngModel)]="createForm.priority" />
       </div>
 
       <div class="form-group full-width">
         <label>Description</label>
-        <textarea rows="3" [(ngModel)]="createForm.description" placeholder="Description de la user story"></textarea>
+        <textarea rows="3" [(ngModel)]="createForm.description" placeholder="User story description"></textarea>
       </div>
 
       <div class="form-group full-width">
-        <label>Critères d'acceptation</label>
-        <textarea rows="3" [(ngModel)]="createForm.acceptanceCriteria" placeholder="Critères d'acceptation"></textarea>
+        <label>Acceptance criteria</label>
+        <textarea rows="3" [(ngModel)]="createForm.acceptanceCriteria" placeholder="Acceptance criteria"></textarea>
       </div>
     </div>
 
     <div class="form-actions">
       <button class="btn-edit" [disabled]="createSubmitting" (click)="submitCreateUserStory()">
-        {{ createSubmitting ? 'Création...' : 'Enregistrer' }}
+        {{ createSubmitting ? 'Creating...' : 'Save' }}
       </button>
       <button class="btn-delete" (click)="cancelCreate()">
-        Annuler
+        Cancel
       </button>
     </div>
   </div>
@@ -56,14 +56,14 @@
 
   <div *ngIf="loading" class="loading-container">
     <div class="spinner"></div>
-    <p>Chargement des user stories...</p>
+    <p>Loading user stories...</p>
   </div>
 
 
   <div *ngIf="error" class="error-container">
     <div class="error-icon">⚠️</div>
     <p>{{ error }}</p>
-    <button class="btn-retry" (click)="loadUserStories()">Réessayer</button>
+    <button class="btn-retry" (click)="loadUserStories()">Retry</button>
   </div>
 
 
@@ -97,15 +97,15 @@
           </div>
           <div class="meta-item">
             <span class="meta-icon">👤</span>
-            <span class="meta-label">Assigné:</span>
-            <span class="meta-value">{{ story.assignedToName || 'Non assigné' }}</span>
+            <span class="meta-label">Assigned:</span>
+            <span class="meta-value">{{ story.assignedToName || 'Unassigned' }}</span>
           </div>
         </div>
 
 
         <div class="progress-section">
           <div class="progress-header">
-            <span class="progress-label">Progression des tâches</span>
+            <span class="progress-label">Task progress</span>
             <span class="progress-count">{{ story.completedTaskCount }} / {{ story.taskCount }}</span>
           </div>
           <div class="progress-bar">
@@ -118,16 +118,16 @@
 
         <div class="criteria-preview" *ngIf="story.acceptanceCriteria">
           <span class="criteria-icon">✓</span>
-          <span class="criteria-text">Critères d'acceptation définis</span>
+          <span class="criteria-text">Acceptance criteria defined</span>
         </div>
       </div>
 
       <div class="card-footer">
-        <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Modifier">
-          ✏️ Modifier
+        <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Edit">
+          ✏️ Edit
         </button>
-        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Supprimer" [disabled]="!canDeleteUserStory(story)">
-          🗑️ Supprimer
+        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Delete" [disabled]="!canDeleteUserStory(story)">
+          🗑️ Delete
         </button>
       </div>
     </div>
@@ -135,10 +135,10 @@
 
   <div *ngIf="!loading && !error && userStories.length === 0" class="empty-state">
     <div class="empty-icon">📝</div>
-    <h2>Aucune user story</h2>
-    <p>Commencez par créer votre première user story pour ce sprint</p>
+    <h2>No user stories</h2>
+    <p>Start by creating your first user story for this sprint</p>
     <button class="btn-create-large" (click)="createUserStory()">
-      + Créer ma première user story
+      + Create my first user story
     </button>
   </div>
 </div>

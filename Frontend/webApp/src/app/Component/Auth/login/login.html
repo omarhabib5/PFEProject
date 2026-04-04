@@ -6,9 +6,9 @@
       </div>
 
       <div class="side-content">
-        <h2>Bienvenue</h2>
+        <h2>Welcome</h2>
         <p>
-          Connectez-vous pour suivre vos projets, user stories et sprints dans la meme interface que vos dashboards.
+          Sign in to track your projects, user stories, and sprints in the same interface as your dashboards.
         </p>
 
         <div class="role-chips">
@@ -23,8 +23,8 @@
     <main class="login-main">
       <section class="login-card">
         <header class="login-header">
-          <h3>Connexion</h3>
-          <p>Entrez vos identifiants pour acceder a votre espace.</p>
+          <h3>Sign in</h3>
+          <p>Enter your credentials to access your workspace.</p>
         </header>
 
         <div *ngIf="errorMessage" class="message error-message">
@@ -37,41 +37,41 @@
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
           <div class="field">
-            <label for="email">Adresse email</label>
+            <label for="email">Email address</label>
             <input
               id="email"
               type="email"
               formControlName="email"
-              placeholder="vous@exemple.com"
+              placeholder="you@example.com"
             />
-            <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Adresse email invalide</small>
+            <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Invalid email address</small>
           </div>
 
           <div class="field">
             <div class="field-head">
-              <label for="password">Mot de passe</label>
+              <label for="password">Password</label>
               <button
                 type="button"
                 class="forgot-link"
                 [disabled]="isLoading || isForgotLoading"
                 (click)="onForgotPassword()"
               >
-                <ng-container *ngIf="!isForgotLoading">Mot de passe oublie ?</ng-container>
-                <ng-container *ngIf="isForgotLoading">Envoi...</ng-container>
+                <ng-container *ngIf="!isForgotLoading">Forgot password?</ng-container>
+                <ng-container *ngIf="isForgotLoading">Sending...</ng-container>
               </button>
             </div>
             <input
               id="password"
               type="password"
               formControlName="password"
-              placeholder="Minimum 6 caracteres"
+              placeholder="Minimum 6 characters"
             />
-            <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 caracteres requis</small>
+            <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 characters required</small>
           </div>
 
           <label class="remember-row" for="rememberMe">
             <input id="rememberMe" type="checkbox" formControlName="rememberMe" />
-            <span>Se souvenir de moi</span>
+            <span>Remember me</span>
           </label>
 
           <button
@@ -79,8 +79,8 @@
             class="submit-btn"
             [disabled]="form.invalid || isLoading"
           >
-            <ng-container *ngIf="!isLoading">Se connecter</ng-container>
-            <ng-container *ngIf="isLoading">Connexion...</ng-container>
+            <ng-container *ngIf="!isLoading">Sign in</ng-container>
+            <ng-container *ngIf="isLoading">Signing in...</ng-container>
           </button>
         </form>
       </section>

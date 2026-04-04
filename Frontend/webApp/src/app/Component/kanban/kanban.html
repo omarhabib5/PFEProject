@@ -3,8 +3,8 @@
         <header class="kanban-header">
             <div class="kanban-title-wrap">
                 <p class="eyebrow">Delivery Board</p>
-                <h1>{{ employeeMode ? 'Mon Kanban' : 'Kanban Workspace' }}</h1>
-                <p>{{ employeeMode ? 'Modifiez le statut de vos taches uniquement' : 'Track work across every stage and keep the team aligned.' }}</p>
+                <h1>{{ employeeMode ? 'My Kanban' : 'Kanban Workspace' }}</h1>
+                <p>{{ employeeMode ? 'You can only update the status of your own tasks' : 'Track work across every stage and keep the team aligned.' }}</p>
             </div>
 
             <div class="kanban-actions" *ngIf="!employeeMode">

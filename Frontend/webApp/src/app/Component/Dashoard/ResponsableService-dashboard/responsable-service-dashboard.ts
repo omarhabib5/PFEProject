@@ -166,17 +166,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   get pageTitle(): string {
     if (this.activeSection === 'calendar') return 'Calendar';
-    if (this.serviceViewMode === 'detail') return 'Mon Service';
-    return 'Gestion des Services';
+    if (this.serviceViewMode === 'detail') return 'My Service';
+    return 'Service Management';
   }
 
   get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   get selectedCalendarDateLabel(): string {
     const selectedDate = this.parseToLocalDate(this.selectedCalendarDateIso);
-    return selectedDate.toLocaleDateString('fr-FR', {
+    return selectedDate.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -193,7 +193,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     const term = this.searchTerm.trim().toLowerCase();
     return this.services.filter((service) => {
       const matchesTerm = !term || service.name.toLowerCase().includes(term);
-      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Actif';
+      const matchesStatus = this.statusFilter === 'all' || this.getServiceStatus(service) === 'Active';
       return matchesTerm && matchesStatus;
     });
   }
@@ -235,7 +235,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         activeTasks,
         completedTasks,
         avatar: this.getInitials(fullName),
-        subtitle: isManager ? 'Chef de service' : undefined,
+        subtitle: isManager ? 'Service manager' : undefined,
       };
     });
   }
@@ -480,7 +480,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
     this.notificationService.markAsRead(notificationId).subscribe({
       next: () => {
-        this.success = 'Notification marquee bien recue.';
+        this.success = 'Notification marked as read.';
         this.refreshNotifications();
       },
       error: () => {
@@ -500,7 +500,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
     this.notificationService.markAllAsRead(userId).subscribe({
       next: () => {
-        this.success = 'Toutes les notifications sont marquees bien recues.';
+        this.success = 'All notifications have been marked as read.';
         this.refreshNotifications();
       },
       error: () => {
@@ -935,15 +935,15 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         const year = Number(match[1]);
         const month = Number(match[2]);
         const day = Number(match[3]);
-        return new Date(year, month - 1, day).toLocaleDateString('fr-FR');
+        return new Date(year, month - 1, day).toLocaleDateString('en-US');
       }
     }
 
-    return new Date(value).toLocaleDateString('fr-FR');
+    return new Date(value).toLocaleDateString('en-US');
   }
 
-  getServiceStatus(_service: Service): 'Actif' {
-    return 'Actif';
+  getServiceStatus(_service: Service): 'Active' {
+    return 'Active';
   }
 
   getServiceAvatars(service: Service): string[] {
@@ -1130,7 +1130,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
     if (isManager) {
-      return 'Chef de service';
+      return 'Service manager';
     }
 
     const normalized = String(role ?? '').trim().toLowerCase();
@@ -1158,7 +1158,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   private setCurrentDate(): void {
-    this.currentDateLabel = new Date().toLocaleDateString('fr-FR', {
+    this.currentDateLabel = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

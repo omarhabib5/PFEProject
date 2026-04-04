@@ -16,6 +16,11 @@ LoadEnvFile();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 20 * 1024 * 1024;
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

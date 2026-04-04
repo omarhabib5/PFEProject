@@ -25,7 +25,7 @@ export class SprintView implements OnInit {
     this.route.params.subscribe((params) => {
       const sprintId = Number(params['id']);
       if (!sprintId) {
-        this.error = 'ID de sprint invalide';
+          this.error = 'Sprint ID is invalid';
         this.loading = false;
         return;
       }
@@ -43,7 +43,7 @@ export class SprintView implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'Erreur lors du chargement du sprint';
+          this.error = 'Error loading the sprint';
         this.loading = false;
       }
     });
@@ -59,12 +59,12 @@ export class SprintView implements OnInit {
   deleteSprint(): void {
     if (!this.sprint) return;
     if (this.sprint.sprintState !== State.pending) {
-      this.error = 'Vous pouvez supprimer ce sprint uniquement lorsqu’il est en attente.';
+        this.error = 'You can only delete this sprint when it is pending.';
       return;
     }
     this.sprintService.deleteSprint(this.sprint.id).subscribe({
       next: () => this.router.navigate(['/SprintManage']),
-      error: () => this.error = 'Erreur lors de la suppression du sprint'
+      error: () => this.error = 'Error deleting the sprint'
     });
   }
 

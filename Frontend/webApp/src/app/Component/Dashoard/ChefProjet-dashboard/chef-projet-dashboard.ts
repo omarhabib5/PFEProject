@@ -241,6 +241,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     if (this.selectedMessagingUserId && !mapById.has(this.selectedMessagingUserId)) {
       this.selectedMessagingUserId = null;
       this.conversationMessages = [];
+      this.cdr.detectChanges();
     }
   }
 
@@ -249,21 +250,25 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.conversationDraft = '';
     this.conversationAttachmentName = '';
     this.conversationAttachmentDataUrl = '';
+    this.cdr.detectChanges();
     this.loadConversationMessages();
   }
 
   loadConversationMessages(): void {
     if (!this.selectedMessagingUserId) {
       this.conversationMessages = [];
+      this.cdr.detectChanges();
       return;
     }
 
     this.notificationService.getConversation(this.selectedMessagingUserId).subscribe({
       next: (items) => {
         this.conversationMessages = (items ?? []).slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Unable to load conversation.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -271,9 +276,23 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   onConversationAttachmentSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    
     if (!file) {
       this.conversationAttachmentName = '';
       this.conversationAttachmentDataUrl = '';
+      input.value = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'File attachment should not exceed 10MB.';
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+      input.value = '';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -281,12 +300,14 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     reader.onload = () => {
       this.conversationAttachmentName = file.name;
       this.conversationAttachmentDataUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.error = '';
       this.cdr.detectChanges();
     };
     reader.onerror = () => {
       this.error = 'Unable to read attachment file.';
       this.conversationAttachmentName = '';
       this.conversationAttachmentDataUrl = '';
+      input.value = '';
       this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
@@ -295,6 +316,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   clearConversationAttachment(): void {
     this.conversationAttachmentName = '';
     this.conversationAttachmentDataUrl = '';
+    const fileInput = document.getElementById('conversationAttachmentInputPM') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.detectChanges();
   }
 
   sendConversationMessage(): void {
@@ -311,11 +337,12 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
     this.conversationSending = true;
     this.clearMessages();
+    this.cdr.detectChanges();
 
     this.notificationService.sendDirectMessage({
       recipientUserId: this.selectedMessagingUserId,
       message: text,
-      title: 'Message du chef de projet',
+      title: 'Project manager message',
       attachmentName: hasAttachment ? this.conversationAttachmentName : undefined,
       attachmentDataUrl: hasAttachment ? this.conversationAttachmentDataUrl : undefined,
     }).subscribe({
@@ -325,10 +352,14 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
         this.conversationSending = false;
         this.loadConversationMessages();
         this.refreshNotifications();
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
-        this.error = err?.error?.message || 'Unable to send message.';
+        this.error = err?.status === 413
+          ? 'La piece jointe est trop volumineuse pour le serveur. Essayez un fichier plus petit.'
+          : (err?.error?.message || 'Unable to send message.');
         this.conversationSending = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -346,11 +377,29 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     return Number(item.relatedUserId ?? 0) === Number(currentManagerId ?? 0);
   }
 
+  hasAttachment(item: AppNotification): boolean {
+    const fromNewValue = typeof item.newValue === 'string' && item.newValue.trim().startsWith('data:');
+    const fromLegacyLink = typeof item.link === 'string' && item.link.trim().startsWith('data:');
+    return fromNewValue || fromLegacyLink;
+  }
+
+  getAttachmentHref(item: AppNotification): string {
+    if (typeof item.newValue === 'string' && item.newValue.trim().startsWith('data:')) {
+      return item.newValue;
+    }
+
+    if (typeof item.link === 'string' && item.link.trim().startsWith('data:')) {
+      return item.link;
+    }
+
+    return '';
+  }
+
   markNotificationAsRead(notificationId: number): void {
     this.clearMessages();
     this.notificationService.markAsRead(notificationId).subscribe({
       next: () => {
-        this.success = 'Notification marquee bien recue.';
+        this.success = 'Notification marked as read.';
         this.refreshNotifications();
       },
       error: () => {
@@ -368,7 +417,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.clearMessages();
     this.notificationService.markAllAsRead(userId).subscribe({
       next: () => {
-        this.success = 'Toutes les notifications sont marquees bien recues.';
+        this.success = 'All notifications have been marked as read.';
         this.refreshNotifications();
       },
       error: () => {
@@ -391,18 +440,21 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     if (!payload.currentPassword.trim() || !payload.newPassword.trim() || !payload.confirmNewPassword.trim()) {
       this.error = 'All password fields are required.';
       this.success = '';
+      this.cdr.detectChanges();
       return;
     }
 
     if (payload.newPassword.length < 6) {
       this.error = 'New password must be at least 6 characters.';
       this.success = '';
+      this.cdr.detectChanges();
       return;
     }
 
     if (payload.newPassword !== payload.confirmNewPassword) {
       this.error = 'New password and confirmation do not match.';
       this.success = '';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -414,11 +466,13 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
         this.success = 'Password changed successfully.';
         this.passwordForm = this.getEmptyPasswordForm();
         this.passwordSaving = false;
+        this.cdr.detectChanges();
       },
       error: (err: unknown) => {
         const message = err instanceof Error ? err.message : 'Unable to change password.';
         this.error = message;
         this.passwordSaving = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1249,7 +1303,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.notificationService.sendDirectMessage({
       recipientUserId: assignedId,
       taskId,
-      title: `Message du chef de projet - ${task.title}`,
+      title: `Project manager message - ${task.title}`,
       message,
     }).subscribe({
       next: () => {

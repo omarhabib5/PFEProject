@@ -72,7 +72,7 @@ export class SprintManager implements OnInit {
     this.sprintService.getSprintById(id).subscribe({
       next: (sprint) => this.startEditSprint(sprint),
       error: () => {
-        this.error = 'Impossible de charger le sprint à modifier';
+        this.error = 'Unable to load the sprint to edit';
         this.cdr.detectChanges();
       }
     });

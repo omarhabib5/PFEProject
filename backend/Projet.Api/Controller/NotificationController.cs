@@ -188,10 +188,11 @@ namespace Projet.Api.Controller
                     message: hasMessage ? request.Message.Trim() : "Piece jointe",
                     type: NotificationType.Info,
                     category: NotificationCategory.TaskUpdate,
-                    link: hasAttachment ? request.AttachmentDataUrl : (request.TaskId.HasValue ? $"/tasks/{request.TaskId.Value}" : null),
+                    link: hasAttachment ? null : (request.TaskId.HasValue ? $"/tasks/{request.TaskId.Value}" : null),
                     relatedTaskId: request.TaskId,
                     relatedUserId: senderUserId,
-                    oldValue: hasAttachment ? request.AttachmentName : null
+                    oldValue: hasAttachment ? request.AttachmentName : null,
+                    newValue: hasAttachment ? request.AttachmentDataUrl : null
                 );
 
                 return Ok(notification);

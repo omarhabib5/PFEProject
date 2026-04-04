@@ -7,7 +7,7 @@
 
             <nav class="menu">
                 <button class="menu-item" [class.active]="serviceViewMode === 'list'" (click)="openServicesList()">
-                    Mes services
+                    My services
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
@@ -15,7 +15,7 @@
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'projects'"
                     (click)="setTab('projects')">
-                    Projets
+                    Projects
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">
@@ -23,7 +23,7 @@
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">
-                    Team & Members
+                    Team & members
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'calendar'"
                     (click)="setTab('calendar')">
@@ -45,7 +45,7 @@
 
             <div class="topbar-right">
                 <div class="search-box">
-                    <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" />
+                    <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" />
                 </div>
                 <button class="notification" type="button" (click)="openNotifications()">{{ notificationCount }}</button>
                 <div class="user-block">
@@ -58,7 +58,7 @@
                 <ng-template #initialsAvatar>
                     <div class="avatar">{{ getInitials(userName || 'User') }}</div>
                 </ng-template>
-                <button class="logout-btn" (click)="logout()" type="button">Logout</button>
+                <button class="logout-btn" (click)="logout()" type="button">Log out</button>
             </div>
         </header>
 
@@ -70,7 +70,7 @@
             <div class="list-header">
                 <div>
                     <h3>Services</h3>
-                    <p>Gerez vos services et accedez a leur performance</p>
+                    <p>Manage your services and access their performance</p>
                 </div>
                 <button class="primary-btn" (click)="openCreateServiceModal()">+ New Service</button>
             </div>
@@ -79,7 +79,7 @@
                 <input type="text" placeholder="Search a service..." [(ngModel)]="searchTerm" />
                 <select [(ngModel)]="statusFilter">
                     <option value="all">All statuses</option>
-                    <option value="active">Actif</option>
+                    <option value="active">Active</option>
                 </select>
             </div>
 
@@ -91,10 +91,10 @@
                     </div>
 
                     <h4>{{ service.name }}</h4>
-                    <p class="desc">ID service: {{ service.id }}</p>
-                    <p class="meta-line">👥 {{ getMembersCountForService(service) }} membres</p>
-                    <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projets</p>
-                    <p class="meta-line">Chef de service: {{ getResponsibleLabel(service) }}</p>
+                    <p class="desc">Service ID: {{ service.id }}</p>
+                    <p class="meta-line">👥 {{ getMembersCountForService(service) }} members</p>
+                    <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projects</p>
+                    <p class="meta-line">Service manager: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block"
                         *ngIf="hasTeamsForService(service) || getMembersCountForService(service) > 0">
@@ -121,23 +121,22 @@
                     <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
                     <div>
                         <h3>{{ selectedService.name }}</h3>
-                        <p>Chef de service: {{ getResponsibleLabel(selectedService) }}</p>
+                        <p>Service manager: {{ getResponsibleLabel(selectedService) }}</p>
                         <div class="detail-meta">
-                            <span>👥 {{ membersCount }} membres</span>
-                            <span>🗂️ {{ projectsCount }} projets</span>
+                            <span>👥 {{ membersCount }} members</span>
+                            <span>🗂️ {{ projectsCount }} projects</span>
                             <span>⚡ {{ teamsCount }} teams</span>
                         </div>
                     </div>
                 </div>
-                <button class="primary-btn" (click)="openProjects()">Nouveau projet</button>
+                <button class="primary-btn" (click)="openProjects()">New project</button>
             </div>
 
             <div class="service-actions-row">
                 
                 
                 <button class="secondary-btn" type="button" (click)="openCreateTeam()">Add team</button>
-                <button class="secondary-btn" type="button" (click)="openAddMembers()">Add member au
-                    service</button>
+                <button class="secondary-btn" type="button" (click)="openAddMembers()">Add members to service</button>
                 <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit projects</button>
                 <button class="secondary-btn" type="button" (click)="openUserStories()">Add user story</button>
                 <button class="secondary-btn" type="button" (click)="backToServiceList()">Switch service</button>
@@ -146,12 +145,11 @@
             <div class="tabs-card">
                 <div class="tabs-header">
                     <button [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">Dashboard</button>
-                    <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Projets</button>
+                    <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Projects</button>
                     <button [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">User
                         Stories</button>
-                    <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Team &
-                        membres</button>
-                    <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendrier</button>
+                    <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Team & members</button>
+                    <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendar</button>
                     <button [class.active]="activeTab === 'notifications'"
                         (click)="setTab('notifications')">Notifications</button>
                     <button [class.active]="activeTab === 'settings'" (click)="setTab('settings')">Settings</button>
@@ -161,10 +159,10 @@
                     <section class="overview-hero">
                         <div class="overview-hero-main">
                             <h4>{{ selectedService.name }}</h4>
-                            <p>Chef de service: {{ getResponsibleLabel(selectedService) }}</p>
-                            <p>Vue d'ensemble de l'activite du service</p>
+                            <p>Service manager: {{ getResponsibleLabel(selectedService) }}</p>
+                            <p>Overview of the service activity</p>
                             <div class="overview-progress-wrap">
-                                <span>Progression globale</span>
+                                <span>Overall progress</span>
                                 <div class="overview-progress-line">
                                     <div class="overview-progress-fill" [style.width.%]="globalProgressPercent"></div>
                                 </div>
@@ -174,22 +172,22 @@
                         <div class="overview-hero-stats">
                             <article>
                                 <strong>{{ projectsCount }}</strong>
-                                <span>Projets</span>
+                                <span>Projects</span>
                             </article>
                             <article>
                                 <strong>{{ membersCount }}</strong>
-                                <span>Membres</span>
+                                <span>Members</span>
                             </article>
                             <article>
                                 <strong>{{ activeTasksCount }}</strong>
-                                <span>Taches actives</span>
+                                <span>Active tasks</span>
                             </article>
                         </div>
                     </section>
 
                     <div class="kpi-grid">
                         <article class="kpi-card kpi-card-blue">
-                            <h4>Projets actifs</h4><strong>{{ projectsCount }}</strong>
+                            <h4>Active projects</h4><strong>{{ projectsCount }}</strong>
                         </article>
                         <article class="kpi-card kpi-card-cyan">
                             <h4>Teams</h4><strong>{{ teamsCount }}</strong>
@@ -210,12 +208,12 @@
                             <h5>User Stories</h5>
                             <p>Total <strong>{{ userStoryTotal }}</strong></p>
                             <p>Completed <strong>{{ completedUserStoriesCount }}</strong></p>
-                            <p>En cours <strong>{{ inProgressUserStoriesCount }}</strong></p>
+                            <p>In progress <strong>{{ inProgressUserStoriesCount }}</strong></p>
                         </article>
                         <article class="stats-card">
                             <h5>Sprints</h5>
                             <p>Total <strong>{{ sprintTotal }}</strong></p>
-                            <p>Actifs <strong>{{ activeSprintCount }}</strong></p>
+                            <p>Active <strong>{{ activeSprintCount }}</strong></p>
                             <p>Completed <strong>{{ completedSprintCount }}</strong></p>
                         </article>
                         <article class="stats-card">
@@ -231,18 +229,18 @@
                     <div class="section-title-row">
                         <h4>Service projects</h4>
                         <div class="inline-actions">
-                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Modifier les
-                                projets</button>
-                            <button class="primary-btn" type="button" (click)="openProjects()">+ Nouveau projet</button>
+                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit
+                                projects</button>
+                            <button class="primary-btn" type="button" (click)="openProjects()">+ New project</button>
                         </div>
                     </div>
                     <div class="team-table-wrap" *ngIf="selectedServiceProjects.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
-                                    <th>Projet</th>
-                                    <th>Statut</th>
-                                    <th>Progression</th>
+                                    <th>Project</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -257,8 +255,8 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td><button class="tiny-btn" type="button"
-                                            (click)="openProjectManager(project.id)">Modifier</button></td>
+                                        <td><button class="tiny-btn" type="button"
+                                            (click)="openProjectManager(project.id)">Edit</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -268,15 +266,15 @@
 
                 <div *ngIf="activeTab === 'userStories'" class="team-tab-content">
                     <div class="section-title-row">
-                        <h4>User Stories du service</h4>
-                        <button class="primary-btn" type="button" (click)="openUserStories()">+ Add User
+                        <h4>Service user stories</h4>
+                        <button class="primary-btn" type="button" (click)="openUserStories()">+ Add user
                             story</button>
                     </div>
                     <div class="team-table-wrap" *ngIf="serviceUserStories.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
-                                    <th>Titre</th>
+                                    <th>Title</th>
                                     <th>Priority</th>
                                     <th>Current status</th>
                                     <th>Change status</th>
@@ -298,8 +296,8 @@
                                         </select>
                                     </td>
                                     <td>{{ story.completedTaskCount }} / {{ story.taskCount }}</td>
-                                    <td><button class="tiny-btn" type="button"
-                                            (click)="saveUserStoryStatus(story)">Enregistrer</button></td>
+                                        <td><button class="tiny-btn" type="button"
+                                            (click)="saveUserStoryStatus(story)">Save</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -313,9 +311,9 @@
                         <h4>Service teams and members</h4>
                         <div class="inline-actions">
                             <button class="secondary-btn" type="button" (click)="openCreateTeam()">Add
-                                Team</button>
+                                team</button>
                             <button class="secondary-btn" type="button" (click)="openAddMembers()">Add
-                                Member</button>
+                                member</button>
                         </div>
                     </div>
                     <p>{{ selectedService.name }}</p>
@@ -341,7 +339,7 @@
                         <table class="team-table">
                             <thead>
                                 <tr>
-                                    <th>Membre</th>
+                                    <th>Member</th>
                                     <th>Role</th>
                                     <th>Tasks in progress</th>
                                     <th>Completed tasks</th>
@@ -407,7 +405,7 @@
 
                         <aside class="calendar-details">
                             <h4>{{ selectedCalendarDateLabel }}</h4>
-                            <p class="calendar-details-sub">Taches et dates limites des projets</p>
+                            <p class="calendar-details-sub">Tasks and project deadlines</p>
 
                             <div class="calendar-event-list"
                                 *ngIf="selectedCalendarDayTasks.length > 0 || selectedCalendarDayProjectDeadlines.length > 0; else noCalendarTasks">
@@ -439,7 +437,7 @@
                         <h4>Notifications</h4>
                         <button class="secondary-btn" type="button" (click)="markAllNotificationsAsRead()"
                             [disabled]="notificationCount === 0">
-                            Tout marquer bien recu
+                            Mark all as read
                         </button>
                     </div>
 
@@ -462,17 +460,17 @@
                                     <td>
                                         <span *ngIf="item.isRead" class="ack-badge">
                                             <span class="ack-icon" aria-hidden="true">&#10003;</span>
-                                            Bien recu
+                                            Read
                                         </span>
                                         <span *ngIf="!item.isRead" class="status-chip status-pending">
                                             <span class="ack-icon" aria-hidden="true">&#128276;</span>
-                                            Non lu
+                                            Unread
                                         </span>
                                     </td>
                                     <td>
                                         <button class="tiny-btn" type="button" *ngIf="!item.isRead"
                                             (click)="markNotificationAsRead(item.id)">
-                                            Marquer bien recu
+                                            Mark as read
                                         </button>
                                     </td>
                                 </tr>
@@ -499,7 +497,7 @@
                                             required />
                                     </div>
                                     <div class="settings-field">
-                                        <label>Nom</label>
+                                        <label>Last name</label>
                                         <input type="text" [(ngModel)]="profileForm.lastName" name="profileLastName"
                                             required />
                                     </div>
@@ -531,7 +529,7 @@
 
                         <article class="settings-card">
                             <h4>Security</h4>
-                            <p>Changez votre mot de passe.</p>
+                            <p>Change your password.</p>
 
                             <form class="settings-form" (ngSubmit)="savePasswordSettings()">
                                 <div class="settings-field">
@@ -579,7 +577,7 @@
                     placeholder="Ex: Development Service" required />
             </div>
             <div class="modal-actions">
-                <button type="button" class="secondary-btn" (click)="closeServiceModal()">Annuler</button>
+                <button type="button" class="secondary-btn" (click)="closeServiceModal()">Cancel</button>
                 <button type="submit" class="primary-btn" [disabled]="serviceSubmitting">
                     {{ serviceSubmitting ? 'Saving...' : (serviceModalMode === 'create' ? 'Create' : 'Update') }}
                 </button>
@@ -594,9 +592,9 @@
         <p class="user-story-modal-subtitle">Add the functional details of the user story.</p>
         <form class="user-story-modal-form" (ngSubmit)="submitCreateUserStory()">
             <div class="user-story-field">
-                <label>Titre</label>
+                <label>Title</label>
                 <input type="text" [(ngModel)]="userStoryForm.title" name="storyTitle"
-                    placeholder="Ex: Gestion des permissions" required />
+                    placeholder="Ex: Permission management" required />
             </div>
 
             <div class="user-story-field">
@@ -634,7 +632,7 @@
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="secondary-btn" (click)="closeUserStoryModal()">Annuler</button>
+                <button type="button" class="secondary-btn" (click)="closeUserStoryModal()">Cancel</button>
                 <button type="submit" class="primary-btn" [disabled]="userStorySubmitting">
                     {{ userStorySubmitting ? 'Creating...' : 'Create' }}
                 </button>

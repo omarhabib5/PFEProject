@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
@@ -99,11 +99,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   private userApiService = inject(UserApiService);
   private serviceService = inject(ServiceService);
   private notificationService = inject(NotificationService);
-  private autoRefreshSubscription: Subscription | null = null;
-  private refreshTickerSubscription: Subscription | null = null;
+  private cdr = inject(ChangeDetectorRef);
   private notificationCountSubscription: Subscription | null = null;
   private notificationsSubscription: Subscription | null = null;
-  private readonly autoRefreshMs = 15000;
+  private conversationLoading = false;
 
   sidebarSection: SidebarSection = 'dashboard';
   activeTab: EmployeeTab = 'overview';
@@ -118,9 +117,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   todayLabel = '';
   unreadNotifications = 0;
   profileImageUrl = '';
-  isRefreshing = false;
-  nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
-  lastUpdatedAt: Date | null = null;
 
   currentUserId: number | null = null;
 
@@ -149,6 +145,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   taskDelayMessageByTaskId: Record<number, string> = {};
   taskProjectManagerIdByTaskId: Record<number, number> = {};
   taskProjectManagerNameByTaskId: Record<number, string> = {};
+  userNameById: Record<number, string> = {};
   showDelayMessageForTaskId: number | null = null;
   sendingDelayMessageTaskId: number | null = null;
   replyMessageByNotificationId: Record<number, string> = {};
@@ -173,14 +170,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   calendarCells: CalendarCell[] = [];
   selectedCalendarDate: Date | null = null;
 
-  readonly weekdays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   readonly bucketOrder: TaskBucket[] = ['todo', 'inProgress', 'review', 'done'];
   readonly bucketLabels: Record<TaskBucket, string> = {
-    todo: 'A faire',
-    inProgress: 'En cours',
-    review: 'A valider',
-    done: 'Termine'
+    todo: 'To do',
+    inProgress: 'In progress',
+    review: 'To review',
+    done: 'Done'
   };
 
   ngOnInit(): void {
@@ -190,7 +187,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     }
 
     this.hydrateProfile();
-    this.todayLabel = new Date().toLocaleDateString('fr-FR', {
+    this.todayLabel = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -200,23 +197,20 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.loadSettingsProfile();
     this.initializeNotifications();
     this.loadEmployeeData();
-    this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
-    this.stopAutoRefresh();
     this.notificationCountSubscription?.unsubscribe();
     this.notificationCountSubscription = null;
     this.notificationsSubscription?.unsubscribe();
-    this.notificationsSubscription = null;
   }
 
   get pageTitle(): string {
-    if (this.sidebarSection === 'calendar') return 'Calendrier';
+    if (this.sidebarSection === 'calendar') return 'Calendar';
     if (this.sidebarSection === 'notifications') return 'Notifications';
-    if (this.sidebarSection === 'messagerie') return 'Messagerie';
-    if (this.sidebarSection === 'settings') return 'Parametres';
-    return 'Mon tableau de bord';
+    if (this.sidebarSection === 'messagerie') return 'Messaging';
+    if (this.sidebarSection === 'settings') return 'Settings';
+    return 'My dashboard';
   }
 
   get completionPercent(): number {
@@ -249,7 +243,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get nearestDueTask(): UiTask | null {
-    const candidates = this.myTasks.filter((task) => task.delayLabel.includes('Dans'));
+    const candidates = this.myTasks.filter((task) => task.delayLabel.includes('In'));
     return candidates.length > 0 ? candidates[0] : null;
   }
 
@@ -264,7 +258,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   get selectedDayTasks(): UiTask[] {
@@ -297,6 +291,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   setSidebarSection(section: SidebarSection): void {
     this.sidebarSection = section;
+    this.cdr.markForCheck();
     if (section === 'messagerie') {
       this.refreshMessagingContacts();
       if (this.selectedMessagingUserId) {
@@ -319,7 +314,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       }
 
       const managerName = this.taskProjectManagerNameByTaskId[Number(taskId)]?.trim();
-      mapById.set(managerId, managerName && managerName.length > 0 ? managerName : `Chef de projet #${managerId}`);
+      mapById.set(managerId, managerName && managerName.length > 0 ? managerName : `Project manager #${managerId}`);
     });
 
     this.messagingContacts = Array.from(mapById.entries())
@@ -330,6 +325,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       this.selectedMessagingUserId = null;
       this.conversationMessages = [];
     }
+    this.cdr.markForCheck();
   }
 
   selectMessagingUser(userId: number): void {
@@ -337,6 +333,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.conversationDraft = '';
     this.conversationAttachmentName = '';
     this.conversationAttachmentDataUrl = '';
+    this.cdr.markForCheck();
     this.loadConversationMessages();
   }
 
@@ -346,13 +343,23 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.conversationLoading) {
+      return;
+    }
+
     this.error = '';
+    this.conversationLoading = true;
+    this.cdr.markForCheck();
     this.notificationService.getConversation(this.selectedMessagingUserId).subscribe({
       next: (items) => {
         this.conversationMessages = (items ?? []).slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        this.conversationLoading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'Impossible de charger la conversation.';
+        this.error = 'Unable to load the conversation.';
+        this.conversationLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -360,9 +367,23 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   onConversationAttachmentSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    
     if (!file) {
       this.conversationAttachmentName = '';
       this.conversationAttachmentDataUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'La piece jointe ne doit pas depasser 10MB.';
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
       return;
     }
 
@@ -370,11 +391,15 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     reader.onload = () => {
       this.conversationAttachmentName = file.name;
       this.conversationAttachmentDataUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.error = '';
+      this.cdr.markForCheck();
     };
     reader.onerror = () => {
-      this.error = 'Impossible de lire le fichier joint.';
+      this.error = 'Unable to read the attached file.';
       this.conversationAttachmentName = '';
       this.conversationAttachmentDataUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }
@@ -382,6 +407,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   clearConversationAttachment(): void {
     this.conversationAttachmentName = '';
     this.conversationAttachmentDataUrl = '';
+    const fileInput = document.getElementById('conversationAttachmentInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.markForCheck();
   }
 
   sendConversationMessage(): void {
@@ -393,12 +423,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const hasAttachment = this.conversationAttachmentDataUrl.trim().length > 0;
     if (!text && !hasAttachment) {
       this.error = 'Message ou piece jointe obligatoire.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.error = '';
     this.settingsSuccess = '';
     this.conversationSending = true;
+    this.cdr.markForCheck();
 
     this.notificationService.sendDirectMessage({
       recipientUserId: this.selectedMessagingUserId,
@@ -408,30 +440,55 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       attachmentDataUrl: hasAttachment ? this.conversationAttachmentDataUrl : undefined,
     }).pipe(finalize(() => {
       this.conversationSending = false;
+      this.cdr.markForCheck();
     })).subscribe({
       next: () => {
         this.conversationDraft = '';
         this.clearConversationAttachment();
         this.loadConversationMessages();
         this.refreshNotifications();
+        this.settingsSuccess = 'Message sent successfully.';
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
-        this.error = err?.error?.message || 'Impossible d envoyer le message.';
+        this.error = err?.status === 413
+          ? 'La piece jointe est trop volumineuse pour le serveur. Essayez un fichier plus petit.'
+          : (err?.error?.message || 'Unable to send the message.');
+        this.cdr.markForCheck();
       }
     });
   }
 
   getSelectedMessagingUserName(): string {
     if (!this.selectedMessagingUserId) {
-      return 'Selectionnez un chef de projet';
+      return 'Select a project manager';
     }
 
     const contact = this.messagingContacts.find((item) => item.id === this.selectedMessagingUserId);
-    return contact?.name ?? `Chef de projet #${this.selectedMessagingUserId}`;
+    const resolved = this.userNameById[this.selectedMessagingUserId]?.trim();
+    return contact?.name ?? resolved ?? 'Project manager';
   }
 
   isMessageSentByCurrentUser(item: Notification): boolean {
     return Number(item.relatedUserId ?? 0) === Number(this.currentUserId ?? 0);
+  }
+
+  hasAttachment(item: Notification): boolean {
+    const fromNewValue = typeof item.newValue === 'string' && item.newValue.trim().startsWith('data:');
+    const fromLegacyLink = typeof item.link === 'string' && item.link.trim().startsWith('data:');
+    return fromNewValue || fromLegacyLink;
+  }
+
+  getAttachmentHref(item: Notification): string {
+    if (typeof item.newValue === 'string' && item.newValue.trim().startsWith('data:')) {
+      return item.newValue;
+    }
+
+    if (typeof item.link === 'string' && item.link.trim().startsWith('data:')) {
+      return item.link;
+    }
+
+    return '';
   }
 
   setTab(tab: EmployeeTab): void {
@@ -448,36 +505,15 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   get selectedCalendarDateLabel(): string {
     if (!this.selectedCalendarDate) return '';
-    return this.selectedCalendarDate.toLocaleDateString('fr-FR', {
+    return this.selectedCalendarDate.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
     });
   }
 
-  get refreshStatusLabel(): string {
-    if (this.isRefreshing) {
-      return 'Actualisation...';
-    }
-
-    return `Rafraichissement auto dans ${this.nextRefreshInSeconds}s`;
-  }
-
   get lastUpdatedLabel(): string {
-    if (!this.lastUpdatedAt) {
-      return 'Pas encore mis a jour';
-    }
-
-    return `Mis a jour a ${this.lastUpdatedAt.toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    })}`;
-  }
-
-  manualRefresh(): void {
-    this.refreshDashboardData();
+    return 'Tableauaux de bord';
   }
 
   goToCurrentCalendarMonth(): void {
@@ -491,7 +527,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   getTaskAssigneeName(task: UiTask): string {
     const rawTask = this.allTasks.find(t => t.id === task.id);
-    return rawTask?.assignedToName || 'Non assigne';
+    return rawTask?.assignedToName || 'Unassigned';
   }
 
   getUserStoryName(storyId: number): string {
@@ -507,10 +543,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   formatDate(date: Date | string | null | undefined): string {
-    if (!date) return 'Non definie';
+    if (!date) return 'Not defined';
     const parsed = typeof date === 'string' ? new Date(date) : date;
-    if (Number.isNaN(parsed.getTime())) return 'Non definie';
-    return parsed.toLocaleDateString('fr-FR');
+    if (Number.isNaN(parsed.getTime())) return 'Not defined';
+    return parsed.toLocaleDateString('en-US');
   }
 
   saveProfileSettings(): void {
@@ -520,7 +556,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const avatarUrl = this.profileForm.avatarUrl.trim();
 
     if (!firstName || !lastName || !email) {
-      this.error = 'Le prenom, le nom et l email sont obligatoires.'
+      this.error = 'First name, last name, and email are required.'
       return;
     }
 
@@ -529,7 +565,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const roleNumber = this.resolveRoleNumber(userData?.role);
 
     if (!userId || roleNumber === null) {
-      this.error = 'Impossible d identifier votre compte utilisateur.'
+      this.error = 'Unable to identify your user account.'
       return;
     }
 
@@ -549,6 +585,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
           this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
           this.hydrateProfile();
           this.settingsSuccess = 'Profil mis a jour avec succes.'
+          this.cdr.markForCheck();
         };
 
         if (avatarUrl) {
@@ -562,24 +599,25 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         applySuccess();
       },
       error: () => {
-        this.error = 'Impossible de mettre a jour le profil.'
+        this.error = 'Unable to update the profile.'
+        this.cdr.markForCheck();
       }
     });
   }
 
   savePasswordSettings(): void {
     if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmNewPassword) {
-      this.error = 'Veuillez remplir tous les champs du mot de passe.'
+      this.error = 'Please fill in all password fields.'
       return;
     }
 
     if (this.passwordForm.newPassword.length < 6) {
-      this.error = 'Le nouveau mot de passe doit contenir au moins 6 caracteres.'
+      this.error = 'The new password must contain at least 6 characters.'
       return;
     }
 
     if (this.passwordForm.newPassword !== this.passwordForm.confirmNewPassword) {
-      this.error = 'La confirmation du mot de passe ne correspond pas.'
+      this.error = 'Password confirmation does not match.'
       return;
     }
 
@@ -593,15 +631,17 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       confirmNewPassword: this.passwordForm.confirmNewPassword
     }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
       next: () => {
-        this.settingsSuccess = 'Mot de passe mis a jour avec succes.'
+        this.settingsSuccess = 'Password updated successfully.'
         this.passwordForm = {
           currentPassword: '',
           newPassword: '',
           confirmNewPassword: ''
         };
+        this.cdr.markForCheck();
       },
       error: (err: unknown) => {
-        this.error = err instanceof Error ? err.message : 'Impossible de changer le mot de passe.';
+        this.error = err instanceof Error ? err.message : 'Unable to change the password.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -624,7 +664,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
           this.loadEmployeeData();
         },
         error: () => {
-          this.error = 'Impossible de mettre a jour le statut de la tache.'
+          this.error = 'Unable to update the task status.'
+          this.cdr.markForCheck();
         }
       });
   }
@@ -642,12 +683,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.error = '';
     this.settingsSuccess = '';
     this.showDelayMessageForTaskId = this.showDelayMessageForTaskId === task.id ? null : task.id;
+    this.cdr.markForCheck();
   }
 
   sendTaskDelayMessage(task: UiTask): void {
     const managerId = this.taskProjectManagerIdByTaskId[task.id] ?? 0;
     if (managerId <= 0) {
-      this.error = 'Chef de projet introuvable pour cette tache.';
+      this.error = 'Project manager not found for this task.';
+      this.cdr.markForCheck();
       return;
     }
 
@@ -655,40 +698,51 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const attachmentDataUrl = (this.taskDelayAttachmentDataUrlByTaskId[task.id] ?? '').trim();
     const hasAttachment = attachmentDataUrl.length > 0;
     if (!draft && !hasAttachment) {
-      this.error = 'Veuillez saisir un message ou joindre un fichier avant envoi.';
+      this.error = 'Enter a message or attach a file before sending.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.error = '';
     this.settingsSuccess = '';
     this.sendingDelayMessageTaskId = task.id;
+    this.cdr.markForCheck();
 
     this.notificationService.sendDirectMessage({
       recipientUserId: managerId,
       taskId: task.id,
-      title: `Retard signale - ${task.title}`,
+      title: `Delay reported - ${task.title}`,
       message: draft,
       attachmentName: hasAttachment ? this.taskDelayAttachmentNameByTaskId[task.id] : undefined,
       attachmentDataUrl: hasAttachment ? attachmentDataUrl : undefined,
     }).pipe(finalize(() => {
       this.sendingDelayMessageTaskId = null;
+      this.cdr.markForCheck();
     })).subscribe({
       next: () => {
-        this.settingsSuccess = 'Message envoye au chef de projet.';
+        this.settingsSuccess = 'Message sent to the project manager.';
         this.taskDelayMessageByTaskId[task.id] = '';
         this.taskDelayAttachmentNameByTaskId[task.id] = '';
         this.taskDelayAttachmentDataUrlByTaskId[task.id] = '';
         this.showDelayMessageForTaskId = null;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
-        this.error = err?.error?.message || 'Impossible d envoyer le message au chef de projet.';
+        this.error = err?.error?.message || 'Unable to send the message to the project manager.';
+        this.cdr.markForCheck();
       }
     });
   }
 
   getTaskManagerName(task: UiTask): string {
     const name = this.taskProjectManagerNameByTaskId[task.id];
-    return name && name.trim().length > 0 ? name : 'Chef de projet';
+    if (name && name.trim().length > 0) {
+      return name;
+    }
+
+    const managerId = Number(this.taskProjectManagerIdByTaskId[task.id] ?? 0);
+    const fallbackName = managerId > 0 ? this.userNameById[managerId] : '';
+    return fallbackName && fallbackName.trim().length > 0 ? fallbackName : 'Project manager';
   }
 
   prevMonth(): void {
@@ -721,64 +775,161 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
 
+    // Global safety timer - force stop loading after 20 seconds
+    const globalTimeoutId = setTimeout(() => {
+      if (this.loading) {
+        console.warn('Dashboard loading timeout - forcing completion');
+        this.loading = false;
+        this.composeDashboard(this.allTasks, this.projectCards.map(card => ({
+          id: card.id,
+          name: card.name
+        } as any)), [], [], []);
+      }
+    }, 20000);
+
+    // Step 1: Load essential data (tasks, projects, services, users)
     forkJoin({
-      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[]))),
-      projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as ProjectEntity[]))),
-      services: this.serviceService.getServices().pipe(catchError(() => of([] as Service[])))
+      tasks: this.taskService.getAll().pipe(
+        timeout(8000),
+        catchError(() => {
+          console.warn('Failed to load tasks');
+          return of([] as TaskDto[]);
+        })
+      ),
+      projects: this.projectService.getAllProjects().pipe(
+        timeout(8000),
+        catchError(() => {
+          console.warn('Failed to load projects');
+          return of([] as ProjectEntity[]);
+        })
+      ),
+      services: this.serviceService.getServices().pipe(
+        timeout(5000),
+        catchError(() => {
+          console.warn('Failed to load services');
+          return of([] as Service[]);
+        })
+      ),
+      users: this.userApiService.getUsers().pipe(
+        timeout(5000),
+        catchError(() => {
+          console.warn('Failed to load users');
+          return of([] as Array<{ id: number; firstName?: string; lastName?: string }>);
+        })
+      )
     })
-      .pipe(timeout(15000))
+      .pipe(
+        timeout(10000),
+        finalize(() => {
+          clearTimeout(globalTimeoutId);
+        })
+      )
       .subscribe({
-        next: ({ tasks, projects, services }) => {
-          const projectIds = projects
-            .map((p) => p.id)
+        next: ({ tasks, projects, services, users }) => {
+          // Build user name cache
+          const userNameById: Record<number, string> = {};
+          users.forEach((user) => {
+            const id = Number(user?.id ?? 0);
+            if (id <= 0) return;
+            const fullName = `${String(user?.firstName ?? '').trim()} ${String(user?.lastName ?? '').trim()}`.trim();
+            if (fullName.length > 0) {
+              userNameById[id] = fullName;
+            }
+          });
+          this.userNameById = userNameById;
+
+          // Try to load sprints and stories in parallel, but don't wait for them
+          this.loadOptionalSprintsAndStories(tasks, projects, services);
+
+          // Display dashboard with what we have
+          this.composeDashboard(tasks, projects, [], [], services);
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load core data:', err);
+          this.loading = false;
+          this.error = 'Unable to load data.';
+          this.composeDashboard([], [], [], [], []);
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
+  }
+
+  private loadOptionalSprintsAndStories(
+    tasks: TaskDto[],
+    projects: ProjectEntity[],
+    services: Service[]
+  ): void {
+    const projectIds = projects
+      .map((p) => p.id)
+      .filter((id): id is number => typeof id === 'number' && id > 0);
+
+    if (projectIds.length === 0) {
+      return; // No projects, skip sprints/stories
+    }
+
+    // Load sprints with aggressive timeout
+    const sprintRequests = projectIds.map((projectId) =>
+      this.sprintService
+        .getSprintsByProjectId(projectId)
+        .pipe(
+          timeout(2000),
+          catchError(err => {
+            console.warn(`Failed to load sprints for project ${projectId}:`, err);
+            return of([] as SprintEntity[]);
+          })
+        )
+    );
+
+    forkJoin(sprintRequests)
+      .pipe(timeout(5000))
+      .subscribe({
+        next: (sprintsByProject) => {
+          const sprints = sprintsByProject.flat();
+          const sprintIds = sprints
+            .map((s) => s.id)
             .filter((id): id is number => typeof id === 'number' && id > 0);
 
-          const sprintRequests = projectIds.map((projectId) =>
-            this.sprintService.getSprintsByProjectId(projectId).pipe(catchError(() => of([] as SprintEntity[])))
-          );
-
-          if (sprintRequests.length === 0) {
-            this.composeDashboard(tasks, projects, [], [], services);
-            this.loading = false;
-            return;
+          if (sprintIds.length === 0) {
+            return; // No sprints, skip stories
           }
 
-          forkJoin(sprintRequests)
-            .pipe(finalize(() => (this.loading = false)))
+          // Load stories
+          const storyRequests = sprintIds.map((sprintId) =>
+            this.userStoryService
+              .getBySprintId(sprintId)
+              .pipe(
+                timeout(2000),
+                catchError(err => {
+                  console.warn(`Failed to load stories for sprint ${sprintId}:`, err);
+                  return of([] as UserStoryDto[]);
+                })
+              )
+          );
+
+          forkJoin(storyRequests)
+            .pipe(timeout(5000))
             .subscribe({
-              next: (sprintsByProject) => {
-                const sprints = sprintsByProject.flat();
-                const sprintIds = sprints
-                  .map((s) => s.id)
-                  .filter((id): id is number => typeof id === 'number' && id > 0);
-
-                if (sprintIds.length === 0) {
-                  this.composeDashboard(tasks, projects, sprints, [], services);
-                  return;
-                }
-
-                const storyRequests = sprintIds.map((sprintId) =>
-                  this.userStoryService.getBySprintId(sprintId).pipe(catchError(() => of([] as UserStoryDto[])))
-                );
-
-                forkJoin(storyRequests).subscribe({
-                  next: (storiesBySprint) => {
-                    this.composeDashboard(tasks, projects, sprints, storiesBySprint.flat(), services);
-                  },
-                  error: () => {
-                    this.composeDashboard(tasks, projects, sprints, [], services);
-                  }
-                });
+              next: (storiesBySprint) => {
+                // Update dashboard with sprints and stories
+                this.composeDashboard(tasks, projects, sprints, storiesBySprint.flat(), services);
+                this.cdr.markForCheck();
               },
-              error: () => {
-                this.composeDashboard(tasks, projects, [], [], services);
+              error: (err) => {
+                console.warn('Failed to load stories:', err);
+                // Update with sprints but no stories
+                this.composeDashboard(tasks, projects, sprints, [], services);
+                this.cdr.markForCheck();
               }
             });
         },
-        error: () => {
-          this.loading = false;
-          this.isRefreshing = false;
-          this.error = 'Impossible de charger les donnees employe.'
+        error: (err) => {
+          console.warn('Failed to load sprints:', err);
+          // Continue without sprints/stories
+          this.cdr.markForCheck();
         }
       });
   }
@@ -844,7 +995,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
       const managerFirstName = String((project as any)?.projectManager?.firstName ?? '').trim();
       const managerLastName = String((project as any)?.projectManager?.lastName ?? '').trim();
-      const managerName = `${managerFirstName} ${managerLastName}`.trim();
+      const managerNameFromProject = `${managerFirstName} ${managerLastName}`.trim();
+      const managerName = managerNameFromProject || (managerId > 0 ? String(this.userNameById[managerId] ?? '').trim() : '');
       if (managerName) {
         managerNameByTaskId[task.id] = managerName;
       }
@@ -882,16 +1034,16 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       const progress = allProjectTasks.length > 0 ? Math.round((doneAll / allProjectTasks.length) * 100) : 0;
 
       const projectSprints = sprints.filter((sprint) => Number((sprint as any).projectId) === projectId);
-      const activeSprint = this.toActiveSprint(projectSprints, stories, project?.name ?? 'Projet');
+      const activeSprint = this.toActiveSprint(projectSprints, stories, project?.name ?? 'Project');
 
-      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Non assigne';
+      const manager = (project?.projectManager as any) ? `${(project?.projectManager as any).firstName ?? ''} ${(project?.projectManager as any).lastName ?? ''}`.trim() : 'Unassigned';
       const dueDate = this.toFrDate((project as any)?.endDate);
 
       return {
         id: projectId,
-        name: project?.name ?? `Projet ${projectId}`,
-        description: project?.description ?? 'Aucune description',
-        managerName: manager || 'Non assigne',
+        name: project?.name ?? `Project ${projectId}`,
+        description: project?.description ?? 'No description',
+        managerName: manager || 'Unassigned',
         dueDate,
         statusLabel: this.getProjectStateLabel(project?.projectState),
         statusClass: this.getProjectStateClass(project?.projectState),
@@ -911,7 +1063,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         return {
           id: sprint.id,
           projectId: Number((sprint as any).projectId ?? 0),
-          projectName: projectById.get(Number((sprint as any).projectId ?? 0))?.name ?? 'Projet',
+          projectName: projectById.get(Number((sprint as any).projectId ?? 0))?.name ?? 'Project',
           name: sprint.name,
           periodLabel: `${this.toFrDate((sprint as any).startDate)} → ${this.toFrDate((sprint as any).endDate)}`,
           statusLabel: this.getSprintStateLabel((sprint as any).sprintState),
@@ -929,13 +1081,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         })
         .filter((name) => name.trim().length > 0)
     ));
-    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service non defini';
+    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service not defined';
 
     this.syncNotificationsForView();
     this.buildCalendar();
-    this.lastUpdatedAt = new Date();
-    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
-    this.isRefreshing = false;
+    this.loading = false;
   }
 
   private toUiTask(
@@ -953,9 +1103,9 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     return {
       id: task.id,
       title: task.title,
-      projectName: project?.name ?? 'Projet non assigne',
+      projectName: project?.name ?? 'Unassigned project',
       tags: [
-        task.description?.split(' ').slice(0, 2).join(' ') || 'tache'
+        task.description?.split(' ').slice(0, 2).join(' ') || 'task'
       ],
       bucket,
       bucketLabel: this.bucketLabels[bucket],
@@ -1022,7 +1172,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     if (this.doneCount > 0) {
       notifications.push({
         level: 'success',
-        message: `${this.doneCount} tache(s) terminee(s)` ,
+        message: `${this.doneCount} task(s) completed` ,
         dateLabel: this.todayLabel
       });
     }
@@ -1080,11 +1230,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.notificationService.markAsRead(notificationId).subscribe({
       next: () => {
         this.updateNotificationReadState(notificationId);
-        this.settingsSuccess = 'Notification marquee bien recue.';
+        this.settingsSuccess = 'Notification marked as read.';
         this.refreshNotifications();
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'Impossible de marquer la notification comme recue.';
+        this.error = 'Unable to mark the notification as read.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -1105,11 +1257,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
           isRead: true
         }));
         this.syncNotificationsForView();
-        this.settingsSuccess = 'Toutes les notifications sont marquees bien recues.';
+        this.settingsSuccess = 'All notifications have been marked as read.';
         this.refreshNotifications();
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.error = 'Impossible de marquer toutes les notifications comme recues.';
+        this.error = 'Unable to mark all notifications as read.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -1122,12 +1276,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.error = '';
     this.settingsSuccess = '';
     this.showReplyComposerForNotificationId = this.showReplyComposerForNotificationId === notificationId ? null : notificationId;
+    this.cdr.markForCheck();
   }
 
   sendReplyToNotification(item: Notification): void {
     const recipientUserId = Number(item.relatedUserId ?? 0);
     if (recipientUserId <= 0) {
-      this.error = 'Impossible d identifier le destinataire de la reponse.';
+      this.error = 'Unable to identify the reply recipient.';
+      this.cdr.markForCheck();
       return;
     }
 
@@ -1136,12 +1292,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const hasAttachment = attachmentDataUrl.length > 0;
     if (!reply && !hasAttachment) {
       this.error = 'Veuillez saisir votre reponse ou joindre un fichier.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.error = '';
     this.settingsSuccess = '';
     this.sendingReplyNotificationId = item.id;
+    this.cdr.markForCheck();
 
     this.notificationService.sendDirectMessage({
       recipientUserId,
@@ -1152,16 +1310,19 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       attachmentDataUrl: hasAttachment ? attachmentDataUrl : undefined,
     }).pipe(finalize(() => {
       this.sendingReplyNotificationId = null;
+      this.cdr.markForCheck();
     })).subscribe({
       next: () => {
-        this.settingsSuccess = 'Reponse envoyee au chef de projet.';
+        this.settingsSuccess = 'Reply sent to the project manager.';
         this.replyMessageByNotificationId[item.id] = '';
         this.replyAttachmentNameByNotificationId[item.id] = '';
         this.replyAttachmentDataUrlByNotificationId[item.id] = '';
         this.showReplyComposerForNotificationId = null;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
-        this.error = err?.error?.message || 'Impossible d envoyer la reponse.';
+        this.error = err?.error?.message || 'Unable to send the reply.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -1179,16 +1340,19 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     reader.onload = () => {
       this.taskDelayAttachmentNameByTaskId[taskId] = file.name;
       this.taskDelayAttachmentDataUrlByTaskId[taskId] = typeof reader.result === 'string' ? reader.result : '';
+      this.cdr.markForCheck();
     };
     reader.onerror = () => {
-      this.error = 'Impossible de lire le fichier joint.';
+      this.error = 'Unable to read the attached file.';
       this.taskDelayAttachmentNameByTaskId[taskId] = '';
       this.taskDelayAttachmentDataUrlByTaskId[taskId] = '';
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }
 
   clearDelayAttachment(taskId: number): void {
+    this.cdr.markForCheck();
     this.taskDelayAttachmentNameByTaskId[taskId] = '';
     this.taskDelayAttachmentDataUrlByTaskId[taskId] = '';
   }
@@ -1206,11 +1370,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     reader.onload = () => {
       this.replyAttachmentNameByNotificationId[notificationId] = file.name;
       this.replyAttachmentDataUrlByNotificationId[notificationId] = typeof reader.result === 'string' ? reader.result : '';
+      this.cdr.markForCheck();
     };
     reader.onerror = () => {
-      this.error = 'Impossible de lire le fichier joint.';
+      this.error = 'Unable to read the attached file.';
       this.replyAttachmentNameByNotificationId[notificationId] = '';
       this.replyAttachmentDataUrlByNotificationId[notificationId] = '';
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }
@@ -1218,6 +1384,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   clearReplyAttachment(notificationId: number): void {
     this.replyAttachmentNameByNotificationId[notificationId] = '';
     this.replyAttachmentDataUrlByNotificationId[notificationId] = '';
+    this.cdr.markForCheck();
   }
 
   mapNotificationLevel(type: string | undefined): 'warning' | 'info' | 'success' {
@@ -1305,14 +1472,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   private buildDelayLabel(endDate: string | undefined): string {
-    if (!endDate) return 'Aucune echeance';
+    if (!endDate) return 'No deadline';
     const due = new Date(endDate);
-    if (Number.isNaN(due.getTime())) return 'Aucune echeance';
+    if (Number.isNaN(due.getTime())) return 'No deadline';
     const now = new Date();
     const diffMs = due.getTime() - now.getTime();
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (days < 0) return `En retard de ${Math.abs(days)}j`;
-    return `Dans ${days}j`;
+    if (days < 0) return `${Math.abs(days)}d overdue`;
+    return `In ${days}d`;
   }
 
   private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
@@ -1335,10 +1502,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   private getProjectStateLabel(state: ProjectState | undefined): string {
-    if (state === ProjectState.done || state === ProjectState.validated) return 'Termine';
-    if (state === ProjectState.inProgress) return 'Actif';
-    if (state === ProjectState.todo) return 'En pause';
-    return 'En attente';
+    if (state === ProjectState.done || state === ProjectState.validated) return 'Done';
+    if (state === ProjectState.inProgress) return 'Active';
+    if (state === ProjectState.todo) return 'On hold';
+    return 'Pending';
   }
 
   private getProjectStateClass(state: ProjectState | undefined): string {
@@ -1350,10 +1517,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   private getSprintStateLabel(value: unknown): string {
     const state = Number(value);
-    if (state === 2) return 'Actif';
-    if (state === 3 || state === 4) return 'Termine';
-    if (state === 1) return 'Planifie';
-    return 'En attente';
+    if (state === 2) return 'Active';
+    if (state === 3 || state === 4) return 'Done';
+    if (state === 1) return 'Planned';
+    return 'Pending';
   }
 
   private isStoryDone(value: unknown): boolean {
@@ -1369,13 +1536,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     if (!value) return '—';
     const date = new Date(value as string);
     if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('fr-FR');
+    return date.toLocaleDateString('en-US');
   }
 
   private extractTeamChips(project: ProjectEntity | undefined, managerName: string): string[] {
     const names: string[] = [];
-    if (managerName && managerName !== 'Non assigne') names.push(managerName.split(' ')[0]);
-    names.push(this.userName.split(' ')[0] || 'Moi');
+    if (managerName && managerName !== 'Unassigned') names.push(managerName.split(' ')[0]);
+    names.push(this.userName.split(' ')[0] || 'Me');
     if (project?.team?.name) names.push(project.team.name);
     return Array.from(new Set(names)).slice(0, 4);
   }
@@ -1442,61 +1609,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
     this.tokenService.setTokens(accessToken, this.tokenService.getRefreshToken(), merged);
     this.profileImageUrl = String((merged as any)?.profileImageUrl ?? '').trim();
-  }
-
-  private startAutoRefresh(): void {
-    this.stopAutoRefresh();
-    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
-
-    this.refreshTickerSubscription = interval(1000).subscribe(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        return;
-      }
-
-      if (this.loading || this.isRefreshing) {
-        return;
-      }
-
-      this.nextRefreshInSeconds = Math.max(0, this.nextRefreshInSeconds - 1);
-      if (this.nextRefreshInSeconds === 0) {
-        this.refreshDashboardData();
-      }
-    });
-
-    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        return;
-      }
-
-      if (this.loading || this.isRefreshing) {
-        return;
-      }
-
-      this.refreshDashboardData();
-      this.refreshNotifications();
-    });
-  }
-
-  private stopAutoRefresh(): void {
-    this.autoRefreshSubscription?.unsubscribe();
-    this.autoRefreshSubscription = null;
-    this.refreshTickerSubscription?.unsubscribe();
-    this.refreshTickerSubscription = null;
-  }
-
-  private refreshDashboardData(): void {
-    if (this.loading || this.isRefreshing) {
-      return;
-    }
-
-    this.nextRefreshInSeconds = Math.ceil(this.autoRefreshMs / 1000);
-    this.isRefreshing = true;
-    this.loadEmployeeData();
-    this.refreshNotifications();
-
-    if (this.sidebarSection === 'settings') {
-      this.loadSettingsProfile();
-    }
   }
 
 }

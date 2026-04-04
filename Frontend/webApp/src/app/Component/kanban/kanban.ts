@@ -140,13 +140,13 @@ export class KanbanComponent implements OnInit {
     }
 
     if (this.employeeMode && !this.isCurrentUserTask(movedTask)) {
-      this.error = 'Vous ne pouvez modifier que vos propres taches.';
+      this.error = 'You can only modify your own tasks.';
       this.cdr.detectChanges();
       return;
     }
 
     if (this.employeeMode && this.normalizeTaskStatus(this.columnIdToStatus(targetColumn.id)) === 'validated') {
-      this.error = 'Vous ne pouvez pas deplacer une tache vers la colonne validee.';
+      this.error = 'You cannot move a task to the validated column.';
       this.cdr.detectChanges();
       return;
     }
