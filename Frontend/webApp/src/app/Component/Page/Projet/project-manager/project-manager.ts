@@ -548,14 +548,14 @@ export class ProjectManager implements OnInit {
 
   getStateLabel(state: State): string {
     const labels: Record<number, string> = {
-      [State.pending]: 'En attente',
+      [State.pending]: 'Pending',
       [State.todo]: 'To Do',
-      [State.inProgress]: 'Actif',
+      [State.inProgress]: 'In Progress',
       [State.done]: 'Done',
       [State.validated]: 'Validated'
     };
 
-    return labels[Number(state)] ?? 'Inconnu';
+    return labels[Number(state)] ?? 'Unknown';
   }
 
   getProjectProgress(project: project): number {
@@ -617,16 +617,11 @@ export class ProjectManager implements OnInit {
   }
 
   getUserStoryStatusDisplay(story: UserStoryDto): string {
-    if (story.userStoryState !== undefined && story.userStoryState !== null) {
-      const option = this.userStoryStateOptions.find((item) => item.value === Number(story.userStoryState));
-      return option?.label ?? this.getUserStoryStatusLabel(story.status);
-    }
-
-    return this.getUserStoryStatusLabel(story.status);
+    return this.getStateLabel(this.getUserStoryStateValue(story));
   }
 
   getUserStoryStatusBadgeClasses(story: UserStoryDto): string {
-    const normalizedState = story.userStoryState ?? this.mapStatusToState(story.status);
+    const normalizedState = this.getUserStoryStateValue(story);
 
     if (normalizedState === State.done || normalizedState === State.validated) {
       return 'bg-blue-100 text-blue-700';
@@ -659,16 +654,8 @@ export class ProjectManager implements OnInit {
     this.openUserStoryMenuId = null;
   }
 
-  getUserStoryStatusLabel(status: UserStoryStatus): string {
-    const labels: Record<UserStoryStatus, string> = {
-      [UserStoryStatus.TODO]: 'To Do',
-      [UserStoryStatus.IN_PROGRESS]: 'In Progress',
-      [UserStoryStatus.REVIEW]: 'Review',
-      [UserStoryStatus.TESTING]: 'Testing',
-      [UserStoryStatus.DONE]: 'Done'
-    };
-
-    return labels[status] ?? 'Unknown';
+  getUserStoryStatusLabel(status: UserStoryStatus | State | number | undefined): string {
+    return this.getStateLabel(this.mapStatusToState(status));
   }
 
   getProjectSprintName(sprintId: number | string | undefined): string {
@@ -940,12 +927,6 @@ export class ProjectManager implements OnInit {
   }
 
   deleteDetailUserStory(storyId: string): void {
-    const story = this.projectUserStories.find((item) => String(item.id) === String(storyId));
-    if (!this.canDeleteUserStory(story)) {
-      alert('You cannot delete this user story unless it is pending.');
-      return;
-    }
-
     if (!confirm('Are you sure you want to delete this user story? This action cannot be undone.')) {
       return;
     }
@@ -1206,7 +1187,7 @@ export class ProjectManager implements OnInit {
       acceptanceCriteria: '',
       storyPoints: 0,
       priority: 0,
-      status: UserStoryStatus.TODO,
+      status: State.todo,
       sprintId: String(request.sprintId),
       taskCount: 0,
       completedTaskCount: 0,
@@ -1228,20 +1209,35 @@ export class ProjectManager implements OnInit {
     return `tmp-${Date.now()}`;
   }
 
-  private mapStatusToState(status: UserStoryStatus | undefined): State {
-    if (!status) {
+  private mapStatusToState(status: UserStoryStatus | State | number | undefined): State {
+    if (status === null || status === undefined) {
       return State.todo;
     }
 
-    const mapping: Record<UserStoryStatus, State> = {
-      [UserStoryStatus.TODO]: State.todo,
-      [UserStoryStatus.IN_PROGRESS]: State.inProgress,
-      [UserStoryStatus.REVIEW]: State.inProgress,
-      [UserStoryStatus.TESTING]: State.inProgress,
-      [UserStoryStatus.DONE]: State.done,
-    };
+    const numericStatus = Number(status);
+    if (Number.isFinite(numericStatus) && numericStatus >= State.pending && numericStatus <= State.validated) {
+      return numericStatus as State;
+    }
 
-    return mapping[status] ?? State.todo;
+    const normalizedStatus = String(status).trim().toLowerCase();
+    switch (normalizedStatus) {
+      case 'pending':
+        return State.pending;
+      case 'todo':
+      case 'to do':
+        return State.todo;
+      case 'inprogress':
+      case 'in progress':
+      case 'review':
+      case 'testing':
+        return State.inProgress;
+      case 'done':
+        return State.done;
+      case 'validated':
+        return State.validated;
+    }
+
+    return State.todo;
   }
 
   private getUserStoryStateValue(story: UserStoryDto): State {

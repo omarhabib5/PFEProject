@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Projet.Domain.Model;
 
 namespace Projet.Application.DTOs.UserStory
 {
@@ -23,5 +24,7 @@ namespace Projet.Application.DTOs.UserStory
         [Required]
         public int SprintId { get; set; }
         public int? AssignedToId { get; set; }
+        public State? Status { get; set; }
+        public int? EstimatedDuration { get; set; }
     }
 }

@@ -31,6 +31,36 @@ public class UserStoryController : ControllerBase
         return int.Parse(userIdClaim!);
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<UserStoryDto>>> GetAll()
+    {
+        var query = new GetAllUserStoriesQuery();
+        var result = await _mediator.Send(query);
+
+        var mapped = result.Select(x => new UserStoryDto
+        {
+            Id = x.Id,
+            Title = x.Title,
+            Description = x.Description,
+            AcceptanceCriteria = x.AcceptanceCriteria,
+            StoryPoints = x.StoryPoints,
+            Priority = x.Priority,
+            Status = x.Status,
+            SprintId = x.SprintId,
+            ProjectId = x.ProjectId,
+            AssignedToId = x.AssignedToId,
+            AssignedToName = x.AssignedTo != null
+                ? $"{x.AssignedTo.FirstName} {x.AssignedTo.LastName}"
+                : null,
+            TaskCount = x.Tasks.Count,
+            CompletedTaskCount = x.Tasks.Count(t => t.Status == Projet.Domain.Model.State.done),
+            CreatedAt = x.CreatedAt,
+            UpdatedAt = x.UpdatedAt
+        }).ToList();
+
+        return Ok(mapped);
+    }
+
     [HttpGet("sprint/{sprintId:int}")]
     public async Task<ActionResult<List<UserStoryDto>>> GetBySprintId(int sprintId)
     {
@@ -150,6 +180,8 @@ public class UserStoryController : ControllerBase
             Priority = request.Priority,
             SprintId = request.SprintId,
             AssignedToId = request.AssignedToId,
+            Status = request.Status,
+            EstimatedDuration = request.EstimatedDuration,
             CreatedById = GetCurrentUserId()
         };
 
@@ -168,7 +200,10 @@ public class UserStoryController : ControllerBase
             AcceptanceCriteria = request.AcceptanceCriteria,
             StoryPoints = request.StoryPoints,
             Priority = request.Priority,
-            AssignedToId = request.AssignedToId
+            AssignedToId = request.AssignedToId,
+            SprintId = request.SprintId,
+            Status = request.Status,
+            EstimatedDuration = request.EstimatedDuration
         };
 
         await _mediator.Send(command);

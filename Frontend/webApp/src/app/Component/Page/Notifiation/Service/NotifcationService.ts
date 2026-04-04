@@ -34,10 +34,9 @@ export class NotificationService {
 
  
     getUserNotifications(userId: number): Observable<Notification[]> {
-        // API récente: GET /api/notification (utilisateur courant depuis token)
-        // API legacy: GET /api/notification/user/{userId}
-        return this.http.get<Notification[]>(`${this.apiUrl}`).pipe(
-            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}`)),
+        // Prefer the implemented API route first to avoid noisy 404s in dev console.
+        return this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}`).pipe(
+            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}`)),
             map((items) => this.normalizeNotifications(items))
         );
     }
@@ -46,10 +45,9 @@ export class NotificationService {
      * Get unread notifications for a user
      */
     getUnreadNotifications(userId: number): Observable<Notification[]> {
-        // API récente: GET /api/notification?onlyUnread=true
-        // API legacy: GET /api/notification/user/{userId}/unread
-        return this.http.get<Notification[]>(`${this.apiUrl}?onlyUnread=true`).pipe(
-            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}/unread`)),
+        // Prefer the implemented API route first to avoid noisy 404s in dev console.
+        return this.http.get<Notification[]>(`${this.apiUrl}/user/${userId}/unread`).pipe(
+            catchError(() => this.http.get<Notification[]>(`${this.apiUrl}?onlyUnread=true`)),
             map((items) => this.normalizeNotifications(items))
         );
     }
@@ -58,10 +56,9 @@ export class NotificationService {
      * Mark a notification as read
      */
     markAsRead(notificationId: number): Observable<void> {
-        // API récente: PUT /api/notification/{id}/mark-as-read
-        // API legacy: PATCH /api/notification/{id}/mark-as-read
-        return this.http.put<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}).pipe(
-            catchError(() => this.http.patch<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}))
+        // Prefer the implemented API route first to avoid noisy 405s in dev console.
+        return this.http.patch<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}).pipe(
+            catchError(() => this.http.put<void>(`${this.apiUrl}/${notificationId}/mark-as-read`, {}))
         );
     }
 

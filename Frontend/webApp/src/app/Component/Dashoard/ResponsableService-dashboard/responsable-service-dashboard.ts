@@ -11,7 +11,7 @@ import { TaskDto, TaskService, TaskState } from '../../Page/Task/Service/TaskSer
 import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { CreateServiceDto, Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 import { UserApiService } from '../../Page/Team/Service/UserApiService';
-import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
+import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus, UserStoryStateValue } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
 import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
@@ -112,7 +112,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     { value: UserStoryStatus.TESTING, label: 'Testing' },
     { value: UserStoryStatus.DONE, label: 'Done' }
   ];
-  selectedUserStoryStatuses: Record<number, UserStoryStatus> = {};
+  selectedUserStoryStatuses: Record<number, UserStoryStateValue | undefined> = {};
 
   showUserStoryModal = false;
   userStorySubmitting = false;
@@ -1079,22 +1079,23 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return 10;
   }
 
-  getUserStoryStatusLabel(status: UserStoryStatus): string {
-    return this.userStoryStatuses.find((item) => item.value === status)?.label ?? 'Unknown';
+  getUserStoryStatusLabel(status: UserStoryStateValue | undefined): string {
+    return this.userStoryStatuses.find((item) => item.value === this.normalizeUserStoryStatus(status))?.label ?? 'Unknown';
   }
 
-  getUserStoryStatusClass(status: UserStoryStatus): string {
-    if (status === UserStoryStatus.DONE) return 'done';
-    if (status === UserStoryStatus.IN_PROGRESS) return 'active';
-    if (status === UserStoryStatus.REVIEW || status === UserStoryStatus.TESTING) return 'review';
+  getUserStoryStatusClass(status: UserStoryStateValue | undefined): string {
+    const normalized = this.normalizeUserStoryStatus(status);
+    if (normalized === UserStoryStatus.DONE || normalized === '3' || normalized === '4') return 'done';
+    if (normalized === UserStoryStatus.IN_PROGRESS || normalized === '2') return 'active';
+    if (normalized === UserStoryStatus.REVIEW || normalized === UserStoryStatus.TESTING) return 'review';
     return 'todo';
   }
 
-  getSelectedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStatus {
-    return this.selectedUserStoryStatuses[story.numericId] ?? story.status;
+  getSelectedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStateValue {
+    return this.selectedUserStoryStatuses[story.numericId] ?? story.status ?? UserStoryStatus.TODO;
   }
 
-  setSelectedUserStoryStatus(storyId: string, status: UserStoryStatus): void {
+  setSelectedUserStoryStatus(storyId: string, status: UserStoryStateValue): void {
     const numericId = Number(storyId);
     if (!Number.isFinite(numericId) || numericId <= 0) return;
     this.selectedUserStoryStatuses[numericId] = status;
@@ -1102,7 +1103,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   saveUserStoryStatus(story: ServiceUserStoryRow): void {
     const newStatus = this.getSelectedUserStoryStatus(story);
-    if (newStatus === story.status) return;
+    if (this.normalizeUserStoryStatus(newStatus) === this.normalizeUserStoryStatus(story.status)) return;
 
     this.userStoryService.updateStatus(story.numericId, newStatus).subscribe({
       next: () => {
@@ -1112,6 +1113,19 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         this.error = 'Unable to update user story status.';
       }
     });
+  }
+
+  private normalizeUserStoryStatus(status: UserStoryStateValue | undefined): UserStoryStatus | string {
+    if (status === null || status === undefined) {
+      return UserStoryStatus.TODO;
+    }
+
+    const numericStatus = Number(status);
+    if (Number.isFinite(numericStatus)) {
+      return String(numericStatus);
+    }
+
+    return status as UserStoryStatus;
   }
 
   private getRoleLabel(role: unknown, isManager: boolean): string {

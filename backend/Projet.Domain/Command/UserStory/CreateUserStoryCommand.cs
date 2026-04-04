@@ -17,6 +17,8 @@ namespace Projet.Domain.Command.UserStory
         public int SprintId { get; set; }
         public int? AssignedToId { get; set; }
         public int CreatedById { get; set; }
+        public Projet.Domain.Model.State? Status { get; set; }
+        public int? EstimatedDuration { get; set; }
 
     }
 }

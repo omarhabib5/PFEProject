@@ -235,59 +235,62 @@
 
  
   <div *ngIf="selectedProject" class="space-y-6">
-    <section class="bg-white rounded-2xl shadow border border-gray-200 p-6">
-      <p class="text-gray-500 text-sm mb-4">{{ currentDateLabel }}</p>
+    <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-amber-50 via-white to-cyan-50 p-6 shadow-xl">
+      <div class="absolute -top-16 -right-12 h-40 w-40 rounded-full bg-cyan-100/70 blur-2xl"></div>
+      <div class="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-amber-100/70 blur-2xl"></div>
 
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-gray-200">
+      <p class="text-slate-500 text-sm mb-4 relative z-10">{{ currentDateLabel }}</p>
+
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
           <div class="flex items-center gap-3 mb-1">
-            <h2 class="text-3xl font-bold text-slate-900">{{ selectedProject.name }}</h2>
-            <span class="px-4 py-1 rounded-full font-semibold text-sm" [ngClass]="getStatusBadgeClasses(selectedProject.projectState)">{{ getStateLabel(selectedProject.projectState) }}</span>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ selectedProject.name }}</h2>
+            <span class="px-4 py-1 rounded-full font-semibold text-sm shadow-sm" [ngClass]="getStatusBadgeClasses(selectedProject.projectState)">{{ getStateLabel(selectedProject.projectState) }}</span>
           </div>
-          <p class="text-lg text-slate-600 mb-1">{{ selectedProject.description || 'No description' }}</p>
-          <p class="text-lg text-slate-600">Service: {{ getServiceName(selectedProject.serviceId) }}</p>
+          <p class="text-base md:text-lg text-slate-600 mb-1 max-w-3xl">{{ selectedProject.description || 'No description' }}</p>
+          <p class="text-base md:text-lg text-slate-600">Service: <span class="font-semibold text-slate-800">{{ getServiceName(selectedProject.serviceId) }}</span></p>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-b border-gray-200">
-        <div>
-          <p class="text-3xl font-bold text-slate-900">{{ getProjectUserStoriesCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">User Stories</p>
+      <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-slate-200">
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <p class="text-3xl font-extrabold text-slate-900">{{ getProjectUserStoriesCount(selectedProject) }}</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">User Stories</p>
         </div>
-        <div>
-          <p class="text-3xl font-bold text-slate-900">{{ getProjectSprintsCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">Sprints</p>
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <p class="text-3xl font-extrabold text-slate-900">{{ getProjectSprintsCount(selectedProject) }}</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Sprints</p>
         </div>
-        <div>
-          <p class="text-3xl font-bold text-slate-900">{{ getProjectTasksCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">Tasks</p>
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <p class="text-3xl font-extrabold text-slate-900">{{ getProjectTasksCount(selectedProject) }}</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Tasks</p>
         </div>
-        <div>
-          <p class="text-3xl font-bold text-slate-900">{{ getProjectMembersCount(selectedProject) }}</p>
-          <p class="text-base text-slate-600">Members</p>
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <p class="text-3xl font-extrabold text-slate-900">{{ getProjectMembersCount(selectedProject) }}</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Members</p>
         </div>
       </div>
 
-      <div class="pt-5">
+      <div class="relative z-10 pt-5">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-lg text-slate-700">Overall progress</p>
-          <span class="text-lg font-semibold text-slate-900">{{ getProjectProgress(selectedProject) }}%</span>
+          <p class="text-base md:text-lg font-semibold text-slate-700">Overall progress</p>
+          <span class="text-lg font-extrabold text-slate-900">{{ getProjectProgress(selectedProject) }}%</span>
         </div>
-        <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-          <div class="h-full bg-blue-500" [style.width.%]="getProjectProgress(selectedProject)"></div>
+        <div class="h-3.5 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+          <div class="h-full bg-linear-to-r from-cyan-500 to-blue-600" [style.width.%]="getProjectProgress(selectedProject)"></div>
         </div>
       </div>
     </section>
 
-    <section class="bg-white rounded-2xl shadow border border-gray-200 overflow-hidden">
-      <div class="flex border-b border-gray-200">
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'overview'" [class.border-b-2]="detailTab === 'overview'" [class.border-blue-600]="detailTab === 'overview'" (click)="setDetailTab('overview')">
+    <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+      <div class="flex flex-wrap gap-2 p-3 border-b border-slate-200 bg-slate-50">
+        <button class="px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all" [class.bg-blue-600]="detailTab === 'overview'" [class.text-white]="detailTab === 'overview'" [class.text-slate-600]="detailTab !== 'overview'" [class.hover:bg-slate-200]="detailTab !== 'overview'" (click)="setDetailTab('overview')">
           Vue d'ensemble
         </button>
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'stories'" [class.border-b-2]="detailTab === 'stories'" [class.border-blue-600]="detailTab === 'stories'" (click)="setDetailTab('stories')">
+        <button class="px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all" [class.bg-blue-600]="detailTab === 'stories'" [class.text-white]="detailTab === 'stories'" [class.text-slate-600]="detailTab !== 'stories'" [class.hover:bg-slate-200]="detailTab !== 'stories'" (click)="setDetailTab('stories')">
           User Stories ({{ getProjectUserStoriesCount(selectedProject) }})
         </button>
-        <button class="px-6 py-4 text-base font-semibold text-slate-500 transition-colors" [class.text-blue-600]="detailTab === 'sprints'" [class.border-b-2]="detailTab === 'sprints'" [class.border-blue-600]="detailTab === 'sprints'" (click)="setDetailTab('sprints')">
+        <button class="px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all" [class.bg-blue-600]="detailTab === 'sprints'" [class.text-white]="detailTab === 'sprints'" [class.text-slate-600]="detailTab !== 'sprints'" [class.hover:bg-slate-200]="detailTab !== 'sprints'" (click)="setDetailTab('sprints')">
           Sprints ({{ getProjectSprintsCount(selectedProject) }})
         </button>
       </div>
@@ -418,10 +421,10 @@
             </div>
 
             <div class="relative">
-              <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200" (click)="toggleUserStoryMenu(story.id)">⋮</button>
+              <button type="button" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 text-lg font-bold hover:bg-gray-200" (click)="$event.stopPropagation(); toggleUserStoryMenu(story.id)">⋮</button>
               <div *ngIf="openUserStoryMenuId === story.id" class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1.5">
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg" (click)="startEditDetailUserStory(story); closeUserStoryMenu()">Edit</button>
-                <button class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg" (click)="deleteDetailUserStory(story.id); closeUserStoryMenu()">Delete</button>
+                <button type="button" class="w-full text-left px-2.5 py-1.5 text-sm text-slate-800 hover:bg-slate-100 rounded-lg" (click)="$event.stopPropagation(); startEditDetailUserStory(story); closeUserStoryMenu()">Edit</button>
+                <button type="button" class="w-full text-left px-2.5 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg" (click)="$event.stopPropagation(); deleteDetailUserStory(story.id); closeUserStoryMenu()">Delete</button>
               </div>
             </div>
           </div>
@@ -435,7 +438,7 @@
               <p class="font-semibold text-slate-900">{{ getProjectSprintName(story.sprintId) }}</p>
             </div>
             <div>
-              <p class="text-slate-500 mb-0.5">State:</p>
+              <p class="text-slate-500 mb-0.5">States:</p>
               <p class="font-semibold text-slate-900">{{ getUserStoryStatusDisplay(story) }}</p>
             </div>
           </div>
@@ -583,10 +586,7 @@
               <p class="text-slate-500 mb-0.5">Estimated Duration:</p>
               <p class="font-semibold text-slate-900">{{ sprint.estimatedDuration }} j</p>
             </div>
-            <div>
-              <p class="text-slate-500 mb-0.5">ID Sprint:</p>
-              <p class="font-semibold text-slate-900">#{{ sprint.id }}</p>
-            </div>
+          
             <div>
               <p class="text-slate-500 mb-0.5">Tasks:</p>
               <p class="font-semibold text-slate-900">{{ getSprintTaskCountInProject(sprint.id) }}</p>
@@ -596,11 +596,11 @@
       </div>
     </section>
 
-    <div class="flex gap-3">
-      <button class="px-5 py-2.5 bg-yellow-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-yellow-700" (click)="startEditProject(selectedProject); backToProjectsList()">
+    <div class="flex flex-wrap gap-3">
+      <button class="px-5 py-2.5 bg-amber-600 text-white rounded-xl font-semibold uppercase tracking-wide transition-all duration-300 hover:bg-amber-700 hover:-translate-y-0.5" (click)="startEditProject(selectedProject); backToProjectsList()">
         Edit Project
       </button>
-      <button class="px-5 py-2.5 bg-red-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-red-700" (click)="deleteProject(selectedProject.id!); backToProjectsList()">
+      <button class="px-5 py-2.5 bg-rose-600 text-white rounded-xl font-semibold uppercase tracking-wide transition-all duration-300 hover:bg-rose-700 hover:-translate-y-0.5" (click)="deleteProject(selectedProject.id!); backToProjectsList()">
         Delete Project
       </button>
     </div>

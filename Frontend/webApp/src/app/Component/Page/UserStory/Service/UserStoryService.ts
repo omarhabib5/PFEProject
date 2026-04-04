@@ -89,6 +89,34 @@ export class UserStoryService {
     return Number.isFinite(parsed) ? parsed : undefined;
   }
 
+  private normalizeStateValue(value: unknown): number | undefined {
+    const numericValue = this.toOptionalNumber(value);
+    if (numericValue !== undefined) {
+      return numericValue;
+    }
+
+    const normalized = String(value ?? '').trim().toLowerCase();
+
+    switch (normalized) {
+      case 'pending':
+        return 0;
+      case 'todo':
+      case 'to do':
+        return 1;
+      case 'inprogress':
+      case 'in progress':
+      case 'review':
+      case 'testing':
+        return 2;
+      case 'done':
+        return 3;
+      case 'validated':
+        return 4;
+      default:
+        return undefined;
+    }
+  }
+
   private clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
   }
@@ -101,14 +129,19 @@ export class UserStoryService {
     priority: number;
     sprintId: number;
     assignedToId?: number;
+    status?: number;
+    estimatedDuration?: number;
   } {
     const title = (request.title ?? request.name ?? '').trim();
-    const description = (request.description ?? title).trim();
+    const normalizedDescription = (request.description ?? '').trim();
+    const description = normalizedDescription || title;
 
     const storyPointsSource = this.toOptionalNumber(request.storyPoints)
       ?? this.toOptionalNumber(request.estimatedDuration)
       ?? 1;
     const prioritySource = this.toOptionalNumber(request.priority) ?? 1;
+    const estimatedDuration = this.toOptionalNumber(request.estimatedDuration);
+    const status = this.normalizeStateValue(request.status ?? request.userStoryState);
 
     const sprintId = this.toOptionalNumber(request.sprintId) ?? 0;
     const assignedToId = this.toOptionalNumber(request.assignedToId);
@@ -120,6 +153,8 @@ export class UserStoryService {
       storyPoints: this.clamp(Math.round(storyPointsSource), 1, 100),
       priority: this.clamp(Math.round(prioritySource), 1, 5),
       sprintId,
+      ...(status !== undefined ? { status } : {}),
+      ...(estimatedDuration !== undefined ? { estimatedDuration: this.clamp(Math.round(estimatedDuration), 1, 100) } : {}),
       ...(assignedToId !== undefined ? { assignedToId } : {})
     };
   }
@@ -131,6 +166,9 @@ export class UserStoryService {
     storyPoints?: number;
     priority?: number;
     assignedToId?: number;
+    sprintId?: number;
+    status?: number;
+    estimatedDuration?: number;
   } {
     const title = (request.title ?? request.name ?? '').trim();
     const description = (request.description ?? '').trim();
@@ -139,6 +177,9 @@ export class UserStoryService {
     const storyPoints = this.toOptionalNumber(request.storyPoints);
     const priority = this.toOptionalNumber(request.priority);
     const assignedToId = this.toOptionalNumber(request.assignedToId);
+    const sprintId = this.toOptionalNumber(request.sprintId);
+    const status = this.normalizeStateValue(request.status ?? request.userStoryState);
+    const estimatedDuration = this.toOptionalNumber(request.estimatedDuration);
 
     return {
       ...(title ? { title } : {}),
@@ -146,7 +187,10 @@ export class UserStoryService {
       ...(acceptanceCriteria ? { acceptanceCriteria } : {}),
       ...(storyPoints !== undefined ? { storyPoints: this.clamp(Math.round(storyPoints), 1, 100) } : {}),
       ...(priority !== undefined ? { priority: this.clamp(Math.round(priority), 1, 5) } : {}),
-      ...(assignedToId !== undefined ? { assignedToId } : {})
+      ...(assignedToId !== undefined ? { assignedToId } : {}),
+      ...(sprintId !== undefined ? { sprintId } : {}),
+      ...(status !== undefined ? { status } : {}),
+      ...(estimatedDuration !== undefined ? { estimatedDuration: this.clamp(Math.round(estimatedDuration), 1, 100) } : {})
     };
   }
 
@@ -184,8 +228,8 @@ export class UserStoryService {
     );
   }
 
-  updateStatus(id: number, status: UserStoryStatus): Observable<void> {
-    const request: UpdateUserStoryStatusRequest = { status };
+  updateStatus(id: number, status: UserStoryStatus | number): Observable<void> {
+    const request: UpdateUserStoryStatusRequest = { status: this.normalizeStateValue(status) ?? 1 };
     return this.withFallback(
       this.http.patch<void>(
         `${this.apiUrl}/${id}/status`,

@@ -59,8 +59,10 @@ export class TeamManage implements OnInit {
   loading = false;
   error: string | null = null;
   successMessage: string | null = null;
+  showBackToDashboardButton = false;
 
   ngOnInit(): void {
+    this.showBackToDashboardButton = this.tokenService.getUserRole() === AppRole.ServiceManager;
     this.loadTeams();
     this.loadServices();
     this.loadUsers();
@@ -106,14 +108,14 @@ export class TeamManage implements OnInit {
     const role = user.role;
 
     if (typeof role === 'number') {
-      return role === Role.Employer;
+      return role === 3;
     }
 
     const normalized = String(role ?? '').trim().toLowerCase();
     return normalized === 'employee'
       || normalized === 'employer'
-      || normalized === '0'
-      || normalized === 'role.employer';
+      || normalized === '3'
+      || normalized === 'role.employee';
   }
 
   hasProjectLeader(memberIdToIgnore?: number): boolean {
@@ -127,10 +129,9 @@ export class TeamManage implements OnInit {
   }
   get availableUsersForTeam(): UserDto[] {
     const currentMemberIds = new Set(this.teamMembers.map((member) => Number(member.userId)));
-    return this.users.filter((user) => {
-      const isAdmin = this.isAdminRole(user.role);
+    return this.employeeUsers.filter((user) => {
       const alreadyInTeam = currentMemberIds.has(Number(user.id));
-      return !isAdmin && !alreadyInTeam;
+      return !alreadyInTeam;
     });
   }
 
@@ -314,8 +315,8 @@ export class TeamManage implements OnInit {
     }
 
     const selectedUser = this.users.find(u => u.id === this.newMember.userId);
-    if (selectedUser && this.isAdminRole(selectedUser.role)) {
-      this.error = 'Admin users cannot be added to a team.';
+    if (selectedUser && !this.isEmployeeUser(selectedUser)) {
+      this.error = 'Only users with Employee role can be added to a team.';
       return;
     }
     const tempMember: TeamUser = {

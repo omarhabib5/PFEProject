@@ -7,6 +7,7 @@ export enum UserStoryStatus {
   TESTING = 'Testing',
   DONE = 'Done'
 }
+export type UserStoryStateValue = UserStoryStatus | number;
 export interface  UserStoryDto {
   name: string;
   id: string;
@@ -19,7 +20,7 @@ export interface  UserStoryDto {
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
-  status: UserStoryStatus;
+  status?: UserStoryStateValue;
   sprintId: string;
   assignedToId?: string;
   assignedToName?: string;
@@ -42,7 +43,7 @@ export interface UserStoryDetailDto
   acceptanceCriteria: string;
   storyPoints: number;
   priority: number;
-  status: UserStoryStatus;
+  status?: UserStoryStateValue;
   sprintId: string;
   assignedToId?: string;
   assignedToName?: string;
@@ -64,7 +65,7 @@ export interface CreateUserStoryRequest {
   acceptanceCriteria?: string;
   storyPoints?: number;
   priority?: number;
-  status?: UserStoryStatus;
+  status?: UserStoryStateValue;
   assignedToId?: string;
 }
 export interface UpdateUserStoryRequest {
@@ -81,17 +82,17 @@ export interface UpdateUserStoryRequest {
   acceptanceCriteria?: string;
   storyPoints?: number;
   priority?: number;
-  status?: UserStoryStatus;
+  status?: UserStoryStateValue;
   assignedToId?: string;
 }
 export interface UpdateUserStoryStatusRequest {
-  status: UserStoryStatus
+  status: UserStoryStateValue
 }
 export interface TaskDto {
     id: string;
   title: string;
   description: string;
-  status: UserStoryStatus;
+  status: UserStoryStateValue;
   estimatedHours: number;
   actualHours: number;
   userStoryId: string;
@@ -116,5 +117,5 @@ export interface UpdateTaskRequest {
   assignedToId?: string;
 }
 export interface UpdateTaskStatusRequest {
-  status: UserStoryStatus
+  status: UserStoryStateValue
 }

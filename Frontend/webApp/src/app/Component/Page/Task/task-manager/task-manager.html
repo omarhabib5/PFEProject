@@ -1,18 +1,22 @@
 <div class="task-manager">
-    <div class="header">
-        <h1>Task management</h1>
+    <header class="header">
+        <div class="header-copy">
+            <p class="eyebrow">Execution Studio</p>
+            <h1>Task Management</h1>
+            <p>Create, assign, and schedule tasks with sprint-safe planning.</p>
+        </div>
 
         <div class="header-actions">
-            <button class="btn-reset" type="button" (click)="startCreate()">New task</button>
+            <button class="btn-reset" type="button" (click)="startCreate()">New Task</button>
             <a class="btn-reset" routerLink="/kanban" [queryParams]="selectedProjectId ? { projectId: selectedProjectId } : null">Kanban View</a>
         </div>
-    </div>
+    </header>
 
     <div *ngIf="error" class="error">{{ error }}</div>
 
     <div class="content-grid">
         <div class="card">
-            <h2>{{ editMode ? 'Edit task' : 'Create task' }}</h2>
+            <h2>{{ editMode ? 'Edit Task' : 'Create Task' }}</h2>
 
             <div class="form-group">
                 <label>Title</label>
@@ -25,10 +29,14 @@
             </div>
 
             <div class="form-row">
-             
                 <div class="form-group">
                     <label>Complexity</label>
                     <input [(ngModel)]="formModel.complexity" type="number" min="1" />
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Hours</label>
+                    <input [(ngModel)]="formModel.estimatedHours" type="number" min="1" />
                 </div>
             </div>
 
@@ -36,10 +44,10 @@
                 <div class="form-group">
                     <label>Status</label>
                     <select [(ngModel)]="formModel.status">
-                        <option *ngFor="let option of statusOptions" [ngValue]="option.value">{{ option.label }}
-                        </option>
+                        <option *ngFor="let option of statusOptions" [ngValue]="option.value">{{ option.label }}</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label>User Story</label>
                     <select [(ngModel)]="formModel.userStoryId" (ngModelChange)="onUserStoryChange()" [disabled]="selectedUserStoryId !== null">
@@ -56,6 +64,7 @@
                     <label>Start date</label>
                     <input [(ngModel)]="formModel.startDate" (ngModelChange)="onTaskStartDateChange()" type="date" [min]="taskMinDateInput" [max]="taskMaxDateInput" />
                 </div>
+
                 <div class="form-group">
                     <label>End date</label>
                     <input [(ngModel)]="formModel.endDate" type="date" [min]="formModel.startDate || taskMinDateInput" [max]="taskMaxDateInput" />
@@ -72,7 +81,11 @@
                         </option>
                     </select>
                 </div>
-                <div class="form-group"></div>
+
+                <div class="form-group sprint-hint">
+                    <label>Sprint Date Rule</label>
+                    <p>Start and end date are locked between sprint limits.</p>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -82,8 +95,8 @@
             </div>
         </div>
 
-        <div class="card" if >
-            <h2>Task list</h2>
+        <div class="card">
+            <h2>Task List</h2>
 
             <div *ngIf="loading" class="loading-state">Loading...</div>
 
@@ -92,16 +105,19 @@
             </div>
 
             <div *ngIf="!loading && tasks.length > 0" class="task-list">
-                <div class="task-item" *ngFor="let task of tasks" >
+                <div class="task-item" *ngFor="let task of tasks">
                     <div class="task-item-head">
                         <h3>{{ task.title }}</h3>
                         <span class="status">{{ getStatusLabel(task.status) }}</span>
                     </div>
+
                     <p>{{ task.description }}</p>
+
                     <div class="meta">
                         <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
                         <span>{{ task.estimatedHours }}h</span>
                     </div>
+
                     <div class="item-actions">
                         <button class="btn-link" type="button" (click)="startEdit(task, $event)">Edit</button>
                         <button class="btn-link" type="button" (click)="deleteTask(task, $event)" [disabled]="!canDeleteTask(task)">Delete</button>

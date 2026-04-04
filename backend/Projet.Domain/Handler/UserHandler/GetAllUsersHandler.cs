@@ -15,7 +15,7 @@ namespace Projet.Domain.Handler.UserHandler
 
         public async Task<List<Model.User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Users.ToListAsync(cancellationToken);
+            return await _context.Users.ToListAsync(cancellationToken);   
         }
     }
 }

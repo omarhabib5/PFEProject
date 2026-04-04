@@ -15,7 +15,7 @@ namespace Projet.Domain.Model
         public int StoryPoints { get; set; }
         public int Priority { get; set; }
         public State Status { get; set; }
-      
+
         public int EstimatedDuration { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

@@ -43,7 +43,6 @@
               type="email"
               formControlName="email"
               placeholder="vous@exemple.com"
-              [disabled]="isLoading"
             />
             <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Adresse email invalide</small>
           </div>
@@ -66,13 +65,12 @@
               type="password"
               formControlName="password"
               placeholder="Minimum 6 caracteres"
-              [disabled]="isLoading"
             />
             <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 caracteres requis</small>
           </div>
 
           <label class="remember-row" for="rememberMe">
-            <input id="rememberMe" type="checkbox" formControlName="rememberMe" [disabled]="isLoading" />
+            <input id="rememberMe" type="checkbox" formControlName="rememberMe" />
             <span>Se souvenir de moi</span>
           </label>
 

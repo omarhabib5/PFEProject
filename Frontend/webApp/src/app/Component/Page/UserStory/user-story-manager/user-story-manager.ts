@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserStoryService } from '../Service/UserStoryService';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../Models/userstory.model';
+import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus, UserStoryStateValue } from '../Models/userstory.model';
 import { NgIf, NgForOf } from '@angular/common';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -80,26 +80,38 @@ export class UserStoryManagerComponent implements OnInit {
       });
   }
 
-  getStatusLabel(status: UserStoryStatus): string {
-      const labels: Record<UserStoryStatus, string> = {
+  getStatusLabel(status: UserStoryStateValue | undefined): string {
+      const normalizedStatus = this.normalizeStatusValue(status);
+      const labels: Record<string, string> = {
+        '0': 'Pending',
+        '1': 'To Do',
+        '2': 'In Progress',
+        '3': 'Done',
+        '4': 'Validated',
         [UserStoryStatus.TODO]: 'À faire',
         [UserStoryStatus.IN_PROGRESS]: 'En cours',
         [UserStoryStatus.REVIEW]: 'Review',
         [UserStoryStatus.TESTING]: 'Testing',
         [UserStoryStatus.DONE]: 'Terminé',
       };
-      return labels[status] || 'Inconnu';
+      return labels[normalizedStatus] || 'Inconnu';
   }
 
-  getStatusClass(status: UserStoryStatus): string {
-      const classes: Record<UserStoryStatus, string> = {
+  getStatusClass(status: UserStoryStateValue | undefined): string {
+      const normalizedStatus = this.normalizeStatusValue(status);
+      const classes: Record<string, string> = {
+        '0': 'status-todo',
+        '1': 'status-todo',
+        '2': 'status-inprogress',
+        '3': 'status-done',
+        '4': 'status-done',
         [UserStoryStatus.TODO]: 'status-todo',
         [UserStoryStatus.IN_PROGRESS]: 'status-inprogress',
         [UserStoryStatus.REVIEW]: 'status-inprogress',
         [UserStoryStatus.TESTING]: 'status-inprogress',
         [UserStoryStatus.DONE]: 'status-done',
       };
-      return classes[status] || '';
+      return classes[normalizedStatus] || '';
   }
 
   getProgress(userStory: UserStoryDto): number {
@@ -136,7 +148,7 @@ export class UserStoryManagerComponent implements OnInit {
       return false;
     }
 
-    return userStory.status === UserStoryStatus.TODO || Number(userStory.userStoryState ?? 1) === 1;
+    return this.normalizeStatusValue(userStory.status) === UserStoryStatus.TODO || Number(userStory.userStoryState ?? 1) === 1;
   }
 
   viewUserStory(id: string): void {
@@ -296,6 +308,19 @@ export class UserStoryManagerComponent implements OnInit {
     if (Number.isNaN(value) || value < min) return false;
     if (max !== undefined && value > max) return false;
     return true;
+  }
+
+  private normalizeStatusValue(status: UserStoryStateValue | undefined): string {
+    if (status === null || status === undefined) {
+      return '';
+    }
+
+    const numericStatus = Number(status);
+    if (Number.isFinite(numericStatus)) {
+      return String(numericStatus);
+    }
+
+    return String(status).trim();
   }
 
   private resetCreateForm(): void {

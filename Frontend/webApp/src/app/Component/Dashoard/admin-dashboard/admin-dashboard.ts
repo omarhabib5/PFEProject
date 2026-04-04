@@ -1386,6 +1386,12 @@ private adminNotificationsSubscription: Subscription | null = null;
   }
 
   deleteService(service: Service): void {
+    const deleteBlockReason = this.getServiceDeleteBlockReason(service);
+    if (deleteBlockReason) {
+      alert(deleteBlockReason);
+      return;
+    }
+
     if (!confirm(`Delete service "${service.name}"? This action cannot be undone.`)) {
       return;
     }
@@ -1404,9 +1410,44 @@ private adminNotificationsSubscription: Subscription | null = null;
          this.cdr.detectChanges();
       },
       error: (err) => {
-        this.serviceFormError = err?.error?.message || 'Error while deleting service.';
+        const backendMessage = err?.error?.message;
+
+        if (backendMessage && typeof backendMessage === 'string') {
+          this.serviceFormError = backendMessage;
+          alert(`Service cannot be deleted: ${backendMessage}`);
+        } else if (err?.status === 404) {
+          this.serviceFormError = 'Service not found or cannot be deleted due to linked data.';
+          alert('Service cannot be deleted. It may already be removed, or it is still linked to projects/users.');
+        } else {
+          this.serviceFormError = 'Error while deleting service.';
+          alert('Service cannot be deleted because of a server error. Please try again.');
+        }
+
         this.serviceFormLoading = false;
       }
     });
+  }
+
+  private getServiceDeleteBlockReason(service: Service): string | null {
+    const existingService = this.services.find((item) => Number(item.id) === Number(service.id));
+    if (!existingService) {
+      return 'This service is not in the current list anymore. Please refresh and try again.';
+    }
+
+    const linkedProjectsCount = this.projects.filter((item) => Number(item.serviceId ?? -1) === Number(service.id)).length;
+    if (linkedProjectsCount > 0) {
+      return `Cannot delete service "${service.name}" because it is linked to ${linkedProjectsCount} project(s). Reassign or delete those projects first.`;
+    }
+
+    if (existingService.responsibleId && Number(existingService.responsibleId) > 0) {
+      const responsible = this.users.find((user) => user.id === Number(existingService.responsibleId));
+      const responsibleLabel = responsible
+        ? `${responsible.firstName} ${responsible.lastName}`
+        : `user #${existingService.responsibleId}`;
+
+      return `Cannot delete service "${service.name}" because it still has a responsible manager (${responsibleLabel}). Remove or change the responsible manager first.`;
+    }
+
+    return null;
   }
 }

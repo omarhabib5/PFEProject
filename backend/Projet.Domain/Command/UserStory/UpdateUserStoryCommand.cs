@@ -16,5 +16,8 @@ namespace Projet.Domain.Command.UserStory
         public int? StoryPoints { get; set; }
         public int? Priority { get; set; }
         public int? AssignedToId { get; set; }
+        public int? SprintId { get; set; }
+        public Projet.Domain.Model.State? Status { get; set; }
+        public int? EstimatedDuration { get; set; }
     }
 }

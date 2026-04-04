@@ -71,9 +71,17 @@ namespace Projet.Api.Controller
                 await _mediator.Send(new DeleteServiceCommand { id = id });
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error while deleting service.", detail = ex.Message });
             }
         }
     }

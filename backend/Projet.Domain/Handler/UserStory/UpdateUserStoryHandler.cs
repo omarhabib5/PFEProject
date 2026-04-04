@@ -52,6 +52,25 @@ public class UpdateUserStoryHandler : IRequestHandler<UpdateUserStoryCommand, Un
             userStory.AssignedToId = request.AssignedToId.Value;
         }
 
+        if (request.SprintId.HasValue)
+        {
+            var sprint = await _context.Sprints.FindAsync(new object[] { request.SprintId.Value }, cancellationToken)
+                ?? throw new KeyNotFoundException($"Sprint with Id {request.SprintId.Value} not found");
+
+            userStory.SprintId = sprint.Id;
+            userStory.ProjectId = sprint.ProjectId;
+        }
+
+        if (request.Status.HasValue)
+        {
+            userStory.Status = request.Status.Value;
+        }
+
+        if (request.EstimatedDuration.HasValue)
+        {
+            userStory.EstimatedDuration = request.EstimatedDuration.Value;
+        }
+
         userStory.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -38,6 +38,7 @@ export class TaskManager implements OnInit {
   private teamMembersByTeamId: Record<number, UserDto[]> = {};
   private projectTeamIdMap: Record<number, number> = {};
   private sprintProjectIdMap: Record<number, number> = {};
+  private sprintDateRangeMap: Record<number, { start: string; end: string }> = {};
   private loadingTeamIds = new Set<number>();
 
   statusOptions: { value: TaskState; label: string }[] = [
@@ -182,7 +183,7 @@ export class TaskManager implements OnInit {
 
     if (!this.isDateInRange(this.formModel.startDate, this.taskMinDateInput, this.taskMaxDateInput)
       || !this.isDateInRange(this.formModel.endDate, this.taskMinDateInput, this.taskMaxDateInput)) {
-      this.error = 'Task dates must be within the allowed user story range';
+      this.error = 'Task dates must be within the selected sprint range';
       return;
     }
 
@@ -271,6 +272,11 @@ export class TaskManager implements OnInit {
   }
 
   get taskMinDateInput(): string {
+    const sprintRange = this.getSelectedSprintDateRange();
+    if (sprintRange?.start) {
+      return sprintRange.start;
+    }
+
     const selectedStory = this.getSelectedUserStory();
     if (!selectedStory?.startDate) {
       return '';
@@ -280,6 +286,11 @@ export class TaskManager implements OnInit {
   }
 
   get taskMaxDateInput(): string {
+    const sprintRange = this.getSelectedSprintDateRange();
+    if (sprintRange?.end) {
+      return sprintRange.end;
+    }
+
     const selectedStory = this.getSelectedUserStory();
     if (!selectedStory?.endDate) {
       return '';
@@ -289,6 +300,10 @@ export class TaskManager implements OnInit {
   }
 
   onUserStoryChange(): void {
+    const selectedStory = this.getSelectedUserStory();
+    const sprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+    this.formModel.sprintId = sprintId > 0 ? sprintId : null;
+
     const minDate = this.taskMinDateInput;
     const maxDate = this.taskMaxDateInput;
 
@@ -328,6 +343,8 @@ export class TaskManager implements OnInit {
         if (this.formModel.userStoryId && !this.userStoryNameMap[this.formModel.userStoryId]) {
           this.formModel.userStoryId = 0;
         }
+
+        this.onUserStoryChange();
 
         this.cdr.detectChanges();
         this.refreshAssignableUsers();
@@ -383,11 +400,30 @@ export class TaskManager implements OnInit {
           return acc;
         }, {} as Record<number, number>);
 
+        this.sprintDateRangeMap = (Array.isArray(sprints) ? sprints : []).reduce((acc, sprint) => {
+          const sprintId = Number((sprint as any)?.id ?? (sprint as any)?.Id ?? 0);
+          if (sprintId <= 0) {
+            return acc;
+          }
+
+          const start = this.toDateInputFromAny((sprint as any)?.startDate ?? (sprint as any)?.StartDate);
+          const end = this.toDateInputFromAny((sprint as any)?.endDate ?? (sprint as any)?.EndDate);
+
+          if (start && end) {
+            acc[sprintId] = { start, end };
+          }
+
+          return acc;
+        }, {} as Record<number, { start: string; end: string }>);
+
+        this.onUserStoryChange();
+
         this.refreshAssignableUsers();
       },
       error: () => {
         this.projectTeamIdMap = {};
         this.sprintProjectIdMap = {};
+        this.sprintDateRangeMap = {};
         this.assignableUsers = [];
       }
     });
@@ -613,6 +649,18 @@ export class TaskManager implements OnInit {
     return this.userStories.find((story) => Number(story.id) === Number(this.formModel.userStoryId));
   }
 
+  private getSelectedSprintDateRange(): { start: string; end: string } | null {
+    const selectedStory = this.getSelectedUserStory();
+    const storySprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+    const sprintId = storySprintId > 0 ? storySprintId : Number(this.formModel.sprintId ?? 0);
+
+    if (!Number.isFinite(sprintId) || sprintId <= 0) {
+      return null;
+    }
+
+    return this.sprintDateRangeMap[sprintId] ?? null;
+  }
+
   canDeleteTask(task: TaskDto): boolean {
     return this.normalizeStatus(task.status) === 'pending';
   }
@@ -622,6 +670,19 @@ export class TaskManager implements OnInit {
     if (minDate && value < minDate) return false;
     if (maxDate && value > maxDate) return false;
     return true;
+  }
+
+  private toDateInputFromAny(value: unknown): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = value instanceof Date ? value : new Date(String(value));
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    return date.toISOString().slice(0, 10);
   }
 
   private parsePositiveNumber(value: unknown): number | null {

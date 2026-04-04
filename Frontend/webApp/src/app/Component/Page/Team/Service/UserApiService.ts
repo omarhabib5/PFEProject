@@ -92,10 +92,11 @@ export class UserApiService {
     }
 
      createEmployee(payload: CreateEmployeeRequest): Observable<any> {
-        const requestBody: { firstName: string; lastName: string; email: string; serviceId?: number } = {
+        const requestBody: { firstName: string; lastName: string; email: string; role: number; serviceId?: number } = {
             firstName: payload.firstName,
             lastName: payload.lastName,
-            email: payload.email
+            email: payload.email,
+            role: payload.role
         };
 
         if (payload.serviceId != null) {
