@@ -41,6 +41,8 @@ namespace Projet.Infrastructure.Service
         System.Threading.Tasks.Task<bool> MarkAsReadAsync(int notificationId);
 
         System.Threading.Tasks.Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, bool onlyUnread = false);
+
+        System.Threading.Tasks.Task<IEnumerable<Notification>> GetConversationAsync(int currentUserId, int otherUserId);
     }
 
     public class NotificationService : INotificationService
@@ -349,6 +351,16 @@ namespace Projet.Infrastructure.Service
                 query = query.Where(n => !n.IsRead);
 
             return await query.OrderByDescending(n => n.CreatedAt).ToListAsync();
+        }
+
+        public async System.Threading.Tasks.Task<IEnumerable<Notification>> GetConversationAsync(int currentUserId, int otherUserId)
+        {
+            return await _context.Set<Notification>()
+                .Where(n =>
+                    (n.UserId == currentUserId && n.RelatedUserId == otherUserId)
+                    || (n.UserId == otherUserId && n.RelatedUserId == currentUserId))
+                .OrderBy(n => n.CreatedAt)
+                .ToListAsync();
         }
 
         private async System.Threading.Tasks.Task SendNotificationEmailAsync(string toEmail, string subject, string message)

@@ -552,6 +552,29 @@
 	font-size: 0.78rem;
 }
 
+.delay-message-box {
+	margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.delay-message-box textarea {
+	width: 100%;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	padding: 8px 10px;
+	font-size: 0.8rem;
+	resize: vertical;
+	background: #ffffff;
+}
+
+.delay-message-box textarea:focus {
+	outline: none;
+	border-color: #93c5fd;
+	box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.28);
+}
+
 .task-actions {
 	display: flex;
 	align-items: center;
@@ -1177,6 +1200,229 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
+}
+
+.notif-actions-buttons {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.notif-reply-box {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.notif-reply-box-file {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.file-chip {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	padding: 2px 8px;
+	font-size: 0.75rem;
+	color: #334155;
+}
+
+.attachment-link {
+	display: inline-flex;
+	margin-top: 4px;
+	border-radius: 8px;
+	border: 1px solid #bfdbfe;
+	background: #eff6ff;
+	padding: 4px 8px;
+	font-size: 0.76rem;
+	font-weight: 700;
+	color: #1d4ed8;
+	text-decoration: none;
+}
+
+.messaging-layout {
+	display: grid;
+	grid-template-columns: 260px minmax(0, 1fr);
+	gap: 12px;
+}
+
+.messaging-contacts {
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: #f8fbff;
+	padding: 10px;
+}
+
+.messaging-contacts h4 {
+	margin: 0 0 8px;
+	font-size: 0.85rem;
+	color: #334155;
+}
+
+.contact-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.contact-list button {
+	border: 1px solid #dbe5f1;
+	border-radius: 10px;
+	background: #ffffff;
+	padding: 8px 10px;
+	text-align: left;
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: #334155;
+	cursor: pointer;
+}
+
+.contact-list button.active {
+	border-color: #93c5fd;
+	background: #eff6ff;
+	color: #1d4ed8;
+}
+
+.messaging-thread {
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: #ffffff;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.thread-body {
+	max-height: 360px;
+	overflow-y: auto;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 10px;
+	background: #f8fafc;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.thread-item {
+	border: 1px solid #dbe5f1;
+	border-radius: 10px;
+	background: #ffffff;
+	padding: 8px 10px;
+}
+
+.thread-item.outgoing {
+	border-color: #bfdbfe;
+	background: #eff6ff;
+}
+
+.thread-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+
+.thread-head strong {
+	font-size: 0.82rem;
+}
+
+.thread-head small {
+	font-size: 0.74rem;
+	color: #64748b;
+}
+
+.thread-item p {
+	margin: 0;
+	font-size: 0.85rem;
+	color: #334155;
+	white-space: pre-wrap;
+}
+
+.thread-compose {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.thread-compose textarea {
+	width: 100%;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	padding: 8px 10px;
+	font-size: 0.86rem;
+	resize: vertical;
+	background: #ffffff;
+}
+
+.thread-compose textarea:focus {
+	outline: none;
+	border-color: #93c5fd;
+	box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.24);
+}
+
+.thread-compose > button {
+	align-self: flex-start;
+	border: 1px solid #bfdbfe;
+	border-radius: 8px;
+	background: #eff6ff;
+	color: #1d4ed8;
+	cursor: pointer;
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.38rem 0.72rem;
+}
+
+.thread-compose > button:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+.notif-reply-box textarea {
+	width: 100%;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	padding: 8px 10px;
+	font-size: 0.86rem;
+	resize: vertical;
+	background: #ffffff;
+}
+
+.notif-reply-box textarea:focus {
+	outline: none;
+	border-color: #93c5fd;
+	box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.24);
+}
+
+.notif-reply-box button,
+.notif-actions-buttons button {
+	border: 1px solid #bfdbfe;
+	border-radius: 8px;
+	background: #eff6ff;
+	color: #1d4ed8;
+	cursor: pointer;
+	font-size: 0.78rem;
+	font-weight: 700;
+	padding: 0.34rem 0.6rem;
+}
+
+.notif-reply-box button:hover,
+.notif-actions-buttons button:hover {
+	background: #e0edff;
+	border-color: #93c5fd;
+}
+
+.notif-reply-box button:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
 }
 
 .ack-badge {

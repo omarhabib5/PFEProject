@@ -30,7 +30,7 @@ import { ChangePasswordRequest } from '../../Auth/model/auth.model';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
 import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
 
-type DashboardSection = 'projects' | 'calendar' | 'notifications' | 'settings';
+type DashboardSection = 'projects' | 'calendar' | 'notifications' | 'messagerie' | 'settings';
 type ProjectTab = 'userStories' | 'sprints' | 'tasks';
 
 interface SprintFormModel {
@@ -84,6 +84,11 @@ interface CalendarDayCell {
   events: CalendarEventItem[];
 }
 
+interface MessagingContact {
+  id: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
@@ -122,6 +127,16 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   success = '';
   notificationCount = 0;
   notifications: AppNotification[] = [];
+  taskMessageDraftByTaskId: Record<number, string> = {};
+  showTaskMessageComposerForId: number | null = null;
+  sendingTaskMessageId: number | null = null;
+  messagingContacts: MessagingContact[] = [];
+  selectedMessagingUserId: number | null = null;
+  conversationMessages: AppNotification[] = [];
+  conversationDraft = '';
+  conversationAttachmentName = '';
+  conversationAttachmentDataUrl = '';
+  conversationSending = false;
 
   projects: project[] = [];
   sprints: Sprint[] = [];
@@ -201,10 +216,134 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
   setSection(section: DashboardSection): void {
     this.activeSection = section;
-    if (section === 'notifications') {
+    if (section === 'notifications' || section === 'messagerie') {
       this.refreshNotifications();
+      this.refreshMessagingContacts();
     }
     this.clearMessages();
+  }
+
+  refreshMessagingContacts(): void {
+    const mapById = new Map<number, string>();
+
+    (this.employeeUsers ?? []).forEach((user) => {
+      const id = Number(user.id ?? 0);
+      if (id <= 0) {
+        return;
+      }
+      mapById.set(id, this.getEmployeeLabel(user));
+    });
+
+    this.messagingContacts = Array.from(mapById.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (this.selectedMessagingUserId && !mapById.has(this.selectedMessagingUserId)) {
+      this.selectedMessagingUserId = null;
+      this.conversationMessages = [];
+    }
+  }
+
+  selectMessagingUser(userId: number): void {
+    this.selectedMessagingUserId = userId;
+    this.conversationDraft = '';
+    this.conversationAttachmentName = '';
+    this.conversationAttachmentDataUrl = '';
+    this.loadConversationMessages();
+  }
+
+  loadConversationMessages(): void {
+    if (!this.selectedMessagingUserId) {
+      this.conversationMessages = [];
+      return;
+    }
+
+    this.notificationService.getConversation(this.selectedMessagingUserId).subscribe({
+      next: (items) => {
+        this.conversationMessages = (items ?? []).slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      },
+      error: () => {
+        this.error = 'Unable to load conversation.';
+      }
+    });
+  }
+
+  onConversationAttachmentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) {
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.conversationAttachmentName = file.name;
+      this.conversationAttachmentDataUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.cdr.detectChanges();
+    };
+    reader.onerror = () => {
+      this.error = 'Unable to read attachment file.';
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearConversationAttachment(): void {
+    this.conversationAttachmentName = '';
+    this.conversationAttachmentDataUrl = '';
+  }
+
+  sendConversationMessage(): void {
+    if (!this.selectedMessagingUserId) {
+      return;
+    }
+
+    const text = this.conversationDraft.trim();
+    const hasAttachment = this.conversationAttachmentDataUrl.trim().length > 0;
+    if (!text && !hasAttachment) {
+      this.error = 'Message or attachment is required.';
+      return;
+    }
+
+    this.conversationSending = true;
+    this.clearMessages();
+
+    this.notificationService.sendDirectMessage({
+      recipientUserId: this.selectedMessagingUserId,
+      message: text,
+      title: 'Message du chef de projet',
+      attachmentName: hasAttachment ? this.conversationAttachmentName : undefined,
+      attachmentDataUrl: hasAttachment ? this.conversationAttachmentDataUrl : undefined,
+    }).subscribe({
+      next: () => {
+        this.conversationDraft = '';
+        this.clearConversationAttachment();
+        this.conversationSending = false;
+        this.loadConversationMessages();
+        this.refreshNotifications();
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'Unable to send message.';
+        this.conversationSending = false;
+      }
+    });
+  }
+
+  getSelectedMessagingUserName(): string {
+    if (!this.selectedMessagingUserId) {
+      return 'Select an employee';
+    }
+    const item = this.messagingContacts.find((contact) => contact.id === this.selectedMessagingUserId);
+    return item?.name ?? `User #${this.selectedMessagingUserId}`;
+  }
+
+  isMessageSentByCurrentUser(item: AppNotification): boolean {
+    const currentManagerId = this.resolveCurrentManagerId();
+    return Number(item.relatedUserId ?? 0) === Number(currentManagerId ?? 0);
   }
 
   markNotificationAsRead(notificationId: number): void {
@@ -603,6 +742,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
           next: (userStories) => {
             this.applyScopedData(projects, sprints, tasks, userStories);
             this.employeeUsers = (users ?? []).filter((user) => this.isEmployeeRole(user.role));
+            this.refreshMessagingContacts();
             this.preloadDeclaredTeamMembers();
 
             if (this.projects.length === 0) {
@@ -1072,6 +1212,62 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     }
 
     return `User #${assignedId}`;
+  }
+
+  canMessageAssignedEmployee(task: TaskDto): boolean {
+    const assignedId = Number((task as any)?.assignedToId ?? 0);
+    return assignedId > 0 && !this.isTaskCompleted(task);
+  }
+
+  toggleTaskMessageComposer(task: TaskDto): void {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId || !this.canMessageAssignedEmployee(task)) {
+      return;
+    }
+
+    this.clearMessages();
+    this.showTaskMessageComposerForId = this.showTaskMessageComposerForId === taskId ? null : taskId;
+  }
+
+  sendMessageToTaskAssignee(task: TaskDto): void {
+    const taskId = Number(task.id ?? 0);
+    const assignedId = Number((task as any)?.assignedToId ?? 0);
+    if (!taskId || assignedId <= 0) {
+      this.error = 'Assigned employee not found for this task.';
+      return;
+    }
+
+    const message = (this.taskMessageDraftByTaskId[taskId] ?? '').trim();
+    if (!message) {
+      this.error = 'Please enter a message before sending.';
+      return;
+    }
+
+    this.clearMessages();
+    this.sendingTaskMessageId = taskId;
+
+    this.notificationService.sendDirectMessage({
+      recipientUserId: assignedId,
+      taskId,
+      title: `Message du chef de projet - ${task.title}`,
+      message,
+    }).subscribe({
+      next: () => {
+        this.success = `Message sent to ${this.getTaskAssigneeName(task)}.`;
+        this.taskMessageDraftByTaskId[taskId] = '';
+        this.showTaskMessageComposerForId = null;
+        this.sendingTaskMessageId = null;
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'Unable to send message to employee.';
+        this.sendingTaskMessageId = null;
+      }
+    });
+  }
+
+  isTaskCompleted(task: TaskDto): boolean {
+    const status = this.normalizeTaskState(task.status);
+    return status === 'done' || status === 'validated';
   }
 
   getSprintStateLabel(state: State): string {

@@ -6,6 +6,15 @@ import { catchError, map, switchMap } from "rxjs/operators";
 import { environment } from "../../../environment";
 import { Notification, CreateNotificationDto, NotificationType } from "../Models/Notification.Model";
 
+export interface DirectMessageDto {
+    recipientUserId: number;
+    message: string;
+    taskId?: number | null;
+    title?: string;
+    attachmentName?: string;
+    attachmentDataUrl?: string;
+}
+
 @Injectable({
     providedIn: "root",
 })
@@ -103,6 +112,21 @@ export class NotificationService {
                 this.unreadCountSubject.next(notifications.filter((n) => !n.isRead).length);
                 return void 0;
             })
+        );
+    }
+
+    sendDirectMessage(payload: DirectMessageDto): Observable<Notification> {
+        return this.http.post<Notification>(`${this.apiUrl}/direct-message`, payload).pipe(
+            map((item) => {
+                const normalized = this.normalizeNotifications([item]);
+                return normalized[0] ?? item;
+            })
+        );
+    }
+
+    getConversation(otherUserId: number): Observable<Notification[]> {
+        return this.http.get<Notification[]>(`${this.apiUrl}/conversation/${otherUserId}`).pipe(
+            map((items) => this.normalizeNotifications(items))
         );
     }
 

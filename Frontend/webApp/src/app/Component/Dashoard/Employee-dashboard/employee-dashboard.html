@@ -17,6 +17,10 @@
                 (click)="setSidebarSection('notifications')">
                 Notifications
             </button>
+            <button class="menu-item" [class.active]="sidebarSection === 'messagerie'"
+                (click)="setSidebarSection('messagerie')">
+                Messagerie
+            </button>
             <button class="menu-item" [class.active]="sidebarSection === 'settings'"
                 (click)="setSidebarSection('settings')">
                 Parametres
@@ -204,10 +208,44 @@
                         <div>
                             <strong>{{ task.title }}</strong>
                             <small>{{ task.projectName }} · {{ task.estimatedHours }}h · {{ task.delayLabel }}</small>
+                            <small *ngIf="canNotifyTaskDelay(task)">Chef de projet: {{ getTaskManagerName(task) }}</small>
+                            <div class="delay-message-box" *ngIf="showDelayMessageForTaskId === task.id">
+                                <textarea
+                                    [(ngModel)]="taskDelayMessageByTaskId[task.id]"
+                                    [name]="'delayMessage' + task.id"
+                                    rows="2"
+                                    placeholder="Expliquez pourquoi la tache n'est pas terminee..."></textarea>
+                                <div class="notif-reply-box-file">
+                                    <input type="file" (change)="onDelayAttachmentSelected(task.id, $event)" class="text-xs" />
+                                    <small *ngIf="taskDelayAttachmentNameByTaskId[task.id]" class="file-chip">
+                                        {{ taskDelayAttachmentNameByTaskId[task.id] }}
+                                    </small>
+                                    <button
+                                        type="button"
+                                        *ngIf="taskDelayAttachmentNameByTaskId[task.id]"
+                                        (click)="clearDelayAttachment(task.id)">
+                                        Retirer
+                                    </button>
+                                </div>
+                                <div class="task-actions">
+                                    <button
+                                        type="button"
+                                        (click)="sendTaskDelayMessage(task)"
+                                        [disabled]="sendingDelayMessageTaskId === task.id">
+                                        {{ sendingDelayMessageTaskId === task.id ? 'Envoi...' : 'Envoyer au chef de projet' }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
                             <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Avancer →</button>
+                            <button
+                                type="button"
+                                *ngIf="canNotifyTaskDelay(task)"
+                                (click)="toggleDelayMessageBox(task)">
+                                {{ showDelayMessageForTaskId === task.id ? 'Fermer message' : 'Signaler non terminee' }}
+                            </button>
                         </div>
                     </div>
                 </article>
@@ -348,6 +386,15 @@
                     <small>{{ formatDate(item.createdAt) }}</small>
                 </div>
                 <p class="notif-message">{{ item.message }}</p>
+                <a
+                    *ngIf="item.link"
+                    [href]="item.link"
+                    [attr.download]="item.oldValue || 'piece-jointe'"
+                    target="_blank"
+                    rel="noopener"
+                    class="attachment-link">
+                    Piece jointe: {{ item.oldValue || 'Telecharger' }}
+                </a>
                 <div class="notif-actions">
                     <span *ngIf="item.isRead" class="ack-badge">
                         <span class="ack-icon" aria-hidden="true">&#10003;</span>
@@ -357,8 +404,38 @@
                         <span class="ack-icon" aria-hidden="true">&#128276;</span>
                         Non lu
                     </span>
-                    <button type="button" *ngIf="!item.isRead" (click)="markNotificationAsRead(item.id)">
-                        Marquer bien recu
+                    <div class="notif-actions-buttons">
+                        <button type="button" *ngIf="canReplyToNotification(item)" (click)="toggleReplyComposer(item.id)">
+                            {{ showReplyComposerForNotificationId === item.id ? 'Fermer reponse' : 'Repondre' }}
+                        </button>
+                        <button type="button" *ngIf="!item.isRead" (click)="markNotificationAsRead(item.id)">
+                            Marquer bien recu
+                        </button>
+                    </div>
+                </div>
+                <div class="notif-reply-box" *ngIf="showReplyComposerForNotificationId === item.id">
+                    <textarea
+                        [(ngModel)]="replyMessageByNotificationId[item.id]"
+                        [name]="'replyNotif' + item.id"
+                        rows="2"
+                        placeholder="Ecrivez votre reponse au chef de projet..."></textarea>
+                    <div class="notif-reply-box-file">
+                        <input type="file" (change)="onReplyAttachmentSelected(item.id, $event)" class="text-xs" />
+                        <small *ngIf="replyAttachmentNameByNotificationId[item.id]" class="file-chip">
+                            {{ replyAttachmentNameByNotificationId[item.id] }}
+                        </small>
+                        <button
+                            type="button"
+                            *ngIf="replyAttachmentNameByNotificationId[item.id]"
+                            (click)="clearReplyAttachment(item.id)">
+                            Retirer
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="sendReplyToNotification(item)"
+                        [disabled]="sendingReplyNotificationId === item.id">
+                        {{ sendingReplyNotificationId === item.id ? 'Envoi...' : 'Envoyer la reponse' }}
                     </button>
                 </div>
             </article>
@@ -374,6 +451,83 @@
 
             <article class="card" *ngIf="apiNotifications.length === 0 && notifications.length === 0">
                 <div class="empty">Aucune notification</div>
+            </article>
+        </section>
+
+        <section *ngIf="!loading && sidebarSection === 'messagerie'" class="page">
+            <article class="card">
+                <div class="card-head">
+                    <h3>Messagerie</h3>
+                    <small>Selectionnez un chef de projet pour voir toute la conversation</small>
+                </div>
+
+                <div class="messaging-layout">
+                    <aside class="messaging-contacts">
+                        <h4>Chefs de projet</h4>
+                        <div class="contact-list" *ngIf="messagingContacts.length > 0; else noMessagingContacts">
+                            <button
+                                type="button"
+                                *ngFor="let contact of messagingContacts"
+                                [class.active]="selectedMessagingUserId === contact.id"
+                                (click)="selectMessagingUser(contact.id)">
+                                {{ contact.name }}
+                            </button>
+                        </div>
+                        <ng-template #noMessagingContacts>
+                            <p class="empty">Aucun chef de projet detecte.</p>
+                        </ng-template>
+                    </aside>
+
+                    <div class="messaging-thread">
+                        <div class="card-head">
+                            <h4>{{ getSelectedMessagingUserName() }}</h4>
+                            <button type="button" (click)="loadConversationMessages()" [disabled]="!selectedMessagingUserId">Rafraichir</button>
+                        </div>
+
+                        <div class="thread-body" *ngIf="selectedMessagingUserId; else selectMessagingHint">
+                            <article
+                                class="thread-item"
+                                *ngFor="let item of conversationMessages"
+                                [class.outgoing]="isMessageSentByCurrentUser(item)">
+                                <div class="thread-head">
+                                    <strong>{{ isMessageSentByCurrentUser(item) ? 'Vous' : getSelectedMessagingUserName() }}</strong>
+                                    <small>{{ formatDate(item.createdAt) }}</small>
+                                </div>
+                                <p>{{ item.message }}</p>
+                                <a
+                                    *ngIf="item.link"
+                                    [href]="item.link"
+                                    [attr.download]="item.oldValue || 'piece-jointe'"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="attachment-link">
+                                    Piece jointe: {{ item.oldValue || 'Telecharger' }}
+                                </a>
+                            </article>
+                            <p *ngIf="conversationMessages.length === 0" class="empty">Aucun message pour cette conversation.</p>
+                        </div>
+
+                        <ng-template #selectMessagingHint>
+                            <div class="empty">Choisissez un chef de projet pour commencer.</div>
+                        </ng-template>
+
+                        <div class="thread-compose" *ngIf="selectedMessagingUserId">
+                            <textarea
+                                [(ngModel)]="conversationDraft"
+                                name="conversationDraft"
+                                rows="3"
+                                placeholder="Ecrire un message..."></textarea>
+                            <div class="notif-reply-box-file">
+                                <input type="file" (change)="onConversationAttachmentSelected($event)" class="text-xs" />
+                                <small *ngIf="conversationAttachmentName" class="file-chip">{{ conversationAttachmentName }}</small>
+                                <button type="button" *ngIf="conversationAttachmentName" (click)="clearConversationAttachment()">Retirer</button>
+                            </div>
+                            <button type="button" (click)="sendConversationMessage()" [disabled]="conversationSending">
+                                {{ conversationSending ? 'Envoi...' : 'Envoyer' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </article>
         </section>
 

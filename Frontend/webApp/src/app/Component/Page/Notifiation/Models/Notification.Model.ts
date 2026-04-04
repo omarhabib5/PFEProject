@@ -21,6 +21,10 @@ export interface Notification {
   isRead: boolean;
   createdAt: string | Date;
   category?: string | number;
+  relatedTaskId?: number | null;
+  relatedUserId?: number | null;
+  oldValue?: string | null;
+  newValue?: string | null;
   emailSent?: boolean;
   emailSentAt?: string | null;
   readAt?: string | null;

@@ -16,7 +16,7 @@ import { NotificationService } from '../../Page/Notifiation/Service/NotifcationS
 import { Notification } from '../../Page/Notifiation/Models/Notification.Model';
 import { KanbanComponent } from '../../kanban/kanban';
 
-type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'settings';
+type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'messagerie' | 'settings';
 type EmployeeTab = 'overview' | 'tasks' | 'kanban' | 'projects' | 'sprints';
 type TaskBucket = 'todo' | 'inProgress' | 'review' | 'done';
 
@@ -74,6 +74,11 @@ interface CalendarCell {
   inCurrentMonth: boolean;
   isToday: boolean;
   hasDeadline: boolean;
+}
+
+interface MessagingContact {
+  id: number;
+  name: string;
 }
 
 @Component({
@@ -141,6 +146,25 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   userStories: UserStoryDto[] = [];
   notifications: UiNotification[] = [];
   apiNotifications: Notification[] = [];
+  taskDelayMessageByTaskId: Record<number, string> = {};
+  taskProjectManagerIdByTaskId: Record<number, number> = {};
+  taskProjectManagerNameByTaskId: Record<number, string> = {};
+  showDelayMessageForTaskId: number | null = null;
+  sendingDelayMessageTaskId: number | null = null;
+  replyMessageByNotificationId: Record<number, string> = {};
+  showReplyComposerForNotificationId: number | null = null;
+  sendingReplyNotificationId: number | null = null;
+  taskDelayAttachmentNameByTaskId: Record<number, string> = {};
+  taskDelayAttachmentDataUrlByTaskId: Record<number, string> = {};
+  replyAttachmentNameByNotificationId: Record<number, string> = {};
+  replyAttachmentDataUrlByNotificationId: Record<number, string> = {};
+  messagingContacts: MessagingContact[] = [];
+  selectedMessagingUserId: number | null = null;
+  conversationMessages: Notification[] = [];
+  conversationDraft = '';
+  conversationAttachmentName = '';
+  conversationAttachmentDataUrl = '';
+  conversationSending = false;
 
   statusFilter: 'all' | TaskBucket = 'all';
   priorityFilter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente' = 'all';
@@ -190,6 +214,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   get pageTitle(): string {
     if (this.sidebarSection === 'calendar') return 'Calendrier';
     if (this.sidebarSection === 'notifications') return 'Notifications';
+    if (this.sidebarSection === 'messagerie') return 'Messagerie';
     if (this.sidebarSection === 'settings') return 'Parametres';
     return 'Mon tableau de bord';
   }
@@ -272,10 +297,141 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   setSidebarSection(section: SidebarSection): void {
     this.sidebarSection = section;
+    if (section === 'messagerie') {
+      this.refreshMessagingContacts();
+      if (this.selectedMessagingUserId) {
+        this.loadConversationMessages();
+      }
+    }
     if (section === 'settings') {
       this.settingsSuccess = '';
       this.loadSettingsProfile();
     }
+  }
+
+  refreshMessagingContacts(): void {
+    const mapById = new Map<number, string>();
+
+    Object.entries(this.taskProjectManagerIdByTaskId).forEach(([taskId, managerIdRaw]) => {
+      const managerId = Number(managerIdRaw ?? 0);
+      if (managerId <= 0) {
+        return;
+      }
+
+      const managerName = this.taskProjectManagerNameByTaskId[Number(taskId)]?.trim();
+      mapById.set(managerId, managerName && managerName.length > 0 ? managerName : `Chef de projet #${managerId}`);
+    });
+
+    this.messagingContacts = Array.from(mapById.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (this.selectedMessagingUserId && !mapById.has(this.selectedMessagingUserId)) {
+      this.selectedMessagingUserId = null;
+      this.conversationMessages = [];
+    }
+  }
+
+  selectMessagingUser(userId: number): void {
+    this.selectedMessagingUserId = userId;
+    this.conversationDraft = '';
+    this.conversationAttachmentName = '';
+    this.conversationAttachmentDataUrl = '';
+    this.loadConversationMessages();
+  }
+
+  loadConversationMessages(): void {
+    if (!this.selectedMessagingUserId) {
+      this.conversationMessages = [];
+      return;
+    }
+
+    this.error = '';
+    this.notificationService.getConversation(this.selectedMessagingUserId).subscribe({
+      next: (items) => {
+        this.conversationMessages = (items ?? []).slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      },
+      error: () => {
+        this.error = 'Impossible de charger la conversation.';
+      }
+    });
+  }
+
+  onConversationAttachmentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) {
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.conversationAttachmentName = file.name;
+      this.conversationAttachmentDataUrl = typeof reader.result === 'string' ? reader.result : '';
+    };
+    reader.onerror = () => {
+      this.error = 'Impossible de lire le fichier joint.';
+      this.conversationAttachmentName = '';
+      this.conversationAttachmentDataUrl = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearConversationAttachment(): void {
+    this.conversationAttachmentName = '';
+    this.conversationAttachmentDataUrl = '';
+  }
+
+  sendConversationMessage(): void {
+    if (!this.selectedMessagingUserId) {
+      return;
+    }
+
+    const text = this.conversationDraft.trim();
+    const hasAttachment = this.conversationAttachmentDataUrl.trim().length > 0;
+    if (!text && !hasAttachment) {
+      this.error = 'Message ou piece jointe obligatoire.';
+      return;
+    }
+
+    this.error = '';
+    this.settingsSuccess = '';
+    this.conversationSending = true;
+
+    this.notificationService.sendDirectMessage({
+      recipientUserId: this.selectedMessagingUserId,
+      message: text,
+      title: 'Message employe',
+      attachmentName: hasAttachment ? this.conversationAttachmentName : undefined,
+      attachmentDataUrl: hasAttachment ? this.conversationAttachmentDataUrl : undefined,
+    }).pipe(finalize(() => {
+      this.conversationSending = false;
+    })).subscribe({
+      next: () => {
+        this.conversationDraft = '';
+        this.clearConversationAttachment();
+        this.loadConversationMessages();
+        this.refreshNotifications();
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'Impossible d envoyer le message.';
+      }
+    });
+  }
+
+  getSelectedMessagingUserName(): string {
+    if (!this.selectedMessagingUserId) {
+      return 'Selectionnez un chef de projet';
+    }
+
+    const contact = this.messagingContacts.find((item) => item.id === this.selectedMessagingUserId);
+    return contact?.name ?? `Chef de projet #${this.selectedMessagingUserId}`;
+  }
+
+  isMessageSentByCurrentUser(item: Notification): boolean {
+    return Number(item.relatedUserId ?? 0) === Number(this.currentUserId ?? 0);
   }
 
   setTab(tab: EmployeeTab): void {
@@ -473,6 +629,68 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       });
   }
 
+  canNotifyTaskDelay(task: UiTask): boolean {
+    const managerId = this.taskProjectManagerIdByTaskId[task.id] ?? 0;
+    return managerId > 0 && task.bucket !== 'done';
+  }
+
+  toggleDelayMessageBox(task: UiTask): void {
+    if (!this.canNotifyTaskDelay(task)) {
+      return;
+    }
+
+    this.error = '';
+    this.settingsSuccess = '';
+    this.showDelayMessageForTaskId = this.showDelayMessageForTaskId === task.id ? null : task.id;
+  }
+
+  sendTaskDelayMessage(task: UiTask): void {
+    const managerId = this.taskProjectManagerIdByTaskId[task.id] ?? 0;
+    if (managerId <= 0) {
+      this.error = 'Chef de projet introuvable pour cette tache.';
+      return;
+    }
+
+    const draft = (this.taskDelayMessageByTaskId[task.id] ?? '').trim();
+    const attachmentDataUrl = (this.taskDelayAttachmentDataUrlByTaskId[task.id] ?? '').trim();
+    const hasAttachment = attachmentDataUrl.length > 0;
+    if (!draft && !hasAttachment) {
+      this.error = 'Veuillez saisir un message ou joindre un fichier avant envoi.';
+      return;
+    }
+
+    this.error = '';
+    this.settingsSuccess = '';
+    this.sendingDelayMessageTaskId = task.id;
+
+    this.notificationService.sendDirectMessage({
+      recipientUserId: managerId,
+      taskId: task.id,
+      title: `Retard signale - ${task.title}`,
+      message: draft,
+      attachmentName: hasAttachment ? this.taskDelayAttachmentNameByTaskId[task.id] : undefined,
+      attachmentDataUrl: hasAttachment ? attachmentDataUrl : undefined,
+    }).pipe(finalize(() => {
+      this.sendingDelayMessageTaskId = null;
+    })).subscribe({
+      next: () => {
+        this.settingsSuccess = 'Message envoye au chef de projet.';
+        this.taskDelayMessageByTaskId[task.id] = '';
+        this.taskDelayAttachmentNameByTaskId[task.id] = '';
+        this.taskDelayAttachmentDataUrlByTaskId[task.id] = '';
+        this.showDelayMessageForTaskId = null;
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'Impossible d envoyer le message au chef de projet.';
+      }
+    });
+  }
+
+  getTaskManagerName(task: UiTask): string {
+    const name = this.taskProjectManagerNameByTaskId[task.id];
+    return name && name.trim().length > 0 ? name : 'Chef de projet';
+  }
+
   prevMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
     this.buildCalendar();
@@ -606,6 +824,34 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
     const mine = tasks.filter((task) => this.isMine(task));
     this.myTasks = mine.map((task) => this.toUiTask(task, storyById, sprintById, projectById));
+
+    const managerIdByTaskId: Record<number, number> = {};
+    const managerNameByTaskId: Record<number, string> = {};
+    mine.forEach((task) => {
+      const story = storyById.get(task.userStoryId);
+      const sprint = (task.sprintId ? sprintById.get(task.sprintId) : null)
+        ?? (story?.sprintId ? sprintById.get(Number(story.sprintId)) : null);
+      const projectId = Number((sprint as any)?.projectId ?? 0);
+      if (projectId <= 0) {
+        return;
+      }
+
+      const project = projectById.get(projectId);
+      const managerId = Number((project as any)?.projectManagerId ?? (project as any)?.projectManager?.id ?? 0);
+      if (managerId > 0) {
+        managerIdByTaskId[task.id] = managerId;
+      }
+
+      const managerFirstName = String((project as any)?.projectManager?.firstName ?? '').trim();
+      const managerLastName = String((project as any)?.projectManager?.lastName ?? '').trim();
+      const managerName = `${managerFirstName} ${managerLastName}`.trim();
+      if (managerName) {
+        managerNameByTaskId[task.id] = managerName;
+      }
+    });
+    this.taskProjectManagerIdByTaskId = managerIdByTaskId;
+    this.taskProjectManagerNameByTaskId = managerNameByTaskId;
+    this.refreshMessagingContacts();
 
     const projectGroups = new Map<number, UiTask[]>();
     this.myTasks.forEach((task) => {
@@ -866,6 +1112,112 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         this.error = 'Impossible de marquer toutes les notifications comme recues.';
       }
     });
+  }
+
+  canReplyToNotification(item: Notification): boolean {
+    return Number(item.relatedUserId ?? 0) > 0;
+  }
+
+  toggleReplyComposer(notificationId: number): void {
+    this.error = '';
+    this.settingsSuccess = '';
+    this.showReplyComposerForNotificationId = this.showReplyComposerForNotificationId === notificationId ? null : notificationId;
+  }
+
+  sendReplyToNotification(item: Notification): void {
+    const recipientUserId = Number(item.relatedUserId ?? 0);
+    if (recipientUserId <= 0) {
+      this.error = 'Impossible d identifier le destinataire de la reponse.';
+      return;
+    }
+
+    const reply = (this.replyMessageByNotificationId[item.id] ?? '').trim();
+    const attachmentDataUrl = (this.replyAttachmentDataUrlByNotificationId[item.id] ?? '').trim();
+    const hasAttachment = attachmentDataUrl.length > 0;
+    if (!reply && !hasAttachment) {
+      this.error = 'Veuillez saisir votre reponse ou joindre un fichier.';
+      return;
+    }
+
+    this.error = '';
+    this.settingsSuccess = '';
+    this.sendingReplyNotificationId = item.id;
+
+    this.notificationService.sendDirectMessage({
+      recipientUserId,
+      taskId: item.relatedTaskId ?? null,
+      title: `Reponse employe - ${item.title || 'Notification'}`,
+      message: reply,
+      attachmentName: hasAttachment ? this.replyAttachmentNameByNotificationId[item.id] : undefined,
+      attachmentDataUrl: hasAttachment ? attachmentDataUrl : undefined,
+    }).pipe(finalize(() => {
+      this.sendingReplyNotificationId = null;
+    })).subscribe({
+      next: () => {
+        this.settingsSuccess = 'Reponse envoyee au chef de projet.';
+        this.replyMessageByNotificationId[item.id] = '';
+        this.replyAttachmentNameByNotificationId[item.id] = '';
+        this.replyAttachmentDataUrlByNotificationId[item.id] = '';
+        this.showReplyComposerForNotificationId = null;
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'Impossible d envoyer la reponse.';
+      }
+    });
+  }
+
+  onDelayAttachmentSelected(taskId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) {
+      this.taskDelayAttachmentNameByTaskId[taskId] = '';
+      this.taskDelayAttachmentDataUrlByTaskId[taskId] = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.taskDelayAttachmentNameByTaskId[taskId] = file.name;
+      this.taskDelayAttachmentDataUrlByTaskId[taskId] = typeof reader.result === 'string' ? reader.result : '';
+    };
+    reader.onerror = () => {
+      this.error = 'Impossible de lire le fichier joint.';
+      this.taskDelayAttachmentNameByTaskId[taskId] = '';
+      this.taskDelayAttachmentDataUrlByTaskId[taskId] = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearDelayAttachment(taskId: number): void {
+    this.taskDelayAttachmentNameByTaskId[taskId] = '';
+    this.taskDelayAttachmentDataUrlByTaskId[taskId] = '';
+  }
+
+  onReplyAttachmentSelected(notificationId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) {
+      this.replyAttachmentNameByNotificationId[notificationId] = '';
+      this.replyAttachmentDataUrlByNotificationId[notificationId] = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.replyAttachmentNameByNotificationId[notificationId] = file.name;
+      this.replyAttachmentDataUrlByNotificationId[notificationId] = typeof reader.result === 'string' ? reader.result : '';
+    };
+    reader.onerror = () => {
+      this.error = 'Impossible de lire le fichier joint.';
+      this.replyAttachmentNameByNotificationId[notificationId] = '';
+      this.replyAttachmentDataUrlByNotificationId[notificationId] = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearReplyAttachment(notificationId: number): void {
+    this.replyAttachmentNameByNotificationId[notificationId] = '';
+    this.replyAttachmentDataUrlByNotificationId[notificationId] = '';
   }
 
   mapNotificationLevel(type: string | undefined): 'warning' | 'info' | 'success' {
