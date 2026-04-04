@@ -138,7 +138,7 @@ export class TeamManage implements OnInit {
   getUserRoleDisplay(role: string | number | undefined): string {
     const normalized = String(role ?? '').trim().toLowerCase();
     if (normalized === '0' || normalized === 'admin') return 'Admin';
-    if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 'Service Manager';
+    if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 'Team Manager';
     if (normalized === '2' || normalized === 'projectmanager' || normalized === 'project manager') return 'Project Manager';
     if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 'Employee';
     return normalized ? String(role) : 'Employee';

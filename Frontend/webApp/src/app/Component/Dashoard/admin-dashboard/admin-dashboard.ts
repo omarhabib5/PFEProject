@@ -146,7 +146,7 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   };
   userRoleOptions = [
     { label: 'Admin', value: 0 },
-    { label: 'Service Manager', value: 1 },
+    { label: 'Team Manager', value: 1 },
     { label: 'Project Manager', value: 2 },
     { label: 'Employee', value: 3 }
   ];
@@ -806,7 +806,7 @@ private adminNotificationsSubscription: Subscription | null = null;
           || validationMessage
           || err?.error?.title
           || (err?.status === 401 || err?.status === 403
-            ? 'Access denied. Sign in again with an Admin or Service Manager account.'
+            ? 'Access denied. Sign in again with an Admin or Team Manager account.'
             : 'Error while creating user.');
         this.userFormLoading = false;
       }
