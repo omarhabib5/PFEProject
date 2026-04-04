@@ -27,6 +27,22 @@
   gap: 28px;
 }
 
+.brand-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.logo-img-login {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  border-radius: 8px;
+}
+
 .brand-block h1 {
   margin: 0;
   font-size: 2rem;
