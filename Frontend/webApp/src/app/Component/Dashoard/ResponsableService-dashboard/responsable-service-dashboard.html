@@ -7,39 +7,43 @@
 
             <nav class="menu">
                 <button class="menu-item" [class.active]="serviceViewMode === 'list'" (click)="openServicesList()">
-                    My services
+                    <span class="menu-icon">SV</span> My services
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">
-                    Dashboard
+                    <span class="menu-icon">DB</span> Dashboard
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'projects'"
                     (click)="setTab('projects')">
-                    Projects
+                    <span class="menu-icon">PR</span> Projects
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">
-                    User Stories
+                    <span class="menu-icon">US</span> User Stories
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">
-                    Team & members
+                    <span class="menu-icon">TM</span> Team & members
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'" [class.active]="activeTab === 'calendar'"
                     (click)="setTab('calendar')">
-                    Calendar
+                    <span class="menu-icon">CL</span> Calendar
                 </button>
             </nav>
         </div>
 
-        <button class="menu-item notification-btn" type="button" (click)="openNotifications()">
-            <span class="notification-icon">●</span>
-            <span>Notifications</span>
-            <span *ngIf="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
-        </button>
+        <div class="sidebar-bottom">
+            <button class="menu-item notification-btn" type="button" (click)="openNotifications()">
+                <span class="menu-icon">NT</span>
+                <span>Notifications</span>
+                <span *ngIf="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
+            </button>
 
-        <button class="menu-item settings-btn" [class.active]="activeTab === 'settings'"
-            (click)="openSettings()">Settings</button>
+            <button class="menu-item settings-btn" [class.active]="activeTab === 'settings'"
+                (click)="openSettings()">
+                <span class="menu-icon">ST</span> Settings
+            </button>
+        </div>
     </aside>
 
     <main class="content-area">
@@ -53,7 +57,10 @@
                 <div class="search-box">
                     <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" />
                 </div>
-                <button class="notification" type="button" (click)="openNotifications()">{{ notificationCount }}</button>
+                <button class="notification" type="button" (click)="openNotifications()">
+                    <span class="notif-glyph">NT</span>
+                    <span *ngIf="notificationCount > 0" class="notif-pill">{{ notificationCount }}</span>
+                </button>
                 <div class="user-block">
                     <strong>{{ userName }}</strong>
                     <span>{{ userRole }}</span>

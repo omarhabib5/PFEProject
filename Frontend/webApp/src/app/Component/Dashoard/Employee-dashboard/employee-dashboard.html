@@ -7,27 +7,29 @@
 
             <button class="menu-item" [class.active]="sidebarSection === 'dashboard'"
                 (click)="setSidebarSection('dashboard')">
-                My dashboard
+                <span class="menu-icon">DB</span> My dashboard
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'calendar'"
                 (click)="setSidebarSection('calendar')">
-                Calendar
+                <span class="menu-icon">CL</span> Calendar
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'notifications'"
                 (click)="setSidebarSection('notifications')">
-                Notifications
+                <span class="menu-icon">NT</span> Notifications
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'messagerie'"
                 (click)="setSidebarSection('messagerie')">
-                Messaging
+                <span class="menu-icon">MS</span> Messaging
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'settings'"
                 (click)="setSidebarSection('settings')">
-                Settings
+                <span class="menu-icon">ST</span> Settings
             </button>
         </div>
 
-        <button class="menu-item logout" (click)="logout()">Sign out</button>
+        <div class="sidebar-bottom">
+            <button class="menu-item logout" (click)="logout()"><span class="menu-icon">OUT</span> Sign out</button>
+        </div>
     </aside>
 
     <main class="content">
@@ -36,7 +38,10 @@
             <div class="topbar-right">
                 <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." />
 
-                <div class="notif">{{ unreadNotifications }}</div>
+                <button class="notif" type="button" (click)="setSidebarSection('notifications')">
+                    <span class="notif-glyph">NT</span>
+                    <span *ngIf="unreadNotifications > 0" class="notif-pill">{{ unreadNotifications }}</span>
+                </button>
                 <div class="profile">
                     <strong>{{ userName }}</strong>
                     <small>{{ roleLabel }}</small>
