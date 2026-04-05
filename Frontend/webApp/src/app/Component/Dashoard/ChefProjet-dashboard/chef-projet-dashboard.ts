@@ -210,9 +210,6 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       }
     });
   }
-  getProjectsby(): void {
-
-  }
 
   setSection(section: DashboardSection): void {
     this.activeSection = section;

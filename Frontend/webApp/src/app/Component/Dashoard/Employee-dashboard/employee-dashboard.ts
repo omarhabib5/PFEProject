@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
+import { Subscription, catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';

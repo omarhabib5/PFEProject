@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Projet.Domain.Model;
 using Projet.Domain.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using Projet.Infrastructure.Hubs;
 
 
 using DomainTask = Projet.Domain.Model.Task;
@@ -38,22 +40,24 @@ namespace Projet.Infrastructure.Service
 
         System.Threading.Tasks.Task SendOverdueTaskEmailsAsync();
 
-        System.Threading.Tasks.Task<bool> MarkAsReadAsync(int notificationId);
-
         System.Threading.Tasks.Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, bool onlyUnread = false);
 
         System.Threading.Tasks.Task<IEnumerable<Notification>> GetConversationAsync(int currentUserId, int otherUserId);
+
+        System.Threading.Tasks.Task PublishUserNotificationsAsync(int userId);
     }
 
     public class NotificationService : INotificationService
     {
         private readonly IApplicationDbSet _context;
         private readonly IEmailService _emailService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public NotificationService(IApplicationDbSet context, IEmailService emailService)
+        public NotificationService(IApplicationDbSet context, IEmailService emailService, IHubContext<NotificationHub> hubContext)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         }
 
         public async System.Threading.Tasks.Task<Notification> CreateNotificationAsync(int userId, string title, string message,
@@ -94,6 +98,8 @@ namespace Projet.Infrastructure.Service
                 _context.Set<Notification>().Update(notification);
                 await _context.SaveChangesAsync(default);
             }
+
+            await PublishUserNotificationsAsync(userId);
 
             return notification;
         }
@@ -329,20 +335,6 @@ namespace Projet.Infrastructure.Service
             }
         }
 
-        public async System.Threading.Tasks.Task<bool> MarkAsReadAsync(int notificationId)
-        {
-            var notification = await _context.Set<Notification>().FirstOrDefaultAsync(n => n.Id == notificationId);
-            if (notification == null)
-                return false;
-
-            notification.IsRead = true;
-            notification.ReadAt = DateTime.UtcNow;
-            _context.Set<Notification>().Update(notification);
-            await _context.SaveChangesAsync(default);
-
-            return true;
-        }
-
         public async System.Threading.Tasks.Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, bool onlyUnread = false)
         {
             var query = _context.Set<Notification>().Where(n => n.UserId == userId);
@@ -361,6 +353,24 @@ namespace Projet.Infrastructure.Service
                     || (n.UserId == otherUserId && n.RelatedUserId == currentUserId))
                 .OrderBy(n => n.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async System.Threading.Tasks.Task PublishUserNotificationsAsync(int userId)
+        {
+            if (userId <= 0)
+            {
+                return;
+            }
+
+            var notifications = await _context.Set<Notification>()
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            var unreadCount = notifications.Count(n => !n.IsRead);
+
+            await _hubContext.Clients.Group(NotificationHub.GetUserGroup(userId))
+                .SendAsync("NotificationsUpdated", notifications, unreadCount);
         }
 
         private async System.Threading.Tasks.Task SendNotificationEmailAsync(string toEmail, string subject, string message)

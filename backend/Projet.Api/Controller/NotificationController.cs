@@ -122,6 +122,7 @@ namespace Projet.Api.Controller
 
                 var command = new MarkAsReadCommand(id, userId);
                 await _mediator.Send(command);
+                await _notificationService.PublishUserNotificationsAsync(userId);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -146,6 +147,7 @@ namespace Projet.Api.Controller
 
                 var command = new DeleteNotificationCommand(id, userId);
                 await _mediator.Send(command);
+                await _notificationService.PublishUserNotificationsAsync(userId);
                 return NoContent();
             }
             catch (KeyNotFoundException)
