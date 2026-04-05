@@ -7,7 +7,7 @@
 
             <button class="menu-item" [class.active]="sidebarSection === 'dashboard'"
                 (click)="setSidebarSection('dashboard')">
-                Mon tableau de bord
+                My dashboard
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'calendar'"
                 (click)="setSidebarSection('calendar')">
@@ -27,14 +27,14 @@
             </button>
         </div>
 
-        <button class="menu-item logout" (click)="logout()">Se deconnecter</button>
+        <button class="menu-item logout" (click)="logout()">Sign out</button>
     </aside>
 
     <main class="content">
         <header class="topbar">
             <p>{{ todayLabel }}</p>
             <div class="topbar-right">
-                <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher..." />
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." />
 
                 <div class="notif">{{ unreadNotifications }}</div>
                 <div class="profile">
@@ -118,7 +118,7 @@
                     </article>
 
                     <article class="card">
-                        <h3>Activite de la semaine</h3>
+                        <h3>Weekly activity</h3>
                         <div class="bars">
                             <div class="bar-col" *ngFor="let value of activityWeekly; let i = index">
                                 <div class="bar" [style.height.px]="20 + value * 12"></div>
@@ -176,7 +176,7 @@
                         <strong>Status:</strong>
                         <button [class.active]="statusFilter==='all'" (click)="setStatusFilter('all')">All</button>
                         <button [class.active]="statusFilter==='todo'" (click)="setStatusFilter('todo')">To do</button>
-                        <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">En
+                        <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">In
                             progress</button>
                         <button [class.active]="statusFilter==='review'" (click)="setStatusFilter('review')">To
                             review</button>
@@ -185,13 +185,13 @@
                         <strong>Priority:</strong>
                         <button [class.active]="priorityFilter==='all'" (click)="setPriorityFilter('all')">All</button>
                         <button [class.active]="priorityFilter==='basse'"
-                            (click)="setPriorityFilter('basse')">Basse</button>
+                            (click)="setPriorityFilter('basse')">Low</button>
                         <button [class.active]="priorityFilter==='moyenne'"
-                            (click)="setPriorityFilter('moyenne')">Moyenne</button>
+                            (click)="setPriorityFilter('moyenne')">Medium</button>
                         <button [class.active]="priorityFilter==='haute'"
-                            (click)="setPriorityFilter('haute')">Haute</button>
+                            (click)="setPriorityFilter('haute')">High</button>
                         <button [class.active]="priorityFilter==='urgente'"
-                            (click)="setPriorityFilter('urgente')">Urgente</button>
+                            (click)="setPriorityFilter('urgente')">Urgent</button>
                         <span class="task-count">{{ filteredTasks.length }} tasks</span>
                     </div>
                 </article>
@@ -239,7 +239,7 @@
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
-                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Avancer →</button>
+                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance →</button>
                             <button
                                 type="button"
                                 *ngIf="canNotifyTaskDelay(task)"
@@ -271,7 +271,7 @@
 
                     <div class="project-body">
                         <div>
-                            <h4>Mes taches ({{ project.myTasks.length }})</h4>
+                            <h4>My tasks ({{ project.myTasks.length }})</h4>
                             <div class="status-boxes">
                                 <span>To do {{ project.counts.todo }}</span>
                                 <span>In progress {{ project.counts.inProgress }}</span>
@@ -284,7 +284,7 @@
                         <div class="sprint-box" *ngIf="project.activeSprint; else noSprint">
                             <h4>{{ project.activeSprint.name }}</h4>
                             <p>{{ project.activeSprint.periodLabel }}</p>
-                            <small>{{ project.activeSprint.storyCount }} stories utilisateur · Vitesse {{
+                            <small>{{ project.activeSprint.storyCount }} user stories · Velocity {{
                                 project.activeSprint.velocity }}</small>
                         </div>
                         <ng-template #noSprint>
@@ -311,7 +311,7 @@
                         <span class="status active">{{ sprint.statusLabel }}</span>
                     </div>
                     <p>{{ sprint.periodLabel }}</p>
-                    <small>{{ sprint.storyCount }} stories utilisateur · Vitesse {{ sprint.velocity }}</small>
+                    <small>{{ sprint.storyCount }} user stories · Velocity {{ sprint.velocity }}</small>
                 </article>
             </section>
         </ng-container>
@@ -428,14 +428,14 @@
                             type="button"
                             *ngIf="replyAttachmentNameByNotificationId[item.id]"
                             (click)="clearReplyAttachment(item.id)">
-                            Retirer
+                            Remove
                         </button>
                     </div>
                     <button
                         type="button"
                         (click)="sendReplyToNotification(item)"
                         [disabled]="sendingReplyNotificationId === item.id">
-                        {{ sendingReplyNotificationId === item.id ? 'Envoi...' : 'Envoyer la reponse' }}
+                        {{ sendingReplyNotificationId === item.id ? 'Sending...' : 'Send reply' }}
                     </button>
                 </div>
             </article>
@@ -520,7 +520,7 @@
                             <div class="compose-controls">
                                 <div class="file-input-wrapper">
                                     <label for="conversationAttachmentInput" class="file-label">
-                                        📎 Piece jointe
+                                        📎 Attachment
                                     </label>
                                     <input 
                                         type="file" 
@@ -530,11 +530,11 @@
                                 </div>
                                 <div *ngIf="conversationAttachmentName" class="file-chip">
                                     <span>{{ conversationAttachmentName }}</span>
-                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Retirer le fichier">✕</button>
+                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">✕</button>
                                 </div>
                             </div>
                             <button type="button" (click)="sendConversationMessage()" [disabled]="conversationSending || (!conversationDraft.trim() && !conversationAttachmentName)" class="send-button">
-                                {{ conversationSending ? 'Envoi...' : 'Envoyer' }}
+                                {{ conversationSending ? 'Sending...' : 'Send' }}
                             </button>
                         </div>
                     </div>
@@ -545,18 +545,18 @@
         <section *ngIf="!loading && sidebarSection === 'settings'" class="page">
             <div class="settings-grid">
                 <article class="card settings-card">
-                    <h3>Mon profil</h3>
-                    <p>Mettre a jour vos informations et votre avatar.</p>
+                    <h3>My profile</h3>
+                    <p>Update your information and avatar.</p>
 
                     <form class="settings-form" (ngSubmit)="saveProfileSettings()">
                         <div class="settings-form-grid">
                             <div class="settings-field">
-                                <label>Prenom</label>
+                                <label>First name</label>
                                 <input type="text" [(ngModel)]="profileForm.firstName" name="profileFirstName"
                                     required />
                             </div>
                             <div class="settings-field">
-                                <label>Nom</label>
+                                <label>Last name</label>
                                 <input type="text" [(ngModel)]="profileForm.lastName" name="profileLastName" required />
                             </div>
                         </div>

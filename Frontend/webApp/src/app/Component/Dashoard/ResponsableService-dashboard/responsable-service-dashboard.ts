@@ -235,7 +235,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         activeTasks,
         completedTasks,
         avatar: this.getInitials(fullName),
-        subtitle: isManager ? 'Service manager' : undefined,
+        subtitle: isManager ? 'Service Manager' : undefined,
       };
     });
   }
@@ -307,11 +307,11 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   get completedUserStoriesCount(): number {
-    return this.serviceUserStories.filter((story) => story.status === UserStoryStatus.DONE).length;
+    return this.serviceUserStories.filter((story) => this.resolveStoryStatus(story) === UserStoryStatus.DONE).length;
   }
 
   get inProgressUserStoriesCount(): number {
-    return this.serviceUserStories.filter((story) => story.status === UserStoryStatus.IN_PROGRESS).length;
+    return this.serviceUserStories.filter((story) => this.resolveStoryStatus(story) === UserStoryStatus.IN_PROGRESS).length;
   }
 
   get todoTasksCount(): number {
@@ -352,7 +352,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     if (this.currentResponsibleId === null) {
       if (!silent) {
         this.loading = false;
-        this.error = 'Service manager user not identified.';
+        this.error = 'Service Manager user not identified.';
       }
       this.services = [];
       return;
@@ -1080,19 +1080,19 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   getUserStoryStatusLabel(status: UserStoryStateValue | undefined): string {
-    return this.userStoryStatuses.find((item) => item.value === this.normalizeUserStoryStatus(status))?.label ?? 'Unknown';
+    return this.userStoryStatuses.find((item) => item.value === this.normalizeUserStoryStatus(status))?.label ?? 'To Do';
   }
 
   getUserStoryStatusClass(status: UserStoryStateValue | undefined): string {
     const normalized = this.normalizeUserStoryStatus(status);
-    if (normalized === UserStoryStatus.DONE || normalized === '3' || normalized === '4') return 'done';
-    if (normalized === UserStoryStatus.IN_PROGRESS || normalized === '2') return 'active';
+    if (normalized === UserStoryStatus.DONE) return 'done';
+    if (normalized === UserStoryStatus.IN_PROGRESS) return 'active';
     if (normalized === UserStoryStatus.REVIEW || normalized === UserStoryStatus.TESTING) return 'review';
     return 'todo';
   }
 
   getSelectedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStateValue {
-    return this.selectedUserStoryStatuses[story.numericId] ?? story.status ?? UserStoryStatus.TODO;
+    return this.selectedUserStoryStatuses[story.numericId] ?? this.resolveStoryStatus(story);
   }
 
   setSelectedUserStoryStatus(storyId: string, status: UserStoryStateValue): void {
@@ -1103,7 +1103,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   saveUserStoryStatus(story: ServiceUserStoryRow): void {
     const newStatus = this.getSelectedUserStoryStatus(story);
-    if (this.normalizeUserStoryStatus(newStatus) === this.normalizeUserStoryStatus(story.status)) return;
+    if (this.normalizeUserStoryStatus(newStatus) === this.resolveStoryStatus(story)) return;
 
     this.userStoryService.updateStatus(story.numericId, newStatus).subscribe({
       next: () => {
@@ -1115,22 +1115,35 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
-  private normalizeUserStoryStatus(status: UserStoryStateValue | undefined): UserStoryStatus | string {
+  private normalizeUserStoryStatus(status: UserStoryStateValue | undefined): UserStoryStatus {
     if (status === null || status === undefined) {
       return UserStoryStatus.TODO;
     }
 
     const numericStatus = Number(status);
     if (Number.isFinite(numericStatus)) {
-      return String(numericStatus);
+      if (numericStatus <= 1) return UserStoryStatus.TODO;
+      if (numericStatus === 2) return UserStoryStatus.IN_PROGRESS;
+      if (numericStatus === 3 || numericStatus === 4) return UserStoryStatus.DONE;
+      return UserStoryStatus.TODO;
     }
 
-    return status as UserStoryStatus;
+    const normalized = String(status).trim().toLowerCase();
+    if (normalized === 'to do' || normalized === 'todo' || normalized === 'pending') return UserStoryStatus.TODO;
+    if (normalized === 'in progress' || normalized === 'inprogress') return UserStoryStatus.IN_PROGRESS;
+    if (normalized === 'review') return UserStoryStatus.REVIEW;
+    if (normalized === 'testing') return UserStoryStatus.TESTING;
+    if (normalized === 'done' || normalized === 'validated') return UserStoryStatus.DONE;
+    return UserStoryStatus.TODO;
+  }
+
+  private resolveStoryStatus(story: ServiceUserStoryRow): UserStoryStatus {
+    return this.normalizeUserStoryStatus(story.status ?? (story as any)?.userStoryState);
   }
 
   private getRoleLabel(role: unknown, isManager: boolean): string {
     if (isManager) {
-      return 'Service manager';
+      return 'Service Manager';
     }
 
     const normalized = String(role ?? '').trim().toLowerCase();
@@ -1420,7 +1433,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
             this.selectedUserStoryStatuses = {};
             this.serviceUserStories.forEach((story) => {
-              this.selectedUserStoryStatuses[story.numericId] = story.status;
+              this.selectedUserStoryStatuses[story.numericId] = this.resolveStoryStatus(story);
             });
 
             this.serviceTasks = (tasks ?? []).filter((task) => {
@@ -1476,7 +1489,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
         this.selectedUserStoryStatuses = {};
         this.serviceUserStories.forEach((story) => {
-          this.selectedUserStoryStatuses[story.numericId] = story.status;
+          this.selectedUserStoryStatuses[story.numericId] = this.resolveStoryStatus(story);
         });
         this.cdr.detectChanges();
       },

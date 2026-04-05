@@ -408,7 +408,7 @@ export class ProjectManager implements OnInit {
   
   openKanbanBoard(): void {
     if (!this.canViewKanban) {
-      this.error = 'The Kanban board is not available for the service manager.';
+      this.error = 'The Kanban board is not available for the Team Manager.';
       return;
     }
 
@@ -422,7 +422,7 @@ export class ProjectManager implements OnInit {
       return false;
     }
     if (!this.newProject.projectManagerId || this.newProject.projectManagerId === 0) {
-      this.error = 'Project manager is required';
+      this.error = 'Project Manager is required';
       return false;
     }
    

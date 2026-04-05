@@ -111,8 +111,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   error = '';
   searchTerm = '';
 
-  userName = 'Employe';
-  roleLabel = 'Membre';
+  userName = 'Employee';
+  roleLabel = 'Member';
   serviceLabel = 'Service';
   todayLabel = '';
   unreadNotifications = 0;
@@ -379,7 +379,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      this.error = 'La piece jointe ne doit pas depasser 10MB.';
+      this.error = 'The attachment must not exceed 10MB.';
       this.conversationAttachmentName = '';
       this.conversationAttachmentDataUrl = '';
       input.value = '';
@@ -422,7 +422,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const text = this.conversationDraft.trim();
     const hasAttachment = this.conversationAttachmentDataUrl.trim().length > 0;
     if (!text && !hasAttachment) {
-      this.error = 'Message ou piece jointe obligatoire.';
+      this.error = 'Message or attachment is required.';
       this.cdr.markForCheck();
       return;
     }
@@ -435,7 +435,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.notificationService.sendDirectMessage({
       recipientUserId: this.selectedMessagingUserId,
       message: text,
-      title: 'Message employe',
+      title: 'Employee message',
       attachmentName: hasAttachment ? this.conversationAttachmentName : undefined,
       attachmentDataUrl: hasAttachment ? this.conversationAttachmentDataUrl : undefined,
     }).pipe(finalize(() => {
@@ -452,7 +452,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.error = err?.status === 413
-          ? 'La piece jointe est trop volumineuse pour le serveur. Essayez un fichier plus petit.'
+          ? 'The attachment is too large for the server. Please try a smaller file.'
           : (err?.error?.message || 'Unable to send the message.');
         this.cdr.markForCheck();
       }
@@ -513,7 +513,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get lastUpdatedLabel(): string {
-    return 'Tableauaux de bord';
+    return 'Dashboard';
   }
 
   goToCurrentCalendarMonth(): void {
@@ -522,7 +522,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   getTaskStatusLabel(task: UiTask): string {
-    return this.bucketLabels[task.bucket] || 'Inconnu';
+    return this.bucketLabels[task.bucket] || 'Unknown';
   }
 
   getTaskAssigneeName(task: UiTask): string {
@@ -584,7 +584,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         const applySuccess = () => {
           this.syncLocalUserProfile(firstName, lastName, email, avatarUrl || undefined);
           this.hydrateProfile();
-          this.settingsSuccess = 'Profil mis a jour avec succes.'
+          this.settingsSuccess = 'Profile updated successfully.'
           this.cdr.markForCheck();
         };
 
@@ -1156,14 +1156,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       if (task.priorityClass === 'urgente' || task.priorityClass === 'haute') {
         notifications.push({
           level: 'warning',
-          message: `Priorite ${task.priorityLabel} : ${task.title}`,
+          message: `Priority ${task.priorityLabel}: ${task.title}`,
           dateLabel: this.todayLabel
         });
       }
-      if (task.delayLabel.startsWith('En retard')) {
+      if (task.delayLabel.includes('overdue')) {
         notifications.push({
           level: 'info',
-          message: `${task.title} est ${task.delayLabel.toLowerCase()}`,
+          message: `${task.title} is ${task.delayLabel.toLowerCase()}`,
           dateLabel: this.todayLabel
         });
       }
@@ -1291,7 +1291,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const attachmentDataUrl = (this.replyAttachmentDataUrlByNotificationId[item.id] ?? '').trim();
     const hasAttachment = attachmentDataUrl.length > 0;
     if (!reply && !hasAttachment) {
-      this.error = 'Veuillez saisir votre reponse ou joindre un fichier.';
+      this.error = 'Please enter a reply or attach a file.';
       this.cdr.markForCheck();
       return;
     }
@@ -1304,7 +1304,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.notificationService.sendDirectMessage({
       recipientUserId,
       taskId: item.relatedTaskId ?? null,
-      title: `Reponse employe - ${item.title || 'Notification'}`,
+      title: `Employee reply - ${item.title || 'Notification'}`,
       message: reply,
       attachmentName: hasAttachment ? this.replyAttachmentNameByNotificationId[item.id] : undefined,
       attachmentDataUrl: hasAttachment ? attachmentDataUrl : undefined,
@@ -1465,10 +1465,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   private mapPriority(complexity: number | undefined): { label: string; class: 'basse' | 'moyenne' | 'haute' | 'urgente' } {
     const value = Number(complexity ?? 1);
-    if (value >= 4) return { label: 'Urgente', class: 'urgente' };
-    if (value >= 3) return { label: 'Haute', class: 'haute' };
-    if (value >= 2) return { label: 'Moyenne', class: 'moyenne' };
-    return { label: 'Basse', class: 'basse' };
+    if (value >= 4) return { label: 'Urgent', class: 'urgente' };
+    if (value >= 3) return { label: 'High', class: 'haute' };
+    if (value >= 2) return { label: 'Medium', class: 'moyenne' };
+    return { label: 'Low', class: 'basse' };
   }
 
   private buildDelayLabel(endDate: string | undefined): string {

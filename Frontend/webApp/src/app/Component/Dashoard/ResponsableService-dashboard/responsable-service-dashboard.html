@@ -94,7 +94,7 @@
                     <p class="desc">Service ID: {{ service.id }}</p>
                     <p class="meta-line">👥 {{ getMembersCountForService(service) }} members</p>
                     <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projects</p>
-                    <p class="meta-line">Service manager: {{ getResponsibleLabel(service) }}</p>
+                    <p class="meta-line">Team Manager: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block"
                         *ngIf="hasTeamsForService(service) || getMembersCountForService(service) > 0">
@@ -121,7 +121,7 @@
                     <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
                     <div>
                         <h3>{{ selectedService.name }}</h3>
-                        <p>Service manager: {{ getResponsibleLabel(selectedService) }}</p>
+                        <p>Team Manager: {{ getResponsibleLabel(selectedService) }}</p>
                         <div class="detail-meta">
                             <span>👥 {{ membersCount }} members</span>
                             <span>🗂️ {{ projectsCount }} projects</span>
@@ -159,7 +159,7 @@
                     <section class="overview-hero">
                         <div class="overview-hero-main">
                             <h4>{{ selectedService.name }}</h4>
-                            <p>Service manager: {{ getResponsibleLabel(selectedService) }}</p>
+                            <p>Team Manager: {{ getResponsibleLabel(selectedService) }}</p>
                             <p>Overview of the service activity</p>
                             <div class="overview-progress-wrap">
                                 <span>Overall progress</span>
