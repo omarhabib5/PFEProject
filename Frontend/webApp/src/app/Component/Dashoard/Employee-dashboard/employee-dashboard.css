@@ -1,4 +1,21 @@
 :host {
+	--sm-bg: #eef4fb;
+	--sm-surface: #ffffff;
+	--sm-surface-soft: #f7faff;
+	--sm-border: #dbe5f1;
+	--sm-text: #0f172a;
+	--sm-muted: #5f738f;
+	--sm-primary: #1d4ed8;
+	--sm-primary-soft: #dbeafe;
+	--sm-success: #16a34a;
+	--sm-warning: #d97706;
+	--sm-danger: #dc2626;
+	--sm-radius: 14px;
+	--sm-shadow-soft: 0 4px 16px rgba(15, 23, 42, 0.06);
+	--sm-shadow-main: 0 12px 28px rgba(15, 23, 42, 0.1);
+	--sm-shadow-strong: 0 20px 40px rgba(15, 23, 42, 0.15);
+	--sm-transition: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+
 	--bg: #eef4fb;
 	--surface: #ffffff;
 	--surface-soft: #f7faff;
@@ -14,6 +31,51 @@
 	--shadow-soft: 0 4px 16px rgba(15, 23, 42, 0.06);
 	--shadow-main: 0 12px 28px rgba(15, 23, 42, 0.1);
 }
+
+/* Icon classes for emoji replacement */
+.btn-icon::before {
+	display: inline-block;
+	margin-right: 4px;
+	font-weight: 700;
+}
+
+.icon-text {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 600;
+}
+
+.icon-text::before {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	font-size: 0.85rem;
+}
+
+.arrow {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	transition: transform var(--sm-transition);
+}
+
+.button:hover .arrow {
+	transform: translateX(2px);
+}
+
+.icon-attach {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 4px;
+	font-size: 0.95em;
+}
+
+
 
 .employee-layout {
 	min-height: 100vh;
@@ -1145,7 +1207,85 @@
 	object-fit: cover;
 }
 
-.settings-card .task-actions button,
+.file-upload-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.file-upload-label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border: 2px dashed #93c5fd;
+	border-radius: 10px;
+	background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+	color: #0369a1;
+	cursor: pointer;
+	font-size: 0.85rem;
+	font-weight: 600;
+	transition: all var(--sm-transition);
+}
+
+.file-upload-label:hover {
+	border-color: #3b82f6;
+	background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+	color: #1e40af;
+	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.file-upload-label:active {
+	transform: scale(0.98);
+}
+
+.upload-icon {
+	font-size: 1.1em;
+}
+
+.file-input {
+	display: none;
+}
+
+.file-name {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border-radius: 8px;
+	background: #f0fdf4;
+	color: #166534;
+	font-size: 0.8rem;
+	font-weight: 500;
+	border: 1px solid #bbf7d0;
+}
+
+.clear-avatar-btn {
+	align-self: flex-start;
+	border: 1px solid #fca5a5;
+	border-radius: 8px;
+	background: #fef2f2;
+	color: #dc2626;
+	cursor: pointer;
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 6px 12px;
+	transition: all var(--sm-transition);
+}
+
+.clear-avatar-btn:hover {
+	border-color: #f87171;
+	background: #fee2e2;
+	color: #b91c1c;
+	box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.clear-avatar-btn:active {
+	transform: scale(0.96);
+}
+
+
 .task-actions button[type='submit'] {
 	border: 1px solid #bfdbfe;
 	border-radius: 9px;
@@ -1592,6 +1732,29 @@
 	}
 }
 
+@media (max-width: 1024px) {
+	.kpi-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	.overview-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.calendar-layout-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.project-body {
+		grid-template-columns: 1fr;
+	}
+
+	.settings-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media (max-width: 840px) {
 	.hero {
 		margin: 0.8rem 0.8rem 0.65rem;
@@ -1627,22 +1790,555 @@
 	.status-boxes {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
-}
 
-@media (max-width: 560px) {
-	.topbar {
-		padding: 0.75rem;
-	}
-
-	.topbar input,
-	.project-mini-grid,
-	.kpi-grid,
-	.status-boxes {
-		width: 100%;
+	.project-mini-grid {
 		grid-template-columns: 1fr;
 	}
 
+	.sidebar {
+		gap: 10px;
+		padding: 10px;
+	}
+}
+
+@media (max-width: 768px) {
+	.employee-layout {
+		grid-template-columns: 1fr;
+		min-height: auto;
+	}
+
+	.sidebar {
+		position: relative;
+		height: auto;
+		gap: 8px;
+		padding: 8px;
+	}
+
+	.sidebar > div {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.menu-item {
+		padding: 0.6rem 0.65rem;
+		font-size: 0.85rem;
+		margin-bottom: 0;
+	}
+
+	.topbar {
+		padding: 0.7rem 0.8rem;
+		gap: 8px;
+	}
+
+	.topbar p {
+		font-size: 0.78rem;
+	}
+
+	.topbar input {
+		width: 100%;
+		height: 36px;
+		font-size: 0.85rem;
+	}
+
+	.profile {
+		min-width: 100px;
+	}
+
+	.profile small {
+		font-size: 0.7rem;
+	}
+
+	.avatar {
+		width: 32px;
+		height: 32px;
+		font-size: 0.85rem;
+	}
+
+	.hero {
+		margin: 0.8rem;
+		padding: 1rem;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.hero h2 {
+		font-size: 1.3rem;
+	}
+
+	.hero-stats {
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+	}
+
+	.tabs-row {
+		margin: 0 0.8rem;
+		gap: 4px;
+	}
+
+	.tabs-row button {
+		padding: 0.42rem 0.7rem;
+		font-size: 0.8rem;
+	}
+
+	.kpi-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+		margin-bottom: 8px;
+	}
+
+	.kpi {
+		padding: 0.7rem 0.8rem;
+	}
+
+	.kpi h4 {
+		font-size: 0.78rem;
+	}
+
+	.overview-grid {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.card,
+	.task-group,
+	.project-card {
+		border-radius: 12px;
+	}
+
+	.status-boxes {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 4px;
+	}
+
+	.status-boxes span {
+		font-size: 0.7rem;
+	}
+
+	.filters {
+		gap: 4px;
+	}
+
+	.filters button {
+		padding: 0.25rem 0.55rem;
+		font-size: 0.75rem;
+	}
+
+	.task-item {
+		padding: 10px;
+	}
+
+	.calendar-layout-grid {
+		grid-template-columns: 1fr;
+		gap: 10px;
+	}
+
+	.calendar-head {
+		padding: 0.7rem 0;
+		font-size: 0.75rem;
+	}
+
+	.day {
+		min-height: 70px;
+		font-size: 0.85rem;
+	}
+
+	.settings-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.settings-form-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.file-upload-label {
+		padding: 10px 12px;
+		font-size: 0.8rem;
+	}
+
+	.upload-icon {
+		font-size: 1em;
+	}
+
+	.file-name {
+		padding: 4px 8px;
+		font-size: 0.75rem;
+	}
+
+	.clear-avatar-btn {
+		padding: 5px 10px;
+		font-size: 0.75rem;
+	}
+}
+
+@media (max-width: 640px) {
+	.sidebar {
+		gap: 6px;
+		padding: 6px;
+	}
+
+	.menu-item {
+		width: auto;
+		padding: 0.5rem 0.55rem;
+		font-size: 0.8rem;
+		margin-bottom: 0;
+	}
+
+	.logo-img-brand {
+		max-width: 120px;
+	}
+
+	.topbar {
+		padding: 0.6rem;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.topbar p {
+		font-size: 0.75rem;
+	}
+
+	.topbar-right {
+		width: 100%;
+		gap: 6px;
+	}
+
+	.topbar input {
+		width: 100%;
+		height: 34px;
+		font-size: 0.8rem;
+		padding: 0 0.6rem;
+	}
+
+	.notif {
+		width: 24px;
+		height: 24px;
+		font-size: 0.65rem;
+	}
+
+	.profile strong {
+		font-size: 0.85rem;
+	}
+
+	.profile small {
+		font-size: 0.68rem;
+	}
+
+	.avatar {
+		width: 30px;
+		height: 30px;
+		font-size: 0.8rem;
+	}
+
+	.hero {
+		margin: 0.6rem;
+		padding: 0.8rem;
+		gap: 10px;
+	}
+
+	.hero h2 {
+		font-size: 1.15rem;
+		margin: 0;
+	}
+
+	.hero p {
+		font-size: 0.8rem;
+		margin: 0.2rem 0;
+	}
+
+	.hero-stats {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+
+	.hero-stats article {
+		padding: 0.6rem;
+	}
+
+	.hero-stats strong {
+		font-size: 1.3rem;
+	}
+
+	.progress-wrap span {
+		font-size: 0.75rem;
+		margin-bottom: 4px;
+	}
+
+	.progress-line {
+		height: 6px;
+	}
+
+	.tabs-row {
+		margin: 0 0.6rem;
+		padding: 5px;
+		gap: 3px;
+	}
+
+	.tabs-row button {
+		padding: 0.38rem 0.6rem;
+		font-size: 0.75rem;
+	}
+
+	.page {
+		padding: 0.6rem;
+	}
+
+	.kpi-grid {
+		grid-template-columns: 1fr;
+		gap: 6px;
+		margin-bottom: 6px;
+	}
+
+	.kpi {
+		padding: 0.6rem 0.7rem;
+	}
+
+	.kpi h4 {
+		font-size: 0.75rem;
+	}
+
+	.kpi strong {
+		font-size: 1.6rem;
+	}
+
+	.card {
+		padding: 0.8rem;
+		border-radius: 11px;
+	}
+
+	.card h3 {
+		font-size: 1rem;
+		margin: 0 0 6px;
+	}
+
+	.status-list div {
+		font-size: 0.85rem;
+	}
+
+	.bars {
+		height: 120px;
+		gap: 6px;
+	}
+
+	.task-line {
+		padding: 0.5rem 0;
+		gap: 6px;
+	}
+
+	.task-line small {
+		font-size: 0.73rem;
+	}
+
+	.task-actions {
+		gap: 4px;
+		flex-wrap: wrap;
+	}
+
+	.task-actions button {
+		padding: 0.3rem 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.badge {
+		padding: 0.15rem 0.45rem;
+		font-size: 0.68rem;
+	}
+
+	.project-mini-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.project-mini {
+		padding: 0.6rem;
+	}
+
+	.filters {
+		flex-wrap: wrap;
+		gap: 3px;
+	}
+
+	.filters strong {
+		font-size: 0.75rem;
+	}
+
+	.filters button {
+		padding: 0.22rem 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.task-count {
+		width: 100%;
+		font-size: 0.7rem;
+		text-align: right;
+	}
+
+	.project-card {
+		padding: 0.8rem;
+		margin-bottom: 8px;
+	}
+
+	.project-head {
+		gap: 6px;
+	}
+
 	.project-head h3 {
-		font-size: 1.16rem;
+		font-size: 1.1rem;
+	}
+
+	.project-head p {
+		font-size: 0.78rem;
+	}
+
+	.project-meta {
+		font-size: 0.75rem;
+		gap: 4px;
+	}
+
+	.status-boxes {
+		grid-template-columns: 1fr;
+		gap: 4px;
+	}
+
+	.status-boxes span {
+		font-size: 0.68rem;
+	}
+
+	.sprint-box {
+		padding: 0.6rem;
+	}
+
+	.sprint-box h4 {
+		font-size: 0.85rem;
+	}
+
+	.chips {
+		gap: 4px;
+	}
+
+	.chips span {
+		font-size: 0.68rem;
+		padding: 0.1rem 0.45rem;
+	}
+
+	.calendar-layout-grid {
+		gap: 8px;
+	}
+
+	.calendar-head {
+		padding: 0.6rem 0;
+		font-size: 0.7rem;
+	}
+
+	.day {
+		min-height: 60px;
+		padding: 6px;
+		font-size: 0.8rem;
+	}
+
+	.calendar-details {
+		max-height: 400px;
+		padding: 8px;
+	}
+
+	.task-item {
+		padding: 8px;
+		border-radius: 10px;
+	}
+
+	.task-item-header strong {
+		font-size: 0.88rem;
+	}
+
+	.task-badge {
+		font-size: 0.65rem;
+		padding: 2px 8px;
+	}
+
+	.task-item p {
+		font-size: 0.78rem;
+	}
+
+	.task-item small {
+		font-size: 0.7rem;
+	}
+
+	.settings-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.settings-card p {
+		font-size: 0.8rem;
+	}
+
+	.settings-field label {
+		font-size: 0.78rem;
+	}
+
+	.settings-field input {
+		height: 34px;
+		font-size: 0.8rem;
+	}
+
+	.messaging-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.messaging-contacts {
+		border-radius: 10px;
+	}
+
+	.contact-list button {
+		font-size: 0.78rem;
+	}
+
+	.messaging-thread {
+		border-radius: 10px;
+	}
+
+	.thread-body {
+		max-height: 300px;
+	}
+
+	.thread-item {
+		padding: 6px 8px;
+	}
+
+	.thread-head strong {
+		font-size: 0.78rem;
+	}
+
+	.thread-head small {
+		font-size: 0.68rem;
+	}
+
+	.thread-item p {
+		font-size: 0.8rem;
+	}
+
+	.thread-compose textarea {
+		font-size: 0.8rem;
+		padding: 6px 8px;
+	}
+
+	.notif-line strong {
+		font-size: 0.85rem;
+	}
+
+	.notif-line small {
+		font-size: 0.7rem;
+	}
+
+	.notif-message {
+		font-size: 0.8rem;
+	}
+
+	.file-label {
+		padding: 4px 8px;
+		font-size: 0.7rem;
+	}
+
+	.send-button {
+		padding: 0.32rem 0.6rem;
+		font-size: 0.72rem;
 	}
 }

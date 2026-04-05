@@ -123,6 +123,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   profileSaving = false;
   passwordSaving = false;
   settingsSuccess = '';
+  profileAvatarFileName = '';
+  profileAvatarPreviewUrl = '';
   profileForm = {
     firstName: '',
     lastName: '',
@@ -471,6 +473,68 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   isMessageSentByCurrentUser(item: Notification): boolean {
     return Number(item.relatedUserId ?? 0) === Number(this.currentUserId ?? 0);
+  }
+
+  onProfileAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file type (image only)
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Please select a valid image file (JPG, PNG, GIF, etc.).';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file size (max 5MB for images)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'The image must not exceed 5MB.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profileAvatarFileName = file.name;
+      this.profileAvatarPreviewUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.profileForm.avatarUrl = this.profileAvatarPreviewUrl;
+      this.error = '';
+      this.cdr.markForCheck();
+    };
+    reader.onerror = () => {
+      this.error = 'Unable to read the image file.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearProfileAvatar(): void {
+    this.profileAvatarFileName = '';
+    this.profileAvatarPreviewUrl = '';
+    this.profileForm.avatarUrl = '';
+    const fileInput = document.getElementById('profileAvatarInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.markForCheck();
   }
 
   hasAttachment(item: Notification): boolean {

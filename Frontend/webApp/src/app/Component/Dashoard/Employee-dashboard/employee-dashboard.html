@@ -57,7 +57,7 @@
         <ng-container *ngIf="!loading && sidebarSection === 'dashboard'">
             <section class="hero">
                 <div class="hero-main">
-                    <h2>Hello, {{ userName }} 👋</h2>
+                    <h2>Hello, {{ userName }}</h2>
                     <p>Service: {{ serviceLabel }} · {{ roleLabel }}</p>
                     <p>{{ todayLabel }}</p>
                     <div class="progress-wrap">
@@ -239,7 +239,7 @@
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
-                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance →</button>
+                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance <span class="arrow">›</span></button>
                             <button
                                 type="button"
                                 *ngIf="canNotifyTaskDelay(task)"
@@ -320,9 +320,9 @@
             <div class="calendar-layout-grid">
                 <article class="card">
                     <div class="card-head">
-                        <button (click)="prevMonth()">‹</button>
+                        <button (click)="prevMonth()">&lt;</button>
                         <h3>{{ calendarTitle }}</h3>
-                        <button (click)="nextMonth()">›</button>
+                        <button (click)="nextMonth()">&gt;</button>
                     </div>
                     <div class="calendar-head"><span *ngFor="let day of weekdays">{{ day }}</span></div>
                     <div class="calendar-grid">
@@ -520,7 +520,7 @@
                             <div class="compose-controls">
                                 <div class="file-input-wrapper">
                                     <label for="conversationAttachmentInput" class="file-label">
-                                        📎 Attachment
+                                        <span class="icon-attach">📎</span> Attachment
                                     </label>
                                     <input 
                                         type="file" 
@@ -530,7 +530,7 @@
                                 </div>
                                 <div *ngIf="conversationAttachmentName" class="file-chip">
                                     <span>{{ conversationAttachmentName }}</span>
-                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">✕</button>
+                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">&times;</button>
                                 </div>
                             </div>
                             <button type="button" (click)="sendConversationMessage()" [disabled]="conversationSending || (!conversationDraft.trim() && !conversationAttachmentName)" class="send-button">
@@ -570,6 +570,30 @@
                             <label>Avatar (URL)</label>
                             <input type="url" [(ngModel)]="profileForm.avatarUrl" name="profileAvatar"
                                 placeholder="https://..." />
+                        </div>
+
+                        <div class="settings-field">
+                            <label>or Upload image</label>
+                            <div class="file-upload-wrapper">
+                                <label for="profileAvatarInput" class="file-upload-label">
+                                    <span class="upload-icon">↑</span>
+                                    <span>Choose image</span>
+                                </label>
+                                <input 
+                                    type="file" 
+                                    id="profileAvatarInput"
+                                    accept="image/*"
+                                    (change)="onProfileAvatarSelected($event)" 
+                                    class="file-input" />
+                                <small *ngIf="profileAvatarFileName" class="file-name">{{ profileAvatarFileName }}</small>
+                                <button 
+                                    type="button" 
+                                    *ngIf="profileAvatarFileName"
+                                    (click)="clearProfileAvatar()" 
+                                    class="clear-avatar-btn">
+                                    Clear image
+                                </button>
+                            </div>
                         </div>
 
                         <div class="settings-preview" *ngIf="profileForm.avatarUrl">

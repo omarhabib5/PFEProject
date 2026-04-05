@@ -129,6 +129,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   profileSaving = false;
   passwordSaving = false;
+  profileAvatarFileName = '';
+  profileAvatarPreviewUrl = '';
   profileForm = {
     firstName: '',
     lastName: '',
@@ -774,6 +776,68 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
+  onProfileAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file type (image only)
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Please select a valid image file (JPG, PNG, GIF, etc.).';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file size (max 5MB for images)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'The image must not exceed 5MB.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profileAvatarFileName = file.name;
+      this.profileAvatarPreviewUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.profileForm.avatarUrl = this.profileAvatarPreviewUrl;
+      this.error = '';
+      this.cdr.markForCheck();
+    };
+    reader.onerror = () => {
+      this.error = 'Unable to read the image file.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearProfileAvatar(): void {
+    this.profileAvatarFileName = '';
+    this.profileAvatarPreviewUrl = '';
+    this.profileForm.avatarUrl = '';
+    const fileInput = document.getElementById('profileAvatarInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.markForCheck();
+  }
+
   submitCreateUserStory(): void {
     if (!this.selectedServiceProjects[0]?.id || !this.userStoryForm.sprintId || !this.userStoryForm.title.trim()) {
       this.error = 'Please fill in required user story fields.';
@@ -1081,6 +1145,42 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   getUserStoryStatusLabel(status: UserStoryStateValue | undefined): string {
     return this.userStoryStatuses.find((item) => item.value === this.normalizeUserStoryStatus(status))?.label ?? 'To Do';
+  }
+
+  getComputedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStatus {
+    const storyTasks = this.serviceTasks.filter((task) => Number(task.userStoryId ?? 0) === story.numericId);
+    if (storyTasks.length === 0) {
+      return this.resolveStoryStatus(story);
+    }
+
+    let hasTodo = false;
+    let hasInProgress = false;
+    let hasCompleted = false;
+
+    storyTasks.forEach((task) => {
+      const state = this.normalizeTaskState(task.status);
+      if (state === 'done' || state === 'validated') {
+        hasCompleted = true;
+        return;
+      }
+
+      if (state === 'inProgress') {
+        hasInProgress = true;
+        return;
+      }
+
+      hasTodo = true;
+    });
+
+    if (!hasTodo && !hasInProgress && hasCompleted) {
+      return UserStoryStatus.DONE;
+    }
+
+    if (hasInProgress || (hasCompleted && hasTodo)) {
+      return UserStoryStatus.IN_PROGRESS;
+    }
+
+    return UserStoryStatus.TODO;
   }
 
   getUserStoryStatusClass(status: UserStoryStateValue | undefined): string {
@@ -1442,6 +1542,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
               return sprintIds.has(sprintId) || userStoryIds.has(userStoryId);
             });
 
+            this.syncUserStoryStatusesFromTasks();
+
             this.generateCalendar();
             this.cdr.detectChanges();
           },
@@ -1476,28 +1578,72 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    const requests = projectIds.map((projectId) =>
+    const storyRequests = projectIds.map((projectId) =>
       this.userStoryService.getByProjectId(projectId).pipe(catchError(() => of([] as UserStoryDto[])))
     );
 
-    forkJoin(requests).subscribe({
-      next: (storiesByProject) => {
+    forkJoin({
+      storiesByProject: forkJoin(storyRequests),
+      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[])))
+    }).subscribe({
+      next: ({ storiesByProject, tasks }) => {
         const flattened = storiesByProject.flat();
         this.serviceUserStories = flattened
           .map((story) => ({ ...story, numericId: Number(story.id) }))
           .filter((story) => Number.isFinite(story.numericId) && story.numericId > 0);
 
+        const userStoryIds = new Set(this.serviceUserStories.map((story) => Number(story.numericId)));
+        this.serviceTasks = (tasks ?? []).filter((task) => userStoryIds.has(Number(task.userStoryId ?? 0)));
+
         this.selectedUserStoryStatuses = {};
         this.serviceUserStories.forEach((story) => {
           this.selectedUserStoryStatuses[story.numericId] = this.resolveStoryStatus(story);
         });
+
+        this.syncUserStoryStatusesFromTasks();
         this.cdr.detectChanges();
       },
       error: () => {
         this.serviceUserStories = [];
+        this.serviceTasks = [];
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private syncUserStoryStatusesFromTasks(): void {
+    if (this.serviceUserStories.length === 0 || this.serviceTasks.length === 0) {
+      return;
+    }
+
+    this.serviceUserStories.forEach((story) => {
+      const computedStatus = this.getComputedUserStoryStatus(story);
+      const currentStatus = this.resolveStoryStatus(story);
+
+      if (computedStatus === currentStatus) {
+        return;
+      }
+
+      story.status = computedStatus;
+      story.userStoryState = this.toUserStoryStateNumber(computedStatus);
+      this.selectedUserStoryStatuses[story.numericId] = computedStatus;
+
+      this.userStoryService.updateStatus(story.numericId, computedStatus)
+        .pipe(catchError(() => of(void 0)))
+        .subscribe();
+    });
+  }
+
+  private toUserStoryStateNumber(status: UserStoryStatus): number {
+    if (status === UserStoryStatus.DONE) {
+      return 3;
+    }
+
+    if (status === UserStoryStatus.IN_PROGRESS || status === UserStoryStatus.REVIEW || status === UserStoryStatus.TESTING) {
+      return 2;
+    }
+
+    return 1;
   }
 
   private startAutoRefresh(): void {

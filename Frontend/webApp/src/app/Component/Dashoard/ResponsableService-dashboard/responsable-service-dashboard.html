@@ -32,6 +32,12 @@
             </nav>
         </div>
 
+        <button class="menu-item notification-btn" type="button" (click)="openNotifications()">
+            <span class="notification-icon">●</span>
+            <span>Notifications</span>
+            <span *ngIf="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
+        </button>
+
         <button class="menu-item settings-btn" [class.active]="activeTab === 'settings'"
             (click)="openSettings()">Settings</button>
     </aside>
@@ -72,7 +78,7 @@
                     <h3>Services</h3>
                     <p>Manage your services and access their performance</p>
                 </div>
-                <button class="primary-btn" (click)="openCreateServiceModal()">+ New Service</button>
+                <button class="primary-btn" (click)="openCreateServiceModal()"><span class="btn-icon">+</span> New Service</button>
             </div>
 
             <div class="filters-row">
@@ -86,14 +92,14 @@
             <div class="cards-grid">
                 <article class="service-card" *ngFor="let service of filteredServices">
                     <div class="card-top">
-                        <div class="service-icon">🏢</div>
+                        <div class="service-icon">S</div>
                         <span class="status-pill">{{ getServiceStatus(service) }}</span>
                     </div>
 
                     <h4>{{ service.name }}</h4>
                     <p class="desc">Service ID: {{ service.id }}</p>
-                    <p class="meta-line">👥 {{ getMembersCountForService(service) }} members</p>
-                    <p class="meta-line">🗂️ {{ getServiceProjectsCount(service) }} projects</p>
+                    <p class="meta-line"><span class="icon-text">👥</span> {{ getMembersCountForService(service) }} members</p>
+                    <p class="meta-line"><span class="icon-text">📁</span> {{ getServiceProjectsCount(service) }} projects</p>
                     <p class="meta-line">Team Manager: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block"
@@ -110,7 +116,7 @@
                         
                     </div>
 
-                    <button class="link-btn" (click)="openServiceDetails(service)">Open dashboard →</button>
+                    <button class="link-btn" (click)="openServiceDetails(service)">Open dashboard <span class="arrow">→</span></button>
                 </article>
             </div>
         </section>
@@ -123,13 +129,13 @@
                         <h3>{{ selectedService.name }}</h3>
                         <p>Team Manager: {{ getResponsibleLabel(selectedService) }}</p>
                         <div class="detail-meta">
-                            <span>👥 {{ membersCount }} members</span>
-                            <span>🗂️ {{ projectsCount }} projects</span>
-                            <span>⚡ {{ teamsCount }} teams</span>
+                            <span><strong>{{ membersCount }}</strong> Members</span>
+                            <span><strong>{{ projectsCount }}</strong> Projects</span>
+                            <span><strong>{{ teamsCount }}</strong> Teams</span>
                         </div>
                     </div>
                 </div>
-                <button class="primary-btn" (click)="openProjects()">New project</button>
+                <button class="primary-btn" (click)="openProjects()"><span class="btn-icon">+</span> New project</button>
             </div>
 
             <div class="service-actions-row">
@@ -229,9 +235,8 @@
                     <div class="section-title-row">
                         <h4>Service projects</h4>
                         <div class="inline-actions">
-                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit
-                                projects</button>
-                            <button class="primary-btn" type="button" (click)="openProjects()">+ New project</button>
+                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit projects</button>
+                            <button class="primary-btn" type="button" (click)="openProjects()"><span class="btn-icon">+</span> New project</button>
                         </div>
                     </div>
                     <div class="team-table-wrap" *ngIf="selectedServiceProjects.length > 0">
@@ -267,8 +272,7 @@
                 <div *ngIf="activeTab === 'userStories'" class="team-tab-content">
                     <div class="section-title-row">
                         <h4>Service user stories</h4>
-                        <button class="primary-btn" type="button" (click)="openUserStories()">+ Add user
-                            story</button>
+                        <button class="primary-btn" type="button" (click)="openUserStories()"><span class="btn-icon">+</span> Add user story</button>
                     </div>
                     <div class="team-table-wrap" *ngIf="serviceUserStories.length > 0">
                         <table class="team-table">
@@ -276,28 +280,17 @@
                                 <tr>
                                     <th>Title</th>
                                     <th>Priority</th>
-                                    <th>Current status</th>
-                                    <th>Change status</th>
+                                    <th>Auto status</th>
                                     <th>Tasks</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let story of serviceUserStories">
                                     <td>{{ story.title }}</td>
                                     <td>{{ story.priority }}</td>
-                                    <td><span class="status-chip" [ngClass]="getUserStoryStatusClass(story.status)">{{
-                                            getUserStoryStatusLabel(story.status) }}</span></td>
-                                    <td>
-                                        <select [ngModel]="getSelectedUserStoryStatus(story)"
-                                            (ngModelChange)="setSelectedUserStoryStatus(story.id, $event)">
-                                            <option *ngFor="let item of userStoryStatuses" [ngValue]="item.value">{{
-                                                item.label }}</option>
-                                        </select>
-                                    </td>
+                                    <td><span class="status-chip" [ngClass]="getUserStoryStatusClass(getComputedUserStoryStatus(story))">{{
+                                            getUserStoryStatusLabel(getComputedUserStoryStatus(story)) }}</span></td>
                                     <td>{{ story.completedTaskCount }} / {{ story.taskCount }}</td>
-                                        <td><button class="tiny-btn" type="button"
-                                            (click)="saveUserStoryStatus(story)">Save</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -372,9 +365,9 @@
                             <p>Click a day to see details.</p>
                         </div>
                         <div class="calendar-toolbar-actions">
-                            <button class="secondary-btn" type="button" (click)="prevMonth()">‹</button>
+                            <button class="secondary-btn" type="button" (click)="prevMonth()"><span class="calendar-nav">◀</span></button>
                             <span class="calendar-month-label">{{ calendarTitle }}</span>
-                            <button class="secondary-btn" type="button" (click)="nextMonth()">›</button>
+                            <button class="secondary-btn" type="button" (click)="nextMonth()"><span class="calendar-nav">▶</span></button>
                             <button class="secondary-btn" type="button"
                                 (click)="goToCurrentCalendarMonth()">Today</button>
                         </div>
@@ -441,45 +434,41 @@
                         </button>
                     </div>
 
-                    <div class="team-table-wrap" *ngIf="notifications.length > 0; else noNotifications">
-                        <table class="team-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Message</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let item of notifications">
-                                    <td>{{ item.title || 'Notification' }}</td>
-                                    <td>{{ item.message }}</td>
-                                    <td>{{ formatDate(item.createdAt) }}</td>
-                                    <td>
-                                        <span *ngIf="item.isRead" class="ack-badge">
-                                            <span class="ack-icon" aria-hidden="true">&#10003;</span>
-                                            Read
-                                        </span>
-                                        <span *ngIf="!item.isRead" class="status-chip status-pending">
-                                            <span class="ack-icon" aria-hidden="true">&#128276;</span>
-                                            Unread
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="tiny-btn" type="button" *ngIf="!item.isRead"
-                                            (click)="markNotificationAsRead(item.id)">
-                                            Mark as read
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="notifications-container" *ngIf="notifications.length > 0; else noNotifications">
+                        <div class="notification-card" *ngFor="let item of notifications" 
+                            [ngClass]="{'notification-unread': !item.isRead}">
+                            <div class="notification-header">
+                                <div class="notification-title-section">
+                                    <span *ngIf="!item.isRead" class="notification-unread-indicator"></span>
+                                    <h5>{{ item.title || 'Notification' }}</h5>
+                                </div>
+                                <span class="notification-date">{{ formatDate(item.createdAt) }}</span>
+                            </div>
+                            
+                            <p class="notification-message">{{ item.message }}</p>
+                            
+                            <div class="notification-footer">
+                                <span *ngIf="item.isRead" class="status-badge status-read">
+                                    <span class="badge-icon">✓</span>
+                                    Read
+                                </span>
+                                <span *ngIf="!item.isRead" class="status-badge status-unread">
+                                    <span class="badge-icon">●</span>
+                                    Unread
+                                </span>
+                                <button class="action-btn" type="button" *ngIf="!item.isRead"
+                                    (click)="markNotificationAsRead(item.id)">
+                                    Mark as read
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <ng-template #noNotifications>
-                        <p class="empty-team">No notifications available.</p>
+                        <div class="empty-state">
+                            <div class="empty-icon">●</div>
+                            <p class="empty-text">No notifications available</p>
+                        </div>
                     </ng-template>
                 </div>
 
@@ -512,6 +501,30 @@
                                     <label>Avatar (URL)</label>
                                     <input type="url" [(ngModel)]="profileForm.avatarUrl" name="profileAvatar"
                                         placeholder="https://..." />
+                                </div>
+
+                                <div class="settings-field">
+                                    <label>or Upload image</label>
+                                    <div class="file-upload-wrapper">
+                                        <label for="profileAvatarInput" class="file-upload-label">
+                                            <span class="upload-icon">↑</span>
+                                            <span>Choose image</span>
+                                        </label>
+                                        <input 
+                                            type="file" 
+                                            id="profileAvatarInput"
+                                            accept="image/*"
+                                            (change)="onProfileAvatarSelected($event)" 
+                                            class="file-input" />
+                                        <small *ngIf="profileAvatarFileName" class="file-name">{{ profileAvatarFileName }}</small>
+                                        <button 
+                                            type="button" 
+                                            *ngIf="profileAvatarFileName"
+                                            (click)="clearProfileAvatar()" 
+                                            class="clear-avatar-btn">
+                                            Clear image
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="settings-preview" *ngIf="profileForm.avatarUrl">
