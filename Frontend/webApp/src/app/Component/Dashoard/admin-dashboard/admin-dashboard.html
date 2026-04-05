@@ -5,24 +5,24 @@
         </div>
 
         <button class="menu-item" [class.active]="activeTab === 'dashboard'" (click)="setActiveTab('dashboard')">
-            <span>▦</span> Dashboard
+            <span class="menu-icon">DB</span> Dashboard
         </button>
         <button class="menu-item" [class.active]="activeTab === 'services'" (click)="setActiveTab('services')">
-            <span>🧩</span> Services
+            <span class="menu-icon">SV</span> Services
         </button>
         <button class="menu-item" [class.active]="activeTab === 'calendar'" (click)="setActiveTab('calendar')">
-            <span>📅</span> Calendar
+            <span class="menu-icon">CL</span> Calendar
         </button>
         <button class="menu-item" [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">
-            <span>👥</span> Users
+            <span class="menu-icon">US</span> Users
         </button>
         <button class="menu-item" [class.active]="activeTab === 'teams'" (click)="setActiveTab('teams')">
-            <span>👥</span> Teams
+            <span class="menu-icon">TM</span> Teams
         </button>
   
 
         <div class="sidebar-bottom">
-            <button class="menu-item" (click)="logout()"><span>⎋</span> LogOut</button>
+            <button class="menu-item" (click)="logout()"><span class="menu-icon">OUT</span> LogOut</button>
         </div>
     </aside>
 
@@ -68,7 +68,12 @@
             </div>
         </header>
 
-        <section class="page" *ngIf="activeTab === 'dashboard'">
+        <section class="page dashboard-page" *ngIf="activeTab === 'dashboard'">
+            <div class="page-intro">
+                <h2>Overview</h2>
+                <p>Track delivery health, active workstreams, and team execution in one place.</p>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon green">✅</div>
@@ -118,8 +123,12 @@
             </div>
         </section>
 
-        <section class="page" *ngIf="activeTab === 'services'">
-           
+        <section class="page services-page" *ngIf="activeTab === 'services'">
+            <div class="page-intro">
+                <h2>Services Workspace</h2>
+                <p>Create services, assign managers, and open the related project list quickly.</p>
+            </div>
+
             <div class="user-message error" *ngIf="serviceFormError">{{ serviceFormError }}</div>
             <div class="user-message success" *ngIf="serviceFormSuccess">{{ serviceFormSuccess }}</div>
 
@@ -160,10 +169,7 @@
                 </form>
             </div>
 
-            <div class="toolbar">
-            
-
-
+            <div class="toolbar services-toolbar">
                 <button type="button" class="btn-primary" (click)="toggleAddServiceForm()">+ New service</button>
             </div>
 
@@ -224,7 +230,12 @@
             </div>
         </section>
 
-        <section class="page" *ngIf="activeTab === 'users'">
+        <section class="page users-page" *ngIf="activeTab === 'users'">
+            <div class="page-intro">
+                <h2>User Administration</h2>
+                <p>Manage accounts, roles, and access policies for your platform teams.</p>
+            </div>
+
             <div class="card user-form-card">
                 <div class="title-row">
                     <h3>Add a user</h3>
@@ -275,8 +286,15 @@
                 </article>
             </div>
         </section>
-        <section class="page" *ngIf="activeTab ==='teams'">
-            <ng-container *ngComponentOutlet="teamManageComponent"></ng-container>
+        <section class="page teams-page" *ngIf="activeTab ==='teams'">
+            <div class="page-intro">
+                <h2>Team Management</h2>
+                <p>Organize squads, members, and responsibilities across each service line.</p>
+            </div>
+
+            <div class="card teams-shell">
+                <ng-container *ngComponentOutlet="teamManageComponent"></ng-container>
+            </div>
 
         </section>
 

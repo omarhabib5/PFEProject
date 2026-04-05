@@ -1,7 +1,11 @@
-<div class="max-w-7xl mx-auto p-5">
+<div class="project-manager-page max-w-7xl mx-auto p-5">
  
-  <div class="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
-    <h1 class="text-3xl font-bold text-gray-800">Project Management</h1>
+  <div class="page-header flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
+    <div>
+      <p class="page-kicker text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Delivery hub</p>
+      <h1 class="page-title text-3xl font-bold text-gray-800">Project Management</h1>
+      <p class="page-subtitle text-sm text-slate-500 mt-2">Plan projects, track delivery, and manage the teams behind them.</p>
+    </div>
     <button 
       class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
       (click)="toggleCreateProjectForm()" 
@@ -27,18 +31,18 @@
   </div>
 
  
-  <div class="p-4 mb-5 bg-green-100 text-green-800 border border-green-200 rounded-lg animate-slideDown" *ngIf="successMessage">
+  <div class="flash-message flash-message--success p-4 mb-5 bg-green-100 text-green-800 border border-green-200 rounded-lg animate-slideDown" *ngIf="successMessage">
     {{ successMessage }}
   </div>
 
  
-  <div class="p-4 mb-5 bg-red-100 text-red-800 border border-red-200 rounded-lg relative" *ngIf="error">
+  <div class="flash-message flash-message--error p-4 mb-5 bg-red-100 text-red-800 border border-red-200 rounded-lg relative" *ngIf="error">
     {{ error }}
     <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-red-800 hover:opacity-70" (click)="error = null">×</button>
   </div>
 
  
-  <div class="bg-gray-50 p-6 rounded-lg mb-8 shadow-sm" *ngIf="showCreateProjectForm && !selectedProject">
+  <div class="project-panel project-panel--form bg-gray-50 p-6 rounded-lg mb-8 shadow-sm" *ngIf="showCreateProjectForm && !selectedProject">
     <h2 class="text-xl font-semibold text-gray-800 mb-5">{{ isEditMode ? 'Edit Project' : 'Create New Project' }}</h2>
     <form (ngSubmit)="isEditMode ? updateProject() : createProject()">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -184,8 +188,10 @@
   </div>
 
 
-  <div *ngIf="!selectedProject && !showCreateProjectForm">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-5">All Projects ({{ projects.length }})</h2>
+  <div class="project-list-view" *ngIf="!selectedProject && !showCreateProjectForm">
+    <div class="section-heading flex items-end justify-between gap-4 mb-5">
+      <h2 class="text-2xl font-semibold text-gray-800">All Projects ({{ projects.length }})</h2>
+    </div>
     
 
     <div class="flex justify-center items-center py-20" *ngIf="loading">
@@ -193,14 +199,14 @@
     </div>
 
    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" *ngIf="projects.length > 0 && !loading">
-      <div class="bg-white border border-gray-200 rounded-lg p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" *ngFor="let project of projects">
-        <div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
+    <div class="project-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" *ngIf="projects.length > 0 && !loading">
+      <div class="project-card bg-white border border-gray-200 rounded-lg p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" *ngFor="let project of projects">
+        <div class="project-card-header flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
           <h3 class="text-xl font-semibold text-gray-800">{{ project.name }}</h3>
           <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">{{ getStateName(project.projectState) }}</span>
         </div>
         
-        <div class="mb-4 space-y-2">
+        <div class="project-card-meta mb-4 space-y-2">
           <p class="text-gray-600 text-sm"><strong>PM:</strong> {{ getUserName(project.projectManagerId) }}</p>
           <p class="text-gray-600 text-sm" *ngIf="project.description">
             <strong>Description:</strong> {{ project.description.length > 60 ? project.description.substring(0, 60) + '...' : project.description }}
@@ -212,7 +218,7 @@
           <p class="text-gray-600 text-sm"><strong>End:</strong> {{ formatDate(project.endDate) }}</p>
         </div>
         
-        <div class="flex gap-2.5">
+        <div class="project-card-actions flex gap-2.5">
           <button class="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-cyan-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="viewProjectDetails(project)" [disabled]="loading">
             View Details
           </button>
@@ -227,15 +233,15 @@
     </div>
 
     
-    <div class="text-center py-20 text-gray-500" *ngIf="projects.length === 0 && !loading">
+    <div class="empty-state text-center py-20 text-gray-500" *ngIf="projects.length === 0 && !loading">
       <p class="text-xl mb-2">No projects found</p>
       <p>Click "Create New Project" to add your first project</p>
     </div>
   </div>
 
  
-  <div *ngIf="selectedProject" class="space-y-6">
-    <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-amber-50 via-white to-cyan-50 p-6 shadow-xl">
+  <div class="project-detail-layout space-y-6" *ngIf="selectedProject">
+    <section class="project-hero relative overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-amber-50 via-white to-cyan-50 p-6 shadow-xl">
       <div class="absolute -top-16 -right-12 h-40 w-40 rounded-full bg-cyan-100/70 blur-2xl"></div>
       <div class="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-amber-100/70 blur-2xl"></div>
 
@@ -282,8 +288,8 @@
       </div>
     </section>
 
-    <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-      <div class="flex flex-wrap gap-2 p-3 border-b border-slate-200 bg-slate-50">
+    <section class="project-detail-panel bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+      <div class="project-tabs flex flex-wrap gap-2 p-3 border-b border-slate-200 bg-slate-50">
         <button class="px-5 py-2.5 rounded-xl text-sm md:text-base font-semibold transition-all" [class.bg-blue-600]="detailTab === 'overview'" [class.text-white]="detailTab === 'overview'" [class.text-slate-600]="detailTab !== 'overview'" [class.hover:bg-slate-200]="detailTab !== 'overview'" (click)="setDetailTab('overview')">
           Vue d'ensemble
         </button>
@@ -295,7 +301,7 @@
         </button>
       </div>
 
-      <div class="p-6" *ngIf="detailTab === 'overview'">
+      <div class="project-subpanel p-6" *ngIf="detailTab === 'overview'">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 class="text-2xl font-bold text-slate-900 mb-4">Project information</h3>
@@ -323,7 +329,7 @@
         </button>
       </div>
 
-      <div class="p-6" *ngIf="detailTab === 'stories'">
+      <div class="project-subpanel p-6" *ngIf="detailTab === 'stories'">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-bold text-slate-900">Project User Stories</h3>
           <button class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700" (click)="toggleDetailUserStoryForm()" [disabled]="loading">
@@ -333,7 +339,7 @@
           </button>
         </div>
 
-        <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateUserStoryFormInDetails">
+        <div class="inline-panel bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateUserStoryFormInDetails">
           <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingUserStoryInDetails ? 'Edit User Story' : 'Create User Story' }}</h4>
           <form (ngSubmit)="isEditingUserStoryInDetails ? updateDetailUserStory() : createDetailUserStory()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -413,7 +419,7 @@
 
         <h3 class="text-xl font-bold text-slate-900 mb-4">User Story List</h3>
         <div *ngIf="projectUserStories.length === 0" class="text-slate-500 text-base">No user story for this project.</div>
-        <div *ngFor="let story of projectUserStories" class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
+        <div *ngFor="let story of projectUserStories" class="detail-card p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
           <div class="flex justify-between items-start gap-3 mb-2">
             <div class="flex items-center gap-3">
               <p class="font-semibold text-slate-900 text-lg leading-none">{{ story.name || story.title }}</p>
@@ -445,7 +451,7 @@
         </div>
       </div>
 
-      <div class="p-6" *ngIf="detailTab === 'sprints'">
+      <div class="project-subpanel p-6" *ngIf="detailTab === 'sprints'">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-bold text-slate-900">Project Sprints</h3>
           <button class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:bg-blue-700" (click)="toggleDetailSprintForm()" [disabled]="loading">
@@ -455,7 +461,7 @@
           </button>
         </div>
 
-        <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateSprintFormInDetails">
+        <div class="inline-panel bg-gray-50 p-5 rounded-lg border border-gray-200 mb-5" *ngIf="showCreateSprintFormInDetails">
           <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ isEditingSprintInDetails ? 'Edit Sprint' : 'Create Sprint' }}</h4>
           <form (ngSubmit)="isEditingSprintInDetails ? updateDetailSprint() : createDetailSprint()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -554,7 +560,7 @@
 
         <h3 class="text-xl font-bold text-slate-900 mb-4">Sprint List</h3>
         <div *ngIf="projectSprints.length === 0" class="text-slate-500 text-base">No sprint for this project.</div>
-        <div *ngFor="let sprint of projectSprints" class="p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
+        <div *ngFor="let sprint of projectSprints" class="detail-card p-4 border border-gray-200 rounded-xl mb-3 bg-white shadow-sm">
           <div class="flex justify-between items-start gap-3 mb-2">
             <div class="flex items-center gap-3">
               <p class="font-semibold text-slate-900 text-lg leading-none">{{ sprint.name }}</p>
@@ -596,7 +602,7 @@
       </div>
     </section>
 
-    <div class="flex flex-wrap gap-3">
+    <div class="project-footer-actions flex flex-wrap gap-3">
       <button class="px-5 py-2.5 bg-amber-600 text-white rounded-xl font-semibold uppercase tracking-wide transition-all duration-300 hover:bg-amber-700 hover:-translate-y-0.5" (click)="startEditProject(selectedProject); backToProjectsList()">
         Edit Project
       </button>
