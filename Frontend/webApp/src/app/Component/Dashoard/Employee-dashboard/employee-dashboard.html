@@ -148,7 +148,7 @@
                     <div class="card-head">
                         <h3>Tasks in progress</h3>
                     </div>
-                    <div *ngIf="inProgressTasks.length === 0" class="empty">No tasks in progress</div>
+                    <div *ngIf="inProgressTasks.length === 0" class="empty">No active tasks</div>
                     <div *ngFor="let task of inProgressTasks" class="task-line">
                         <div>
                             <strong>{{ task.title }}</strong>
@@ -201,7 +201,7 @@
                     </div>
                 </article>
 
-                <article class="task-group" *ngFor="let group of groupedFilteredTasks" [ngClass]="group.bucket">
+                <article class="task-group" *ngFor="let group of groupedFilteredTasks; trackBy: trackByTaskGroup" [ngClass]="group.bucket">
                     <header>
                         <strong>{{ group.label }}</strong>
                         <span>{{ group.items.length }}</span>
@@ -209,7 +209,7 @@
 
                     <div *ngIf="group.items.length === 0" class="empty">No tasks in this category</div>
 
-                    <div class="task-line" *ngFor="let task of group.items">
+                    <div class="task-line" *ngFor="let task of group.items; trackBy: trackByTaskId">
                         <div>
                             <strong>{{ task.title }}</strong>
                             <small>{{ task.projectName }} · {{ task.estimatedHours }}h · {{ task.delayLabel }}</small>
@@ -244,12 +244,11 @@
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
-                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance <span class="arrow">›</span></button>
                             <button
                                 type="button"
                                 *ngIf="canNotifyTaskDelay(task)"
                                 (click)="toggleDelayMessageBox(task)">
-                                {{ showDelayMessageForTaskId === task.id ? 'Close message' : 'Report as not completed' }}
+                                {{ showDelayMessageForTaskId === task.id ? 'Cancel report' : 'Report issue' }}
                             </button>
                         </div>
                     </div>

@@ -241,7 +241,9 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get inProgressTasks(): UiTask[] {
-    return this.myTasks.filter((task) => task.bucket === 'inProgress').slice(0, 5);
+    return this.myTasks
+      .filter((task) => task.bucket === 'todo' || task.bucket === 'inProgress' || task.bucket === 'review')
+      .slice(0, 5);
   }
 
   get nearestDueTask(): UiTask | null {
@@ -277,6 +279,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       label: this.bucketLabels[bucket],
       items: this.filteredTasks.filter((task) => task.bucket === bucket)
     }));
+  }
+
+  trackByTaskGroup(index: number, group: { bucket: TaskBucket }): string {
+    return group.bucket;
+  }
+
+  trackByTaskId(index: number, task: UiTask): number {
+    return task.id;
   }
 
   get activityWeekly(): number[] {
@@ -713,25 +723,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   logout(): void {
     this.tokenService.clear();
     this.router.navigate(['/login']);
-  }
-
-  advanceTask(task: UiTask): void {
-    const next = this.nextStatus(task.rawStatus);
-    if (next === null) {
-      return;
-    }
-
-    this.taskService.updateStatus(task.id, next)
-      .pipe(timeout(10000))
-      .subscribe({
-        next: () => {
-          this.loadEmployeeData();
-        },
-        error: () => {
-          this.error = 'Unable to update the task status.'
-          this.cdr.markForCheck();
-        }
-      });
   }
 
   canNotifyTaskDelay(task: UiTask): boolean {
@@ -1520,10 +1511,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   private mapBucket(status: TaskDto['status']): TaskBucket {
     const normalized = typeof status === 'string' ? status.toLowerCase() : Number(status);
 
+    if (normalized === 'todo' || normalized === 'to do' || normalized === 1) return 'todo';
     if (normalized === 'inprogress' || normalized === 'in progress' || normalized === 2) return 'inProgress';
     if (normalized === 'review') return 'review';
     if (normalized === 'done' || normalized === 'validated' || normalized === 3 || normalized === 4) return 'done';
-    if (normalized === 'pending' || normalized === 0) return 'review';
+    if (normalized === 'pending' || normalized === 0) return 'todo';
     return 'todo';
   }
 
@@ -1544,14 +1536,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     if (days < 0) return `${Math.abs(days)}d overdue`;
     return `In ${days}d`;
-  }
-
-  private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
-    const bucket = this.mapBucket(status);
-    if (bucket === 'todo') return UserStoryStatus.IN_PROGRESS;
-    if (bucket === 'inProgress') return UserStoryStatus.REVIEW;
-    if (bucket === 'review') return UserStoryStatus.DONE;
-    return null;
   }
 
   countByBucket(bucket: TaskBucket): number {

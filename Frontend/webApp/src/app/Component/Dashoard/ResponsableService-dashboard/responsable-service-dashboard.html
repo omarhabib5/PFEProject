@@ -105,8 +105,8 @@
 
                     <h4>{{ service.name }}</h4>
                     <p class="desc">Service ID: {{ service.id }}</p>
-                    <p class="meta-line"><span class="icon-text">👥</span> {{ getMembersCountForService(service) }} members</p>
-                    <p class="meta-line"><span class="icon-text">📁</span> {{ getServiceProjectsCount(service) }} projects</p>
+                    <p class="meta-line"> {{ getMembersCountForService(service) }} members</p>
+                    <p class="meta-line"> {{ getServiceProjectsCount(service) }} projects</p>
                     <p class="meta-line">Team Manager: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block"
@@ -350,7 +350,7 @@
                                     <td>
                                         <div class="member-cell">
                                             <span class="mini-avatar big">{{ row.avatar }}</span>
-                                            <div><strong>{{ row.fullName }}</strong><small>{{ row.email }}</small></div>
+                                            <div><strong>{{ row.fullName }} </strong><small>{{ row.email }}</small></div>
                                         </div>
                                     </td>
                                     <td><span class="role-pill" [ngClass]="row.roleClass">{{ row.roleLabel }}</span>

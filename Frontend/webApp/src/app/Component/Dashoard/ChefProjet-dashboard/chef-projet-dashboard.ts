@@ -89,6 +89,11 @@ interface MessagingContact {
   name: string;
 }
 
+interface TeamDisplayMember {
+  name: string;
+  avatarUrl: string;
+}
+
 @Component({
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
@@ -679,6 +684,29 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return [];
     }
     return (this.teamMemberNamesByTeamId[teamId] ?? []).slice(0, 8);
+  }
+
+  get teamDisplayMemberProfiles(): TeamDisplayMember[] {
+    const teamId = this.getCurrentProjectTeamId();
+    if (!teamId) {
+      return [];
+    }
+
+    return (this.teamMembersByTeamId[teamId] ?? []).slice(0, 8).map((user) => ({
+      name: this.getEmployeeLabel(user),
+      avatarUrl: this.getUserProfileImageUrl(user)
+    }));
+  }
+
+  get managerProfileImageUrl(): string {
+    const projectManager = (this.currentProject as any)?.projectManager;
+    const fromProject = this.resolveProfileImageUrl(projectManager);
+    if (fromProject) {
+      return fromProject;
+    }
+
+    const userData = this.tokenService.getUserData();
+    return this.resolveProfileImageUrl(userData);
   }
 
   get assignableUsers(): UserDto[] {
@@ -1611,6 +1639,37 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     return fullName || user.email || `User #${user.id}`;
   }
 
+  getUserProfileImageUrl(user: UserDto | null | undefined): string {
+    if (!user) {
+      return '';
+    }
+
+    return this.resolveProfileImageUrl(user);
+  }
+
+  getUserInitials(name: string): string {
+    const words = String(name ?? '')
+      .trim()
+      .split(/\s+/)
+      .filter((part) => part.length > 0);
+
+    if (words.length === 0) {
+      return 'NA';
+    }
+
+    if (words.length === 1) {
+      return words[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  private resolveProfileImageUrl(source: unknown): string {
+    const candidate = source as { profileImageUrl?: unknown; imageUrl?: unknown; avatarUrl?: unknown } | null | undefined;
+    const raw = candidate?.profileImageUrl ?? candidate?.imageUrl ?? candidate?.avatarUrl;
+    return typeof raw === 'string' ? raw.trim() : '';
+  }
+
   private isEmployeeRole(role?: string | number | null): boolean {
     if (typeof role === 'number') {
       return role === 3;
@@ -1915,6 +1974,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
               firstName,
               lastName,
               email,
+              profileImageUrl: this.resolveProfileImageUrl(member?.user),
               role: roleValue != null ? String(roleValue) : undefined,
             });
           });

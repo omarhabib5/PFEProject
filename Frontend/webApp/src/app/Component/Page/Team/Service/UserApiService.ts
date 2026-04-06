@@ -7,6 +7,7 @@ export interface UserDto {
     firstName: string;
     lastName: string;
     email: string;
+    profileImageUrl?: string;
     role?: string;
 }
 
