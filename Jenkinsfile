@@ -35,8 +35,19 @@ pipeline {
                 script {
                     echo "✓ Checked out code from branch: ${env.BRANCH_NAME ?: 'unknown'}"
                     sh '''
+                        if [ -n "${BRANCH_NAME}" ]; then
+                            echo "Synchronizing workspace with origin/${BRANCH_NAME}"
+                            git fetch --all --prune
+                            git reset --hard "origin/${BRANCH_NAME}" || true
+                            git clean -fdx
+                        fi
+
                         echo "Commit built:" 
                         git rev-parse --short HEAD
+
+                        echo "Dockerfile used by Jenkins:"
+                        sed -n '1,30p' Frontend/webApp/Dockerfile
+
                         echo "Angular production budgets in workspace:"
                         sed -n '30,55p' Frontend/webApp/angular.json
                     '''
