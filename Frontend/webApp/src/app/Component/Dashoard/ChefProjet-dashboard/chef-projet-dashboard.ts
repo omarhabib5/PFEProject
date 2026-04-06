@@ -93,6 +93,7 @@ interface MessagingContact {
   selector: 'app-chef-projet-dashboard',
   imports: [CommonModule, FormsModule],
   templateUrl: './chef-projet-dashboard.html',
+  styleUrl: './chef-projet-dashboard.css',
 })
 export class ChefProjetDashboard implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);

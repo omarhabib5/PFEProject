@@ -935,3 +935,230 @@ button.primary {
 		min-width: 130px;
 	}
 }
+
+/* Admin-dashboard visual parity for shell elements */
+:host {
+	--bg-base: #eef2f7;
+	--surface: #ffffff;
+	--ink-900: #1e293b;
+	--ink-500: #64748b;
+	--line: #d9e2ec;
+	--line-strong: #c3cedb;
+	--brand-700: #1d3557;
+	--radius-xl: 20px;
+	--shadow-1: 0 8px 24px rgba(15, 23, 42, 0.08);
+	--shadow-2: 0 16px 36px rgba(15, 23, 42, 0.12);
+}
+
+.layout {
+	display: flex;
+	min-height: 100vh;
+	background:
+		radial-gradient(1200px 500px at 10% -10%, #dbeafe 0%, transparent 50%),
+		radial-gradient(1000px 450px at 100% 0%, #d1fae5 0%, transparent 45%),
+		var(--bg-base);
+	color: var(--ink-900);
+}
+
+.sidebar {
+	width: 268px;
+	padding: 20px 14px;
+	background: linear-gradient(180deg, #12314d 0%, #1d3557 65%, #294468 100%);
+	border-right: 1px solid rgba(255, 255, 255, 0.12);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	box-shadow: var(--shadow-2);
+	position: relative;
+	z-index: 2;
+}
+
+.logo-area {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 1.1rem;
+	padding: 0.6rem 0;
+}
+
+.logo-img {
+	max-width: 180px;
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.08);
+	padding: 0.25rem;
+}
+
+.menu-item {
+	display: flex;
+	gap: 0.6rem;
+	align-items: center;
+	width: 100%;
+	padding: 0.8rem 0.9rem;
+	border: none;
+	border-radius: 12px;
+	text-align: left;
+	font-weight: 700;
+	color: rgba(241, 245, 249, 0.94);
+	background: transparent;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.menu-item span {
+	width: 1.2rem;
+	text-align: center;
+}
+
+.menu-icon {
+	width: 2.1rem;
+	height: 1.5rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	background: rgba(255, 255, 255, 0.12);
+	color: #e2e8f0;
+	font-size: 0.64rem;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	flex-shrink: 0;
+}
+
+.menu-item.active,
+.menu-item:hover {
+	background: rgba(191, 219, 254, 0.2);
+	transform: translateX(2px);
+}
+
+.menu-item.active .menu-icon,
+.menu-item:hover .menu-icon {
+	background: rgba(255, 255, 255, 0.94);
+	color: #1d3557;
+	border-color: rgba(255, 255, 255, 0.94);
+}
+
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.topbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 1rem 1.1rem 0;
+	padding: 1rem 1.2rem;
+	border-radius: var(--radius-xl);
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	backdrop-filter: blur(6px);
+	box-shadow: var(--shadow-1);
+}
+
+.topbar h1 {
+	margin: 0;
+	font-size: clamp(1.35rem, 2.4vw, 2.1rem);
+	color: var(--brand-700);
+}
+
+.topbar p {
+	margin: 0.2rem 0 0;
+	color: var(--ink-500);
+	font-weight: 600;
+}
+
+.topbar-right {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+}
+
+.notif {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 999px;
+	background: #f8fbff;
+	border: 1px solid var(--line);
+	font-size: 1.15rem;
+	cursor: pointer;
+}
+
+.notif span {
+	position: absolute;
+	right: -10px;
+	top: -10px;
+	background: #dc2626;
+	color: #fff;
+	border-radius: 999px;
+	padding: 1px 6px;
+	font-size: 0.72rem;
+}
+
+.profile {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.15;
+}
+
+.profile strong {
+	color: var(--brand-700);
+}
+
+.profile small {
+	color: var(--ink-500);
+}
+
+.page {
+	padding: 1rem 1.1rem 1.3rem;
+}
+
+.btn-danger {
+	height: 42px;
+	border: none;
+	border-radius: 10px;
+	padding: 0 0.9rem;
+	font-weight: 700;
+	cursor: pointer;
+	background: #dc2626;
+	color: #fff;
+}
+
+@media (max-width: 900px) {
+	.layout {
+		flex-direction: column;
+	}
+
+	.sidebar {
+		width: auto;
+		border-right: none;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+		box-shadow: none;
+	}
+
+	.topbar {
+		margin: 0.8rem;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.9rem;
+	}
+
+	.topbar-right {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.page {
+		padding: 0.8rem;
+	}
+}
