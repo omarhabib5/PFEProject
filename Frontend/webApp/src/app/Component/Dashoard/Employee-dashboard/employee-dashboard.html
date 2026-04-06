@@ -7,27 +7,29 @@
 
             <button class="menu-item" [class.active]="sidebarSection === 'dashboard'"
                 (click)="setSidebarSection('dashboard')">
-                My dashboard
+                <span class="menu-icon">DB</span> My dashboard
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'calendar'"
                 (click)="setSidebarSection('calendar')">
-                Calendar
+                <span class="menu-icon">CL</span> Calendar
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'notifications'"
                 (click)="setSidebarSection('notifications')">
-                Notifications
+                <span class="menu-icon">NT</span> Notifications
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'messagerie'"
                 (click)="setSidebarSection('messagerie')">
-                Messaging
+                <span class="menu-icon">MS</span> Messaging
             </button>
             <button class="menu-item" [class.active]="sidebarSection === 'settings'"
                 (click)="setSidebarSection('settings')">
-                Settings
+                <span class="menu-icon">ST</span> Settings
             </button>
         </div>
 
-        <button class="menu-item logout" (click)="logout()">Sign out</button>
+        <div class="sidebar-bottom">
+            <button class="menu-item logout" (click)="logout()"><span class="menu-icon">OUT</span> Sign out</button>
+        </div>
     </aside>
 
     <main class="content">
@@ -36,7 +38,10 @@
             <div class="topbar-right">
                 <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." />
 
-                <div class="notif">{{ unreadNotifications }}</div>
+                <button class="notif" type="button" (click)="setSidebarSection('notifications')">
+                    <span class="notif-glyph">NT</span>
+                    <span *ngIf="unreadNotifications > 0" class="notif-pill">{{ unreadNotifications }}</span>
+                </button>
                 <div class="profile">
                     <strong>{{ userName }}</strong>
                     <small>{{ roleLabel }}</small>
@@ -57,7 +62,7 @@
         <ng-container *ngIf="!loading && sidebarSection === 'dashboard'">
             <section class="hero">
                 <div class="hero-main">
-                    <h2>Hello, {{ userName }} 👋</h2>
+                    <h2>Hello, {{ userName }}</h2>
                     <p>Service: {{ serviceLabel }} · {{ roleLabel }}</p>
                     <p>{{ todayLabel }}</p>
                     <div class="progress-wrap">
@@ -143,7 +148,7 @@
                     <div class="card-head">
                         <h3>Tasks in progress</h3>
                     </div>
-                    <div *ngIf="inProgressTasks.length === 0" class="empty">No tasks in progress</div>
+                    <div *ngIf="inProgressTasks.length === 0" class="empty">No active tasks</div>
                     <div *ngFor="let task of inProgressTasks" class="task-line">
                         <div>
                             <strong>{{ task.title }}</strong>
@@ -196,7 +201,7 @@
                     </div>
                 </article>
 
-                <article class="task-group" *ngFor="let group of groupedFilteredTasks" [ngClass]="group.bucket">
+                <article class="task-group" *ngFor="let group of groupedFilteredTasks; trackBy: trackByTaskGroup" [ngClass]="group.bucket">
                     <header>
                         <strong>{{ group.label }}</strong>
                         <span>{{ group.items.length }}</span>
@@ -204,7 +209,7 @@
 
                     <div *ngIf="group.items.length === 0" class="empty">No tasks in this category</div>
 
-                    <div class="task-line" *ngFor="let task of group.items">
+                    <div class="task-line" *ngFor="let task of group.items; trackBy: trackByTaskId">
                         <div>
                             <strong>{{ task.title }}</strong>
                             <small>{{ task.projectName }} · {{ task.estimatedHours }}h · {{ task.delayLabel }}</small>
@@ -239,12 +244,11 @@
                         </div>
                         <div class="task-actions">
                             <span class="badge" [ngClass]="task.priorityClass">{{ task.priorityLabel }}</span>
-                            <button *ngIf="task.bucket !== 'done'" (click)="advanceTask(task)">Advance →</button>
                             <button
                                 type="button"
                                 *ngIf="canNotifyTaskDelay(task)"
                                 (click)="toggleDelayMessageBox(task)">
-                                {{ showDelayMessageForTaskId === task.id ? 'Close message' : 'Report as not completed' }}
+                                {{ showDelayMessageForTaskId === task.id ? 'Cancel report' : 'Report issue' }}
                             </button>
                         </div>
                     </div>
@@ -320,9 +324,9 @@
             <div class="calendar-layout-grid">
                 <article class="card">
                     <div class="card-head">
-                        <button (click)="prevMonth()">‹</button>
+                        <button (click)="prevMonth()">&lt;</button>
                         <h3>{{ calendarTitle }}</h3>
-                        <button (click)="nextMonth()">›</button>
+                        <button (click)="nextMonth()">&gt;</button>
                     </div>
                     <div class="calendar-head"><span *ngFor="let day of weekdays">{{ day }}</span></div>
                     <div class="calendar-grid">
@@ -520,7 +524,7 @@
                             <div class="compose-controls">
                                 <div class="file-input-wrapper">
                                     <label for="conversationAttachmentInput" class="file-label">
-                                        📎 Attachment
+                                        <span class="icon-attach">📎</span> Attachment
                                     </label>
                                     <input 
                                         type="file" 
@@ -530,7 +534,7 @@
                                 </div>
                                 <div *ngIf="conversationAttachmentName" class="file-chip">
                                     <span>{{ conversationAttachmentName }}</span>
-                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">✕</button>
+                                    <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">&times;</button>
                                 </div>
                             </div>
                             <button type="button" (click)="sendConversationMessage()" [disabled]="conversationSending || (!conversationDraft.trim() && !conversationAttachmentName)" class="send-button">
@@ -570,6 +574,30 @@
                             <label>Avatar (URL)</label>
                             <input type="url" [(ngModel)]="profileForm.avatarUrl" name="profileAvatar"
                                 placeholder="https://..." />
+                        </div>
+
+                        <div class="settings-field">
+                            <label>or Upload image</label>
+                            <div class="file-upload-wrapper">
+                                <label for="profileAvatarInput" class="file-upload-label">
+                                    <span class="upload-icon">↑</span>
+                                    <span>Choose image</span>
+                                </label>
+                                <input 
+                                    type="file" 
+                                    id="profileAvatarInput"
+                                    accept="image/*"
+                                    (change)="onProfileAvatarSelected($event)" 
+                                    class="file-input" />
+                                <small *ngIf="profileAvatarFileName" class="file-name">{{ profileAvatarFileName }}</small>
+                                <button 
+                                    type="button" 
+                                    *ngIf="profileAvatarFileName"
+                                    (click)="clearProfileAvatar()" 
+                                    class="clear-avatar-btn">
+                                    Clear image
+                                </button>
+                            </div>
                         </div>
 
                         <div class="settings-preview" *ngIf="profileForm.avatarUrl">

@@ -31,10 +31,3 @@ export interface Notification {
   link?: string;
 }
 
-export interface CreateNotificationDto {
-  title: string;
-  message: string;
-  type: NotificationType | string;
-  link?: string;
-  userId: number;
-}

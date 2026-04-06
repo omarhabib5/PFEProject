@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
+import { Subscription, catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
@@ -123,6 +123,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   profileSaving = false;
   passwordSaving = false;
   settingsSuccess = '';
+  profileAvatarFileName = '';
+  profileAvatarPreviewUrl = '';
   profileForm = {
     firstName: '',
     lastName: '',
@@ -239,7 +241,9 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   }
 
   get inProgressTasks(): UiTask[] {
-    return this.myTasks.filter((task) => task.bucket === 'inProgress').slice(0, 5);
+    return this.myTasks
+      .filter((task) => task.bucket === 'todo' || task.bucket === 'inProgress' || task.bucket === 'review')
+      .slice(0, 5);
   }
 
   get nearestDueTask(): UiTask | null {
@@ -275,6 +279,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
       label: this.bucketLabels[bucket],
       items: this.filteredTasks.filter((task) => task.bucket === bucket)
     }));
+  }
+
+  trackByTaskGroup(index: number, group: { bucket: TaskBucket }): string {
+    return group.bucket;
+  }
+
+  trackByTaskId(index: number, task: UiTask): number {
+    return task.id;
   }
 
   get activityWeekly(): number[] {
@@ -473,6 +485,68 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     return Number(item.relatedUserId ?? 0) === Number(this.currentUserId ?? 0);
   }
 
+  onProfileAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file type (image only)
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Please select a valid image file (JPG, PNG, GIF, etc.).';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file size (max 5MB for images)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'The image must not exceed 5MB.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profileAvatarFileName = file.name;
+      this.profileAvatarPreviewUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.profileForm.avatarUrl = this.profileAvatarPreviewUrl;
+      this.error = '';
+      this.cdr.markForCheck();
+    };
+    reader.onerror = () => {
+      this.error = 'Unable to read the image file.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearProfileAvatar(): void {
+    this.profileAvatarFileName = '';
+    this.profileAvatarPreviewUrl = '';
+    this.profileForm.avatarUrl = '';
+    const fileInput = document.getElementById('profileAvatarInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.markForCheck();
+  }
+
   hasAttachment(item: Notification): boolean {
     const fromNewValue = typeof item.newValue === 'string' && item.newValue.trim().startsWith('data:');
     const fromLegacyLink = typeof item.link === 'string' && item.link.trim().startsWith('data:');
@@ -649,25 +723,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   logout(): void {
     this.tokenService.clear();
     this.router.navigate(['/login']);
-  }
-
-  advanceTask(task: UiTask): void {
-    const next = this.nextStatus(task.rawStatus);
-    if (next === null) {
-      return;
-    }
-
-    this.taskService.updateStatus(task.id, next)
-      .pipe(timeout(10000))
-      .subscribe({
-        next: () => {
-          this.loadEmployeeData();
-        },
-        error: () => {
-          this.error = 'Unable to update the task status.'
-          this.cdr.markForCheck();
-        }
-      });
   }
 
   canNotifyTaskDelay(task: UiTask): boolean {
@@ -1456,10 +1511,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   private mapBucket(status: TaskDto['status']): TaskBucket {
     const normalized = typeof status === 'string' ? status.toLowerCase() : Number(status);
 
+    if (normalized === 'todo' || normalized === 'to do' || normalized === 1) return 'todo';
     if (normalized === 'inprogress' || normalized === 'in progress' || normalized === 2) return 'inProgress';
     if (normalized === 'review') return 'review';
     if (normalized === 'done' || normalized === 'validated' || normalized === 3 || normalized === 4) return 'done';
-    if (normalized === 'pending' || normalized === 0) return 'review';
+    if (normalized === 'pending' || normalized === 0) return 'todo';
     return 'todo';
   }
 
@@ -1480,14 +1536,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     if (days < 0) return `${Math.abs(days)}d overdue`;
     return `In ${days}d`;
-  }
-
-  private nextStatus(status: TaskDto['status']): UserStoryStatus | null {
-    const bucket = this.mapBucket(status);
-    if (bucket === 'todo') return UserStoryStatus.IN_PROGRESS;
-    if (bucket === 'inProgress') return UserStoryStatus.REVIEW;
-    if (bucket === 'review') return UserStoryStatus.DONE;
-    return null;
   }
 
   countByBucket(bucket: TaskBucket): number {

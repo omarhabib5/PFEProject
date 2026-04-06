@@ -15,6 +15,7 @@ import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus, UserStoryStateVa
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
 import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
+import { NotificationType } from '../../Page/Notifiation/Models/Notification.Model';
 
 interface TeamMemberRow {
   fullName: string;
@@ -87,7 +88,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   userName = '';
   userRole = '';
   notificationCount = 0;
+  apiNotifications: AppNotification[] = [];
   notifications: AppNotification[] = [];
+  private acknowledgedOverdueNotificationKeys = new Set<string>();
   profileImageUrl = '';
 
   currentMonth = new Date();
@@ -129,6 +132,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   profileSaving = false;
   passwordSaving = false;
+  profileAvatarFileName = '';
+  profileAvatarPreviewUrl = '';
   profileForm = {
     firstName: '',
     lastName: '',
@@ -420,6 +425,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.selectedServiceMembers = [];
     this.serviceUserStories = [];
     this.serviceTasks = [];
+    this.recomputeNotificationsView();
   }
 
   openServicesList(): void {
@@ -464,6 +470,10 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       if (this.services.length > 0) {
         this.selectedServiceId = Number(this.services[0].id);
         this.serviceViewMode = 'detail';
+        this.loadUsersForSelectedService();
+        this.loadMembersForSelectedService();
+        this.loadTeams();
+        this.loadProjects();
       } else {
         this.error = 'No service available to open notifications.';
         return;
@@ -478,6 +488,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.error = '';
     this.success = '';
 
+    const localNotification = this.notifications.find((item) => item.id === notificationId && this.isLocalOverdueNotification(item));
+    if (localNotification) {
+      const key = this.extractOverdueNotificationKey(localNotification);
+      if (key) {
+        this.acknowledgedOverdueNotificationKeys.add(key);
+      }
+      this.recomputeNotificationsView();
+      this.success = 'Notification marked as read.';
+      return;
+    }
+
     this.notificationService.markAsRead(notificationId).subscribe({
       next: () => {
         this.success = 'Notification marked as read.';
@@ -490,13 +511,24 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   markAllNotificationsAsRead(): void {
-    const userId = this.resolveCurrentResponsibleId();
-    if (!userId) {
-      return;
-    }
-
     this.error = '';
     this.success = '';
+
+    this.notifications
+      .filter((item) => this.isLocalOverdueNotification(item) && !item.isRead)
+      .forEach((item) => {
+        const key = this.extractOverdueNotificationKey(item);
+        if (key) {
+          this.acknowledgedOverdueNotificationKeys.add(key);
+        }
+      });
+
+    const userId = this.resolveCurrentResponsibleId();
+    if (!userId) {
+      this.recomputeNotificationsView();
+      this.success = 'All notifications have been marked as read.';
+      return;
+    }
 
     this.notificationService.markAllAsRead(userId).subscribe({
       next: () => {
@@ -772,6 +804,68 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         this.error = err instanceof Error ? err.message : 'Unable to change password.';
       }
     });
+  }
+
+  onProfileAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file type (image only)
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Please select a valid image file (JPG, PNG, GIF, etc.).';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Validate file size (max 5MB for images)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.error = 'The image must not exceed 5MB.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profileAvatarFileName = file.name;
+      this.profileAvatarPreviewUrl = typeof reader.result === 'string' ? reader.result : '';
+      this.profileForm.avatarUrl = this.profileAvatarPreviewUrl;
+      this.error = '';
+      this.cdr.markForCheck();
+    };
+    reader.onerror = () => {
+      this.error = 'Unable to read the image file.';
+      this.profileAvatarFileName = '';
+      this.profileAvatarPreviewUrl = '';
+      input.value = '';
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearProfileAvatar(): void {
+    this.profileAvatarFileName = '';
+    this.profileAvatarPreviewUrl = '';
+    this.profileForm.avatarUrl = '';
+    const fileInput = document.getElementById('profileAvatarInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.markForCheck();
   }
 
   submitCreateUserStory(): void {
@@ -1081,6 +1175,42 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   getUserStoryStatusLabel(status: UserStoryStateValue | undefined): string {
     return this.userStoryStatuses.find((item) => item.value === this.normalizeUserStoryStatus(status))?.label ?? 'To Do';
+  }
+
+  getComputedUserStoryStatus(story: ServiceUserStoryRow): UserStoryStatus {
+    const storyTasks = this.serviceTasks.filter((task) => Number(task.userStoryId ?? 0) === story.numericId);
+    if (storyTasks.length === 0) {
+      return this.resolveStoryStatus(story);
+    }
+
+    let hasTodo = false;
+    let hasInProgress = false;
+    let hasCompleted = false;
+
+    storyTasks.forEach((task) => {
+      const state = this.normalizeTaskState(task.status);
+      if (state === 'done' || state === 'validated') {
+        hasCompleted = true;
+        return;
+      }
+
+      if (state === 'inProgress') {
+        hasInProgress = true;
+        return;
+      }
+
+      hasTodo = true;
+    });
+
+    if (!hasTodo && !hasInProgress && hasCompleted) {
+      return UserStoryStatus.DONE;
+    }
+
+    if (hasInProgress || (hasCompleted && hasTodo)) {
+      return UserStoryStatus.IN_PROGRESS;
+    }
+
+    return UserStoryStatus.TODO;
   }
 
   getUserStoryStatusClass(status: UserStoryStateValue | undefined): string {
@@ -1405,6 +1535,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
           this.serviceUserStories = [];
           this.selectedUserStoryStatuses = {};
           this.generateCalendar();
+          this.recomputeNotificationsView();
           return;
         }
 
@@ -1442,7 +1573,10 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
               return sprintIds.has(sprintId) || userStoryIds.has(userStoryId);
             });
 
+            this.syncUserStoryStatusesFromTasks();
+
             this.generateCalendar();
+            this.recomputeNotificationsView();
             this.cdr.detectChanges();
           },
           error: () => {
@@ -1451,6 +1585,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
             this.serviceUserStories = [];
             this.selectedUserStoryStatuses = {};
             this.generateCalendar();
+            this.recomputeNotificationsView();
             this.cdr.detectChanges();
           }
         });
@@ -1460,6 +1595,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         this.availableSprints = [];
         this.serviceTasks = [];
         this.serviceUserStories = [];
+        this.recomputeNotificationsView();
       }
     });
   }
@@ -1473,31 +1609,78 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       this.serviceUserStories = [];
       this.serviceTasks = [];
       this.selectedUserStoryStatuses = {};
+      this.recomputeNotificationsView();
       return;
     }
 
-    const requests = projectIds.map((projectId) =>
+    const storyRequests = projectIds.map((projectId) =>
       this.userStoryService.getByProjectId(projectId).pipe(catchError(() => of([] as UserStoryDto[])))
     );
 
-    forkJoin(requests).subscribe({
-      next: (storiesByProject) => {
+    forkJoin({
+      storiesByProject: forkJoin(storyRequests),
+      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[])))
+    }).subscribe({
+      next: ({ storiesByProject, tasks }) => {
         const flattened = storiesByProject.flat();
         this.serviceUserStories = flattened
           .map((story) => ({ ...story, numericId: Number(story.id) }))
           .filter((story) => Number.isFinite(story.numericId) && story.numericId > 0);
 
+        const userStoryIds = new Set(this.serviceUserStories.map((story) => Number(story.numericId)));
+        this.serviceTasks = (tasks ?? []).filter((task) => userStoryIds.has(Number(task.userStoryId ?? 0)));
+
         this.selectedUserStoryStatuses = {};
         this.serviceUserStories.forEach((story) => {
           this.selectedUserStoryStatuses[story.numericId] = this.resolveStoryStatus(story);
         });
+
+        this.syncUserStoryStatusesFromTasks();
+        this.recomputeNotificationsView();
         this.cdr.detectChanges();
       },
       error: () => {
         this.serviceUserStories = [];
+        this.serviceTasks = [];
+        this.recomputeNotificationsView();
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private syncUserStoryStatusesFromTasks(): void {
+    if (this.serviceUserStories.length === 0 || this.serviceTasks.length === 0) {
+      return;
+    }
+
+    this.serviceUserStories.forEach((story) => {
+      const computedStatus = this.getComputedUserStoryStatus(story);
+      const currentStatus = this.resolveStoryStatus(story);
+
+      if (computedStatus === currentStatus) {
+        return;
+      }
+
+      story.status = computedStatus;
+      story.userStoryState = this.toUserStoryStateNumber(computedStatus);
+      this.selectedUserStoryStatuses[story.numericId] = computedStatus;
+
+      this.userStoryService.updateStatus(story.numericId, computedStatus)
+        .pipe(catchError(() => of(void 0)))
+        .subscribe();
+    });
+  }
+
+  private toUserStoryStateNumber(status: UserStoryStatus): number {
+    if (status === UserStoryStatus.DONE) {
+      return 3;
+    }
+
+    if (status === UserStoryStatus.IN_PROGRESS || status === UserStoryStatus.REVIEW || status === UserStoryStatus.TESTING) {
+      return 2;
+    }
+
+    return 1;
   }
 
   private startAutoRefresh(): void {
@@ -1532,13 +1715,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.notificationCountSubscription?.unsubscribe();
     this.notificationsSubscription?.unsubscribe();
 
-    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
-      this.notificationCount = count;
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe(() => {
+      this.recomputeNotificationsView();
       this.cdr.markForCheck();
     });
 
     this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
-      this.notifications = items;
+      this.apiNotifications = items;
+      this.recomputeNotificationsView();
       this.cdr.markForCheck();
     });
 
@@ -1548,12 +1732,103 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   private refreshNotifications(): void {
     const userId = this.resolveCurrentResponsibleId();
     if (!userId) {
-      this.notificationCount = 0;
-      this.notifications = [];
+      this.apiNotifications = [];
+      this.recomputeNotificationsView();
+      this.cdr.markForCheck();
       return;
     }
 
     this.notificationService.loadNotifications(userId);
+  }
+
+  private recomputeNotificationsView(): void {
+    const overdueNotifications = this.buildOverdueNotifications();
+    const merged = [...overdueNotifications, ...(this.apiNotifications ?? [])]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    this.notifications = merged;
+    this.notificationCount = merged.filter((item) => !item.isRead).length;
+  }
+
+  private buildOverdueNotifications(): AppNotification[] {
+    const todayIso = this.toIsoDateLocal(new Date());
+    const nowIso = new Date().toISOString();
+    const alerts: AppNotification[] = [];
+
+    this.selectedServiceProjects.forEach((project) => {
+      const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
+      if (!deadlineIso || deadlineIso >= todayIso) {
+        return;
+      }
+
+      const projectState = Number(project.projectState);
+      const isDone = projectState === ProjectState.done || projectState === ProjectState.validated;
+      if (isDone) {
+        return;
+      }
+
+      const key = `project:${Number(project.id ?? 0)}:${deadlineIso}`;
+      const read = this.acknowledgedOverdueNotificationKeys.has(key);
+
+      alerts.push({
+        id: this.toLocalOverdueNotificationId(key),
+        title: 'Project overdue',
+        message: `Project "${project.name}" is overdue since ${deadlineIso} and is not finished.`,
+        type: NotificationType.TaskOverdue,
+        isRead: read,
+        createdAt: nowIso,
+        link: `local-overdue:${key}`,
+      });
+    });
+
+    this.serviceTasks.forEach((task) => {
+      const deadlineIso = this.getSafeIsoDate(task.endDate);
+      if (!deadlineIso || deadlineIso >= todayIso) {
+        return;
+      }
+
+      const state = this.normalizeTaskState(task.status);
+      const isDone = state === 'done' || state === 'validated';
+      if (isDone) {
+        return;
+      }
+
+      const key = `task:${Number(task.id ?? 0)}:${deadlineIso}`;
+      const read = this.acknowledgedOverdueNotificationKeys.has(key);
+
+      alerts.push({
+        id: this.toLocalOverdueNotificationId(key),
+        title: 'Task overdue',
+        message: `Task "${task.title}" is overdue since ${deadlineIso} and is not finished.`,
+        type: NotificationType.TaskOverdue,
+        isRead: read,
+        createdAt: nowIso,
+        relatedTaskId: Number(task.id ?? 0),
+        link: `local-overdue:${key}`,
+      });
+    });
+
+    return alerts;
+  }
+
+  private isLocalOverdueNotification(notification: AppNotification): boolean {
+    return String(notification.link ?? '').startsWith('local-overdue:');
+  }
+
+  private extractOverdueNotificationKey(notification: AppNotification): string {
+    const link = String(notification.link ?? '');
+    return link.startsWith('local-overdue:') ? link.slice('local-overdue:'.length) : '';
+  }
+
+  private toLocalOverdueNotificationId(key: string): number {
+    let hash = 0;
+    for (let i = 0; i < key.length; i += 1) {
+      hash = ((hash << 5) - hash) + key.charCodeAt(i);
+      hash |= 0;
+    }
+
+    const id = Math.abs(hash) + 1;
+    return -id;
   }
 
   private resolveCurrentResponsibleId(): number | null {

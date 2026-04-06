@@ -98,7 +98,6 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   notifications: Notification[] = [];
   deadlineNotifications: DeadlineNotification[] = [];
   showNotificationsPanel = false;
-  showDeadlineNotificationsPanel = false;
   private sentNotificationIds = new Set<string>();
   private currentUserId: number | null = null;
 
@@ -116,7 +115,6 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   completedTasks = 0;
   inProgressTasks = 0;
   urgentTasks = 0;
-  unreadNotifications = 0;
   adminUnreadNotifications = 0;
 
   recentProjects: UiProjectCard[] = [];
@@ -395,10 +393,6 @@ private adminNotificationsSubscription: Subscription | null = null;
 
   toggleAdminNotificationsPanel(): void {
     this.showNotificationsPanel = !this.showNotificationsPanel;
-  }
-
-  toggleDeadlineNotificationsPanel(): void {
-    this.showDeadlineNotificationsPanel = !this.showDeadlineNotificationsPanel;
   }
 
   markAdminNotificationAsRead(notificationId: number): void {
@@ -1144,7 +1138,6 @@ private adminNotificationsSubscription: Subscription | null = null;
     ].sort((a, b) => a.daysLeft - b.daysLeft || a.title.localeCompare(b.title));
 
     this.deadlineNotifications = notifications;
-    this.unreadNotifications = notifications.length;
     this.sendBrowserDeadlineNotifications(notifications);
   }
 

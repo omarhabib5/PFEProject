@@ -214,12 +214,38 @@
 
               <div>
                 <p class="mb-1 text-sm text-slate-500">Manager</p>
-                <p class="text-sm font-semibold text-slate-900">🧑 {{ managerDisplayName }}</p>
+                <div class="flex items-center gap-2">
+                  <img
+                    *ngIf="managerProfileImageUrl"
+                    [src]="managerProfileImageUrl"
+                    alt="Manager profile"
+                    class="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                    loading="lazy" />
+                  <span
+                    *ngIf="!managerProfileImageUrl"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xs font-black text-slate-700">
+                    {{ getUserInitials(managerDisplayName) }}
+                  </span>
+                  <p class="text-sm font-semibold text-slate-900">{{ managerDisplayName }}</p>
+                </div>
               </div>
               <div>
                 <p class="mb-1 text-sm text-slate-500">Team</p>
-                <div class="flex flex-wrap gap-2" *ngIf="teamDisplayMembers.length > 0; else emptyTeam">
-                  <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs" *ngFor="let member of teamDisplayMembers">🧑 {{ member }}</span>
+                <div class="flex flex-wrap gap-2" *ngIf="teamDisplayMemberProfiles.length > 0; else emptyTeam">
+                  <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs" *ngFor="let member of teamDisplayMemberProfiles">
+                    <img
+                      *ngIf="member.avatarUrl"
+                      [src]="member.avatarUrl"
+                      [alt]="member.name"
+                      class="h-6 w-6 rounded-full border border-slate-200 object-cover"
+                      loading="lazy" />
+                    <span
+                      *ngIf="!member.avatarUrl"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-black text-slate-700">
+                      {{ getUserInitials(member.name) }}
+                    </span>
+                    <span>{{ member.name }}</span>
+                  </div>
                 </div>
                 <ng-template #emptyTeam>
                   <p class="text-sm text-slate-500">No team member assigned</p>

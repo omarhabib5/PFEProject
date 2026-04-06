@@ -30,9 +30,27 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                deleteDir()
                 checkout scm
                 script {
                     echo "✓ Checked out code from branch: ${env.BRANCH_NAME ?: 'unknown'}"
+                    sh '''
+                        if [ -n "${BRANCH_NAME}" ]; then
+                            echo "Synchronizing workspace with origin/${BRANCH_NAME}"
+                            git fetch --all --prune
+                            git reset --hard "origin/${BRANCH_NAME}" || true
+                            git clean -fdx
+                        fi
+
+                        echo "Commit built:" 
+                        git rev-parse --short HEAD
+
+                        echo "Dockerfile used by Jenkins:"
+                        sed -n '1,30p' Frontend/webApp/Dockerfile
+
+                        echo "Angular production budgets in workspace:"
+                        sed -n '30,55p' Frontend/webApp/angular.json
+                    '''
                 }
             }
         }
@@ -205,11 +223,11 @@ pipeline {
                     echo "🐳 Building Docker Images..."
                     sh '''
                         echo "Building Backend Docker image"
-                        docker build -f backend/Projet.Api/Dockerfile -t ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} backend
+                        docker build --pull -f backend/Projet.Api/Dockerfile -t ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} backend
                         docker tag ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} ${IMAGE_NAME_BACKEND}:latest
                         
                         echo "Building Frontend Docker image"
-                        docker build -f Frontend/webApp/Dockerfile -t ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} Frontend/webApp
+                        docker build --pull --no-cache -f Frontend/webApp/Dockerfile -t ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} Frontend/webApp
                         docker tag ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} ${IMAGE_NAME_FRONTEND}:latest
                     '''
                 }

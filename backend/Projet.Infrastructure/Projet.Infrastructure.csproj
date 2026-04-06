@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Projet.Domain\Projet.Domain.csproj" />
     <ProjectReference Include="..\Projet.Application\Projet.Application.csproj" />
   </ItemGroup>

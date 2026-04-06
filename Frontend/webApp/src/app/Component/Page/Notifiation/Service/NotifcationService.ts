@@ -1,10 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { Observable, BehaviorSubject, interval, forkJoin, of } from "rxjs";
+import { Observable, BehaviorSubject, forkJoin, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
+import * as signalR from "@microsoft/signalr";
 import { environment } from "../../../environment";
-import { Notification, CreateNotificationDto, NotificationType } from "../Models/Notification.Model";
+import { Notification, NotificationType } from "../Models/Notification.Model";
 
 export interface DirectMessageDto {
     recipientUserId: number;
@@ -20,7 +21,12 @@ export interface DirectMessageDto {
 })
 export class NotificationService {
     private apiUrl = `${environment.apiUrl}/notification`;
+    private hubUrl = `${environment.apiUrl.replace(/\/api$/i, "")}/hubs/notifications`;
     private http = inject(HttpClient);
+    private hubConnection: signalR.HubConnection | null = null;
+    private connectedUserId: number | null = null;
+    private isConnecting = false;
+    private loadedUserId: number | null = null;
     
     private unreadCountSubject = new BehaviorSubject<number>(0);
     public unreadCount$ = this.unreadCountSubject.asObservable();
@@ -28,9 +34,7 @@ export class NotificationService {
     private notificationsSubject = new BehaviorSubject<Notification[]>([]);
     public notifications$ = this.notificationsSubject.asObservable();
 
-    constructor() {
-        this.initAutoRefresh();
-    }
+    constructor() {}
 
  
     getUserNotifications(userId: number): Observable<Notification[]> {
@@ -80,11 +84,16 @@ export class NotificationService {
      * Update notifications and unread count
      */
     loadNotifications(userId: number): void {
+        this.ensureSignalRConnection(userId);
+
+        if (this.loadedUserId === userId && this.connectedUserId === userId) {
+            return;
+        }
+
         this.getUserNotifications(userId).subscribe({
             next: (notifications) => {
-                this.notificationsSubject.next(notifications);
-                const unreadCount = notifications.filter(n => !n.isRead).length;
-                this.unreadCountSubject.next(unreadCount);
+                this.pushNotificationState(notifications);
+                this.loadedUserId = userId;
             },
             error: (error) => {
                 console.error('Error loading notifications:', error);
@@ -105,8 +114,7 @@ export class NotificationService {
         return forkJoin(unreadNotifications.map((n) => this.markAsRead(n.id))).pipe(
             switchMap(() => this.getUserNotifications(userId)),
             map((notifications) => {
-                this.notificationsSubject.next(notifications);
-                this.unreadCountSubject.next(notifications.filter((n) => !n.isRead).length);
+                this.pushNotificationState(notifications);
                 return void 0;
             })
         );
@@ -127,13 +135,74 @@ export class NotificationService {
         );
     }
 
-    /**
-     * Initialize auto-refresh of notifications (30 seconds interval)
-     */
-    private initAutoRefresh(): void {
-        interval(30000).subscribe(() => {
-            // Auto-refresh will be triggered by component
+    private ensureSignalRConnection(userId: number): void {
+        if (!userId || userId <= 0) {
+            return;
+        }
+
+        if (this.connectedUserId === userId && this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+            return;
+        }
+
+        if (this.isConnecting) {
+            return;
+        }
+
+        this.isConnecting = true;
+
+        const token = this.getAccessToken();
+        if (!token) {
+            this.isConnecting = false;
+            return;
+        }
+
+        if (this.hubConnection) {
+            this.hubConnection.stop().catch(() => undefined);
+            this.hubConnection = null;
+        }
+
+        this.hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(this.hubUrl, {
+                accessTokenFactory: () => this.getAccessToken() || ''
+            })
+            .withAutomaticReconnect([0, 2000, 5000, 10000])
+            .build();
+
+        this.hubConnection.on("NotificationsUpdated", (items: Notification[] | null | undefined, unreadCount: number | null | undefined) => {
+            const normalized = this.normalizeNotifications(items ?? []);
+            this.notificationsSubject.next(normalized);
+            const computedUnread = normalized.filter((item) => !item.isRead).length;
+            this.unreadCountSubject.next(typeof unreadCount === 'number' ? unreadCount : computedUnread);
         });
+
+        this.hubConnection.onclose(() => {
+            this.connectedUserId = null;
+            this.loadedUserId = null;
+        });
+
+        this.hubConnection.start()
+            .then(() => {
+                this.connectedUserId = userId;
+            })
+            .catch((error) => {
+                console.error('SignalR connection failed:', error);
+                this.connectedUserId = null;
+            })
+            .finally(() => {
+                this.isConnecting = false;
+            });
+    }
+
+    private getAccessToken(): string {
+        return localStorage.getItem('access_token')
+            || localStorage.getItem('token')
+            || '';
+    }
+
+    private pushNotificationState(items: Notification[] | null | undefined): void {
+        const normalized = this.normalizeNotifications(items);
+        this.notificationsSubject.next(normalized);
+        this.unreadCountSubject.next(normalized.filter((n) => !n.isRead).length);
     }
 
     /**
