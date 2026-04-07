@@ -11,6 +11,7 @@ namespace Projet.Domain.Model
         Admin,
         ServiceManager,
         ProjectManager,
-        Employee
+        Employee,
+        Observer
     }
 }

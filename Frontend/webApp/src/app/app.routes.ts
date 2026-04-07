@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AdminDashboard } from './Component/Dashoard/admin-dashboard/admin-dashboard';
 import { ChefProjetDashboard } from './Component/Dashoard/ChefProjet-dashboard/chef-projet-dashboard';
 import { EmployeeDashboard } from './Component/Dashoard/Employee-dashboard/employee-dashboard';
+import { ObserverDashboard } from './Component/Dashoard/Observateur-dashboard/observateur-dashboard';
 import { ResponsableServiceDashboard } from './Component/Dashoard/ResponsableService-dashboard/responsable-service-dashboard';
 import { Login } from './Component/Auth/login/login';
 import { UserManage } from './Component/Page/user-manage/user-manage';
@@ -43,6 +44,12 @@ export const routes: Routes = [
                 component: EmployeeDashboard,
                 canActivate: [roleGuard],
                 data: { roles: [AppRole.Employee] }
+            },
+            {
+                path: 'ObserverDashboard',
+                component: ObserverDashboard,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.Observer] }
             },
             {
                 path: 'ResponsableServiceDashboard',

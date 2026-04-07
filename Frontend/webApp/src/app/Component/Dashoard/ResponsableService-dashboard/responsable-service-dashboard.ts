@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription, catchError, finalize, forkJoin, interval, of, timeout } from 'rxjs';
+import { Subscription, catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
-import { ProjectService, State as ProjectState, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
-import { Sprint, SprintService } from '../../Page/Sprint/Service/SprintService';
+import { CreateProjectDto, ProjectService, State as ProjectState, UpdateProjectDto, project as ProjectEntity } from '../../Page/Projet/Service/ProjectService';
+import { Sprint, SprintService, State as SprintState } from '../../Page/Sprint/Service/SprintService';
 import { TaskDto, TaskService, TaskState } from '../../Page/Task/Service/TaskService';
 import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { CreateServiceDto, Service, ServiceService } from '../../Page/Team/Service/ServiceService';
@@ -54,14 +54,12 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   private currentResponsibleId: number | null = null;
-  private autoRefreshSubscription: Subscription | null = null;
   private notificationCountSubscription: Subscription | null = null;
   private notificationsSubscription: Subscription | null = null;
-  private readonly autoRefreshMs = 15000;
 
   activeSection: 'services' | 'calendar' = 'services';
   serviceViewMode: 'list' | 'detail' = 'list';
-  activeTab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'projects' | 'sprints' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings' = 'dashboard';
 
   loading = false;
   error = '';
@@ -77,6 +75,27 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   selectedServiceMemberIds = new Set<number>();
   selectedServiceMembers: TeamUser[] = [];
   selectedServiceId: number | null = null;
+  selectedProjectId: number | null = null;
+
+  showProjectForm = false;
+  projectSubmitting = false;
+  projectFormMode: 'create' | 'edit' = 'create';
+  editingProjectId: number | null = null;
+  projectStateOptions = [
+    { value: ProjectState.todo, label: 'Planned' },
+    { value: ProjectState.inProgress, label: 'Active' },
+    { value: ProjectState.done, label: 'Done' },
+    { value: ProjectState.validated, label: 'Validated' },
+  ];
+  projectForm = {
+    name: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    estimatedDuration: 14,
+    projectState: ProjectState.todo as ProjectState,
+    teamId: null as number | null,
+  };
 
   showCreateModal = false;
   serviceSubmitting = false;
@@ -120,6 +139,26 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   showUserStoryModal = false;
   userStorySubmitting = false;
   availableSprints: Sprint[] = [];
+  showSprintForm = false;
+  sprintSubmitting = false;
+  sprintFormMode: 'create' | 'edit' = 'create';
+  editingSprintId: number | null = null;
+  sprintStateOptions = [
+    { value: SprintState.pending, label: 'Pending' },
+    { value: SprintState.todo, label: 'To Do' },
+    { value: SprintState.inProgress, label: 'In Progress' },
+    { value: SprintState.done, label: 'Done' },
+    { value: SprintState.validated, label: 'Validated' },
+  ];
+  sprintForm = {
+    name: '',
+    description: '',
+    projectId: null as number | null,
+    startDate: '',
+    endDate: '',
+    estimatedDuration: 14,
+    sprintState: SprintState.todo as SprintState,
+  };
   userStoryPriorities = [1, 2, 3, 4, 5];
   userStoryForm = {
     title: '',
@@ -158,11 +197,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.loadUserSettings();
     this.loadServices();
     this.initializeNotifications();
-    this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
-    this.stopAutoRefresh();
     this.notificationCountSubscription?.unsubscribe();
     this.notificationCountSubscription = null;
     this.notificationsSubscription?.unsubscribe();
@@ -211,6 +248,35 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   get selectedServiceProjects(): ProjectEntity[] {
     if (!this.selectedServiceId) return [];
     return this.allProjects.filter((project) => this.belongsToSelectedService(project));
+  }
+
+  get selectedProject(): ProjectEntity | null {
+    if (!this.selectedProjectId) return null;
+    return this.selectedServiceProjects.find((project) => Number(project.id) === Number(this.selectedProjectId)) ?? null;
+  }
+
+  get selectedProjectTeam(): TeamEntity | null {
+    const project = this.selectedProject;
+    if (!project?.teamId) return null;
+    return this.selectedServiceTeams.find((team) => Number(team.id) === Number(project.teamId)) ?? null;
+  }
+
+  get selectedProjectTeamMembers(): TeamUser[] {
+    const team = this.selectedProjectTeam;
+    if (!team) return [];
+    return this.selectedServiceMembers.filter((member) => Number(member.teamId) === Number(team.id));
+  }
+
+  get selectedProjectSprints(): Sprint[] {
+    const project = this.selectedProject;
+    if (!project?.id) return [];
+    return this.availableSprints.filter((sprint) => Number(sprint.projectId) === Number(project.id));
+  }
+
+  get selectedProjectProgressPercent(): number {
+    const project = this.selectedProject;
+    if (!project) return 0;
+    return this.getProjectProgress(project);
   }
 
   get teamRows(): TeamMemberRow[] {
@@ -383,10 +449,12 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
               ? previousSelectedServiceId
               : Number(this.services[0].id);
             this.serviceViewMode = this.selectedServiceId ? 'detail' : 'list';
+            this.selectedProjectId = null;
           } else if (this.services.length === 0) {
             this.serviceViewMode = 'list';
             this.error = 'No service is assigned to you.';
             this.selectedServiceId = null;
+            this.selectedProjectId = null;
           }
           this.loadTeams();
           this.loadProjects();
@@ -412,6 +480,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.serviceViewMode = 'detail';
     this.activeSection = 'services';
     this.activeTab = 'dashboard';
+    this.selectedProjectId = null;
     this.loadUsersForSelectedService();
     this.loadMembersForSelectedService();
     this.loadTeams();
@@ -421,6 +490,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   backToServiceList(): void {
     this.serviceViewMode = 'list';
     this.selectedServiceId = null;
+    this.selectedProjectId = null;
     this.selectedServiceMemberIds = new Set<number>();
     this.selectedServiceMembers = [];
     this.serviceUserStories = [];
@@ -432,15 +502,24 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.backToServiceList();
   }
 
-  setTab(tab: 'dashboard' | 'projects' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings'): void {
+  setTab(tab: 'dashboard' | 'projects' | 'sprints' | 'userStories' | 'teamMembers' | 'calendar' | 'notifications' | 'settings'): void {
     this.activeTab = tab;
     if (tab === 'dashboard') {
       this.loadUsersForSelectedService();
       this.loadTeams();
       this.loadProjects();
     }
+    if (tab === 'projects') {
+      this.loadProjects();
+      if (!this.selectedProjectId && this.selectedServiceProjects.length > 0) {
+        this.selectedProjectId = Number(this.selectedServiceProjects[0].id);
+      }
+    }
+    if (tab === 'sprints') {
+      this.loadProjects();
+    }
     if (tab === 'userStories') {
-      this.loadServiceUserStories();
+      this.loadProjects();
     }
     if (tab === 'settings') {
       this.loadUserSettings();
@@ -612,9 +691,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
 
   openProjects(): void {
-    this.router.navigate(['/ProjectManage'], {
-      queryParams: { serviceId: this.selectedServiceId ?? undefined }
-    });
+    this.openCreateProjectForm();
   }
 
   openProjectEdit(): void {
@@ -635,6 +712,196 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         source: 'service-manager'
       }
     });
+  }
+
+  selectProject(project: ProjectEntity): void {
+    const projectId = Number(project.id ?? 0);
+    if (!projectId) return;
+    this.selectedProjectId = projectId;
+  }
+
+  openCreateProjectForm(): void {
+    if (!this.selectedServiceId) {
+      this.error = 'Open a service before creating a project.';
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+    this.projectFormMode = 'create';
+    this.editingProjectId = null;
+    this.showProjectForm = true;
+    this.resetProjectForm();
+    this.projectForm.teamId = this.selectedServiceTeams[0]?.id ?? null;
+  }
+
+  openEditProjectForm(project: ProjectEntity): void {
+    this.error = '';
+    this.success = '';
+    this.projectFormMode = 'edit';
+    this.editingProjectId = Number(project.id ?? 0);
+    this.showProjectForm = true;
+
+    const startDate = this.toDateInput(project.startDate);
+    const endDate = this.toDateInput(project.endDate);
+    this.projectForm = {
+      name: String(project.name ?? '').trim(),
+      description: String(project.description ?? ''),
+      startDate,
+      endDate,
+      estimatedDuration: Number(project.estimatedDuration ?? this.calculateProjectDuration(startDate, endDate)),
+      projectState: Number(project.projectState ?? ProjectState.todo) as ProjectState,
+      teamId: this.normalizeId((project as any).teamId ?? (project as any).TeamId ?? project.teamId) ?? null,
+    };
+  }
+
+  cancelProjectForm(): void {
+    this.showProjectForm = false;
+    this.projectSubmitting = false;
+    this.editingProjectId = null;
+    this.projectFormMode = 'create';
+    this.resetProjectForm();
+  }
+
+  onProjectDatesChanged(): void {
+    const start = this.projectForm.startDate;
+    const end = this.projectForm.endDate;
+    if (start && end && end < start) {
+      this.projectForm.endDate = start;
+    }
+    this.projectForm.estimatedDuration = this.calculateProjectDuration(this.projectForm.startDate, this.projectForm.endDate);
+  }
+
+  submitProjectForm(): void {
+    const name = this.projectForm.name.trim();
+    const startDate = this.projectForm.startDate;
+    const endDate = this.projectForm.endDate;
+    const teamId = Number(this.projectForm.teamId ?? 0) || undefined;
+
+    if (!name || !startDate || !endDate) {
+      this.error = 'Project name, start date, and end date are required.';
+      return;
+    }
+
+    if (endDate < startDate) {
+      this.error = 'Project end date must be greater than or equal to the start date.';
+      return;
+    }
+
+    if (teamId && !this.selectedServiceTeams.some((team) => Number(team.id) === teamId)) {
+      this.error = 'Selected team does not belong to this service.';
+      return;
+    }
+
+    const payload = {
+      name,
+      description: this.projectForm.description.trim(),
+      startDate: this.parseToLocalDate(startDate),
+      endDate: this.parseToLocalDate(endDate),
+      estimatedDuration: this.calculateProjectDuration(startDate, endDate),
+      projectState: Number(this.projectForm.projectState ?? ProjectState.todo) as ProjectState,
+      serviceId: this.selectedServiceId ?? undefined,
+      teamId,
+      projectManagerId: this.currentResponsibleId ?? 0,
+    };
+
+    this.error = '';
+    this.success = '';
+    this.projectSubmitting = true;
+
+    if (this.projectFormMode === 'edit' && this.editingProjectId) {
+      const updatePayload: UpdateProjectDto = {
+        name: payload.name,
+        description: payload.description,
+        startDate: payload.startDate,
+        endDate: payload.endDate,
+        estimatedDuration: payload.estimatedDuration,
+        projectState: payload.projectState,
+        serviceId: payload.serviceId,
+        teamId: payload.teamId,
+        projectManagerId: payload.projectManagerId,
+      };
+
+      this.projectService.updateProject(this.editingProjectId, updatePayload)
+        .pipe(finalize(() => (this.projectSubmitting = false)))
+        .subscribe({
+          next: () => {
+            this.success = 'Project updated successfully.';
+            this.cancelProjectForm();
+            this.loadProjects();
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.error = 'Unable to update project.';
+          }
+        });
+      return;
+    }
+
+    const createPayload: CreateProjectDto = {
+      name: payload.name,
+      description: payload.description,
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      estimatedDuration: payload.estimatedDuration,
+      projectState: payload.projectState,
+      serviceId: payload.serviceId,
+      teamId: payload.teamId,
+      projectManagerId: payload.projectManagerId,
+    };
+
+    this.projectService.createProject(createPayload)
+      .pipe(finalize(() => (this.projectSubmitting = false)))
+      .subscribe({
+        next: (result) => {
+          this.success = 'Project created successfully.';
+          this.cancelProjectForm();
+          const createdId = Number((result as any)?.id ?? 0);
+          this.loadProjects();
+          if (createdId > 0) {
+            this.selectedProjectId = createdId;
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Unable to create project.';
+        }
+      });
+  }
+
+  deleteProject(project: ProjectEntity): void {
+    const projectId = Number(project.id ?? 0);
+    if (!projectId) return;
+
+    const confirmed = typeof window === 'undefined'
+      ? true
+      : window.confirm(`Delete project "${project.name}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+    this.projectSubmitting = true;
+
+    this.projectService.deleteProject(projectId)
+      .pipe(finalize(() => (this.projectSubmitting = false)))
+      .subscribe({
+        next: () => {
+          if (this.editingProjectId === projectId) {
+            this.cancelProjectForm();
+          }
+          if (this.selectedProjectId === projectId) {
+            this.selectedProjectId = null;
+          }
+          this.success = 'Project deleted successfully.';
+          this.loadProjects();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Unable to delete project.';
+        }
+      });
   }
 
   openAddMembers(): void {
@@ -664,48 +931,250 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
-  openUserStories(): void {
+  openSprints(): void {
     this.error = '';
-    const firstProjectId = this.selectedServiceProjects[0]?.id;
+    const firstProjectId = Number(this.selectedServiceProjects[0]?.id ?? 0);
     if (!firstProjectId) {
-      this.error = 'Add a project to this service to manage user stories.';
+      this.error = 'Add a project to this service to manage sprints.';
       return;
     }
 
-    this.loading = true;
-    this.sprintService.getSprintsByProjectId(firstProjectId)
-      .pipe(
-        timeout(10000),
-        finalize(() => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        })
-      )
-      .subscribe({
-        next: (sprints) => {
-          this.availableSprints = sprints ?? [];
-          if (this.availableSprints.length === 0) {
-            this.error = 'No sprint found. Create a sprint to manage user stories.';
-            this.router.navigate(['/SprintManage', firstProjectId], {
-              queryParams: { source: 'service-manager' }
-            });
-            return;
-          }
+    this.router.navigate(['/SprintManage', firstProjectId], {
+      queryParams: { source: 'service-manager' }
+    });
+  }
 
-          this.userStoryForm = {
-            title: '',
-            description: '',
-            acceptanceCriteria: '',
-            sprintId: this.availableSprints[0].id,
-            storyPoints: 1,
-            priority: 3
-          };
-          this.showUserStoryModal = true;
+  openSprintManager(projectId?: number): void {
+    const numericProjectId = Number(projectId ?? 0);
+    if (!numericProjectId) {
+      this.openSprints();
+      return;
+    }
+
+    this.router.navigate(['/SprintManage', numericProjectId], {
+      queryParams: {
+        serviceId: this.selectedServiceId ?? undefined,
+        source: 'service-manager'
+      }
+    });
+  }
+
+  openCreateSprintForm(projectId?: number): void {
+    if (this.selectedServiceProjects.length === 0) {
+      this.error = 'Add a project to this service before creating a sprint.';
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+    this.sprintFormMode = 'create';
+    this.editingSprintId = null;
+    this.showSprintForm = true;
+    this.resetSprintForm();
+    const targetProjectId = Number(projectId ?? this.selectedProjectId ?? this.selectedServiceProjects[0]?.id ?? 0);
+    this.sprintForm.projectId = targetProjectId > 0 ? targetProjectId : Number(this.selectedServiceProjects[0]?.id ?? 0) || null;
+  }
+
+  openEditSprintForm(sprint: Sprint): void {
+    this.error = '';
+    this.success = '';
+    this.sprintFormMode = 'edit';
+    this.editingSprintId = Number(sprint.id ?? 0);
+    this.showSprintForm = true;
+    const sprintProjectId = Number(sprint.projectId ?? 0);
+    if (sprintProjectId > 0) {
+      this.selectedProjectId = sprintProjectId;
+    }
+
+    const startDate = this.toDateInput(sprint.startDate);
+    const endDate = this.toDateInput(sprint.endDate);
+
+    this.sprintForm = {
+      name: String(sprint.name ?? '').trim(),
+      description: String(sprint.description ?? ''),
+      projectId: Number(sprint.projectId ?? 0) || null,
+      startDate,
+      endDate,
+      estimatedDuration: this.calculateSprintDuration(startDate, endDate),
+      sprintState: Number(sprint.sprintState ?? SprintState.todo) as SprintState,
+    };
+  }
+
+  cancelSprintForm(): void {
+    this.showSprintForm = false;
+    this.sprintSubmitting = false;
+    this.editingSprintId = null;
+    this.sprintFormMode = 'create';
+    this.resetSprintForm();
+  }
+
+  onSprintDatesChanged(): void {
+    const start = this.sprintForm.startDate;
+    const end = this.sprintForm.endDate;
+
+    if (start && end && end < start) {
+      this.sprintForm.endDate = start;
+    }
+
+    this.sprintForm.estimatedDuration = this.calculateSprintDuration(
+      this.sprintForm.startDate,
+      this.sprintForm.endDate,
+    );
+  }
+
+  submitSprintForm(): void {
+    const projectId = Number(this.sprintForm.projectId ?? 0);
+    const name = this.sprintForm.name.trim();
+    const startDate = this.sprintForm.startDate;
+    const endDate = this.sprintForm.endDate;
+
+    if (!projectId || !name || !startDate || !endDate) {
+      this.error = 'Name, project, start date, and end date are required.';
+      return;
+    }
+
+    if (endDate < startDate) {
+      this.error = 'End date must be greater than or equal to start date.';
+      return;
+    }
+
+    const project = this.selectedServiceProjects.find((item) => Number(item.id) === projectId);
+    if (!project) {
+      this.error = 'Selected project does not belong to this service.';
+      return;
+    }
+
+    const minProjectDate = this.toDateInput((project as any).startDate);
+    const maxProjectDate = this.toDateInput((project as any).endDate);
+    if (!this.isDateInRange(startDate, minProjectDate || undefined, maxProjectDate || undefined)
+      || !this.isDateInRange(endDate, minProjectDate || undefined, maxProjectDate || undefined)) {
+      this.error = 'Sprint dates must be within the selected project date range.';
+      return;
+    }
+
+    const estimatedDuration = this.calculateSprintDuration(startDate, endDate);
+    const payload = {
+      name,
+      description: this.sprintForm.description.trim(),
+      estimatedDuration,
+      startDate: this.parseToLocalDate(startDate),
+      endDate: this.parseToLocalDate(endDate),
+      sprintState: Number(this.sprintForm.sprintState ?? SprintState.todo) as SprintState,
+      projectId,
+    };
+
+    this.error = '';
+    this.success = '';
+    this.sprintSubmitting = true;
+
+    if (this.sprintFormMode === 'edit' && this.editingSprintId) {
+      this.sprintService.updateSprint(this.editingSprintId, {
+        id: this.editingSprintId,
+        ...payload,
+      }).pipe(finalize(() => (this.sprintSubmitting = false))).subscribe({
+        next: () => {
+          this.success = 'Sprint updated successfully.';
+          this.cancelSprintForm();
+          this.loadProjects();
+          this.cdr.detectChanges();
         },
         error: () => {
-          this.error = 'Unable to load project sprints.';
+          this.error = 'Unable to update sprint.';
         }
       });
+      return;
+    }
+
+    this.sprintService.createSprint(payload)
+      .pipe(finalize(() => (this.sprintSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.success = 'Sprint created successfully.';
+          this.cancelSprintForm();
+          this.loadProjects();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Unable to create sprint.';
+        }
+      });
+  }
+
+  deleteSprint(sprint: Sprint): void {
+    const sprintId = Number(sprint.id ?? 0);
+    if (!sprintId) {
+      return;
+    }
+
+    const confirmed = typeof window === 'undefined'
+      ? true
+      : window.confirm(`Delete sprint "${sprint.name}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+    this.sprintSubmitting = true;
+
+    this.sprintService.deleteSprint(sprintId)
+      .pipe(finalize(() => (this.sprintSubmitting = false)))
+      .subscribe({
+        next: () => {
+          if (this.editingSprintId === sprintId) {
+            this.cancelSprintForm();
+          }
+          this.success = 'Sprint deleted successfully.';
+          this.loadProjects();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Unable to delete sprint.';
+        }
+      });
+  }
+
+  getSprintStateLabel(state: SprintState): string {
+    switch (state) {
+      case SprintState.todo:
+        return 'To Do';
+      case SprintState.inProgress:
+        return 'In Progress';
+      case SprintState.done:
+        return 'Done';
+      case SprintState.validated:
+        return 'Validated';
+      case SprintState.pending:
+      default:
+        return 'Pending';
+    }
+  }
+
+  getSprintStateClass(state: SprintState): string {
+    if (state === SprintState.done || state === SprintState.validated) return 'state-done';
+    if (state === SprintState.inProgress) return 'state-progress';
+    return 'state-pending';
+  }
+
+  getSprintProjectName(sprint: Sprint): string {
+    const project = this.selectedServiceProjects.find((item) => Number(item.id) === Number(sprint.projectId));
+    return project?.name ?? `Project #${sprint.projectId}`;
+  }
+
+  getSelectedSprintProjectDate(type: 'start' | 'end'): string {
+    const projectId = Number(this.sprintForm.projectId ?? 0);
+    if (!projectId) {
+      return '';
+    }
+
+    const project = this.selectedServiceProjects.find((item) => Number(item.id) === projectId);
+    if (!project) {
+      return '';
+    }
+
+    return type === 'start'
+      ? this.toDateInput((project as any).startDate)
+      : this.toDateInput((project as any).endDate);
   }
 
   closeUserStoryModal(): void {
@@ -1155,6 +1624,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   getProjectProgress(project: ProjectEntity): number {
     const projectId = Number(project.id ?? 0);
     const stories = this.serviceUserStories.filter((story) => Number((story as any)?.projectId ?? 0) === projectId);
+    const projectStoryIds = new Set(stories.map((story) => Number(story.numericId ?? story.id ?? 0)).filter((id) => id > 0));
+    const projectTasks = this.serviceTasks.filter((task) => projectStoryIds.has(Number(task.userStoryId ?? 0)));
+
+    if (projectTasks.length > 0) {
+      const completedTasks = projectTasks.filter((task) => {
+        const state = this.normalizeTaskState(task.status);
+        return state === 'done' || state === 'validated';
+      }).length;
+
+      return Math.round((completedTasks / projectTasks.length) * 100);
+    }
 
     if (stories.length > 0) {
       const completedStories = stories.filter((story) => {
@@ -1171,6 +1651,56 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     if (state === ProjectState.inProgress) return 65;
     if (state === ProjectState.todo) return 30;
     return 10;
+  }
+
+  getProjectTeamLabel(project: ProjectEntity): string {
+    const teamId = this.normalizeId((project as any).teamId ?? (project as any).TeamId ?? project.teamId);
+    if (!teamId) return 'No team assigned';
+
+    const team = this.selectedServiceTeams.find((item) => Number(item.id) === teamId);
+    return team?.name ?? `Team #${teamId}`;
+  }
+
+  getProjectTeamMembers(project: ProjectEntity): TeamUser[] {
+    const teamId = this.normalizeId((project as any).teamId ?? (project as any).TeamId ?? project.teamId);
+    if (!teamId) return [];
+    return this.selectedServiceMembers.filter((member) => Number(member.teamId) === teamId);
+  }
+
+  getProjectSprintCount(project: ProjectEntity): number {
+    const projectId = Number(project.id ?? 0);
+    if (!projectId) return 0;
+    return this.availableSprints.filter((sprint) => Number(sprint.projectId) === projectId).length;
+  }
+
+  getProjectMemberCount(project: ProjectEntity): number {
+    return this.getProjectTeamMembers(project).length;
+  }
+
+  getProjectNameByUserStory(story: ServiceUserStoryRow): string {
+    const projectId = Number((story as any)?.projectId ?? 0);
+    if (!projectId) return '-';
+    const project = this.selectedServiceProjects.find((item) => Number(item.id) === projectId);
+    return project?.name ?? `Project #${projectId}`;
+  }
+
+  getSprintNameByUserStory(story: ServiceUserStoryRow): string {
+    const sprintId = Number(story?.sprintId ?? 0);
+    if (!sprintId) return '-';
+    const sprint = this.availableSprints.find((item) => Number(item.id) === sprintId);
+    return sprint?.name ?? `Sprint #${sprintId}`;
+  }
+
+  getProjectMemberRoleLabel(member: TeamUser): string {
+    if (member.role === 1) {
+      return 'Project Leader';
+    }
+
+    if (member.role === 0) {
+      return 'Employee';
+    }
+
+    return 'Team Member';
   }
 
   getUserStoryStatusLabel(status: UserStoryStateValue | undefined): string {
@@ -1525,7 +2055,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.projectService.getAllProjects().subscribe({
       next: (projects) => {
         this.allProjects = projects ?? [];
-        const projectIds = this.selectedServiceProjects
+        const serviceProjects = this.selectedServiceProjects;
+        if (serviceProjects.length > 0) {
+          const selectedProjectStillExists = serviceProjects.some((project) => Number(project.id) === Number(this.selectedProjectId));
+          if (!selectedProjectStillExists) {
+            this.selectedProjectId = Number(serviceProjects[0].id);
+          }
+        } else {
+          this.selectedProjectId = null;
+        }
+
+        const projectIds = serviceProjects
           .map((project) => Number(project.id ?? 0))
           .filter((id) => id > 0);
 
@@ -1683,34 +2223,6 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return 1;
   }
 
-  private startAutoRefresh(): void {
-    this.stopAutoRefresh();
-    this.autoRefreshSubscription = interval(this.autoRefreshMs).subscribe(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        return;
-      }
-
-      this.loadServices(true);
-
-      if (this.selectedServiceId) {
-        this.loadUsersForSelectedService();
-        this.loadTeams();
-        this.loadProjects();
-      }
-
-      if (this.activeTab === 'settings') {
-        this.loadUserSettings();
-      }
-
-      this.refreshNotifications();
-    });
-  }
-
-  private stopAutoRefresh(): void {
-    this.autoRefreshSubscription?.unsubscribe();
-    this.autoRefreshSubscription = null;
-  }
-
   private initializeNotifications(): void {
     this.notificationCountSubscription?.unsubscribe();
     this.notificationsSubscription?.unsubscribe();
@@ -1866,6 +2378,66 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   private addDays(date: Date, days: number): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+  }
+
+  private resetProjectForm(): void {
+    const defaultStart = this.toIsoDateLocal(new Date());
+    const defaultEnd = this.toIsoDateLocal(this.addDays(new Date(), 29));
+
+    this.projectForm = {
+      name: '',
+      description: '',
+      startDate: defaultStart,
+      endDate: defaultEnd,
+      estimatedDuration: this.calculateProjectDuration(defaultStart, defaultEnd),
+      projectState: ProjectState.todo,
+      teamId: this.selectedServiceTeams[0]?.id ?? null,
+    };
+  }
+
+  private calculateProjectDuration(startDate: string, endDate: string): number {
+    if (!startDate || !endDate) {
+      return 1;
+    }
+
+    const start = this.parseToLocalDate(startDate);
+    const end = this.parseToLocalDate(endDate);
+    const diff = end.getTime() - start.getTime();
+    if (!Number.isFinite(diff) || diff < 0) {
+      return 1;
+    }
+
+    return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1);
+  }
+
+  private resetSprintForm(): void {
+    const defaultStart = this.toIsoDateLocal(new Date());
+    const defaultEnd = this.toIsoDateLocal(this.addDays(new Date(), 13));
+
+    this.sprintForm = {
+      name: '',
+      description: '',
+      projectId: null,
+      startDate: defaultStart,
+      endDate: defaultEnd,
+      estimatedDuration: this.calculateSprintDuration(defaultStart, defaultEnd),
+      sprintState: SprintState.todo,
+    };
+  }
+
+  private calculateSprintDuration(startDate: string, endDate: string): number {
+    if (!startDate || !endDate) {
+      return 1;
+    }
+
+    const start = this.parseToLocalDate(startDate);
+    const end = this.parseToLocalDate(endDate);
+    const diff = end.getTime() - start.getTime();
+    if (!Number.isFinite(diff) || diff < 0) {
+      return 1;
+    }
+
+    return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1);
   }
 
   private toDateInput(value?: Date | string): string {

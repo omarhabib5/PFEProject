@@ -1,19 +1,35 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Projet.Application.Context;
 using Projet.Domain.Command.TaskCRUD;
+using Projet.Domain.Model;
 using Projet.Domain.Querie.Task;
+using Projet.Infrastructure.Service;
 
 namespace Projet.Api.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TaskController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ApplicationDbContext _dbContext;
+        private readonly INotificationService _notificationService;
+        private readonly ILogger<TaskController> _logger;
 
-        public TaskController(IMediator mediator)
+        public TaskController(
+            IMediator mediator,
+            ApplicationDbContext dbContext,
+            INotificationService notificationService,
+            ILogger<TaskController> logger)
         {
             _mediator = mediator;
+            _dbContext = dbContext;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -40,13 +56,16 @@ namespace Projet.Api.Controller
         }
 
         [HttpPost]
+        [Authorize(Roles = "ServiceManager")]
         public async Task<IActionResult> Create([FromBody] CreateTaskCommand command)
         {
             var taskId = await _mediator.Send(command);
+            await _notificationService.NotifyTaskAddedAsync(taskId);
             return CreatedAtAction(nameof(GetById), new { id = taskId }, new { id = taskId });
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ServiceManager,Observer,Employee")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskCommand command)
         {
             if (id != command.Id)
@@ -54,18 +73,58 @@ namespace Projet.Api.Controller
                 return BadRequest(new { message = "ID in URL does not match ID in request body." });
             }
 
+            var existingTask = await _dbContext.Tasks
+                .Include(t => t.UserStory)
+                    .ThenInclude(us => us.Project)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (existingTask == null)
+            {
+                return NotFound(new { message = $"Task with ID {id} not found." });
+            }
+
+            var oldStatus = existingTask.Status;
+            var oldAssignedToId = existingTask.AssignedToId;
+
             try
             {
                 await _mediator.Send(command);
+
+                var isStatusChanged = oldStatus != command.Status;
+                var isNotValidatedStatus = command.Status != State.validated;
+                var shouldNotifyStakeholders = isStatusChanged && isNotValidatedStatus;
+
+                if (shouldNotifyStakeholders)
+                {
+                    var assignedToId = command.AssignedToId ?? oldAssignedToId ?? 0;
+                    var projectManagerId = await _dbContext.UserStories
+                        .Where(us => us.Id == command.UserStoryId)
+                        .Select(us => (int?)us.Project.ProjectManagerId)
+                        .FirstOrDefaultAsync() ?? 0;
+
+                    await _notificationService.NotifyTaskStatusChangeAsync(
+                        taskId: id,
+                        projectManagerId: projectManagerId,
+                        oldStatus: oldStatus.ToString(),
+                        newStatus: command.Status.ToString(),
+                        assignedToId: assignedToId);
+                }
+
                 return NoContent();
             }
             catch (KeyNotFoundException)
             {
                 return NotFound(new { message = $"Task with ID {id} not found." });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update task {TaskId}", id);
+                return StatusCode(500, new { message = "An error occurred while updating task." });
+            }
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ServiceManager")]
         public async Task<IActionResult> Delete(int id)
         {
             try

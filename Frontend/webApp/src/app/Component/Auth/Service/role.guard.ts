@@ -12,7 +12,8 @@ export class RoleGuard {
     [AppRole.Admin]: '/AdminDashboard',
     [AppRole.ProjectManager]: '/ChefProjetDashboard',
     [AppRole.Employee]: '/EmployeeDashboard',
-    [AppRole.ServiceManager]: '/ResponsableServiceDashboard'
+    [AppRole.ServiceManager]: '/ResponsableServiceDashboard',
+    [AppRole.Observer]: '/ObserverDashboard'
   };
 
   getDashboardByRole(role?: string | number | null): string {

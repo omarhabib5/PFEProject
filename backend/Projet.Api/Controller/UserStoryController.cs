@@ -169,6 +169,7 @@ public class UserStoryController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult<int>> Create([FromBody] CreateUserStoryRequest request)
     {
         var command = new CreateUserStoryCommand
@@ -190,6 +191,7 @@ public class UserStoryController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult> Update(int id, [FromBody] UpdateUserStoryRequest request)
     {
         var command = new UpdateUserStoryCommand
@@ -211,6 +213,7 @@ public class UserStoryController : ControllerBase
     }
 
     [HttpPatch("{id:int}/status")]
+    [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult> UpdateStatus(int id, [FromBody] UpdateUserStoryStatusRequest request)
     {
         var command = new UpdateUserStoryStatusCommand
@@ -224,6 +227,7 @@ public class UserStoryController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult> Delete(int id)
     {
         var command = new DeleteUserStoryCommand { Id = id };

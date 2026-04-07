@@ -46,7 +46,7 @@ namespace Projet.Infrastructure.Service
 
             if (!Enum.TryParse<UserRole>(role, true, out var userRole))
             {
-                throw new InvalidOperationException($"Invalid role '{role}'. Valid roles are: Admin, ServiceManager, ProjectManager, Employee");
+                throw new InvalidOperationException($"Invalid role '{role}'. Valid roles are: Admin, ServiceManager, ProjectManager, Employee, Observer");
             }
 
             var user = new User

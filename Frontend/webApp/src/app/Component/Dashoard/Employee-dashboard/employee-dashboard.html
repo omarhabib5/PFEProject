@@ -380,11 +380,25 @@
                         Mark all as read
                     </button>
                 </div>
+                <div class="notif-filter-tabs">
+                    <button
+                        type="button"
+                        [class.active]="notificationViewFilter === 'notifications'"
+                        (click)="setNotificationViewFilter('notifications')">
+                        Notifications ({{ systemNotifications.length }})
+                    </button>
+                    <button
+                        type="button"
+                        [class.active]="notificationViewFilter === 'messages'"
+                        (click)="setNotificationViewFilter('messages')">
+                        Messages ({{ messageNotifications.length }})
+                    </button>
+                </div>
                 <p *ngIf="settingsSuccess" class="success-message">{{ settingsSuccess }}</p>
                 <p *ngIf="error" class="error-message">{{ error }}</p>
             </article>
 
-            <article class="card" *ngFor="let item of apiNotifications">
+            <article class="card" *ngFor="let item of displayedApiNotifications">
                 <div class="notif-line" [ngClass]="mapNotificationLevel(item.type)">
                     <strong>{{ item.title || 'Notification' }}</strong>
                     <small>{{ formatDate(item.createdAt) }}</small>
@@ -444,7 +458,7 @@
                 </div>
             </article>
 
-            <ng-container *ngIf="apiNotifications.length === 0 && notifications.length > 0">
+            <ng-container *ngIf="notificationViewFilter === 'notifications' && apiNotifications.length === 0 && notifications.length > 0">
                 <article class="card" *ngFor="let item of notifications">
                     <div class="notif-line" [ngClass]="item.level">
                         <strong>{{ item.message }}</strong>
@@ -453,8 +467,8 @@
                 </article>
             </ng-container>
 
-            <article class="card" *ngIf="apiNotifications.length === 0 && notifications.length === 0">
-                <div class="empty">No notifications</div>
+            <article class="card" *ngIf="displayedApiNotifications.length === 0 && !(notificationViewFilter === 'notifications' && apiNotifications.length === 0 && notifications.length > 0)">
+                <div class="empty">{{ notificationViewFilter === 'messages' ? 'No messages' : 'No notifications' }}</div>
             </article>
         </section>
 
@@ -462,12 +476,12 @@
             <article class="card">
                 <div class="card-head">
                     <h3>Messaging</h3>
-                    <small>Select a project manager to view the full conversation</small>
+                    <small>Select a project manager or observer to view the full conversation</small>
                 </div>
 
                 <div class="messaging-layout">
                     <aside class="messaging-contacts">
-                        <h4>Project managers</h4>
+                        <h4>Project managers and observers</h4>
                         <div class="contact-list" *ngIf="messagingContacts.length > 0; else noMessagingContacts">
                             <button
                                 type="button"
@@ -478,7 +492,7 @@
                             </button>
                         </div>
                         <ng-template #noMessagingContacts>
-                            <p class="empty">No project manager detected.</p>
+                            <p class="empty">No contact detected.</p>
                         </ng-template>
                     </aside>
 
@@ -512,7 +526,7 @@
                         </div>
 
                         <ng-template #selectMessagingHint>
-                            <div class="empty">Choose a project manager to get started.</div>
+                            <div class="empty">Choose a contact to get started.</div>
                         </ng-template>
 
                         <div class="thread-compose" *ngIf="selectedMessagingUserId">

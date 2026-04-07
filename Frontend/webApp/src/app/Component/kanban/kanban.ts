@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, Input } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   CdkDragDrop,
@@ -22,8 +22,10 @@ import { catchError, forkJoin, of } from 'rxjs';
   styleUrl: './kanban.css'
 })
 
-export class KanbanComponent implements OnInit {
+export class KanbanComponent implements OnInit, OnChanges {
   @Input() employeeMode = false;
+  @Input() projectId: number | null = null;
+  @Input() useRouteProjectContext = true;
   private readonly projectContextStorageKey = 'kanban:lastProjectId';
   private currentUserId: number | null = null;
 
@@ -41,7 +43,7 @@ export class KanbanComponent implements OnInit {
   columns: BoardColumn[] = [
     {
       id: 'pending',
-      title: 'Pending',
+      title: 'Not confirmed',
       tasks: []
     },
     {
@@ -70,17 +72,24 @@ export class KanbanComponent implements OnInit {
   error = '';
   userStoryNameMap: Record<number, string> = {};
   userNameMap: Record<number, string> = {};
-  projectId: number | null = null;
 
   ngOnInit(): void {
     this.currentUserId = this.resolveCurrentUserId();
 
-    const projectIdParam = this.route.snapshot.queryParamMap.get('projectId');
-    this.projectId = this.resolveProjectId(projectIdParam);
+    if (this.useRouteProjectContext && (this.projectId === null || this.projectId === undefined)) {
+      const projectIdParam = this.route.snapshot.queryParamMap.get('projectId');
+      this.projectId = this.resolveProjectId(projectIdParam);
+    }
 
     this.loadUserStories();
     this.loadUsers();
     this.loadTasks();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['projectId'] && !changes['projectId'].firstChange) {
+      this.loadTasks();
+    }
   }
 
   goToProjectDetails(): void {
@@ -116,7 +125,15 @@ export class KanbanComponent implements OnInit {
   }
 
   get connectedIds(): string[] {
-    return this.columns.map((column) => column.id);
+    return this.boardColumns.map((column) => column.id);
+  }
+
+  get boardColumns(): BoardColumn[] {
+    if (!this.employeeMode) {
+      return this.columns;
+    }
+
+    return this.columns.filter((column) => ['todo', 'in-progress', 'done'].includes(column.id));
   }
 
   addTask(column: BoardColumn): void {
@@ -129,6 +146,12 @@ export class KanbanComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<TaskDto[]>, targetColumn: BoardColumn): void {
+    if (this.employeeMode && !['todo', 'in-progress', 'done'].includes(targetColumn.id)) {
+      this.error = 'Employees can only move tasks between To Do, In Progress, and Done.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
@@ -141,12 +164,6 @@ export class KanbanComponent implements OnInit {
 
     if (this.employeeMode && !this.isCurrentUserTask(movedTask)) {
       this.error = 'You can only modify your own tasks.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    if (this.employeeMode && this.normalizeTaskStatus(this.columnIdToStatus(targetColumn.id)) === 'validated') {
-      this.error = 'You cannot move a task to the validated column.';
       this.cdr.detectChanges();
       return;
     }
@@ -262,7 +279,11 @@ export class KanbanComponent implements OnInit {
 
     visibleTasks.forEach((task) => {
       const taskStatus = this.normalizeTaskStatus(task.status);
-      const column = this.columns.find((item) => this.columnIdToStatus(item.id) === taskStatus);
+      const displayStatus = this.employeeMode
+        ? this.mapEmployeeDisplayStatus(taskStatus)
+        : taskStatus;
+
+      const column = this.boardColumns.find((item) => this.columnIdToStatus(item.id) === displayStatus);
       if (column) {
         column.tasks.push(task);
         this.cdr.detectChanges();
@@ -338,6 +359,18 @@ export class KanbanComponent implements OnInit {
     return status;
   }
 
+  private mapEmployeeDisplayStatus(status: TaskState): TaskState {
+    if (status === 'pending') {
+      return 'todo';
+    }
+
+    if (status === 'validated') {
+      return 'done';
+    }
+
+    return status;
+  }
+
   private toDateInput(value?: string): string {
     if (!value) {
       return new Date().toISOString().slice(0, 10);
@@ -347,6 +380,10 @@ export class KanbanComponent implements OnInit {
   }
 
   private resolveProjectId(projectIdParam: string | null): number | null {
+    if (this.projectId !== null && this.projectId !== undefined && Number.isFinite(Number(this.projectId)) && Number(this.projectId) > 0) {
+      return Number(this.projectId);
+    }
+
     const fromQuery = Number(projectIdParam);
     if (projectIdParam && Number.isFinite(fromQuery) && fromQuery > 0) {
       localStorage.setItem(this.projectContextStorageKey, String(fromQuery));

@@ -1,7 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command.Sprint;
+using Projet.Domain.Model;
+using Projet.Domain.Querie;
 using Projet.Domain.Querie.Sprint;
+using Projet.Domain.Querie.User;
+using Projet.Infrastructure.Service;
+using System.Security.Claims;
 
 namespace Projet.Api.Controller
 {
@@ -10,10 +15,12 @@ namespace Projet.Api.Controller
     public class SprintController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly INotificationService _notificationService;
 
-        public SprintController(IMediator mediator)
+        public SprintController(IMediator mediator, INotificationService notificationService)
         {
             _mediator = mediator;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -58,6 +65,28 @@ namespace Projet.Api.Controller
             try
             {
                 var sprintId = await _mediator.Send(command);
+
+                try
+                {
+                    var project = await _mediator.Send(new GetProjectByIdQuery(command.ProjectId));
+                    var users = await _mediator.Send(new GetAllUsersQuery());
+                    var serviceManagerId = users.FirstOrDefault(u => u.role == UserRole.ServiceManager)?.Id;
+                    var adminUserId = users.FirstOrDefault(u => u.role == UserRole.Admin)?.Id;
+                    var creatorClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+                    var createdByUserId = int.TryParse(creatorClaim, out var parsedCreatorId) ? parsedCreatorId : (int?)null;
+
+                    await _notificationService.NotifySprintAddedAsync(
+                        sprintId: sprintId,
+                        projectManagerId: project.ProjectManagerId,
+                        serviceManagerId: serviceManagerId,
+                        adminUserId: adminUserId,
+                        createdByUserId: createdByUserId);
+                }
+                catch
+                {
+                    // Notification failure should not block sprint creation.
+                }
+
                 return CreatedAtAction(nameof(GetById), new { id = sprintId }, new { message = "Sprint created", id = sprintId });
             }
             catch (Exception ex)

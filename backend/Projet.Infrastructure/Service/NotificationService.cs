@@ -24,10 +24,15 @@ namespace Projet.Infrastructure.Service
         System.Threading.Tasks.Task<Notification> NotifyTaskStatusChangeAsync(int taskId, int projectManagerId, 
             string oldStatus, string newStatus, int assignedToId);
 
+        System.Threading.Tasks.Task<Notification> NotifyTaskAddedAsync(int taskId);
+
         System.Threading.Tasks.Task<Notification> NotifyUserStoryAddedAsync(int userStoryId, int projectManagerId, 
             int assignedToId);
 
         System.Threading.Tasks.Task<Notification> NotifyProjectAddedAsync(int projectId, int projectManagerId,
+            int? serviceManagerId = null, int? adminUserId = null, int? createdByUserId = null);
+
+        System.Threading.Tasks.Task<Notification> NotifySprintAddedAsync(int sprintId, int projectManagerId,
             int? serviceManagerId = null, int? adminUserId = null, int? createdByUserId = null);
 
         System.Threading.Tasks.Task<Notification> NotifyUserRoleChangedAsync(int changedUserId, int changedByUserId, 
@@ -112,22 +117,122 @@ namespace Projet.Infrastructure.Service
                 throw new InvalidOperationException("Tâche non trouvée");
 
             var title = "Changement de Statut de Tâche";
-            var message = $"La tâche '{task.Title}' a changé de statut: {oldStatus} → {newStatus}";
             var link = $"/tasks/{taskId}";
 
-            var notification = await CreateNotificationAsync(
-                userId: projectManagerId,
-                title: title,
-                message: message,
-                type: NotificationType.TaskStatusChanged,
-                category: NotificationCategory.TaskUpdate,
-                link: link,
-                relatedTaskId: taskId,
-                relatedUserId: assignedToId,
-                oldValue: oldStatus,
-                newValue: newStatus);
+            Notification? employeeNotification = null;
+            if (assignedToId > 0)
+            {
+                var employeeMessage = newStatus.Equals(nameof(State.pending), StringComparison.OrdinalIgnoreCase)
+                    ? $"Votre tâche '{task.Title}' est marquée comme not confirmed."
+                    : newStatus.Equals(nameof(State.validated), StringComparison.OrdinalIgnoreCase)
+                        ? $"Votre tâche '{task.Title}' a été validée."
+                        : newStatus.Equals(nameof(State.done), StringComparison.OrdinalIgnoreCase)
+                            ? $"Votre tâche '{task.Title}' est marquée comme terminée."
+                            : $"La tâche '{task.Title}' a changé de statut: {oldStatus} → {newStatus}";
 
-            return notification;
+                employeeNotification = await CreateNotificationAsync(
+                    userId: assignedToId,
+                    title: title,
+                    message: employeeMessage,
+                    type: NotificationType.TaskStatusChanged,
+                    category: NotificationCategory.TaskUpdate,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedUserId: projectManagerId > 0 ? projectManagerId : null,
+                    oldValue: oldStatus,
+                    newValue: newStatus);
+            }
+
+            Notification? pmNotification = null;
+            if (projectManagerId > 0 && projectManagerId != assignedToId)
+            {
+                var pmMessage = $"La tâche '{task.Title}' a changé de statut: {oldStatus} → {newStatus}";
+
+                pmNotification = await CreateNotificationAsync(
+                    userId: projectManagerId,
+                    title: title,
+                    message: pmMessage,
+                    type: NotificationType.TaskStatusChanged,
+                    category: NotificationCategory.TaskUpdate,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedUserId: assignedToId > 0 ? assignedToId : null,
+                    oldValue: oldStatus,
+                    newValue: newStatus);
+            }
+
+            return employeeNotification ?? pmNotification
+                ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification de statut de tâche");
+        }
+
+        public async System.Threading.Tasks.Task<Notification> NotifyTaskAddedAsync(int taskId)
+        {
+            var task = await _context.Set<DomainTask>()
+                .Include(t => t.UserStory)
+                    .ThenInclude(us => us.Project)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                throw new InvalidOperationException("Tâche non trouvée");
+            }
+
+            var title = "Nouvelle Tâche Assignée";
+            var link = $"/tasks/{taskId}";
+            var message = $"Une nouvelle tâche '{task.Title}' a été ajoutée.";
+
+            var recipients = new HashSet<int>();
+
+            if (task.AssignedToId.HasValue && task.AssignedToId.Value > 0)
+            {
+                recipients.Add(task.AssignedToId.Value);
+            }
+
+            var projectManagerId = task.UserStory?.Project?.ProjectManagerId ?? 0;
+            if (projectManagerId > 0)
+            {
+                recipients.Add(projectManagerId);
+            }
+
+            var observerIds = await _context.Set<User>()
+                .Where(user => user.role == UserRole.Observer)
+                .Select(user => user.Id)
+                .ToListAsync();
+
+            foreach (var observerId in observerIds)
+            {
+                if (observerId > 0)
+                {
+                    recipients.Add(observerId);
+                }
+            }
+
+            Notification? firstNotification = null;
+            foreach (var recipientId in recipients)
+            {
+                var recipientMessage = recipientId == task.AssignedToId
+                    ? $"Une nouvelle tâche '{task.Title}' vous a été assignée."
+                    : recipientId == projectManagerId
+                        ? $"Une nouvelle tâche '{task.Title}' a été ajoutée au projet."
+                        : $"Une nouvelle tâche '{task.Title}' a été ajoutée au projet '{task.UserStory?.Project?.name ?? "Projet"}'.";
+
+                var notification = await CreateNotificationAsync(
+                    userId: recipientId,
+                    title: title,
+                    message: recipientMessage,
+                    type: NotificationType.Info,
+                    category: NotificationCategory.TaskUpdate,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedProjectId: task.UserStory?.ProjectId,
+                    relatedUserStoryId: task.UserStoryId,
+                    relatedUserId: task.AssignedToId,
+                    newValue: task.Status.ToString());
+
+                firstNotification ??= notification;
+            }
+
+            return firstNotification ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification de création de tâche");
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyUserStoryAddedAsync(int userStoryId, int projectManagerId,
@@ -210,6 +315,68 @@ namespace Projet.Infrastructure.Service
             return pmNotification;
         }
 
+        public async System.Threading.Tasks.Task<Notification> NotifySprintAddedAsync(int sprintId, int projectManagerId,
+            int? serviceManagerId = null, int? adminUserId = null, int? createdByUserId = null)
+        {
+            var sprint = await _context.Set<Sprint>()
+                .Include(s => s.Project)
+                .FirstOrDefaultAsync(s => s.Id == sprintId);
+
+            if (sprint == null)
+                throw new InvalidOperationException("Sprint non trouvé");
+
+            var projectName = sprint.Project?.name ?? $"Projet #{sprint.ProjectId}";
+            var link = $"/sprints/{sprintId}";
+            var message = $"Un nouveau sprint '{sprint.Name}' a été créé pour le projet '{projectName}'.";
+
+            if (createdByUserId.HasValue)
+            {
+                var creator = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == createdByUserId.Value);
+                if (creator != null)
+                {
+                    message = $"Un nouveau sprint '{sprint.Name}' a été créé pour le projet '{projectName}' par {creator.FirstName} {creator.LastName} ({creator.role}).";
+                }
+            }
+
+            var pmNotification = await CreateNotificationAsync(
+                userId: projectManagerId,
+                title: "Nouveau Sprint Créé",
+                message: message,
+                type: NotificationType.ProjectAdded,
+                category: NotificationCategory.ProjectUpdate,
+                link: link,
+                relatedProjectId: sprint.ProjectId,
+                newValue: sprint.Name);
+
+            if (serviceManagerId.HasValue && serviceManagerId.Value != projectManagerId)
+            {
+                await CreateNotificationAsync(
+                    userId: serviceManagerId.Value,
+                    title: "Nouveau Sprint dans le Service",
+                    message: message,
+                    type: NotificationType.ProjectAdded,
+                    category: NotificationCategory.ProjectUpdate,
+                    link: link,
+                    relatedProjectId: sprint.ProjectId,
+                    newValue: sprint.Name);
+            }
+
+            if (adminUserId.HasValue && adminUserId.Value != projectManagerId && adminUserId.Value != serviceManagerId)
+            {
+                await CreateNotificationAsync(
+                    userId: adminUserId.Value,
+                    title: "Nouveau Sprint Créé",
+                    message: message,
+                    type: NotificationType.ProjectAdded,
+                    category: NotificationCategory.ProjectUpdate,
+                    link: link,
+                    relatedProjectId: sprint.ProjectId,
+                    newValue: sprint.Name);
+            }
+
+            return pmNotification;
+        }
+
         public async System.Threading.Tasks.Task<Notification> NotifyUserRoleChangedAsync(int changedUserId, int changedByUserId,
             string oldRole, string newRole)
         {
@@ -253,21 +420,56 @@ namespace Projet.Infrastructure.Service
             var assignedUser = assignedToId > 0
                 ? await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == assignedToId)
                 : null;
-            var pmMessage = $"La tâche '{task.Title}' assignée à {assignedUser?.FirstName ?? "l'utilisateur"} " +
-                            (urgencyLevel == "OVERDUE" ? "a dépassé sa date limite!" : "approche de sa date limite!");
 
-            var pmNotification = await CreateNotificationAsync(
-                userId: projectManagerId,
-                title: title,
-                message: pmMessage,
-                type: notificationType,
-                category: NotificationCategory.Deadline,
-                link: link,
-                relatedTaskId: taskId,
-                relatedUserId: assignedToId > 0 ? assignedToId : null,
-                newValue: urgencyLevel);
+            var recipients = new HashSet<int>();
+            if (assignedToId > 0)
+            {
+                recipients.Add(assignedToId);
+            }
 
-            return pmNotification;
+            if (projectManagerId > 0)
+            {
+                recipients.Add(projectManagerId);
+            }
+
+            var observerIds = await _context.Set<User>()
+                .Where(user => user.role == UserRole.Observer)
+                .Select(user => user.Id)
+                .ToListAsync();
+
+            foreach (var observerId in observerIds)
+            {
+                if (observerId > 0)
+                {
+                    recipients.Add(observerId);
+                }
+            }
+
+            Notification? firstNotification = null;
+            foreach (var recipientId in recipients)
+            {
+                var recipientMessage = recipientId == assignedToId
+                    ? message
+                    : recipientId == projectManagerId
+                        ? $"La tâche '{task.Title}' assignée à {assignedUser?.FirstName ?? "l'utilisateur"} " +
+                          (urgencyLevel == "OVERDUE" ? "a dépassé sa date limite!" : "approche de sa date limite!")
+                        : $"La tâche '{task.Title}' du projet est { (urgencyLevel == "OVERDUE" ? "en retard" : "proche de sa date limite") }.";
+
+                var notification = await CreateNotificationAsync(
+                    userId: recipientId,
+                    title: title,
+                    message: recipientMessage,
+                    type: notificationType,
+                    category: NotificationCategory.Deadline,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedUserId: assignedToId > 0 ? assignedToId : null,
+                    newValue: urgencyLevel);
+
+                firstNotification ??= notification;
+            }
+
+            return firstNotification ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification d'échéance");
         }
 
         public async System.Threading.Tasks.Task SendUnreadNotificationEmailsAsync(int daysOld = 1)

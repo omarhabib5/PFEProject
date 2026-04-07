@@ -146,7 +146,8 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
     { label: 'Admin', value: 0 },
     { label: 'Team Manager', value: 1 },
     { label: 'Project Manager', value: 2 },
-    { label: 'Employee', value: 3 }
+    { label: 'Employee', value: 3 },
+    { label: 'Observer', value: 4 }
   ];
   newUser: CreateEmployeeRequest = {
     firstName: '',
@@ -830,6 +831,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     if (normalized === 'admin') return 0;
     if (normalized === 'servicemanager' || normalized === 'service manager') return 1;
     if (normalized === 'projectmanager' || normalized === 'project manager') return 2;
+    if (normalized === 'observer' || normalized === 'observateur') return 4;
     return 3;
   }
 

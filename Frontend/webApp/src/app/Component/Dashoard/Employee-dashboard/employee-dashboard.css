@@ -598,6 +598,33 @@
 	margin-bottom: 8px;
 }
 
+.notif-filter-tabs {
+	display: inline-flex;
+	gap: 6px;
+	padding: 6px;
+	margin: 0 0 10px;
+	border-radius: 10px;
+	border: 1px solid var(--border);
+	background: #f8fbff;
+}
+
+.notif-filter-tabs button {
+	border: 1px solid transparent;
+	border-radius: 8px;
+	padding: 0.35rem 0.7rem;
+	background: transparent;
+	color: #334155;
+	font-size: 0.78rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.notif-filter-tabs button.active {
+	color: #1d4ed8;
+	border-color: #bfdbfe;
+	background: #dbeafe;
+}
+
 .empty {
 	color: #8aa0ba;
 	text-align: center;

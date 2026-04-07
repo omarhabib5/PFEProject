@@ -20,7 +20,7 @@ import {
   TaskState,
   UpdateTaskRequest,
 } from '../../Page/Task/Service/TaskService';
-import { UserStoryDto } from '../../Page/UserStory/Models/userstory.model';
+import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserApiService, UserDto } from '../../Page/Team/Service/UserApiService';
 import { TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
@@ -60,6 +60,15 @@ interface ChangePasswordFormModel {
   currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
+}
+
+interface UserStoryFormModel {
+  title: string;
+  description: string;
+  acceptanceCriteria: string;
+  storyPoints: number;
+  priority: number;
+  sprintId: number | null;
 }
 
 type CalendarEventType = 'task';
@@ -122,7 +131,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   private cdr=inject(ChangeDetectorRef);
 
   activeSection: DashboardSection = 'projects';
-  activeProjectTab: ProjectTab = 'tasks';
+  activeProjectTab: ProjectTab = 'userStories';
 
   loading = false;
   sprintSaving = false;
@@ -163,6 +172,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   showTaskForm = false;
   taskEditId: number | null = null;
   taskForm: TaskFormModel = this.getEmptyTaskForm();
+  showUserStoryForm = false;
+  userStorySaving = false;
+  userStoryFormMode: 'create' | 'edit' = 'create';
+  editingUserStoryId: number | null = null;
+  userStoryForm: UserStoryFormModel = this.getEmptyUserStoryForm();
   passwordForm: ChangePasswordFormModel = this.getEmptyPasswordForm();
 
   sprintStateOptions = [
@@ -485,6 +499,215 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.clearMessages();
   }
 
+  openUserStoryManager(sprintId?: number): void {
+    const targetSprintId = Number(sprintId ?? this.selectedProjectSprints[0]?.id ?? 0);
+    if (!targetSprintId) {
+      this.error = 'No sprint available for user story management.';
+      return;
+    }
+
+    void this.router.navigate(['/userstory/manage', targetSprintId]);
+  }
+
+  openCreateUserStory(): void {
+    if (!this.currentProject) {
+      this.error = 'Select a project first.';
+      return;
+    }
+
+    const defaultSprintId = Number(this.selectedProjectSprints[0]?.id ?? 0);
+    this.userStoryForm = this.getEmptyUserStoryForm();
+    this.userStoryForm.sprintId = defaultSprintId > 0 ? defaultSprintId : null;
+    this.userStoryFormMode = 'create';
+    this.editingUserStoryId = null;
+    this.showUserStoryForm = true;
+    this.clearMessages();
+  }
+
+  cancelUserStoryForm(): void {
+    this.showUserStoryForm = false;
+    this.userStoryFormMode = 'create';
+    this.editingUserStoryId = null;
+    this.userStoryForm = this.getEmptyUserStoryForm();
+  }
+
+  get isEditingUserStory(): boolean {
+    return this.userStoryFormMode === 'edit' && this.editingUserStoryId !== null;
+  }
+
+  submitUserStory(): void {
+    if (this.userStorySaving) {
+      return;
+    }
+
+    if (!this.currentProject) {
+      this.error = 'Select a project first.';
+      return;
+    }
+
+    const title = this.userStoryForm.title.trim();
+    if (!title) {
+      this.error = 'User story title is required.';
+      return;
+    }
+
+    const sprintId = Number(this.userStoryForm.sprintId ?? 0);
+    if (!sprintId || !this.selectedProjectSprints.some((sprint) => Number(sprint.id) === sprintId)) {
+      this.error = 'Select a sprint from the selected project.';
+      return;
+    }
+
+    const storyPoints = Number(this.userStoryForm.storyPoints);
+    const priority = Number(this.userStoryForm.priority);
+    if (!Number.isFinite(storyPoints) || storyPoints <= 0 || !Number.isFinite(priority) || priority < 1 || priority > 5) {
+      this.error = 'Story points and priority are invalid.';
+      return;
+    }
+
+    const selectedSprint = this.selectedProjectSprints.find((sprint) => Number(sprint.id) === sprintId);
+    const startDate = selectedSprint?.startDate ? new Date(selectedSprint.startDate) : new Date();
+    const endDate = selectedSprint?.endDate ? new Date(selectedSprint.endDate) : new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+
+    const payload: CreateUserStoryRequest = {
+      name: title,
+      title,
+      description: this.userStoryForm.description.trim() || title,
+      acceptanceCriteria: this.userStoryForm.acceptanceCriteria.trim(),
+      storyPoints: Math.round(storyPoints),
+      priority: Math.round(priority),
+      status: UserStoryStatus.TODO,
+      startDate,
+      endDate,
+      estimatedDuration: Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000))),
+      userStoryState: 1,
+      projectId: Number(this.currentProject.id ?? 0),
+      sprintId,
+    };
+
+    this.userStorySaving = true;
+    this.clearMessages();
+
+    if (this.isEditingUserStory && this.editingUserStoryId) {
+      const storyToEdit = this.userStories.find((item) => Number((item as any)?.id ?? 0) === this.editingUserStoryId);
+      const selectedStoryId = this.editingUserStoryId;
+      const updatePayload: UpdateUserStoryRequest = {
+        id: selectedStoryId,
+        name: title,
+        title,
+        description: payload.description,
+        acceptanceCriteria: payload.acceptanceCriteria,
+        storyPoints: payload.storyPoints,
+        priority: payload.priority,
+        startDate: storyToEdit?.startDate ? new Date(storyToEdit.startDate) : payload.startDate,
+        endDate: storyToEdit?.endDate ? new Date(storyToEdit.endDate) : payload.endDate,
+        estimatedDuration: Number((storyToEdit as any)?.estimatedDuration ?? payload.estimatedDuration ?? 1),
+        userStoryState: Number((storyToEdit as any)?.userStoryState ?? payload.userStoryState ?? 1),
+        projectId: Number((storyToEdit as any)?.projectId ?? payload.projectId),
+        sprintId,
+        assignedToId: (storyToEdit as any)?.assignedToId,
+        status: (storyToEdit as any)?.status ?? payload.status,
+      };
+
+      this.userStoryService.update(selectedStoryId, updatePayload).subscribe({
+        next: () => {
+          this.success = 'User story updated successfully.';
+          this.userStorySaving = false;
+          this.cancelUserStoryForm();
+          this.loadDashboardData();
+        },
+        error: (err) => {
+          this.error = err?.error?.message || 'Error while updating user story.';
+          this.userStorySaving = false;
+        },
+      });
+      return;
+    }
+
+    this.userStoryService.create(payload).subscribe({
+      next: () => {
+        this.success = 'User story created successfully.';
+        this.userStorySaving = false;
+        this.cancelUserStoryForm();
+        this.loadDashboardData();
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'Error while creating user story.';
+        this.userStorySaving = false;
+      },
+    });
+  }
+
+  editUserStory(story: UserStoryDto): void {
+    const storyId = Number((story as any)?.id ?? 0);
+    if (!storyId) {
+      this.error = 'Invalid user story.';
+      return;
+    }
+
+    this.userStoryFormMode = 'edit';
+    this.editingUserStoryId = storyId;
+    this.userStoryForm = {
+      title: String(story.title ?? story.name ?? '').trim(),
+      description: String(story.description ?? '').trim(),
+      acceptanceCriteria: String((story as any)?.acceptanceCriteria ?? '').trim(),
+      storyPoints: Number((story as any)?.storyPoints ?? 1),
+      priority: Number((story as any)?.priority ?? 3),
+      sprintId: Number((story as any)?.sprintId ?? 0) || null,
+    };
+    this.showUserStoryForm = true;
+    this.clearMessages();
+  }
+
+  deleteUserStory(story: UserStoryDto): void {
+    const storyId = Number((story as any)?.id ?? 0);
+    if (!storyId) {
+      this.error = 'Invalid user story.';
+      return;
+    }
+
+    if (!this.canDeleteUserStory(story)) {
+      this.error = 'You can delete only a pending/to-do user story.';
+      return;
+    }
+
+    if (!confirm('Delete this user story?')) {
+      return;
+    }
+
+    this.clearMessages();
+    this.userStoryService.delete(storyId).subscribe({
+      next: () => {
+        this.success = 'User story deleted successfully.';
+        this.loadDashboardData();
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'Error while deleting user story.';
+      },
+    });
+  }
+
+  canDeleteUserStory(story: UserStoryDto): boolean {
+    const normalized = this.normalizeUserStoryStatus(story);
+    return normalized === 'pending' || normalized === 'todo';
+  }
+
+  private normalizeUserStoryStatus(story: UserStoryDto): 'pending' | 'todo' | 'inProgress' | 'done' | 'validated' {
+    const stateValue = Number((story as any)?.userStoryState ?? -1);
+    const statusRaw = String((story as any)?.status ?? '').trim().toLowerCase();
+
+    if (stateValue === 0) return 'pending';
+    if (stateValue === 1) return 'todo';
+    if (stateValue === 2) return 'inProgress';
+    if (stateValue === 3) return 'done';
+    if (stateValue === 4) return 'validated';
+
+    if (statusRaw === 'pending') return 'pending';
+    if (statusRaw === 'to do' || statusRaw === 'todo') return 'todo';
+    if (statusRaw === 'in progress' || statusRaw === 'inprogress') return 'inProgress';
+    if (statusRaw === 'validated') return 'validated';
+    return 'done';
+  }
+
   selectProject(projectId: number): void {
     if (!this.scopedProjectIds.has(projectId)) {
       return;
@@ -494,6 +717,9 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.selectedSprintFilter = 'all';
     this.showSprintForm = false;
     this.showTaskForm = false;
+    this.showUserStoryForm = false;
+    this.userStoryFormMode = 'create';
+    this.editingUserStoryId = null;
     this.sprintEditId = null;
     this.taskEditId = null;
     this.sprintForm = this.getEmptySprintForm();
@@ -506,6 +732,9 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     this.selectedSprintFilter = 'all';
     this.showSprintForm = false;
     this.showTaskForm = false;
+    this.showUserStoryForm = false;
+    this.userStoryFormMode = 'create';
+    this.editingUserStoryId = null;
     this.sprintEditId = null;
     this.taskEditId = null;
     this.sprintForm = this.getEmptySprintForm();
@@ -1624,6 +1853,17 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       userStoryId: 0,
       sprintId: null,
       assignedToUserId: null,
+    };
+  }
+
+  private getEmptyUserStoryForm(): UserStoryFormModel {
+    return {
+      title: '',
+      description: '',
+      acceptanceCriteria: '',
+      storyPoints: 1,
+      priority: 3,
+      sprintId: null,
     };
   }
 

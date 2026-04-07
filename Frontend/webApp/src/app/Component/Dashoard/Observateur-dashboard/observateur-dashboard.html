@@ -1,0 +1,490 @@
+<div class="observer-layout">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <img src="/pic12420.gif" alt="" class="logo-img-brand">
+      </div>
+
+      <button class="menu-item" [class.active]="activeTab === 'projects'" (click)="setTab('projects')">
+        <span class="menu-icon">PR</span> Projects
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">
+        <span class="menu-icon">SP</span> Sprints
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'stories'" (click)="setTab('stories')">
+        <span class="menu-icon">US</span> User stories
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'notifications'" (click)="setTab('notifications')">
+        <span class="menu-icon">NT</span> Notifications
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">
+        <span class="menu-icon">CL</span> Calendar
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'kanban'" (click)="setTab('kanban')">
+        <span class="menu-icon">KB</span> Kanban
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'messagerie'" (click)="setTab('messagerie')">
+        <span class="menu-icon">MS</span> Messaging
+      </button>
+      <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="setTab('settings')">
+        <span class="menu-icon">ST</span> Settings
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="menu-item logout" (click)="logout()"><span class="menu-icon">OUT</span> Sign out</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div>
+        <h2>Observer dashboard</h2>
+        <p>{{ (today | date:'fullDate') }}</p>
+      </div>
+
+      <div class="topbar-right">
+        <div class="filters">
+          <label for="projectFilter">Project</label>
+          <select
+            id="projectFilter"
+            [ngModel]="selectedProjectId"
+            (ngModelChange)="setProjectFilter($event === 'all' ? 'all' : +$event)">
+            <option value="all">All projects</option>
+            <option *ngFor="let project of projects" [value]="project.id">{{ project.name }}</option>
+          </select>
+          <button type="button" class="refresh-btn" (click)="loadDashboardData()">Refresh</button>
+        </div>
+        <div class="profile">
+          <strong>{{ userName }}</strong>
+          <small>Observer</small>
+        </div>
+        <div class="avatar">{{ userName.charAt(0) || 'O' }}</div>
+      </div>
+    </header>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="settingsSuccess" class="success">{{ settingsSuccess }}</div>
+    <section *ngIf="loading" class="loading">Loading...</section>
+
+    <section *ngIf="!loading" class="hero">
+      <div class="hero-main">
+        <h3>Read and validate delivery flow</h3>
+        <p>Consult projects, sprints and user stories, then validate tasks in kanban.</p>
+      </div>
+      <div class="hero-stats">
+        <article><strong>{{ filteredProjects.length }}</strong><span>Projects</span></article>
+        <article><strong>{{ filteredSprints.length }}</strong><span>Sprints</span></article>
+        <article><strong>{{ filteredStories.length }}</strong><span>User stories</span></article>
+      </div>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'projects'" class="card page-section-card">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Portfolio</p>
+          <h3>Projects overview</h3>
+          <p>Detailed view of scope, progress and ownership for each project.</p>
+        </div>
+        <div class="section-summary">
+          <span>{{ filteredProjects.length }} projects</span>
+          <span>{{ filteredSprints.length }} sprints</span>
+          <span>{{ filteredStories.length }} user stories</span>
+        </div>
+      </div>
+
+      <article class="detail-feature" *ngIf="selectedProjectCard as selectedProject">
+        <div>
+          <p class="feature-label">Selected project</p>
+          <h4>{{ selectedProject.name }}</h4>
+          <p>{{ selectedProject.description || 'No description available.' }}</p>
+        </div>
+        <div class="feature-metrics">
+          <div><strong>{{ getProjectStateLabel(selectedProject.projectState) }}</strong><span>Status</span></div>
+          <div><strong>{{ getProjectProgressPercent(toNumber(selectedProject.id)) }}%</strong><span>Progress</span></div>
+          <div><strong>{{ getProjectTaskCount(toNumber(selectedProject.id)) }}</strong><span>Tasks</span></div>
+          <div><strong>{{ getProjectSprintCount(toNumber(selectedProject.id)) }}</strong><span>Sprints</span></div>
+        </div>
+      </article>
+
+      <div class="detail-grid" *ngIf="filteredProjects.length > 0; else emptyProjects">
+        <article class="detail-card" *ngFor="let project of filteredProjects">
+          <div class="detail-card-head">
+            <div>
+              <p class="detail-card-title">{{ project.name }}</p>
+              <p class="detail-card-subtitle">{{ project.description || 'No description available.' }}</p>
+            </div>
+            <span class="state-pill">{{ getProjectStateLabel(project.projectState) }}</span>
+          </div>
+
+          <div class="detail-meta-row">
+            <span>{{ getProjectDateRange(project) }}</span>
+            <span>{{ project.estimatedDuration }} days</span>
+          </div>
+
+          <div class="detail-stats">
+            <div>
+              <strong>{{ getProjectProgressPercent(toNumber(project.id)) }}%</strong>
+              <span>Progress</span>
+            </div>
+            <div>
+              <strong>{{ getProjectTaskCount(toNumber(project.id)) }}</strong>
+              <span>Tasks</span>
+            </div>
+            <div>
+              <strong>{{ getProjectSprintCount(toNumber(project.id)) }}</strong>
+              <span>Sprints</span>
+            </div>
+            <div>
+              <strong>{{ getProjectStoryCount(toNumber(project.id)) }}</strong>
+              <span>User stories</span>
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProjectProgressPercent(toNumber(project.id))"></div>
+          </div>
+
+          <div class="chip-row">
+            <span>Manager: {{ getProjectManagerName(project) }}</span>
+            <span>Team: {{ getProjectTeamName(project) }}</span>
+            <span>{{ getProjectSummaryLabel(project) }}</span>
+          </div>
+        </article>
+      </div>
+      <ng-template #emptyProjects><p class="empty">No projects available.</p></ng-template>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'sprints'" class="card page-section-card">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Planning</p>
+          <h3>Sprints overview</h3>
+          <p>Track sprint windows, progress and what each sprint contains.</p>
+        </div>
+        <div class="section-summary">
+          <span>{{ filteredSprints.length }} sprints</span>
+          <span>{{ filteredTasks.length }} tasks</span>
+        </div>
+      </div>
+
+      <div class="detail-grid" *ngIf="filteredSprints.length > 0; else emptySprints">
+        <article class="detail-card" *ngFor="let sprint of filteredSprints">
+          <div class="detail-card-head">
+            <div>
+              <p class="detail-card-title">{{ sprint.name }}</p>
+              <p class="detail-card-subtitle">{{ getProjectName(sprint.projectId) }}</p>
+            </div>
+            <span class="state-pill state-pill--soft">{{ getSprintStateLabel(sprint.sprintState) }}</span>
+          </div>
+
+          <div class="detail-meta-row">
+            <span>{{ getSprintDateRange(sprint) }}</span>
+            <span>{{ sprint.estimatedDuration }} days</span>
+          </div>
+
+          <div class="detail-stats">
+            <div>
+              <strong>{{ getSprintProgressPercent(toNumber(sprint.id)) }}%</strong>
+              <span>Progress</span>
+            </div>
+            <div>
+              <strong>{{ getSprintTaskCount(toNumber(sprint.id)) }}</strong>
+              <span>Tasks</span>
+            </div>
+            <div>
+              <strong>{{ getSprintStoryCount(toNumber(sprint.id)) }}</strong>
+              <span>User stories</span>
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getSprintProgressPercent(toNumber(sprint.id))"></div>
+          </div>
+
+          <div class="chip-row">
+            <span>Project: {{ getProjectName(sprint.projectId) }}</span>
+            <span>{{ getSprintStoryCount(toNumber(sprint.id)) }} linked stories</span>
+          </div>
+        </article>
+      </div>
+      <ng-template #emptySprints><p class="empty">No sprints available.</p></ng-template>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'stories'" class="card page-section-card">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Delivery</p>
+          <h3>User stories overview</h3>
+          <p>Inspect status, priority and progress for every story in the selected project scope.</p>
+        </div>
+        <div class="section-summary">
+          <span>{{ filteredStories.length }} stories</span>
+          <span>{{ filteredTasks.length }} tasks</span>
+        </div>
+      </div>
+
+      <div class="detail-grid detail-grid--stories" *ngIf="filteredStories.length > 0; else emptyStories">
+        <article class="detail-card story-card" *ngFor="let story of filteredStories">
+          <div class="detail-card-head">
+            <div>
+              <p class="detail-card-title">{{ story.title || story.name }}</p>
+              <p class="detail-card-subtitle">{{ story.description || 'No description available.' }}</p>
+            </div>
+            <span class="state-pill state-pill--soft">{{ getStoryStatusLabel(story) }}</span>
+          </div>
+
+          <div class="detail-meta-row">
+            <span>Project: {{ getProjectName(getStoryProjectId(story)) }}</span>
+            <span>Sprint: {{ getSprintName(story.sprintId) }}</span>
+          </div>
+
+          <div class="detail-stats detail-stats--stories">
+            <div>
+              <strong>{{ getTaskProgress(story) }}</strong>
+              <span>Task progress</span>
+            </div>
+            <div>
+              <strong>{{ story.storyPoints }}</strong>
+              <span>Story points</span>
+            </div>
+            <div>
+              <strong>{{ getStoryPriorityLabel(story.priority) }}</strong>
+              <span>Priority</span>
+            </div>
+          </div>
+
+          <div class="chip-row">
+            <span class="priority-chip" [ngClass]="getStoryPriorityClass(story.priority)">{{ getStoryPriorityLabel(story.priority) }}</span>
+            <span>{{ story.acceptanceCriteria || 'No acceptance criteria defined.' }}</span>
+          </div>
+        </article>
+      </div>
+      <ng-template #emptyStories><p class="empty">No user stories available.</p></ng-template>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'notifications'" class="card">
+      <div class="card-head">
+        <h3>Notifications</h3>
+        <button type="button" class="refresh-btn" (click)="markAllNotificationsAsRead()" [disabled]="unreadNotifications === 0">
+          Mark all as read
+        </button>
+      </div>
+
+      <div class="notification-list" *ngIf="displayedNotifications.length > 0; else emptyNotifications">
+        <article class="notification-item" *ngFor="let notification of displayedNotifications" [class.unread]="!notification.isRead">
+          <div class="notification-item-head">
+            <strong>{{ notification.title }}</strong>
+            <span class="notification-type">{{ notification.type }}</span>
+          </div>
+          <p>{{ notification.message }}</p>
+          <small>{{ formatDate(notification.createdAt) }}</small>
+          <div class="notification-actions" *ngIf="!notification.isRead">
+            <button type="button" class="refresh-btn" (click)="markNotificationAsRead(notification.id)">Mark as read</button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyNotifications><p class="empty">No notifications available.</p></ng-template>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'calendar'" class="card">
+      <div class="card-head calendar-head">
+        <button type="button" class="refresh-btn" (click)="prevMonth()">&lt;</button>
+        <h3>{{ calendarTitle }}</h3>
+        <button type="button" class="refresh-btn" (click)="nextMonth()">&gt;</button>
+      </div>
+
+      <div class="calendar-grid-head">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div class="calendar-grid">
+        <button
+          type="button"
+          class="calendar-day"
+          *ngFor="let cell of calendarCells"
+          [class.outside]="!cell.inCurrentMonth"
+          [class.today]="cell.isToday"
+          [class.selected]="selectedCalendarDate && sameDate(cell.date, selectedCalendarDate)"
+          (click)="selectCalendarDate(cell.date)">
+          <span>{{ cell.day }}</span>
+          <i *ngIf="cell.hasDeadline"></i>
+        </button>
+      </div>
+
+      <div class="calendar-day-panel">
+        <div class="card-head">
+          <h3>{{ selectedCalendarDateLabel || 'Select a day' }}</h3>
+          <button type="button" class="refresh-btn" (click)="goToCurrentCalendarMonth()">Today</button>
+        </div>
+
+        <div class="calendar-day-tasks">
+          <article class="calendar-task" *ngFor="let task of selectedDayTasks" [ngClass]="getTaskStatusClass(task)">
+            <div class="task-item-header">
+              <strong>{{ task.title }}</strong>
+              <span class="task-badge">{{ getTaskStatusLabel(task) }}</span>
+            </div>
+            <p>{{ getTaskProjectName(task) }}</p>
+            <small>User story: {{ getUserStoryName(task.userStoryId) }}</small>
+            <small>Due date: {{ formatDate(task.endDate) }}</small>
+          </article>
+          <p *ngIf="selectedDayTasks.length === 0" class="empty">No task for this date.</p>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'kanban'" class="card card-kanban">
+      <div class="card-head">
+        <h3>Kanban (task validation)</h3>
+        <p class="hint">Observer can move and validate tasks directly in kanban.</p>
+      </div>
+      <app-kanban
+        [employeeMode]="false"
+        [useRouteProjectContext]="false"
+        [projectId]="selectedProjectId === 'all' ? null : selectedProjectId">
+      </app-kanban>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'messagerie'" class="card">
+      <div class="card-head">
+        <h3>Messaging</h3>
+        <small>Exchange directly with employees.</small>
+      </div>
+
+      <div class="messaging-layout">
+        <aside class="messaging-contacts">
+          <h4>Employees</h4>
+          <div class="contact-list" *ngIf="messagingContacts.length > 0; else emptyMessagingContacts">
+            <button
+              type="button"
+              *ngFor="let contact of messagingContacts"
+              [class.active]="selectedMessagingUserId === contact.id"
+              (click)="selectMessagingUser(contact.id)">
+              {{ contact.name }}
+            </button>
+          </div>
+          <ng-template #emptyMessagingContacts><p class="empty">No employee available.</p></ng-template>
+        </aside>
+
+        <div class="messaging-thread">
+          <div class="card-head">
+            <h4>{{ getSelectedMessagingUserName() }}</h4>
+            <button type="button" class="refresh-btn" (click)="loadConversationMessages()" [disabled]="!selectedMessagingUserId">Refresh</button>
+          </div>
+
+          <div class="thread-body" *ngIf="selectedMessagingUserId; else selectContactHint">
+            <article
+              class="thread-item"
+              *ngFor="let item of conversationMessages"
+              [class.outgoing]="isMessageSentByCurrentUser(item)">
+              <div class="thread-head">
+                <strong>{{ isMessageSentByCurrentUser(item) ? 'You' : getSelectedMessagingUserName() }}</strong>
+                <small>{{ formatDate(item.createdAt) }}</small>
+              </div>
+              <p>{{ item.message }}</p>
+              <a
+                *ngIf="hasAttachment(item)"
+                [href]="getAttachmentHref(item)"
+                [attr.download]="item.oldValue || 'attachment'"
+                target="_blank"
+                rel="noopener"
+                class="attachment-link">
+                Attachment: {{ item.oldValue || 'Download' }}
+              </a>
+            </article>
+            <p *ngIf="conversationMessages.length === 0" class="empty">No message for this conversation.</p>
+          </div>
+
+          <ng-template #selectContactHint>
+            <div class="empty">Choose an employee to start.</div>
+          </ng-template>
+
+          <div class="thread-compose" *ngIf="selectedMessagingUserId">
+            <textarea
+              [(ngModel)]="conversationDraft"
+                name="observerConversationDraft"
+              rows="3"
+              placeholder="Write a message..."></textarea>
+              <div class="compose-controls">
+                <div class="file-input-wrapper">
+                  <label for="observerConversationAttachmentInput" class="file-label">
+                    <span class="icon-attach">📎</span> Attachment
+                  </label>
+                  <input
+                    type="file"
+                    id="observerConversationAttachmentInput"
+                    (change)="onConversationAttachmentSelected($event)"
+                    class="file-input" />
+                </div>
+                <div *ngIf="conversationAttachmentName" class="file-chip">
+                  <span>{{ conversationAttachmentName }}</span>
+                  <button type="button" (click)="clearConversationAttachment()" class="clear-btn" title="Remove file">&times;</button>
+                </div>
+              </div>
+            <button
+              type="button"
+              class="send-button"
+              (click)="sendConversationMessage()"
+                [disabled]="conversationSending || (!conversationDraft.trim() && !conversationAttachmentName)">
+              {{ conversationSending ? 'Sending...' : 'Send' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="!loading && activeTab === 'settings'" class="card page-section-card">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Security</p>
+          <h3>Change password</h3>
+          <p>Use a stronger password and keep your account protected.</p>
+        </div>
+      </div>
+
+      <div class="security-layout">
+        <article class="password-panel">
+          <h4>Password rules</h4>
+          <p>The new password must meet all of the following requirements.</p>
+          <ul class="password-rules">
+            <li [class.ok]="passwordHasMinLength">At least 8 characters</li>
+            <li [class.ok]="passwordHasUppercase">At least one uppercase letter</li>
+            <li [class.ok]="passwordHasLowercase">At least one lowercase letter</li>
+            <li [class.ok]="passwordHasDigit">At least one number</li>
+          </ul>
+        </article>
+
+        <form class="settings-form password-form" (ngSubmit)="savePasswordSettings()">
+          <div class="settings-field">
+            <label>Current password</label>
+            <input type="password" [(ngModel)]="passwordForm.currentPassword" name="currentPassword" autocomplete="current-password" required />
+            <small class="field-hint">Enter your existing password first.</small>
+          </div>
+
+          <div class="settings-field">
+            <label>New password</label>
+            <input type="password" [(ngModel)]="passwordForm.newPassword" name="newPassword" autocomplete="new-password" required />
+            <small class="field-hint">The password strength checklist updates live.</small>
+          </div>
+
+          <div class="settings-field">
+            <label>Confirm new password</label>
+            <input type="password" [(ngModel)]="passwordForm.confirmNewPassword" name="confirmNewPassword" autocomplete="new-password" required />
+            <small class="field-hint">Type the same password again to confirm.</small>
+          </div>
+
+          <div class="password-status" *ngIf="passwordForm.newPassword || passwordForm.confirmNewPassword">
+            <span [class.ok]="passwordHasMinLength">8+ chars</span>
+            <span [class.ok]="passwordHasUppercase">A-Z</span>
+            <span [class.ok]="passwordHasLowercase">a-z</span>
+            <span [class.ok]="passwordHasDigit">0-9</span>
+          </div>
+
+          <div class="task-actions form-actions">
+            <button type="submit" [disabled]="passwordSaving || !isPasswordFormValid">{{ passwordSaving ? 'Updating...' : 'Update password' }}</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>

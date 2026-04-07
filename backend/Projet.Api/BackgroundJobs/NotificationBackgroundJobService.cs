@@ -132,20 +132,43 @@ namespace Projet.Api.BackgroundJobs
                     task.Status != State.validated)
                 .ToListAsync();
 
+            var observerIds = await dbContext.Users
+                .Where(user => user.role == UserRole.Observer)
+                .Select(user => user.Id)
+                .ToListAsync();
+
             foreach (var task in upcomingTasks)
             {
                 var projectManagerId = task.UserStory?.Project?.ProjectManagerId;
-                if (!projectManagerId.HasValue || projectManagerId.Value <= 0)
+                var assignedToId = task.AssignedToId ?? 0;
+                var pmId = projectManagerId ?? 0;
+
+                var recipientIds = new List<int>();
+                if (assignedToId > 0)
+                {
+                    recipientIds.Add(assignedToId);
+                }
+                if (pmId > 0 && pmId != assignedToId)
+                {
+                    recipientIds.Add(pmId);
+                }
+                foreach (var observerId in observerIds)
+                {
+                    if (observerId > 0 && observerId != assignedToId && observerId != pmId)
+                    {
+                        recipientIds.Add(observerId);
+                    }
+                }
+
+                if (recipientIds.Count == 0)
                 {
                     continue;
                 }
 
-                var assignedToId = task.AssignedToId ?? 0;
-
                 var alreadyNotified = await dbContext.Set<Notification>()
                     .AnyAsync(notification =>
                         notification.RelatedTaskId == task.Id &&
-                        notification.UserId == projectManagerId.Value &&
+                        recipientIds.Contains(notification.UserId) &&
                         notification.Type == NotificationType.TaskDeadlineApproaching &&
                         notification.NewValue == "UPCOMING");
 
@@ -159,7 +182,7 @@ namespace Projet.Api.BackgroundJobs
                     await notificationService.NotifyTaskDeadlineAsync(
                         taskId: task.Id,
                         assignedToId: assignedToId,
-                        projectManagerId: projectManagerId.Value,
+                        projectManagerId: pmId,
                         urgencyLevel: "UPCOMING");
                 }
                 catch (Exception ex)

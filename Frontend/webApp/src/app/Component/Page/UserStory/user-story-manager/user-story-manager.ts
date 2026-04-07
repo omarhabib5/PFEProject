@@ -36,6 +36,7 @@ export class UserStoryManagerComponent implements OnInit {
     priority: 3,
     sprintId: 0,
   };
+  private loadingWatchdogId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private userStoryService: UserStoryService,
@@ -44,11 +45,19 @@ export class UserStoryManagerComponent implements OnInit {
   ) { }
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => {
-      const sprintIdParam = Number(params['sprintId']);
+      const sprintIdFromPath = Number(params['sprintId']);
+      const sprintIdFromQuery = Number(this.activatedRoute.snapshot.queryParamMap.get('sprintId'));
+      const sprintIdParam = Number.isFinite(sprintIdFromPath) && sprintIdFromPath > 0
+        ? sprintIdFromPath
+        : sprintIdFromQuery;
+
       this.sprintId = Number.isFinite(sprintIdParam) && sprintIdParam > 0 ? sprintIdParam : null;
       if (this.sprintId !== null) {
         this.createForm.sprintId = this.sprintId;
         this.loadUserStories();
+      } else {
+        this.loading = false;
+        this.error = 'Sprint invalide pour charger les user stories';
       }
     });
   }
@@ -61,12 +70,14 @@ export class UserStoryManagerComponent implements OnInit {
 
     this.loading = true;
     this.error = '';
+    this.startLoadingWatchdog();
 
     this.userStoryService.getBySprintId(this.sprintId)
       .pipe(
         timeout(10000),
         finalize(() => {
           this.loading = false;
+          this.clearLoadingWatchdog();
         })
       )
       .subscribe({
@@ -74,7 +85,7 @@ export class UserStoryManagerComponent implements OnInit {
         this.userStories = data;
       },
       error: (err) => {
-        this.error = 'Error while loading user stories';
+        this.error = err?.error?.message || 'Erreur lors du chargement des user stories';
         console.error(err);
       }
       });
@@ -161,6 +172,7 @@ export class UserStoryManagerComponent implements OnInit {
       return;
     }
 
+    this.error = '';
     this.showCreateForm = !this.showCreateForm;
     if (this.showCreateForm) {
       this.createForm.sprintId = this.sprintId;
@@ -168,6 +180,10 @@ export class UserStoryManagerComponent implements OnInit {
   }
 
   submitCreateUserStory(): void {
+    if (this.createSubmitting) {
+      return;
+    }
+
     if (this.sprintId === null) {
       this.error = 'Invalid sprint for creating a user story';
       return;
@@ -191,8 +207,8 @@ export class UserStoryManagerComponent implements OnInit {
     const payload: CreateUserStoryRequest = {
       name: title,
       title,
-      description: this.createForm.description || '',
-      acceptanceCriteria: this.createForm.acceptanceCriteria || '',
+      description: (this.createForm.description || '').trim(),
+      acceptanceCriteria: (this.createForm.acceptanceCriteria || '').trim(),
       storyPoints,
       priority,
       status: UserStoryStatus.TODO,
@@ -218,7 +234,7 @@ export class UserStoryManagerComponent implements OnInit {
           this.loadUserStories();
         },
         error: (err) => {
-          this.error = 'Error while creating the user story';
+          this.error = err?.error?.message || 'Error while creating the user story';
           console.error(err);
         }
       });
@@ -232,7 +248,7 @@ export class UserStoryManagerComponent implements OnInit {
   editUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
-    const story = this.userStories.find(item => item.id === id);
+    const story = this.userStories.find(item => Number(item.id) === Number(id));
     if (!story) {
       return;
     }
@@ -332,6 +348,23 @@ export class UserStoryManagerComponent implements OnInit {
       priority: 3,
       sprintId: this.sprintId ?? 0,
     };
+  }
+
+  private startLoadingWatchdog(): void {
+    this.clearLoadingWatchdog();
+    this.loadingWatchdogId = setTimeout(() => {
+      if (this.loading) {
+        this.loading = false;
+        this.error = 'Chargement trop long. Veuillez reessayer.';
+      }
+    }, 12000);
+  }
+
+  private clearLoadingWatchdog(): void {
+    if (this.loadingWatchdogId !== null) {
+      clearTimeout(this.loadingWatchdogId);
+      this.loadingWatchdogId = null;
+    }
   }
 
 }

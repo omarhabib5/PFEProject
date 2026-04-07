@@ -18,8 +18,12 @@
                     <span class="menu-icon">PR</span> Projects
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
+                    [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">
+                    <span class="menu-icon">SP</span> Sprints
+                </button>
+                <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">
-                    <span class="menu-icon">US</span> User Stories
+                    <span class="menu-icon">US</span> User stories
                 </button>
                 <button class="menu-item" *ngIf="serviceViewMode === 'detail'"
                     [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">
@@ -142,25 +146,14 @@
                         </div>
                     </div>
                 </div>
-                <button class="primary-btn" (click)="openProjects()"><span class="btn-icon">+</span> New project</button>
-            </div>
-
-            <div class="service-actions-row">
-                
-                
-                <button class="secondary-btn" type="button" (click)="openCreateTeam()">Add team</button>
-                <button class="secondary-btn" type="button" (click)="openAddMembers()">Add members to service</button>
-                <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit projects</button>
-                <button class="secondary-btn" type="button" (click)="openUserStories()">Add user story</button>
-                <button class="secondary-btn" type="button" (click)="backToServiceList()">Switch service</button>
             </div>
 
             <div class="tabs-card">
                 <div class="tabs-header">
                     <button [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">Dashboard</button>
                     <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Projects</button>
-                    <button [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">User
-                        Stories</button>
+                    <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints</button>
+                    <button [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">User stories</button>
                     <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Team & members</button>
                     <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendar</button>
                     <button [class.active]="activeTab === 'notifications'"
@@ -242,68 +235,246 @@
                     <div class="section-title-row">
                         <h4>Service projects</h4>
                         <div class="inline-actions">
-                            <button class="secondary-btn" type="button" (click)="openProjectEdit()">Edit projects</button>
-                            <button class="primary-btn" type="button" (click)="openProjects()"><span class="btn-icon">+</span> New project</button>
+                            <button class="primary-btn" type="button" (click)="openProjectEdit()">
+                                <span class="btn-icon">+</span> New project
+                            </button>
                         </div>
                     </div>
+
+                    <div class="service-header-card" *ngIf="selectedProject; else noProjectSelected">
+                        <div class="service-left">
+                            <div class="service-initial">{{ getInitials(selectedProject.name) }}</div>
+                            <div>
+                                <h3>{{ selectedProject.name }}</h3>
+                                <p>{{ selectedProject.description || 'No description provided.' }}</p>
+                                <div class="detail-meta">
+                                    <span><strong>Team:</strong> {{ getProjectTeamLabel(selectedProject) }}</span>
+                                    <span><strong>Period:</strong> {{ formatDate(selectedProject.startDate) }} - {{ formatDate(selectedProject.endDate) }}</span>
+                                    <span><strong>Duration:</strong> {{ selectedProject.estimatedDuration }} days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-template #noProjectSelected>
+                        <div class="empty-line">Select a project to see its details.</div>
+                    </ng-template>
+
+                    <div class="kpi-grid" *ngIf="selectedProject">
+                        <article class="kpi-card kpi-card-blue">
+                            <h4>Progress</h4><strong>{{ selectedProjectProgressPercent }}%</strong>
+                        </article>
+                        <article class="kpi-card kpi-card-cyan">
+                            <h4>Sprints</h4><strong>{{ getProjectSprintCount(selectedProject) }}</strong>
+                        </article>
+                        <article class="kpi-card kpi-card-green">
+                            <h4>Team members</h4><strong>{{ getProjectMemberCount(selectedProject) }}</strong>
+                        </article>
+                    </div>
+
+                    <div class="progress-line" *ngIf="selectedProject">
+                        <div class="progress-fill" [style.width.%]="selectedProjectProgressPercent"></div>
+                    </div>
+
                     <div class="team-table-wrap" *ngIf="selectedServiceProjects.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
                                     <th>Project</th>
                                     <th>Status</th>
-                                    <th>Progress</th>
+                                    <th>Team</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let project of selectedServiceProjects">
-                                    <td>{{ project.name }}</td>
-                                    <td><span class="status-chip" [ngClass]="getProjectStatusClass(project)">{{
-                                            getProjectStatusLabel(project) }}</span></td>
+                                <tr *ngFor="let project of selectedServiceProjects" [class.selected-row]="selectedProjectId === project.id" (click)="selectProject(project)">
                                     <td>
-                                        <div class="progress-line">
-                                            <div class="progress-fill" [style.width.%]="getProjectProgress(project)">
-                                            </div>
+                                        <strong>{{ project.name }}</strong>
+                                        <small class="table-subtext">{{ project.description || 'No description' }}</small>
+                                    </td>
+                                    <td><span class="status-chip" [ngClass]="getProjectStatusClass(project)">{{ getProjectStatusLabel(project) }}</span></td>
+                                    <td>{{ getProjectTeamLabel(project) }}</td>
+                                    <td>
+                                        <div class="inline-actions">
+                                            <button class="tiny-btn" type="button" (click)="$event.stopPropagation(); selectProject(project)">Details</button>
+                                            <button class="tiny-btn danger" type="button" [disabled]="projectSubmitting" (click)="$event.stopPropagation(); deleteProject(project)">Delete</button>
                                         </div>
                                     </td>
-                                        <td><button class="tiny-btn" type="button"
-                                            (click)="openProjectManager(project.id)">Edit</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <p *ngIf="selectedServiceProjects.length === 0" class="empty-team">No project in this service.</p>
+
+                    <div class="team-table-wrap" *ngIf="selectedProjectTeamMembers.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Team member</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let member of selectedProjectTeamMembers">
+                                    <td>
+                                        <div class="member-cell">
+                                            <span class="mini-avatar big">{{ getInitials((member.user?.firstName ?? '') + ' ' + (member.user?.lastName ?? '')) }}</span>
+                                            <div>
+                                                <strong>{{ member.user?.firstName }} {{ member.user?.lastName }}</strong>
+                                                <small>{{ member.user?.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="role-pill" [ngClass]="member.role === 1 ? 'role-lead' : 'role-employee'">{{ getProjectMemberRoleLabel(member) }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div *ngIf="activeTab === 'sprints'" class="team-tab-content">
+                    <div class="section-title-row">
+                        <h4>Service sprints</h4>
+                        <div class="inline-actions">
+                            <button class="secondary-btn" type="button" (click)="openSprints()">Open sprint manager</button>
+                            <button class="primary-btn" type="button" (click)="openCreateSprintForm()"><span class="btn-icon">+</span> New sprint</button>
+                        </div>
+                    </div>
+
+                    <div class="sprint-form-card" *ngIf="showSprintForm">
+                        <div class="sprint-form-header">
+                            <h5>{{ sprintFormMode === 'create' ? 'Create sprint' : 'Edit sprint' }}</h5>
+                            <small>Duration is updated automatically based on dates.</small>
+                        </div>
+
+                        <form class="sprint-form-grid" (ngSubmit)="submitSprintForm()">
+                            <div class="sprint-form-field">
+                                <label>Sprint name</label>
+                                <input type="text" [(ngModel)]="sprintForm.name" name="sprintName"
+                                    placeholder="Ex: Sprint 1 - Core features" required />
+                            </div>
+
+                            <div class="sprint-form-field">
+                                <label>Project</label>
+                                <select [(ngModel)]="sprintForm.projectId" name="sprintProject" required>
+                                    <option [ngValue]="null">Select a project</option>
+                                    <option *ngFor="let project of selectedServiceProjects" [ngValue]="project.id">{{ project.name }}</option>
+                                </select>
+                            </div>
+
+                            <div class="sprint-form-field">
+                                <label>Status</label>
+                                <select [(ngModel)]="sprintForm.sprintState" name="sprintState" required>
+                                    <option *ngFor="let option of sprintStateOptions" [ngValue]="option.value">{{ option.label }}</option>
+                                </select>
+                            </div>
+
+                            <div class="sprint-form-field">
+                                <label>Start date</label>
+                                <input type="date" [(ngModel)]="sprintForm.startDate" name="sprintStartDate"
+                                    [min]="getSelectedSprintProjectDate('start') || null"
+                                    [max]="getSelectedSprintProjectDate('end') || null"
+                                    (ngModelChange)="onSprintDatesChanged()" required />
+                            </div>
+
+                            <div class="sprint-form-field">
+                                <label>End date</label>
+                                <input type="date" [(ngModel)]="sprintForm.endDate" name="sprintEndDate"
+                                    [min]="sprintForm.startDate || (getSelectedSprintProjectDate('start') || null)"
+                                    [max]="getSelectedSprintProjectDate('end') || null"
+                                    (ngModelChange)="onSprintDatesChanged()" required />
+                            </div>
+
+                            <div class="sprint-form-field sprint-duration-field">
+                                <label>Estimated duration (days)</label>
+                                <input type="number" [ngModel]="sprintForm.estimatedDuration" name="sprintDuration" readonly />
+                            </div>
+
+                            <div class="sprint-form-field sprint-description-field">
+                                <label>Description</label>
+                                <textarea rows="3" [(ngModel)]="sprintForm.description" name="sprintDescription"
+                                    placeholder="Describe sprint scope and goals"></textarea>
+                            </div>
+
+                            <div class="sprint-form-actions">
+                                <button type="button" class="secondary-btn" (click)="cancelSprintForm()">Cancel</button>
+                                <button type="submit" class="primary-btn" [disabled]="sprintSubmitting">
+                                    {{ sprintSubmitting ? 'Saving...' : (sprintFormMode === 'create' ? 'Create sprint' : 'Update sprint') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="team-table-wrap" *ngIf="availableSprints.length > 0">
+                        <table class="team-table">
+                            <thead>
+                                <tr>
+                                    <th>Sprint</th>
+                                    <th>Project</th>
+                                    <th>Status</th>
+                                    <th>Period</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let sprint of availableSprints">
+                                    <td>{{ sprint.name }}</td>
+                                    <td>{{ getSprintProjectName(sprint) }}</td>
+                                    <td><span class="status-chip" [ngClass]="getSprintStateClass(sprint.sprintState)">{{ getSprintStateLabel(sprint.sprintState) }}</span></td>
+                                    <td>{{ formatDate(sprint.startDate) }} - {{ formatDate(sprint.endDate) }}</td>
+                                    <td>
+                                        <div class="inline-actions">
+                                            <button class="tiny-btn" type="button" (click)="openSprintManager(sprint.projectId)">Details</button>
+                                            <button class="tiny-btn" type="button" (click)="openEditSprintForm(sprint)">Edit</button>
+                                            <button class="tiny-btn danger" type="button" [disabled]="sprintSubmitting" (click)="deleteSprint(sprint)">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p *ngIf="availableSprints.length === 0" class="empty-team">No sprint available for this service.</p>
                 </div>
 
                 <div *ngIf="activeTab === 'userStories'" class="team-tab-content">
                     <div class="section-title-row">
-                        <h4>Service user stories</h4>
-                        <button class="primary-btn" type="button" (click)="openUserStories()"><span class="btn-icon">+</span> Add user story</button>
+                        <h4>User stories (read-only)</h4>
                     </div>
+
                     <div class="team-table-wrap" *ngIf="serviceUserStories.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
                                     <th>Title</th>
+                                    <th>Project</th>
+                                    <th>Sprint</th>
+                                    <th>Status</th>
+                                    <th>Story points</th>
                                     <th>Priority</th>
-                                    <th>Auto status</th>
                                     <th>Tasks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let story of serviceUserStories">
-                                    <td>{{ story.title }}</td>
+                                    <td>
+                                        <strong>{{ story.title || story.name }}</strong>
+                                        <small class="table-subtext">{{ story.description || 'No description' }}</small>
+                                    </td>
+                                    <td>{{ getProjectNameByUserStory(story) }}</td>
+                                    <td>{{ getSprintNameByUserStory(story) }}</td>
+                                    <td>
+                                        <span class="status-chip" [ngClass]="getUserStoryStatusClass(getSelectedUserStoryStatus(story))">
+                                            {{ getUserStoryStatusLabel(getSelectedUserStoryStatus(story)) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ story.storyPoints }}</td>
                                     <td>{{ story.priority }}</td>
-                                    <td><span class="status-chip" [ngClass]="getUserStoryStatusClass(getComputedUserStoryStatus(story))">{{
-                                            getUserStoryStatusLabel(getComputedUserStoryStatus(story)) }}</span></td>
                                     <td>{{ story.completedTaskCount }} / {{ story.taskCount }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <p *ngIf="serviceUserStories.length === 0" class="empty-team">No user story available for this
-                        service.</p>
+
+                    <p *ngIf="serviceUserStories.length === 0" class="empty-team">No user stories available for this service.</p>
                 </div>
 
                 <div *ngIf="activeTab === 'teamMembers'" class="team-tab-content">

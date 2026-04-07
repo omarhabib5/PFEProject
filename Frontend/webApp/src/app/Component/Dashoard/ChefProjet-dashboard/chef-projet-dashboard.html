@@ -276,7 +276,49 @@
           <section *ngIf="activeProjectTab === 'userStories'">
             <div class="mb-3 flex items-center justify-between">
               <h3 class="text-2xl font-black text-slate-900">User Story List</h3>
+              <div class="flex gap-2">
+                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" (click)="openCreateUserStory()">+ New User Story</button>
+
+              </div>
             </div>
+
+            <form *ngIf="showUserStoryForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitUserStory()">
+              <h4 class="mb-3 text-base font-bold text-slate-900">{{ isEditingUserStory ? 'Edit User Story' : 'Create User Story' }}</h4>
+              <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+                <label class="text-xs font-semibold text-slate-600">
+                  Title
+                  <input class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.title" name="userStoryTitle" type="text" placeholder="Title" />
+                </label>
+                <label class="text-xs font-semibold text-slate-600">
+                  Sprint
+                  <select class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.sprintId" name="userStorySprintId">
+                    <option [ngValue]="null">Select sprint</option>
+                    <option *ngFor="let sprint of selectedProjectSprints" [ngValue]="+sprint.id">{{ sprint.name }}</option>
+                  </select>
+                </label>
+                <label class="text-xs font-semibold text-slate-600">
+                  Story Points
+                  <input class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.storyPoints" name="userStoryPoints" type="number" min="1" placeholder="Story points" />
+                </label>
+                <label class="text-xs font-semibold text-slate-600">
+                  Priority (1-5)
+                  <input class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.priority" name="userStoryPriority" type="number" min="1" max="5" placeholder="Priority" />
+                </label>
+              </div>
+              <label class="mt-2 block text-xs font-semibold text-slate-600">
+                Description
+                <textarea class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.description" name="userStoryDescription" rows="2" placeholder="Description"></textarea>
+              </label>
+              <label class="mt-2 block text-xs font-semibold text-slate-600">
+                Acceptance criteria
+                <textarea class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.acceptanceCriteria" name="userStoryAcceptance" rows="2" placeholder="Acceptance criteria"></textarea>
+              </label>
+              <div class="mt-3 flex gap-2">
+                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" type="submit" [disabled]="userStorySaving">{{ userStorySaving ? (isEditingUserStory ? 'Saving...' : 'Creating...') : (isEditingUserStory ? 'Save changes' : 'Create') }}</button>
+                <button class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" type="button" (click)="cancelUserStoryForm()">Cancel</button>
+              </div>
+            </form>
+
             <div class="space-y-3" *ngIf="filteredUserStories.length > 0; else noStories">
               <article class="rounded-2xl border border-slate-200 bg-white p-4" *ngFor="let story of filteredUserStories">
                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -298,6 +340,21 @@
                   <span>✔ {{ getUserStoryCompletedTaskCount(story) }}/{{ getUserStoryTaskCount(story) }} tasks</span>
                   <span>⏱️ {{ story.estimatedDuration || 0 }} days</span>
                 </div>
+
+                <div class="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
+                    (click)="editUserStory(story)">
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm text-rose-700"
+                    (click)="deleteUserStory(story)">
+                    Delete
+                  </button>
+                </div>
               </article>
             </div>
             <ng-template #noStories>
@@ -308,7 +365,7 @@
           <section *ngIf="activeProjectTab === 'sprints'">
             <div class="mb-3 flex items-center justify-between">
               <h3 class="text-2xl font-black text-slate-900">Sprint List</h3>
-              <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" (click)="openCreateSprint()">+ New Sprint</button>
+              <span class="text-xs font-semibold text-slate-500">Sprint management is handled by Service Manager.</span>
             </div>
 
             <form *ngIf="showSprintForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitSprint()">
@@ -355,8 +412,7 @@
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="openEditSprint(sprint)">✏️</button>
-                  <button class="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm text-rose-700" (click)="deleteSprint(sprint)" [disabled]="getSprintStateClass(sprint.sprintState) !== 'state-pending'">🗑️</button>
+                  <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="openUserStoryManager(sprint.id)">Manage User Stories</button>
                 </div>
               </article>
             </div>
@@ -368,7 +424,7 @@
           <section *ngIf="activeProjectTab === 'tasks'">
             <div class="mb-3 flex items-center justify-between">
               <h3 class="text-2xl font-black text-slate-900">Task List</h3>
-              <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" (click)="openCreateTask()">+ New Task</button>
+              <span class="text-xs font-semibold text-slate-500">Task management is handled by Service Manager.</span>
             </div>
 
             <div class="mb-3">
@@ -450,8 +506,7 @@
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm" (click)="openEditTask(task)">✏️</button>
-                  <button class="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm text-rose-700" (click)="deleteTask(task)" [disabled]="getTaskStatusClass(task.status) !== 'state-pending'">🗑️</button>
+                  <span class="text-xs font-semibold text-slate-400">Read only</span>
                 </div>
               </article>
             </div>

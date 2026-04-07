@@ -19,6 +19,7 @@ import { KanbanComponent } from '../../kanban/kanban';
 type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'messagerie' | 'settings';
 type EmployeeTab = 'overview' | 'tasks' | 'kanban' | 'projects' | 'sprints';
 type TaskBucket = 'todo' | 'inProgress' | 'review' | 'done';
+type NotificationViewFilter = 'notifications' | 'messages';
 
 interface UiTask {
   id: number;
@@ -158,12 +159,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   replyAttachmentNameByNotificationId: Record<number, string> = {};
   replyAttachmentDataUrlByNotificationId: Record<number, string> = {};
   messagingContacts: MessagingContact[] = [];
+  observerContacts: MessagingContact[] = [];
   selectedMessagingUserId: number | null = null;
   conversationMessages: Notification[] = [];
   conversationDraft = '';
   conversationAttachmentName = '';
   conversationAttachmentDataUrl = '';
   conversationSending = false;
+  notificationViewFilter: NotificationViewFilter = 'notifications';
 
   statusFilter: 'all' | TaskBucket = 'all';
   priorityFilter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente' = 'all';
@@ -301,9 +304,24 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     return output;
   }
 
+  get messageNotifications(): Notification[] {
+    return this.apiNotifications.filter((item) => this.isMessageNotification(item));
+  }
+
+  get systemNotifications(): Notification[] {
+    return this.apiNotifications.filter((item) => !this.isMessageNotification(item));
+  }
+
+  get displayedApiNotifications(): Notification[] {
+    return this.notificationViewFilter === 'messages' ? this.messageNotifications : this.systemNotifications;
+  }
+
   setSidebarSection(section: SidebarSection): void {
     this.sidebarSection = section;
     this.cdr.markForCheck();
+    if (section === 'notifications') {
+      this.notificationViewFilter = 'notifications';
+    }
     if (section === 'messagerie') {
       this.refreshMessagingContacts();
       if (this.selectedMessagingUserId) {
@@ -327,6 +345,12 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
       const managerName = this.taskProjectManagerNameByTaskId[Number(taskId)]?.trim();
       mapById.set(managerId, managerName && managerName.length > 0 ? managerName : `Project manager #${managerId}`);
+    });
+
+    this.observerContacts.forEach((observer) => {
+      if (!mapById.has(observer.id)) {
+        mapById.set(observer.id, observer.name);
+      }
     });
 
     this.messagingContacts = Array.from(mapById.entries())
@@ -473,12 +497,12 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   getSelectedMessagingUserName(): string {
     if (!this.selectedMessagingUserId) {
-      return 'Select a project manager';
+      return 'Select a contact';
     }
 
     const contact = this.messagingContacts.find((item) => item.id === this.selectedMessagingUserId);
     const resolved = this.userNameById[this.selectedMessagingUserId]?.trim();
-    return contact?.name ?? resolved ?? 'Project manager';
+    return contact?.name ?? resolved ?? 'Contact';
   }
 
   isMessageSentByCurrentUser(item: Notification): boolean {
@@ -575,6 +599,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
 
   setPriorityFilter(filter: 'all' | 'basse' | 'moyenne' | 'haute' | 'urgente'): void {
     this.priorityFilter = filter;
+  }
+
+  setNotificationViewFilter(filter: NotificationViewFilter): void {
+    this.notificationViewFilter = filter;
+    this.showReplyComposerForNotificationId = null;
   }
 
   get selectedCalendarDateLabel(): string {
@@ -869,7 +898,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         timeout(5000),
         catchError(() => {
           console.warn('Failed to load users');
-          return of([] as Array<{ id: number; firstName?: string; lastName?: string }>);
+          return of([] as Array<{ id: number; firstName?: string; lastName?: string; role?: string | number }>);
         })
       )
     })
@@ -892,6 +921,19 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
             }
           });
           this.userNameById = userNameById;
+
+          this.observerContacts = users
+            .filter((user) => this.isObserverRole((user as any)?.role))
+            .map((user) => {
+              const id = Number((user as any)?.id ?? 0);
+              const name = `${String((user as any)?.firstName ?? '').trim()} ${String((user as any)?.lastName ?? '').trim()}`.trim();
+              return {
+                id,
+                name: name || `Observer #${id}`
+              } as MessagingContact;
+            })
+            .filter((item) => item.id > 0)
+            .sort((a, b) => a.name.localeCompare(b.name));
 
           // Try to load sprints and stories in parallel, but don't wait for them
           this.loadOptionalSprintsAndStories(tasks, projects, services);
@@ -1449,6 +1491,14 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     return 'info';
   }
 
+  isMessageNotification(item: Notification): boolean {
+    const title = String(item.title ?? '').toLowerCase();
+    return title.includes('message')
+      || title.includes('nouveau message')
+      || title.includes('delay reported')
+      || title.includes('reply');
+  }
+
   private resolveCurrentUserId(): number | null {
     const userData = this.tokenService.getUserData();
     const parsed = Number(userData?.userId ?? userData?.id ?? 0);
@@ -1637,7 +1687,12 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     if (normalized === 'servicemanager' || normalized === 'service manager' || normalized === '1') return 1;
     if (normalized === 'projectmanager' || normalized === 'project manager' || normalized === '2') return 2;
     if (normalized === 'employee' || normalized === 'employe' || normalized === '3') return 3;
+    if (normalized === 'observer' || normalized === 'observateur' || normalized === 'observeteur' || normalized === '4') return 4;
     return null;
+  }
+
+  private isObserverRole(role: unknown): boolean {
+    return this.resolveRoleNumber(role as string | number | undefined) === 4;
   }
 
   private syncLocalUserProfile(firstName: string, lastName: string, email: string, profileImageUrl?: string): void {

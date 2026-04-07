@@ -8,7 +8,8 @@ export enum AppRole {
   Admin = 'admin',
   ServiceManager = 'servicemanager',
   ProjectManager = 'projectmanager',
-  Employee = 'employee'
+  Employee = 'employee',
+  Observer = 'observer'
 }
 
 export enum UserRole {

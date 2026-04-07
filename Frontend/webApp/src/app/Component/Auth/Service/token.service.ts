@@ -15,6 +15,7 @@ export class TokenService {
     '1': AppRole.ServiceManager,
     '2': AppRole.ProjectManager,
     '3': AppRole.Employee,
+    '4': AppRole.Observer,
     admin: AppRole.Admin,
     administrator: AppRole.Admin,
     servicemanager: AppRole.ServiceManager,
@@ -26,7 +27,9 @@ export class TokenService {
     chefprojet: AppRole.ProjectManager,
     chefdeprojet: AppRole.ProjectManager,
     employee: AppRole.Employee,
-    employe: AppRole.Employee
+    employe: AppRole.Employee,
+    observer: AppRole.Observer,
+    observateur: AppRole.Observer
   };
 
   private get isBrowser(): boolean {

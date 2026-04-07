@@ -4,7 +4,7 @@
             <div class="kanban-title-wrap">
                 <p class="eyebrow">Delivery Board</p>
                 <h1>{{ employeeMode ? 'My Kanban' : 'Kanban Workspace' }}</h1>
-                <p>{{ employeeMode ? 'You can only update the status of your own tasks' : 'Track work across every stage and keep the team aligned.' }}</p>
+                <p>{{ employeeMode ? 'You can only update the status of your own tasks between To Do, In Progress, and Done.' : 'Track work across every stage and keep the team aligned.' }}</p>
             </div>
 
             <div class="kanban-actions" *ngIf="!employeeMode">
