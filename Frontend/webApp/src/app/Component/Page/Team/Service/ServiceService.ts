@@ -1,6 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from "../../../environment";
 
 export interface Service {
     id: number;
@@ -18,22 +19,13 @@ export interface UpdateServiceDto {
     name: string;
     responsibleId?: number;
 }
-export interface CreateServiceDto {
-    name: string;
-    responsibleId?: number;
-}
 
-export interface UpdateServiceDto {
-    id: number;
-    name: string;
-    responsibleId?: number;
-}
 @Injectable({
     providedIn: "root",
 })
 export class ServiceService {
     private http = inject(HttpClient);
-    private apiUrl = 'https://localhost:7219/api/service';
+    private apiUrl = `${environment.apiUrl}/Service`;
 
     getServices(): Observable<Service[]> {
         return this.http.get<Service[]>(this.apiUrl);

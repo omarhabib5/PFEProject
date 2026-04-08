@@ -184,7 +184,7 @@ export class NotificationService {
             .then(() => {
                 this.connectedUserId = userId;
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 console.error('SignalR connection failed:', error);
                 this.connectedUserId = null;
             })

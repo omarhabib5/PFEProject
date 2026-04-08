@@ -144,7 +144,7 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   };
   userRoleOptions = [
     { label: 'Admin', value: 0 },
-    { label: 'Team Manager', value: 1 },
+    { label: 'Service Manager', value: 1 },
     { label: 'Project Manager', value: 2 },
     { label: 'Employee', value: 3 },
     { label: 'Observer', value: 4 }
@@ -1352,13 +1352,13 @@ private adminNotificationsSubscription: Subscription | null = null;
       return;
     }
 
-    if (!this.editingServiceId) {
+    if (this.editingServiceId == null) {
       return;
     }
 
     this.serviceFormLoading = true;
     const payload: UpdateServiceDto = {
-      id: this.editService.id,
+      id: this.editingServiceId,
       name: this.editService.name.trim(),
       responsibleId: this.editService.responsibleId || undefined
     };
