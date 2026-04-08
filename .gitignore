@@ -18,4 +18,5 @@
 # Environment files
 .env
 *.ts
+!Frontend/webApp/src/app/Component/Dashoard/Observateur-dashboard/observateur-dashboard.ts
 Frontend/webApp/src/app/Component/Dashoard/admin-dashboard/admin-dashboard.html
