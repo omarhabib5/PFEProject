@@ -17,6 +17,7 @@ import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService'
 import { KanbanComponent } from '../../kanban/kanban';
 
 type ObserverTab = 'projects' | 'sprints' | 'stories' | 'notifications' | 'calendar' | 'kanban' | 'messagerie' | 'settings';
+type ObserverNotificationFilter = 'all' | 'notifications' | 'messages';
 
 interface MessagingContact {
   id: number;
@@ -93,6 +94,7 @@ export class ObserverDashboard implements OnInit {
   selectedProjectId: number | 'all' = 'all';
   unreadNotifications = 0;
   notifications: Notification[] = [];
+  selectedNotificationFilter: ObserverNotificationFilter = 'all';
   private notificationCountSubscription: Subscription | null = null;
   private notificationsSubscription: Subscription | null = null;
 
@@ -243,7 +245,39 @@ export class ObserverDashboard implements OnInit {
   }
 
   get displayedNotifications(): Notification[] {
-    return this.notifications.slice(0, 8);
+    return this.filteredNotifications.slice(0, 8);
+  }
+
+  get filteredNotifications(): Notification[] {
+    if (this.selectedNotificationFilter === 'all') {
+      return this.notifications;
+    }
+
+    if (this.selectedNotificationFilter === 'messages') {
+      return this.notifications.filter((item) => this.isMessageNotification(item));
+    }
+
+    return this.notifications.filter((item) => !this.isMessageNotification(item));
+  }
+
+  setNotificationFilter(filter: ObserverNotificationFilter): void {
+    this.selectedNotificationFilter = filter;
+  }
+
+  get hasFilteredNotifications(): boolean {
+    return this.filteredNotifications.length > 0;
+  }
+
+  get emptyNotificationFilterLabel(): string {
+    if (this.selectedNotificationFilter === 'messages') {
+      return 'No messages available.';
+    }
+
+    if (this.selectedNotificationFilter === 'notifications') {
+      return 'No notifications available.';
+    }
+
+    return 'No notifications or messages available.';
   }
 
   toNumber(value: unknown): number {
@@ -924,6 +958,20 @@ export class ObserverDashboard implements OnInit {
     );
 
     return Number.isFinite(fromClaims) && fromClaims > 0 ? fromClaims : null;
+  }
+
+  private isMessageNotification(item: Notification): boolean {
+    const title = String(item?.title ?? '').toLowerCase();
+    const message = String(item?.message ?? '').toLowerCase();
+    const type = String(item?.type ?? '').toLowerCase();
+    const hasMessageKeyword = title.includes('message') || message.includes('message') || title.includes('msg');
+
+    const hasOnlyRelatedUser = Number(item?.relatedUserId ?? 0) > 0
+      && Number(item?.relatedTaskId ?? 0) === 0
+      && Number((item as any)?.relatedProjectId ?? 0) === 0
+      && Number((item as any)?.relatedUserStoryId ?? 0) === 0;
+
+    return hasMessageKeyword || type === 'message' || hasOnlyRelatedUser;
   }
 
   private validatePasswordForm(): string | null {

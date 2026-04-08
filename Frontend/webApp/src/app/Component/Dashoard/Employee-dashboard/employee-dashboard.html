@@ -99,8 +99,7 @@
                             completed</small>
                     </article>
                     <article class="kpi purple">
-                        <h4>Estimated hours</h4><strong>{{ totalEstimatedHours }}h</strong><small>planned
-                            workload</small>
+                        <h4>My tasks</h4><strong>{{ myTasks.length }}</strong><small>assigned workload</small>
                     </article>
                     <article class="kpi red">
                         <h4>High priority</h4><strong>{{ highPriorityCount }}</strong><small>to monitor</small>
@@ -212,7 +211,7 @@
                     <div class="task-line" *ngFor="let task of group.items; trackBy: trackByTaskId">
                         <div>
                             <strong>{{ task.title }}</strong>
-                            <small>{{ task.projectName }} · {{ task.estimatedHours }}h · {{ task.delayLabel }}</small>
+                            <small>{{ task.projectName }} · {{ task.delayLabel }}</small>
                             <small *ngIf="canNotifyTaskDelay(task)">Project manager: {{ getTaskManagerName(task) }}</small>
                             <div class="delay-message-box" *ngIf="showDelayMessageForTaskId === task.id">
                                 <textarea

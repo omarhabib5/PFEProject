@@ -216,6 +216,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
+  get calendarMonthLabel(): string {
+    return this.calendarTitle;
+  }
+
+  get calendarWeekdayLabels(): string[] {
+    return this.calendarWeekdays;
+  }
+
   get selectedCalendarDateLabel(): string {
     const selectedDate = this.parseToLocalDate(this.selectedCalendarDateIso);
     return selectedDate.toLocaleDateString('en-US', {
@@ -1437,9 +1445,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.generateCalendar();
   }
 
+  goToPreviousCalendarMonth(): void {
+    this.prevMonth();
+  }
+
   nextMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
     this.generateCalendar();
+  }
+
+  goToNextCalendarMonth(): void {
+    this.nextMonth();
   }
 
   goToCurrentCalendarMonth(): void {

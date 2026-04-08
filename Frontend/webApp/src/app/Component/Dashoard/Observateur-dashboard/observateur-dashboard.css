@@ -176,6 +176,44 @@
   font-weight: 600;
 }
 
+.notification {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  position: relative;
+  border: none;
+  cursor: pointer;
+}
+
+.notif-glyph {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.notif-pill {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.66rem;
+  line-height: 17px;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid #fff;
+}
+
 .profile {
   display: flex;
   flex-direction: column;
@@ -373,6 +411,38 @@
 .notification-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.notif-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notif-filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid #dbe5f1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.notif-filter-btn {
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.notif-filter-btn.active {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .calendar-head {
