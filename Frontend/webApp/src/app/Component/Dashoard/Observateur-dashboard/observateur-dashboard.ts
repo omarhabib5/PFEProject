@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
@@ -23,12 +23,25 @@ interface MessagingContact {
   name: string;
 }
 
-interface CalendarCell {
-  day: number;
-  date: Date;
+type CalendarEventType = 'task';
+
+interface CalendarEventItem {
+  id: number;
+  type: CalendarEventType;
+  title: string;
+  meta: string;
+  startIso: string;
+  endIso: string;
+  className: string;
+}
+
+interface CalendarDayCell {
+  iso: string;
+  dayNumber: number;
   inCurrentMonth: boolean;
   isToday: boolean;
-  hasDeadline: boolean;
+  isSelected: boolean;
+  events: CalendarEventItem[];
 }
 
 @Component({
@@ -54,9 +67,9 @@ export class ObserverDashboard implements OnInit {
   loading = false;
   error = '';
   today = new Date();
-  currentMonth = new Date();
-  calendarCells: CalendarCell[] = [];
-  selectedCalendarDate: Date | null = null;
+  readonly calendarWeekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  currentCalendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  selectedCalendarDateIso = this.toIsoDateLocal(new Date());
   settingsSuccess = '';
   passwordSaving = false;
   notificationCount = 0;
@@ -80,6 +93,8 @@ export class ObserverDashboard implements OnInit {
   selectedProjectId: number | 'all' = 'all';
   unreadNotifications = 0;
   notifications: Notification[] = [];
+  private notificationCountSubscription: Subscription | null = null;
+  private notificationsSubscription: Subscription | null = null;
 
   projects: project[] = [];
   sprints: Sprint[] = [];
@@ -97,8 +112,13 @@ export class ObserverDashboard implements OnInit {
       this.userName = `${userData?.firstName ?? ''} ${userData?.lastName ?? ''}`.trim();
     }
 
-    this.refreshNotifications();
+    this.initializeNotifications();
     this.loadDashboardData();
+  }
+
+  ngOnDestroy(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
   }
 
   setTab(tab: ObserverTab): void {
@@ -201,31 +221,25 @@ export class ObserverDashboard implements OnInit {
     return this.filteredProjects.length;
   }
 
-  get calendarTitle(): string {
-    return this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  get calendarMonthLabel(): string {
+    return this.currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   get selectedCalendarDateLabel(): string {
-    if (!this.selectedCalendarDate) {
-      return '';
-    }
-
-    return this.selectedCalendarDate.toLocaleDateString('en-US', {
+    const selectedDate = this.parseToLocalDate(this.selectedCalendarDateIso);
+    return selectedDate.toLocaleDateString('en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
     });
   }
 
-  get selectedDayTasks(): TaskDto[] {
-    if (!this.selectedCalendarDate) {
-      return [];
-    }
+  get calendarDays(): CalendarDayCell[] {
+    return this.buildCalendarDays();
+  }
 
-    return this.filteredTasks.filter((task) => {
-      const dueDate = this.taskDueDate(task);
-      return dueDate !== null && this.sameDate(dueDate, this.selectedCalendarDate);
-    });
+  get selectedCalendarDayEvents(): CalendarEventItem[] {
+    return this.getEventsForDate(this.selectedCalendarDateIso);
   }
 
   get displayedNotifications(): Notification[] {
@@ -438,18 +452,37 @@ export class ObserverDashboard implements OnInit {
   }
 
   prevMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.buildCalendar();
+    this.goToPreviousCalendarMonth();
   }
 
   nextMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.buildCalendar();
+    this.goToNextCalendarMonth();
   }
 
   goToCurrentCalendarMonth(): void {
-    this.currentMonth = new Date();
-    this.buildCalendar();
+    const today = new Date();
+    this.currentCalendarDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.selectedCalendarDateIso = this.toIsoDateLocal(today);
+  }
+
+  goToPreviousCalendarMonth(): void {
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() - 1,
+      1
+    );
+  }
+
+  goToNextCalendarMonth(): void {
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() + 1,
+      1
+    );
+  }
+
+  selectCalendarDay(iso: string): void {
+    this.selectedCalendarDateIso = iso;
   }
 
   sameDate(left: Date, right: Date | null): boolean {
@@ -463,7 +496,7 @@ export class ObserverDashboard implements OnInit {
   }
 
   selectCalendarDate(date: Date): void {
-    this.selectedCalendarDate = date;
+    this.selectedCalendarDateIso = this.toIsoDateLocal(date);
   }
 
   markNotificationAsRead(notificationId: number): void {
@@ -720,6 +753,26 @@ export class ObserverDashboard implements OnInit {
     });
   }
 
+  private initializeNotifications(): void {
+    this.notificationCountSubscription?.unsubscribe();
+    this.notificationsSubscription?.unsubscribe();
+
+    this.notificationCountSubscription = this.notificationService.unreadCount$.subscribe((count) => {
+      this.unreadNotifications = count;
+      this.notificationCount = count;
+      this.cdr.markForCheck();
+    });
+
+    this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
+      this.notifications = Array.isArray(items) ? items : [];
+      this.unreadNotifications = this.notifications.filter((item) => !item.isRead).length;
+      this.notificationCount = this.unreadNotifications;
+      this.cdr.markForCheck();
+    });
+
+    this.refreshNotifications();
+  }
+
   private refreshNotifications(): void {
     const userId = this.getCurrentUserId();
     if (!userId) {
@@ -729,48 +782,120 @@ export class ObserverDashboard implements OnInit {
       return;
     }
 
-    this.notificationService.getUserNotifications(userId).subscribe({
-      next: (items) => {
-        this.notifications = items;
-        this.unreadNotifications = items.filter((item) => !item.isRead).length;
-        this.notificationCount = this.unreadNotifications;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.notifications = [];
-        this.unreadNotifications = 0;
-        this.notificationCount = 0;
-        this.cdr.markForCheck();
-      }
-    });
+    this.notificationService.loadNotifications(userId);
   }
 
   private buildCalendar(): void {
-    const year = this.currentMonth.getFullYear();
-    const month = this.currentMonth.getMonth();
-    const first = new Date(year, month, 1);
-    const offset = (first.getDay() + 6) % 7;
-    const start = new Date(year, month, 1 - offset);
-    const today = new Date();
+    if (!this.selectedCalendarDateIso) {
+      this.selectedCalendarDateIso = this.toIsoDateLocal(new Date());
+    }
+  }
 
-    if (!this.selectedCalendarDate) {
-      this.selectedCalendarDate = new Date();
+  getCalendarEventTypeLabel(type: CalendarEventType): string {
+    return type === 'task' ? 'Task' : 'Item';
+  }
+
+  private buildCalendarDays(): CalendarDayCell[] {
+    const year = this.currentCalendarDate.getFullYear();
+    const month = this.currentCalendarDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const dayOffset = (firstDayOfMonth.getDay() + 6) % 7;
+    const gridStart = new Date(year, month, 1 - dayOffset);
+    const todayIso = this.toIsoDateLocal(new Date());
+
+    const days: CalendarDayCell[] = [];
+    for (let index = 0; index < 42; index += 1) {
+      const date = this.addDays(gridStart, index);
+      const iso = this.toIsoDateLocal(date);
+      const events = this.getEventsForDate(iso);
+
+      days.push({
+        iso,
+        dayNumber: date.getDate(),
+        inCurrentMonth: date.getMonth() === month,
+        isToday: iso === todayIso,
+        isSelected: iso === this.selectedCalendarDateIso,
+        events
+      });
     }
 
-    this.calendarCells = Array.from({ length: 42 }).map((_, index) => {
-      const date = new Date(start);
-      date.setDate(start.getDate() + index);
-      return {
-        day: date.getDate(),
-        date,
-        inCurrentMonth: date.getMonth() === month,
-        isToday: this.sameDate(date, today),
-        hasDeadline: this.filteredTasks.some((task) => {
-          const dueDate = this.taskDueDate(task);
-          return dueDate !== null && this.sameDate(dueDate, date);
-        })
-      };
+    return days;
+  }
+
+  private getEventsForDate(dateIso: string): CalendarEventItem[] {
+    return this.getCalendarEvents().filter((event) => dateIso >= event.startIso && dateIso <= event.endIso);
+  }
+
+  private getCalendarEvents(): CalendarEventItem[] {
+    const events: CalendarEventItem[] = [];
+
+    this.filteredTasks.forEach((task) => {
+      const startIso = this.toIsoDateLocal(task.startDate ? new Date(task.startDate) : new Date(task.endDate ?? task.startDate ?? new Date()));
+      const endIso = this.toIsoDateLocal(task.endDate ? new Date(task.endDate) : new Date(task.startDate ?? task.endDate ?? new Date()));
+
+      if (!startIso || !endIso) {
+        return;
+      }
+
+      const normalizedStatus = String(task.status ?? 'pending').toLowerCase();
+      const projectName = this.getTaskProjectName(task);
+      const storyName = this.getUserStoryName(task.userStoryId);
+
+      events.push({
+        id: Number(task.id ?? 0),
+        type: 'task',
+        title: task.title,
+        meta: `${projectName} · ${storyName} · ${this.getTaskStatusLabel(task)}`,
+        startIso,
+        endIso,
+        className: `cal-event-task ${this.getCalendarTaskStateClass(normalizedStatus)}`
+      });
     });
+
+    return events.sort((a, b) => {
+      if (a.startIso !== b.startIso) {
+        return a.startIso.localeCompare(b.startIso);
+      }
+      return a.title.localeCompare(b.title);
+    });
+  }
+
+  private getCalendarTaskStateClass(status: string): string {
+    if (status === 'validated' || status === 'done') return 'cal-task-done';
+    if (status === 'inprogress') return 'cal-task-in-progress';
+    if (status === 'todo') return 'cal-task-todo';
+    return 'cal-task-pending';
+  }
+
+  private toIsoDateLocal(value: Date | string | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseToLocalDate(value: string): Date {
+    const [yearPart, monthPart, dayPart] = value.split('-').map((item) => Number(item));
+    if (!yearPart || !monthPart || !dayPart) {
+      return new Date();
+    }
+
+    return new Date(yearPart, monthPart - 1, dayPart);
+  }
+
+  private addDays(date: Date, amount: number): Date {
+    const next = new Date(date);
+    next.setDate(next.getDate() + amount);
+    return next;
   }
 
   private taskDueDate(task: TaskDto): Date | null {
@@ -785,8 +910,20 @@ export class ObserverDashboard implements OnInit {
 
   private getCurrentUserId(): number | null {
     const userData = this.tokenService.getUserData();
-    const parsed = Number(userData?.userId ?? userData?.id ?? 0);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    const fromUserData = Number(userData?.userId ?? userData?.id ?? 0);
+    if (Number.isFinite(fromUserData) && fromUserData > 0) {
+      return fromUserData;
+    }
+
+    const payload = this.tokenService.getTokenPayload();
+    const fromClaims = Number(
+      (payload?.['nameid'] as string | number | undefined)
+      ?? (payload?.['sub'] as string | number | undefined)
+      ?? (payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] as string | number | undefined)
+      ?? 0
+    );
+
+    return Number.isFinite(fromClaims) && fromClaims > 0 ? fromClaims : null;
   }
 
   private validatePasswordForm(): string | null {

@@ -96,7 +96,7 @@ namespace Projet.Api.Controller
                 return Forbid();
             }
 
-            if (!User.IsInRole("ProjectManager") && oldStatus != command.Status)
+            if (User.IsInRole("ServiceManager") && oldStatus != command.Status)
             {
                 return Forbid();
             }
