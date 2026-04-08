@@ -145,6 +145,8 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   taskMessageDraftByTaskId: Record<number, string> = {};
   showTaskMessageComposerForId: number | null = null;
   sendingTaskMessageId: number | null = null;
+  assigningTaskId: number | null = null;
+  selectedAssigneeByTaskId: Record<number, number | null> = {};
   messagingContacts: MessagingContact[] = [];
   selectedMessagingUserId: number | null = null;
   conversationMessages: AppNotification[] = [];
@@ -945,7 +947,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return [];
     }
 
-    return this.teamMembersByTeamId[teamId] ?? [];
+    return (this.teamMembersByTeamId[teamId] ?? []).filter((user) => this.isEmployeeRole(user.role));
   }
 
   get completedStoriesCount(): number {
@@ -1279,6 +1281,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.taskForm.assignedToUserId || Number(this.taskForm.assignedToUserId) <= 0) {
+      this.error = 'Please assign this task to an employee.';
+      return;
+    }
+
     if (!this.scopedUserStoryIds.has(Number(this.taskForm.userStoryId))) {
       this.error = 'You can only create tasks in your own user stories.';
       return;
@@ -1313,7 +1320,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       endDate: this.taskForm.endDate,
       userStoryId: Number(this.taskForm.userStoryId),
       sprintId: this.taskForm.sprintId ? Number(this.taskForm.sprintId) : null,
-      assignedToId: this.taskForm.assignedToUserId ? Number(this.taskForm.assignedToUserId) : null,
+      assignedToId: Number(this.taskForm.assignedToUserId),
     };
 
     if (this.taskEditId) {
@@ -1521,6 +1528,84 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     }
 
     return `User #${assignedId}`;
+  }
+
+  getSelectedAssignee(task: TaskDto): number | null {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return null;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(this.selectedAssigneeByTaskId, taskId)) {
+      return this.selectedAssigneeByTaskId[taskId] ?? null;
+    }
+
+    const assignedId = Number((task as any)?.assignedToId ?? 0);
+    return assignedId > 0 ? assignedId : null;
+  }
+
+  setSelectedAssignee(task: TaskDto, value: number | null): void {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return;
+    }
+
+    const numeric = Number(value ?? 0);
+    this.selectedAssigneeByTaskId[taskId] = Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  }
+
+  assignEmployeeToTask(task: TaskDto): void {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return;
+    }
+
+    const assigneeId = Number(this.getSelectedAssignee(task) ?? 0);
+    if (assigneeId <= 0) {
+      this.error = 'Please select an employee to assign.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const isEmployee = this.assignableUsers.some((user) => Number(user.id) === assigneeId);
+    if (!isEmployee) {
+      this.error = 'Only users with Employee role can be assigned.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.clearMessages();
+    this.assigningTaskId = taskId;
+
+    const payload: UpdateTaskRequest = {
+      id: taskId,
+      title: String(task.title ?? '').trim(),
+      description: String(task.description ?? '').trim(),
+      estimatedHours: Number(task.estimatedHours ?? 0),
+      status: this.normalizeTaskState(task.status),
+      complexity: Number(task.complexity ?? 1),
+      startDate: this.toDateInput(task.startDate),
+      endDate: this.toDateInput(task.endDate),
+      userStoryId: Number(task.userStoryId ?? 0),
+      sprintId: task.sprintId != null ? Number(task.sprintId) : null,
+      assignedToId: assigneeId,
+    };
+
+    this.taskService.update(payload).subscribe({
+      next: () => {
+        const selectedEmployee = this.employeeUsers.find((user) => Number(user.id) === assigneeId);
+        (task as any).assignedToId = assigneeId;
+        (task as any).assignedToName = selectedEmployee ? this.getEmployeeLabel(selectedEmployee) : null;
+        this.success = 'Employee assigned successfully.';
+        this.assigningTaskId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'Unable to assign employee to task.';
+        this.assigningTaskId = null;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   canMessageAssignedEmployee(task: TaskDto): boolean {

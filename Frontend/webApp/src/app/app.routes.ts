@@ -73,15 +73,60 @@ export const routes: Routes = [
             { path: 'SprintManage', component: SprintManager },
             { path: 'sprint/manage/:projectId', component: SprintManager },
             { path: 'TeamManage', component: TeamManage },
-            { path: 'TaskManage', component: TaskManager },
-            { path: 'task/manage', component: TaskManager },
-            { path: 'task/manage/:userStoryId', component: TaskManager },
-            { path: 'task/create/:userStoryId', component: TaskManager },
-            { path: 'task/edit/:id', component: TaskManager },
-            { path: 'UserStoryManage', component: UserStoryManagerComponent },
-            { path: 'userstory/manage/:sprintId', component: UserStoryManagerComponent },
-            { path: 'userstory/create/:sprintId', component: UserStoryManagerComponent },
-            { path: 'userstory/edit/:id', component: UserStoryManagerComponent }
+            {
+                path: 'TaskManage',
+                component: TaskManager,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+            },
+            {
+                path: 'task/manage',
+                component: TaskManager,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+            },
+            {
+                path: 'task/manage/:userStoryId',
+                component: TaskManager,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+            },
+            {
+                path: 'task/create/:userStoryId',
+                component: TaskManager,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+            },
+            {
+                path: 'task/edit/:id',
+                component: TaskManager,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+            },
+            {
+                path: 'UserStoryManage',
+                component: UserStoryManagerComponent,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager] }
+            },
+            {
+                path: 'userstory/manage/:sprintId',
+                component: UserStoryManagerComponent,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager] }
+            },
+            {
+                path: 'userstory/create/:sprintId',
+                component: UserStoryManagerComponent,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager] }
+            },
+            {
+                path: 'userstory/edit/:id',
+                component: UserStoryManagerComponent,
+                canActivate: [roleGuard],
+                data: { roles: [AppRole.ProjectManager] }
+            }
         ]
     },
     { path: '**', redirectTo: '' }

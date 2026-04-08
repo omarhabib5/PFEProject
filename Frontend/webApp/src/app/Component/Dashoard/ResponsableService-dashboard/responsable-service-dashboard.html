@@ -235,6 +235,9 @@
                     <div class="section-title-row">
                         <h4>Service projects</h4>
                         <div class="inline-actions">
+                            <button class="secondary-btn" type="button" (click)="openTaskManager(selectedProject?.id)">
+                                Create task (no assignee)
+                            </button>
                             <button class="primary-btn" type="button" (click)="openProjectEdit()">
                                 <span class="btn-icon">+</span> New project
                             </button>
@@ -335,6 +338,7 @@
                     <div class="section-title-row">
                         <h4>Service sprints</h4>
                         <div class="inline-actions">
+                            <button class="secondary-btn" type="button" (click)="openTaskManager(selectedProject?.id)">Create task</button>
                             <button class="secondary-btn" type="button" (click)="openSprints()">Open sprint manager</button>
                             <button class="primary-btn" type="button" (click)="openCreateSprintForm()"><span class="btn-icon">+</span> New sprint</button>
                         </div>
@@ -404,7 +408,7 @@
                         </form>
                     </div>
 
-                    <div class="team-table-wrap" *ngIf="availableSprints.length > 0">
+                    <div class="team-table-wrap" *ngIf="(selectedProject ? selectedProjectSprints : availableSprints).length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
@@ -416,7 +420,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let sprint of availableSprints">
+                                <tr *ngFor="let sprint of (selectedProject ? selectedProjectSprints : availableSprints)">
                                     <td>{{ sprint.name }}</td>
                                     <td>{{ getSprintProjectName(sprint) }}</td>
                                     <td><span class="status-chip" [ngClass]="getSprintStateClass(sprint.sprintState)">{{ getSprintStateLabel(sprint.sprintState) }}</span></td>
@@ -432,15 +436,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <p *ngIf="availableSprints.length === 0" class="empty-team">No sprint available for this service.</p>
+                    <p *ngIf="(selectedProject ? selectedProjectSprints : availableSprints).length === 0" class="empty-team">No sprint available for the selected project.</p>
                 </div>
 
                 <div *ngIf="activeTab === 'userStories'" class="team-tab-content">
                     <div class="section-title-row">
                         <h4>User stories (read-only)</h4>
                     </div>
+                    <p class="empty-line">Only project managers can create user stories.</p>
 
-                    <div class="team-table-wrap" *ngIf="serviceUserStories.length > 0">
+                    <div class="team-table-wrap" *ngIf="selectedProjectUserStories.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
@@ -454,7 +459,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let story of serviceUserStories">
+                                <tr *ngFor="let story of selectedProjectUserStories">
                                     <td>
                                         <strong>{{ story.title || story.name }}</strong>
                                         <small class="table-subtext">{{ story.description || 'No description' }}</small>
@@ -474,7 +479,7 @@
                         </table>
                     </div>
 
-                    <p *ngIf="serviceUserStories.length === 0" class="empty-team">No user stories available for this service.</p>
+                    <p *ngIf="selectedProjectUserStories.length === 0" class="empty-team">No user stories available for the selected project.</p>
                 </div>
 
                 <div *ngIf="activeTab === 'teamMembers'" class="team-tab-content">
@@ -804,7 +809,7 @@
                 <div class="user-story-field">
                     <label>Sprint</label>
                     <select [(ngModel)]="userStoryForm.sprintId" name="storySprint" required>
-                        <option *ngFor="let sprint of availableSprints" [ngValue]="sprint.id">{{ sprint.name }}</option>
+                        <option *ngFor="let sprint of (selectedProject ? selectedProjectSprints : availableSprints)" [ngValue]="sprint.id">{{ sprint.name }}</option>
                     </select>
                 </div>
 

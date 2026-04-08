@@ -424,7 +424,9 @@
           <section *ngIf="activeProjectTab === 'tasks'">
             <div class="mb-3 flex items-center justify-between">
               <h3 class="text-2xl font-black text-slate-900">Task List</h3>
-              <span class="text-xs font-semibold text-slate-500">Task management is handled by Service Manager.</span>
+              <div class="flex gap-2">
+                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white" type="button" disabled>Affected Employee</button>
+              </div>
             </div>
 
             <div class="mb-3">
@@ -433,32 +435,6 @@
               </div>
               <small class="mt-1 block text-xs text-slate-500">{{ completedTasksCount }} / {{ selectedProjectTasks.length }} tasks completed</small>
             </div>
-
-            <form *ngIf="showTaskForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitTask()">
-              <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
-                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.title" name="taskTitle" type="text" placeholder="Title" />
-                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.status" name="taskStatus">
-                  <option *ngFor="let status of taskStatusOptions" [ngValue]="status.value">{{ status.label }}</option>
-                </select>
-                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.userStoryId" (ngModelChange)="onTaskUserStoryChange()" name="taskUserStoryId">
-                  <option [ngValue]="0">User Story</option>
-                  <option *ngFor="let story of filteredUserStories" [ngValue]="+story.id">{{ story.name || story.title || ('US #' + story.id) }}</option>
-                </select>
-                <select class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.assignedToUserId" name="taskAssignedToUserId">
-                  <option [ngValue]="null">Select an employee</option>
-                  <option *ngFor="let user of employeeUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
-                </select>
-
-                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.complexity" name="taskComplexity" type="number" min="1" placeholder="Complexity" />
-                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.startDate" (ngModelChange)="onTaskStartDateChange()" name="taskStart" type="date" [min]="taskMinDateInput" [max]="taskMaxDateInput" />
-                <input class="rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.endDate" name="taskEnd" type="date" [min]="taskForm.startDate || taskMinDateInput" [max]="taskMaxDateInput" />
-              </div>
-              <textarea class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="taskForm.description" name="taskDescription" rows="2" placeholder="Description"></textarea>
-              <div class="mt-3 flex gap-2">
-                <button class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" type="submit" [disabled]="taskSaving">{{ taskEditId ? 'Update' : 'Create' }}</button>
-                <button class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700" type="button" (click)="cancelTaskForm()">Cancel</button>
-              </div>
-            </form>
 
             <div class="space-y-3" *ngIf="filteredTasks.length > 0; else noTasks">
               <article class="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4" *ngFor="let task of filteredTasks">
@@ -506,7 +482,20 @@
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <span class="text-xs font-semibold text-slate-400">Read only</span>
+                  <select
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
+                    [ngModel]="getSelectedAssignee(task)"
+                    (ngModelChange)="setSelectedAssignee(task, $event)">
+                    <option [ngValue]="null">Select Employee</option>
+                    <option *ngFor="let user of assignableUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="rounded-lg border border-slate-900 bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    (click)="assignEmployeeToTask(task)"
+                    [disabled]="assigningTaskId === task.id">
+                    {{ assigningTaskId === task.id ? 'Assigning...' : 'Affect Employee' }}
+                  </button>
                 </div>
               </article>
             </div>

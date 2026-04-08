@@ -12,6 +12,8 @@ import { TeamService, TeamUser } from '../../Team/Service/TeamService';
 import { ProjectService, project } from '../../Projet/Service/ProjectService';
 import { SprintService, Sprint } from '../../Sprint/Service/SprintService';
 import { combineLatest, forkJoin, of } from 'rxjs';
+import { AppRole } from '../../../Auth/model/auth.model';
+import { TokenService } from '../../../Auth/Service/token.service';
 
 @Component({
   selector: 'app-task-manager',
@@ -60,7 +62,8 @@ export class TaskManager implements OnInit {
     private sprintService: SprintService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -299,6 +302,10 @@ export class TaskManager implements OnInit {
     return this.toDateInput(new Date(selectedStory.endDate).toISOString());
   }
 
+  get canAssignTasks(): boolean {
+    return this.tokenService.getUserRole() === AppRole.ProjectManager;
+  }
+
   onUserStoryChange(): void {
     const selectedStory = this.getSelectedUserStory();
     const sprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
@@ -466,6 +473,11 @@ export class TaskManager implements OnInit {
   }
 
   private refreshAssignableUsers(): void {
+    if (!this.canAssignTasks) {
+      this.setAssignableUsers([]);
+      return;
+    }
+
     const teamId = this.resolveSelectedStoryTeamId();
 
     if (!teamId) {
@@ -543,7 +555,8 @@ export class TaskManager implements OnInit {
   private setAssignableUsers(users: UserDto[]): void {
     this.assignableUsers = Array.isArray(users) ? users : [];
 
-    if (this.formModel.assignedToId != null
+    if (this.canAssignTasks
+      && this.formModel.assignedToId != null
       && !this.assignableUsers.some((user) => Number(user.id) === Number(this.formModel.assignedToId))) {
       this.formModel.assignedToId = null;
     }

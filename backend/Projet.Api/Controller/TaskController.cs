@@ -56,16 +56,21 @@ namespace Projet.Api.Controller
         }
 
         [HttpPost]
-        [Authorize(Roles = "ServiceManager")]
+        [Authorize(Roles = "ProjectManager,ServiceManager")]
         public async Task<IActionResult> Create([FromBody] CreateTaskCommand command)
         {
+            if (!User.IsInRole("ProjectManager") && command.AssignedToId.HasValue)
+            {
+                return Forbid();
+            }
+
             var taskId = await _mediator.Send(command);
             await _notificationService.NotifyTaskAddedAsync(taskId);
             return CreatedAtAction(nameof(GetById), new { id = taskId }, new { id = taskId });
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "ServiceManager,Observer,Employee")]
+        [Authorize(Roles = "ProjectManager,ServiceManager,Observer,Employee")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskCommand command)
         {
             if (id != command.Id)
@@ -86,22 +91,41 @@ namespace Projet.Api.Controller
             var oldStatus = existingTask.Status;
             var oldAssignedToId = existingTask.AssignedToId;
 
+            if (!User.IsInRole("ProjectManager") && oldAssignedToId != command.AssignedToId)
+            {
+                return Forbid();
+            }
+
+            if (!User.IsInRole("ProjectManager") && oldStatus != command.Status)
+            {
+                return Forbid();
+            }
+
             try
             {
+                var shouldNotifyAssignmentChange = oldAssignedToId != command.AssignedToId && command.AssignedToId.HasValue;
+                var projectManagerId = await _dbContext.UserStories
+                    .Where(us => us.Id == command.UserStoryId)
+                    .Select(us => (int?)us.Project.ProjectManagerId)
+                    .FirstOrDefaultAsync() ?? 0;
+
                 await _mediator.Send(command);
 
                 var isStatusChanged = oldStatus != command.Status;
                 var isNotValidatedStatus = command.Status != State.validated;
                 var shouldNotifyStakeholders = isStatusChanged && isNotValidatedStatus;
 
+                if (shouldNotifyAssignmentChange)
+                {
+                    await _notificationService.NotifyTaskAssignedAsync(
+                        taskId: id,
+                        projectManagerId: projectManagerId,
+                        assignedToId: command.AssignedToId ?? 0);
+                }
+
                 if (shouldNotifyStakeholders)
                 {
                     var assignedToId = command.AssignedToId ?? oldAssignedToId ?? 0;
-                    var projectManagerId = await _dbContext.UserStories
-                        .Where(us => us.Id == command.UserStoryId)
-                        .Select(us => (int?)us.Project.ProjectManagerId)
-                        .FirstOrDefaultAsync() ?? 0;
-
                     await _notificationService.NotifyTaskStatusChangeAsync(
                         taskId: id,
                         projectManagerId: projectManagerId,
@@ -124,7 +148,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ServiceManager")]
+        [Authorize(Roles = "ProjectManager")]
         public async Task<IActionResult> Delete(int id)
         {
             try

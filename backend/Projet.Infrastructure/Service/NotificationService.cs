@@ -24,6 +24,9 @@ namespace Projet.Infrastructure.Service
         System.Threading.Tasks.Task<Notification> NotifyTaskStatusChangeAsync(int taskId, int projectManagerId, 
             string oldStatus, string newStatus, int assignedToId);
 
+        System.Threading.Tasks.Task<Notification> NotifyTaskAssignedAsync(int taskId, int projectManagerId,
+            int assignedToId);
+
         System.Threading.Tasks.Task<Notification> NotifyTaskAddedAsync(int taskId);
 
         System.Threading.Tasks.Task<Notification> NotifyUserStoryAddedAsync(int userStoryId, int projectManagerId, 
@@ -163,6 +166,65 @@ namespace Projet.Infrastructure.Service
 
             return employeeNotification ?? pmNotification
                 ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification de statut de tâche");
+        }
+
+        public async System.Threading.Tasks.Task<Notification> NotifyTaskAssignedAsync(int taskId, int projectManagerId,
+            int assignedToId)
+        {
+            var task = await _context.Set<DomainTask>()
+                .Include(t => t.UserStory)
+                    .ThenInclude(us => us.Project)
+                .Include(t => t.AssignedTo)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                throw new InvalidOperationException("Tâche non trouvée");
+            }
+
+            var projectName = task.UserStory?.Project?.name ?? "Projet";
+            var link = $"/tasks/{taskId}";
+            var title = "Tâche affectée";
+            var assignedUserName = task.AssignedTo != null
+                ? $"{task.AssignedTo.FirstName} {task.AssignedTo.LastName}".Trim()
+                : "l'employé";
+
+            Notification? assigneeNotification = null;
+            if (assignedToId > 0)
+            {
+                assigneeNotification = await CreateNotificationAsync(
+                    userId: assignedToId,
+                    title: title,
+                    message: $"Une tâche '{task.Title}' vous a été affectée sur le projet '{projectName}'.",
+                    type: NotificationType.Info,
+                    category: NotificationCategory.TaskUpdate,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedProjectId: task.UserStory?.ProjectId,
+                    relatedUserStoryId: task.UserStoryId,
+                    relatedUserId: projectManagerId > 0 ? projectManagerId : null,
+                    newValue: assignedToId.ToString());
+            }
+
+            Notification? pmNotification = null;
+            if (projectManagerId > 0 && projectManagerId != assignedToId)
+            {
+                pmNotification = await CreateNotificationAsync(
+                    userId: projectManagerId,
+                    title: title,
+                    message: $"La tâche '{task.Title}' a été affectée à {assignedUserName} dans le projet '{projectName}'.",
+                    type: NotificationType.Info,
+                    category: NotificationCategory.TaskUpdate,
+                    link: link,
+                    relatedTaskId: taskId,
+                    relatedProjectId: task.UserStory?.ProjectId,
+                    relatedUserStoryId: task.UserStoryId,
+                    relatedUserId: assignedToId > 0 ? assignedToId : null,
+                    newValue: assignedToId.ToString());
+            }
+
+            return assigneeNotification ?? pmNotification
+                ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification d'affectation de tâche");
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyTaskAddedAsync(int taskId)

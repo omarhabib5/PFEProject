@@ -43,9 +43,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Status</label>
-                    <select [(ngModel)]="formModel.status">
+                    <select [(ngModel)]="formModel.status" [disabled]="!canAssignTasks">
                         <option *ngFor="let option of statusOptions" [ngValue]="option.value">{{ option.label }}</option>
                     </select>
+                    <small *ngIf="!canAssignTasks" class="text-xs text-slate-600">Only project manager can change task status</small>
                 </div>
 
                 <div class="form-group">
@@ -72,7 +73,7 @@
             </div>
 
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" *ngIf="canAssignTasks; else assignmentReadOnly">
                     <label>Assign to</label>
                     <select [(ngModel)]="formModel.assignedToId">
                         <option [ngValue]="null">Unassigned</option>
@@ -81,6 +82,13 @@
                         </option>
                     </select>
                 </div>
+
+                <ng-template #assignmentReadOnly>
+                    <div class="form-group">
+                        <label>Assignment</label>
+                        <p>Task assignment is reserved for the project manager.</p>
+                    </div>
+                </ng-template>
 
                 <div class="form-group sprint-hint">
                     <label>Sprint Date Rule</label>

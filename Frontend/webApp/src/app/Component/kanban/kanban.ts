@@ -9,6 +9,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { AuthService } from '../Auth/Service/auth.service'
 import { TokenService } from '../Auth/Service/token.service';
+import { AppRole } from '../Auth/model/auth.model';
 import { TaskDto, TaskService, TaskState, UpdateTaskRequest } from '../Page/Task/Service/TaskService';
 import { UserStoryService } from '../Page/UserStory/Service/UserStoryService';
 import { UserApiService, UserDto } from '../Page/Team/Service/UserApiService';
@@ -108,6 +109,11 @@ export class KanbanComponent implements OnInit, OnChanges {
     return typeof this.projectId === 'number' && Number.isFinite(this.projectId) && this.projectId > 0;
   }
 
+  isDragDropDisabled(): boolean {
+    const userRole = this.tokenService.getUserRole();
+    return userRole === AppRole.ServiceManager;
+  }
+
   getUserStoryLabel(userStoryId: number): string {
     return this.userStoryNameMap[userStoryId] ?? `US #${userStoryId}`;
   }
@@ -146,6 +152,13 @@ export class KanbanComponent implements OnInit, OnChanges {
   }
 
   drop(event: CdkDragDrop<TaskDto[]>, targetColumn: BoardColumn): void {
+    const userRole = this.tokenService.getUserRole();
+    if (userRole === AppRole.ServiceManager) {
+      this.error = 'Service manager cannot change task status.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (this.employeeMode && !['todo', 'in-progress', 'done'].includes(targetColumn.id)) {
       this.error = 'Employees can only move tasks between To Do, In Progress, and Done.';
       this.cdr.detectChanges();

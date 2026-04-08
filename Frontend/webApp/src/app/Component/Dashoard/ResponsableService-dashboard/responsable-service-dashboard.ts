@@ -273,6 +273,72 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return this.availableSprints.filter((sprint) => Number(sprint.projectId) === Number(project.id));
   }
 
+  get selectedProjectUserStories(): ServiceUserStoryRow[] {
+    const project = this.selectedProject;
+    if (!project?.id) return [];
+
+    const projectId = Number(project.id);
+    const sprintIds = new Set(this.selectedProjectSprints.map((sprint) => Number(sprint.id)));
+
+    return this.serviceUserStories.filter((story) => {
+      const storyProjectId = Number((story as any)?.projectId ?? 0);
+      const sprintId = Number(story.sprintId ?? 0);
+      return storyProjectId === projectId || sprintIds.has(sprintId);
+    });
+  }
+
+  get selectedProjectTasks(): TaskDto[] {
+    const project = this.selectedProject;
+    if (!project?.id) return [];
+
+    const projectId = Number(project.id);
+    const sprintIds = new Set(this.selectedProjectSprints.map((sprint) => Number(sprint.id)));
+    const storyIds = new Set(this.selectedProjectUserStories.map((story) => Number(story.numericId)));
+
+    return this.serviceTasks.filter((task) => {
+      const taskProjectId = this.getTaskProjectId(task);
+      const taskSprintId = Number(task.sprintId ?? 0);
+      const taskStoryId = Number(task.userStoryId ?? 0);
+      return taskProjectId === projectId || sprintIds.has(taskSprintId) || storyIds.has(taskStoryId);
+    });
+  }
+
+  private getTaskProjectId(task: TaskDto): number {
+    const directProjectId = Number((task as any)?.projectId ?? (task as any)?.ProjectId ?? 0);
+    if (directProjectId > 0) {
+      return directProjectId;
+    }
+
+    const sprintId = Number(task.sprintId ?? 0);
+    if (sprintId > 0) {
+      const sprint = this.availableSprints.find((item) => Number(item.id) === sprintId);
+      const sprintProjectId = Number((sprint as any)?.projectId ?? (sprint as any)?.ProjectId ?? 0);
+      if (sprintProjectId > 0) {
+        return sprintProjectId;
+      }
+    }
+
+    const storyId = Number(task.userStoryId ?? 0);
+    if (storyId > 0) {
+      const story = this.serviceUserStories.find((item) => Number((item as any)?.numericId ?? (item as any)?.id ?? 0) === storyId);
+      const storyProjectId = Number((story as any)?.projectId ?? (story as any)?.ProjectId ?? 0);
+      if (storyProjectId > 0) {
+        return storyProjectId;
+      }
+
+      const storySprintId = Number((story as any)?.sprintId ?? (story as any)?.SprintId ?? 0);
+      if (storySprintId > 0) {
+        const storySprint = this.availableSprints.find((item) => Number(item.id) === storySprintId);
+        const storySprintProjectId = Number((storySprint as any)?.projectId ?? (storySprint as any)?.ProjectId ?? 0);
+        if (storySprintProjectId > 0) {
+          return storySprintProjectId;
+        }
+      }
+    }
+
+    return 0;
+  }
+
   get selectedProjectProgressPercent(): number {
     const project = this.selectedProject;
     if (!project) return 0;
@@ -394,7 +460,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   get selectedCalendarDayTasks(): TaskDto[] {
     const selectedIso = this.selectedCalendarDateIso;
-    return this.serviceTasks.filter((task) => {
+    const scopedTasks = this.selectedProject ? this.selectedProjectTasks : this.serviceTasks;
+
+    return scopedTasks.filter((task) => {
       const startIso = this.getSafeIsoDate(task.startDate);
       const endIso = this.getSafeIsoDate(task.endDate);
       if (!startIso || !endIso) {
@@ -406,7 +474,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   get selectedCalendarDayProjectDeadlines(): ProjectEntity[] {
     const selectedIso = this.selectedCalendarDateIso;
-    return this.selectedServiceProjects.filter((project) => {
+    const scopedProjects = this.selectedProject ? [this.selectedProject] : this.selectedServiceProjects;
+
+    return scopedProjects.filter((project) => {
       const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
       return !!deadlineIso && deadlineIso === selectedIso;
     });
@@ -944,6 +1014,22 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
+  openTaskManager(projectId?: number): void {
+    const numericProjectId = Number(projectId ?? this.selectedProjectId ?? this.selectedServiceProjects[0]?.id ?? 0);
+    if (!numericProjectId) {
+      this.error = 'Add a project to this service before creating a task.';
+      return;
+    }
+
+    this.error = '';
+    this.router.navigate(['/task/manage'], {
+      queryParams: {
+        projectId: numericProjectId,
+        source: 'service-manager'
+      }
+    });
+  }
+
   openSprintManager(projectId?: number): void {
     const numericProjectId = Number(projectId ?? 0);
     if (!numericProjectId) {
@@ -1338,75 +1424,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   submitCreateUserStory(): void {
-    if (!this.selectedServiceProjects[0]?.id || !this.userStoryForm.sprintId || !this.userStoryForm.title.trim()) {
-      this.error = 'Please fill in required user story fields.';
-      return;
-    }
-
-    const selectedSprint = this.getSelectedSprint();
-    if (!selectedSprint) {
-      this.error = 'Selected sprint not found.';
-      return;
-    }
-
-    const relatedProject = this.selectedServiceProjects.find(
-      (project) => Number(project.id ?? 0) === Number(selectedSprint.projectId)
-    ) ?? this.selectedServiceProjects[0];
-
-    const sprintStartInput = this.toDateInput(selectedSprint.startDate);
-    const sprintEndInput = this.toDateInput(selectedSprint.endDate);
-    const projectStartInput = this.toDateInput(relatedProject?.startDate as Date | string | undefined);
-    const projectEndInput = this.toDateInput(relatedProject?.endDate as Date | string | undefined);
-
-    const startDateInput = this.maxDateString(projectStartInput, sprintStartInput);
-    const endDateInput = this.minDateString(projectEndInput, sprintEndInput);
-
-    if (!this.isDateInRange(startDateInput, projectStartInput, projectEndInput)
-      || !this.isDateInRange(startDateInput, sprintStartInput, sprintEndInput)
-      || !this.isDateInRange(endDateInput, projectStartInput, projectEndInput)
-      || !this.isDateInRange(endDateInput, sprintStartInput, sprintEndInput)
-      || endDateInput < startDateInput) {
-      this.error = 'User story dates are outside sprint/project range.';
-      return;
-    }
-
-    this.userStorySubmitting = true;
-    this.error = '';
-
-    const startDate = this.parseToLocalDate(startDateInput);
-    const endDate = this.parseToLocalDate(endDateInput);
-    const estimatedDuration = Math.max(
-      1,
-      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    );
-
-    const request: CreateUserStoryRequest = {
-      name: this.userStoryForm.title,
-      title: this.userStoryForm.title,
-      description: this.userStoryForm.description || this.userStoryForm.title,
-      acceptanceCriteria: this.userStoryForm.acceptanceCriteria,
-      storyPoints: Number(this.userStoryForm.storyPoints),
-      priority: Number(this.userStoryForm.priority),
-      status: UserStoryStatus.TODO,
-      startDate,
-      endDate,
-      estimatedDuration,
-      userStoryState: 1,
-      projectId: Number(relatedProject?.id ?? 0),
-      sprintId: Number(this.userStoryForm.sprintId),
-    };
-
-    this.userStoryService.create(request)
-      .pipe(finalize(() => (this.userStorySubmitting = false)))
-      .subscribe({
-        next: () => {
-          this.showUserStoryModal = false;
-          this.loadServiceUserStories();
-        },
-        error: () => {
-          this.error = 'Unable to create user story.';
-        }
-      });
+    this.error = 'Service manager cannot create user stories.';
   }
 
   logout(): void {
@@ -1687,7 +1705,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   getSprintNameByUserStory(story: ServiceUserStoryRow): string {
     const sprintId = Number(story?.sprintId ?? 0);
     if (!sprintId) return '-';
-    const sprint = this.availableSprints.find((item) => Number(item.id) === sprintId);
+    const scopedSprints = this.selectedProject ? this.selectedProjectSprints : this.availableSprints;
+    const sprint = scopedSprints.find((item) => Number(item.id) === sprintId);
     return sprint?.name ?? `Sprint #${sprintId}`;
   }
 
@@ -1940,7 +1959,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     }
 
     const projectDeadlineCountByIso: Record<string, number> = {};
-    this.selectedServiceProjects.forEach((project) => {
+    const scopedProjects = this.selectedProject ? [this.selectedProject] : this.selectedServiceProjects;
+    scopedProjects.forEach((project) => {
       const deadlineIso = this.getSafeIsoDate(project.endDate as Date | string | null | undefined);
       if (!deadlineIso) {
         return;
@@ -1950,7 +1970,8 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
 
     const taskCountByIso: Record<string, number> = {};
-    this.serviceTasks.forEach((task) => {
+    const scopedTasks = this.selectedProject ? this.selectedProjectTasks : this.serviceTasks;
+    scopedTasks.forEach((task) => {
       const startIso = this.getSafeIsoDate(task.startDate);
       const endIso = this.getSafeIsoDate(task.endDate);
       if (!startIso || !endIso) {
