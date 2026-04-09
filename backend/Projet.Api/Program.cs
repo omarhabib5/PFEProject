@@ -140,13 +140,16 @@ builder.Services.AddHostedService<NotificationBackgroundJobService>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Load("Projet.Domain")));
 
+var frontendBaseUrl = builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:4200";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("FrontendCors", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(frontendBaseUrl.TrimEnd('/'))
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -177,7 +180,7 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors("FrontendCors");
 
 app.UseAuthentication();
 app.UseAuthorization();

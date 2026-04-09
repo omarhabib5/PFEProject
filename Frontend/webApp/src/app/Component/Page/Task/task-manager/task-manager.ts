@@ -53,6 +53,15 @@ export class TaskManager implements OnInit {
 
   formModel: CreateTaskRequest = this.getEmptyForm();
 
+  get canManageTasks(): boolean {
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ProjectManager;
+  }
+
+  get canAssignTasks(): boolean {
+    return this.canManageTasks;
+  }
+
   constructor(
     private taskService: TaskService,
     private userStoryService: UserStoryService,
@@ -65,6 +74,37 @@ export class TaskManager implements OnInit {
     private cdr: ChangeDetectorRef,
     private tokenService: TokenService
   ) {}
+
+  goToDashboard(): void {
+    const role = this.tokenService.getUserRole();
+
+    if (role === AppRole.Admin) {
+      void this.router.navigate(['/AdminDashboard']);
+      return;
+    }
+
+    if (role === AppRole.ServiceManager) {
+      void this.router.navigate(['/ResponsableServiceDashboard']);
+      return;
+    }
+
+    if (role === AppRole.ProjectManager) {
+      void this.router.navigate(['/ChefProjetDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Employee) {
+      void this.router.navigate(['/EmployeeDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Observer) {
+      void this.router.navigate(['/ObserverDashboard']);
+      return;
+    }
+
+    void this.router.navigate(['/login']);
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -101,6 +141,24 @@ export class TaskManager implements OnInit {
   loadTasks(): void {
     this.loading = true;
     this.error = '';
+
+    if (this.canManageTasks) {
+      this.taskService.getAll().subscribe({
+        next: (data) => {
+          this.tasks = this.selectedUserStoryId
+            ? data.filter(task => task.userStoryId === this.selectedUserStoryId)
+            : data;
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Error while loading tasks';
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
 
     if (this.selectedProjectId) {
       forkJoin({
@@ -300,10 +358,6 @@ export class TaskManager implements OnInit {
     }
 
     return this.toDateInput(new Date(selectedStory.endDate).toISOString());
-  }
-
-  get canAssignTasks(): boolean {
-    return this.tokenService.getUserRole() === AppRole.ProjectManager;
   }
 
   onUserStoryChange(): void {
@@ -675,6 +729,10 @@ export class TaskManager implements OnInit {
   }
 
   canDeleteTask(task: TaskDto): boolean {
+    if (this.canManageTasks) {
+      return true;
+    }
+
     return this.normalizeStatus(task.status) === 'pending';
   }
 

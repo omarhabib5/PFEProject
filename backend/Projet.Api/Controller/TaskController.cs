@@ -70,7 +70,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "ProjectManager,ServiceManager,Observer,Employee")]
+        [Authorize(Roles = "Admin,ProjectManager,ServiceManager,Observer,Employee")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskCommand command)
         {
             if (id != command.Id)
@@ -91,12 +91,15 @@ namespace Projet.Api.Controller
             var oldStatus = existingTask.Status;
             var oldAssignedToId = existingTask.AssignedToId;
 
-            if (!User.IsInRole("ProjectManager") && oldAssignedToId != command.AssignedToId)
+            var canManageAssignment = User.IsInRole("Admin") || User.IsInRole("ProjectManager");
+            var canManageStatus = User.IsInRole("Admin") || User.IsInRole("ProjectManager");
+
+            if (!canManageAssignment && oldAssignedToId != command.AssignedToId)
             {
                 return Forbid();
             }
 
-            if (User.IsInRole("ServiceManager") && oldStatus != command.Status)
+            if (!canManageStatus && User.IsInRole("ServiceManager") && oldStatus != command.Status)
             {
                 return Forbid();
             }
@@ -148,7 +151,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ProjectManager")]
+        [Authorize(Roles = "Admin,ProjectManager")]
         public async Task<IActionResult> Delete(int id)
         {
             try

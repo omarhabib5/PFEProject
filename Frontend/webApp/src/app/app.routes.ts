@@ -77,31 +77,31 @@ export const routes: Routes = [
                 path: 'TaskManage',
                 component: TaskManager,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager, AppRole.ServiceManager] }
             },
             {
                 path: 'task/manage',
                 component: TaskManager,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager, AppRole.ServiceManager] }
             },
             {
                 path: 'task/manage/:userStoryId',
                 component: TaskManager,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager, AppRole.ServiceManager] }
             },
             {
                 path: 'task/create/:userStoryId',
                 component: TaskManager,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager, AppRole.ServiceManager] }
             },
             {
                 path: 'task/edit/:id',
                 component: TaskManager,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager, AppRole.ServiceManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager, AppRole.ServiceManager] }
             },
             {
                 path: 'UserStoryManage',
