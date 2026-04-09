@@ -1,0 +1,132 @@
+<mxfile host="Electron" version="29.6.6">
+  <diagram id="controllers-01" name="Page-1">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2800" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="2" value="Controllers API - Diagramme corrige" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontSize=20;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="10" value="AuthController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="380" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="+ _mediator: IMediator" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="10">
+          <mxGeometry y="30" width="380" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="10">
+          <mxGeometry y="56" width="380" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="+ register(request: RegisterRequestDto): Task&lt;IActionResult&gt;&#xa;+ login(request: LoginRequestDto): Task&lt;IActionResult&gt;&#xa;+ refreshToken(request: RefreshTokenRequestDto): Task&lt;IActionResult&gt;&#xa;+ forgotPassword(request: ForgotPasswordRequestDto): Task&lt;IActionResult&gt;&#xa;+ resetPassword(request: ResetPasswordRequestDto): Task&lt;IActionResult&gt;&#xa;+ logout(): Task&lt;IActionResult&gt;&#xa;+ changePassword(request: ChangePasswordRequestDto): Task&lt;IActionResult&gt;&#xa;+ createEmployee(request: CreateEmployeeRequest): Task&lt;IActionResult&gt;&#xa;+ getCurrentUser(): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="10">
+          <mxGeometry y="64" width="380" height="216" as="geometry" />
+        </mxCell>
+
+        <mxCell id="20" value="ProjectController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="430" y="60" width="380" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="+ _mediator: IMediator&#xa;+ _notificationService: INotificationService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="20">
+          <mxGeometry y="30" width="380" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="20">
+          <mxGeometry y="74" width="380" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateProjectCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateProjectCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="20">
+          <mxGeometry y="82" width="380" height="138" as="geometry" />
+        </mxCell>
+
+        <mxCell id="30" value="TaskController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="840" y="60" width="430" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="+ _mediator: IMediator&#xa;+ _dbContext: ApplicationDbContext&#xa;+ _notificationService: INotificationService&#xa;+ _logger: ILogger&lt;TaskController&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="30">
+          <mxGeometry y="30" width="430" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="30">
+          <mxGeometry y="110" width="430" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="33" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateTaskCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateTaskCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="30">
+          <mxGeometry y="118" width="430" height="132" as="geometry" />
+        </mxCell>
+
+        <mxCell id="40" value="UserController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="20" y="380" width="380" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="41" value="+ _mediator: IMediator&#xa;+ _notificationService: INotificationService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="40">
+          <mxGeometry y="30" width="380" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="42" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="40">
+          <mxGeometry y="74" width="380" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="43" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateUserCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateUserCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="40">
+          <mxGeometry y="82" width="380" height="138" as="geometry" />
+        </mxCell>
+
+        <mxCell id="50" value="TeamController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="430" y="380" width="460" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="51" value="+ _mediator: IMediator" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="50">
+          <mxGeometry y="30" width="460" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="52" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="50">
+          <mxGeometry y="56" width="460" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="53" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateTeamCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateTeamCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;&#xa;+ getMembers(teamId: int): Task&lt;IActionResult&gt;&#xa;+ getLeaders(teamId: int): Task&lt;IActionResult&gt;&#xa;+ getEmployees(teamId: int): Task&lt;IActionResult&gt;&#xa;+ addMember(teamId: int, command: CreateTeamUserCommand): Task&lt;IActionResult&gt;&#xa;+ updateMemberRole(teamId: int, memberId: int, command: UpdateTeamUserCommand): Task&lt;IActionResult&gt;&#xa;+ removeMember(teamId: int, memberId: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="50">
+          <mxGeometry y="64" width="460" height="236" as="geometry" />
+        </mxCell>
+
+        <mxCell id="60" value="UserStoryController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="920" y="380" width="430" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="61" value="+ _mediator: IMediator" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="60">
+          <mxGeometry y="30" width="430" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="62" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="60">
+          <mxGeometry y="56" width="430" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="63" value="+ getAll(): Task&lt;ActionResult&lt;List&lt;UserStoryDto&gt;&gt;&gt;&#xa;+ getBySprintId(sprintId: int): Task&lt;ActionResult&lt;List&lt;UserStoryDto&gt;&gt;&gt;&#xa;+ getByProjectId(projectId: int): Task&lt;ActionResult&lt;List&lt;UserStoryDto&gt;&gt;&gt;&#xa;+ getById(id: int): Task&lt;ActionResult&lt;UserStoryDetailDto&gt;&gt;&#xa;+ create(request: CreateUserStoryRequest): Task&lt;ActionResult&lt;int&gt;&gt;&#xa;+ update(id: int, request: UpdateUserStoryRequest): Task&lt;ActionResult&gt;&#xa;+ updateStatus(id: int, request: UpdateUserStoryStatusRequest): Task&lt;ActionResult&gt;&#xa;+ delete(id: int): Task&lt;ActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="60">
+          <mxGeometry y="64" width="430" height="216" as="geometry" />
+        </mxCell>
+
+        <mxCell id="70" value="ServiceController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="20" y="700" width="380" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="71" value="+ _mediator: IMediator" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="70">
+          <mxGeometry y="30" width="380" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="72" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="70">
+          <mxGeometry y="56" width="380" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="73" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateServiceCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateServiceCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="70">
+          <mxGeometry y="64" width="380" height="156" as="geometry" />
+        </mxCell>
+
+        <mxCell id="80" value="SprintController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="430" y="720" width="430" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="81" value="+ _mediator: IMediator&#xa;+ _notificationService: INotificationService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="80">
+          <mxGeometry y="30" width="430" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="82" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="80">
+          <mxGeometry y="74" width="430" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="83" value="+ getAll(): Task&lt;IActionResult&gt;&#xa;+ getById(id: int): Task&lt;IActionResult&gt;&#xa;+ getByProjectId(projectId: int): Task&lt;IActionResult&gt;&#xa;+ create(command: CreateSprintCommand): Task&lt;IActionResult&gt;&#xa;+ update(id: int, command: UpdateSprintCommand): Task&lt;IActionResult&gt;&#xa;+ delete(id: int): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="80">
+          <mxGeometry y="82" width="430" height="158" as="geometry" />
+        </mxCell>
+
+        <mxCell id="90" value="NotificationController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d9d9d9;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="890" y="700" width="460" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="91" value="+ _mediator: IMediator&#xa;+ _notificationService: INotificationService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="90">
+          <mxGeometry y="30" width="460" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="92" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="90">
+          <mxGeometry y="74" width="460" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="93" value="+ getUserNotifications(userId: int): Task&lt;IActionResult&gt;&#xa;+ getUnreadNotifications(userId: int): Task&lt;IActionResult&gt;&#xa;+ getConversation(otherUserId: int): Task&lt;IActionResult&gt;&#xa;+ markAsRead(id: int): Task&lt;IActionResult&gt;&#xa;+ deleteNotification(id: int): Task&lt;IActionResult&gt;&#xa;+ sendDirectMessage(request: SendDirectMessageRequest): Task&lt;IActionResult&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="90">
+          <mxGeometry y="82" width="460" height="178" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

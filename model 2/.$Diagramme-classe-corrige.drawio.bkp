@@ -1,0 +1,82 @@
+<mxfile host="Electron" version="29.3.6">
+  <diagram id="domain-corrected-02" name="Page-1">
+    <mxGraphModel dx="1900" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="2" value="Role&#xa;ADMIN&#xa;SERVICE_MANAGER&#xa;PROJECT_MANAGER&#xa;EMPLOYEE&#xa;OBSERVER" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="ProjectStatus&#xa;PENDING&#xa;IN_PROGRESS&#xa;DONE&#xa;VALIDATED" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="210" y="20" width="170" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="TaskStatus&#xa;TODO&#xa;IN_PROGRESS&#xa;DONE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="Priority&#xa;LOW&#xa;MEDIUM&#xa;HIGH&#xa;(UserStory.Priority int)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="20" y="160" width="170" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="10" value="Service&#xa;-------------------------&#xa;+ id: int&#xa;+ name: string&#xa;+ ResponsibleId: int?&#xa;-------------------------&#xa;+ Members: ICollection&lt;User&gt;&#xa;+ Teams: ICollection&lt;Team&gt;&#xa;+ Projects: ICollection&lt;Project&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="150" width="230" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="11" value="Team&#xa;-------------------------&#xa;+ id: int&#xa;+ name: string&#xa;+ ServiceId: int&#xa;-------------------------&#xa;+ CreateSprint(sprint: Sprint)&#xa;+ AddTeam(team: Team)&#xa;+ RemoveTeam(team: Team)&#xa;+ GetSprints(): List&lt;Sprint&gt;&#xa;+ TeamUsers: ICollection&lt;TeamUser&gt;&#xa;+ Projects: ICollection&lt;Project&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="40" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="12" value="Project&#xa;-------------------------&#xa;+ id: int&#xa;+ name: string&#xa;+ description: string&#xa;+ startDate: DateTime&#xa;+ endDate: DateTime&#xa;+ estimatedDuration: int&#xa;+ projectState: State&#xa;+ ServiceId: int?&#xa;+ ProjectManagerId: int&#xa;+ TeamId: int?&#xa;-------------------------&#xa;+ Sprints: ICollection&lt;Sprint&gt;&#xa;+ UserStories: ICollection&lt;UserStory&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="200" width="280" height="250" as="geometry" />
+        </mxCell>
+
+        <mxCell id="13" value="Sprint&#xa;-------------------------&#xa;+ Id: int&#xa;+ Name: string&#xa;+ Description: string&#xa;+ estimatedDuration: int&#xa;+ startDate: DateTime&#xa;+ endDate: DateTime&#xa;+ SprintState: State&#xa;+ ProjectId: int&#xa;-------------------------&#xa;+ UserStories: ICollection&lt;UserStory&gt;&#xa;+ Tasks: ICollection&lt;Task&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="220" width="270" height="210" as="geometry" />
+        </mxCell>
+
+        <mxCell id="14" value="UserStory&#xa;-------------------------&#xa;+ Id: int&#xa;+ Title: string&#xa;+ Description: string&#xa;+ AcceptanceCriteria: string?&#xa;+ StoryPoints: int&#xa;+ Priority: int&#xa;+ Status: State&#xa;+ EstimatedDuration: int&#xa;+ SprintId: int&#xa;+ ProjectId: int&#xa;+ AssignedToId: int?&#xa;+ CreatedById: int&#xa;-------------------------&#xa;+ Tasks: ICollection&lt;Task&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="280" width="300" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="15" value="Task&#xa;-------------------------&#xa;+ Id: int&#xa;+ Title: string&#xa;+ Description: string&#xa;+ EstimatedHours: int&#xa;+ ActualHours: int?&#xa;+ Status: State&#xa;+ Complexity: int&#xa;+ StartDate: DateTime&#xa;+ EndDate: DateTime&#xa;+ UserStoryId: int&#xa;+ SprintId: int?&#xa;+ AssignedToId: int?&#xa;-------------------------&#xa;+ UserStory: UserStory&#xa;+ Sprint: Sprint?&#xa;+ AssignedTo: User?" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="590" width="300" height="250" as="geometry" />
+        </mxCell>
+
+        <mxCell id="16" value="User&#xa;-------------------------&#xa;+ Id: int&#xa;+ FirstName: string&#xa;+ LastName: string&#xa;+ Email: string&#xa;+ PasswordHash: string&#xa;+ token: string?&#xa;+ role: UserRole&#xa;+ ProfileImageUrl: string?&#xa;+ IsEmailVerified: bool&#xa;+ LastLoginAt: DateTime?&#xa;+ Serviceid: int?&#xa;+ FailedLoginAttempts: int&#xa;+ LockoutEnd: DateTime?&#xa;-------------------------&#xa;+ UpdatePassword(passwordHash: string): void&#xa;+ UpdateLastLogin(): void&#xa;+ IncrementFailedLoginAttempts(maxAttempts: int = 5, lockoutMinutes: int = 15): void&#xa;+ IsLockedOut(): bool&#xa;+ ManagedServices: ICollection&lt;Service&gt;&#xa;+ TeamUsers: ICollection&lt;TeamUser&gt;&#xa;+ ManagedProjects: ICollection&lt;Project&gt;&#xa;+ AssignedTasks: ICollection&lt;Task&gt;&#xa;+ RefreshTokens: ICollection&lt;RefreshToken&gt;&#xa;+ Notifications: ICollection&lt;Notification&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="350" width="330" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="17" value="TeamMember (TeamUser)&#xa;-------------------------&#xa;+ Id: int&#xa;+ role: Role&#xa;+ JoinedAt: DateTime&#xa;+ LeftAt: DateTime?&#xa;+ UserId: int&#xa;+ TeamId: int&#xa;-------------------------&#xa;+ User: User&#xa;+ team: Team" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="700" width="280" height="190" as="geometry" />
+        </mxCell>
+
+        <mxCell id="18" value="Notification&#xa;-------------------------&#xa;+ Id: int&#xa;+ Title: string&#xa;+ Message: string&#xa;+ Type: NotificationType&#xa;+ Category: NotificationCategory&#xa;+ IsRead: bool&#xa;+ CreatedAt: DateTime&#xa;+ UserId: int&#xa;-------------------------&#xa;+ MarkAsRead(): void&#xa;+ User: User" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="760" width="260" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="19" value="RefreshToken&#xa;-------------------------&#xa;+ Id: int&#xa;+ Token: string&#xa;+ UserId: int&#xa;+ ExpiresAt: DateTime&#xa;+ CreatedAt: DateTime&#xa;+ RevokedAt: DateTime?&#xa;-------------------------&#xa;+ IsExpired: bool&#xa;+ IsRevoked: bool&#xa;+ IsActive: bool&#xa;+ User: User" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=6;spacingTop=6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="700" width="260" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="100" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="10" target="11"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="101" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="10" target="12"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="102" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="12" target="13"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="103" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="12" target="14"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="104" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="13" target="14"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="105" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="14" target="15"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="106" value="AssignedTo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;" edge="1" parent="1" source="16" target="15"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="107" value="AssignedTo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;" edge="1" parent="1" source="16" target="14"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="108" value="CreatedBy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="16" target="14"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1370" y="380" /></Array></mxGeometry></mxCell>
+
+        <mxCell id="109" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="16" target="17"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="110" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="11" target="17"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="111" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="16" target="18"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="112" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="16" target="19"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="113" value="ProjectManager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;" edge="1" parent="1" source="16" target="12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="660" y="530" /><mxPoint x="660" y="280" /></Array></mxGeometry></mxCell>
+        <mxCell id="114" value="Responsible" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;" edge="1" parent="1" source="16" target="10"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="390" y="260" /></Array></mxGeometry></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
