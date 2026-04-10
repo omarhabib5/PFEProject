@@ -339,11 +339,12 @@ export class TaskManager implements OnInit {
     }
 
     const selectedStory = this.getSelectedUserStory();
-    if (!selectedStory?.startDate) {
-      return '';
+    const storyStartDate = (selectedStory as any)?.startDate ?? (selectedStory as any)?.StartDate;
+    if (storyStartDate) {
+      return this.toDateInput(storyStartDate);
     }
 
-    return this.toDateInput(new Date(selectedStory.startDate).toISOString());
+    return new Date().toISOString().slice(0, 10);
   }
 
   get taskMaxDateInput(): string {
@@ -353,11 +354,12 @@ export class TaskManager implements OnInit {
     }
 
     const selectedStory = this.getSelectedUserStory();
-    if (!selectedStory?.endDate) {
-      return '';
+    const storyEndDate = (selectedStory as any)?.endDate ?? (selectedStory as any)?.EndDate;
+    if (storyEndDate) {
+      return this.toDateInput(storyEndDate);
     }
 
-    return this.toDateInput(new Date(selectedStory.endDate).toISOString());
+    return new Date().toISOString().slice(0, 10);
   }
 
   onUserStoryChange(): void {

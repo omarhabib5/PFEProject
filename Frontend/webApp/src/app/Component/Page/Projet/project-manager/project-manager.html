@@ -324,9 +324,14 @@
           </div>
         </div>
 
-        <button *ngIf="canViewKanban" type="button" class="mt-8 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
-         See the Kanban board for tasks
-        </button>
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button *ngIf="canViewKanban" type="button" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold" (click)="openKanbanBoard()">
+            See the Kanban board for tasks
+          </button>
+          <button type="button" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold" (click)="openProjectBacklog()">
+            Open project backlog
+          </button>
+        </div>
       </div>
 
       <div class="project-subpanel p-6" *ngIf="detailTab === 'stories'">

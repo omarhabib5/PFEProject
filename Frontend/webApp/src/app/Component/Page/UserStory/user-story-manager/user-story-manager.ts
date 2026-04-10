@@ -261,27 +261,23 @@ export class UserStoryManagerComponent implements OnInit {
     const description = window.prompt('Description:', story.description) ?? story.description;
     const acceptanceCriteria = window.prompt('Acceptance criteria:', story.acceptanceCriteria) ?? story.acceptanceCriteria;
     const storyPoints = Number(window.prompt('Story points:', String(story.storyPoints)) ?? String(story.storyPoints));
-    const priority = Number(window.prompt('Priority (1-5):', String(story.priority)) ?? String(story.priority));
+ 
 
-    if (!this.isValidNumber(storyPoints, 1) || !this.isValidNumber(priority, 1, 5)) {
-      this.error = 'Invalid story points or priority';
-      return;
-    }
+
 
     const updatePayload: UpdateUserStoryRequest = {
       id: Number(id),
       name: title.trim(),
       title: title.trim(),
       description,
-      startDate: story.startDate ? new Date(story.startDate) : new Date(),
-      endDate: story.endDate ? new Date(story.endDate) : new Date(Date.now() + 24 * 60 * 60 * 1000),
+
       estimatedDuration: Number(story.estimatedDuration ?? 1),
       userStoryState: Number(story.userStoryState ?? 1),
       projectId: 0,
       sprintId: Number(story.sprintId ?? this.sprintId ?? 0),
       acceptanceCriteria,
       storyPoints,
-      priority,
+    
       assignedToId: story.assignedToId
     };
 

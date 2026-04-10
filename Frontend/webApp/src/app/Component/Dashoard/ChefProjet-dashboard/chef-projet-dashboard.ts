@@ -599,9 +599,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
         description: payload.description,
         acceptanceCriteria: payload.acceptanceCriteria,
         storyPoints: payload.storyPoints,
-        priority: payload.priority,
-        startDate: storyToEdit?.startDate ? new Date(storyToEdit.startDate) : payload.startDate,
-        endDate: storyToEdit?.endDate ? new Date(storyToEdit.endDate) : payload.endDate,
+    
         estimatedDuration: Number((storyToEdit as any)?.estimatedDuration ?? payload.estimatedDuration ?? 1),
         userStoryState: Number((storyToEdit as any)?.userStoryState ?? payload.userStoryState ?? 1),
         projectId: Number((storyToEdit as any)?.projectId ?? payload.projectId),
@@ -854,15 +852,13 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   get taskMinDateInput(): string {
-    const story = this.getSelectedTaskUserStory();
-    const storyStart = story?.startDate ? this.toDateInput(story.startDate) : '';
-    return this.maxDateString(this.projectStartDateInput, storyStart);
+    const sprintRange = this.getSelectedTaskSprintDateRange();
+    return this.maxDateString(this.projectStartDateInput, sprintRange?.start);
   }
 
   get taskMaxDateInput(): string {
-    const story = this.getSelectedTaskUserStory();
-    const storyEnd = story?.endDate ? this.toDateInput(story.endDate) : '';
-    return this.minDateString(this.projectEndDateInput, storyEnd);
+    const sprintRange = this.getSelectedTaskSprintDateRange();
+    return this.minDateString(this.projectEndDateInput, sprintRange?.end);
   }
 
   get managerDisplayName(): string {
@@ -2029,6 +2025,33 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
   private getSelectedTaskUserStory(): UserStoryDto | undefined {
     return this.filteredUserStories.find((item) => Number((item as any)?.id ?? (item as any)?.Id ?? 0) === Number(this.taskForm.userStoryId));
+  }
+
+  private getSelectedTaskSprintDateRange(): { start: string; end: string } | null {
+    const formSprintId = Number(this.taskForm.sprintId ?? 0);
+    const selectedStory = this.getSelectedTaskUserStory();
+    const storySprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+    const sprintId = formSprintId > 0 ? formSprintId : storySprintId;
+
+    if (!sprintId) {
+      return null;
+    }
+
+    const sprint = this.selectedProjectSprints.find((item) => Number((item as any)?.id ?? 0) === sprintId)
+      ?? this.sprints.find((item) => Number((item as any)?.id ?? 0) === sprintId);
+
+    if (!sprint) {
+      return null;
+    }
+
+    const start = this.toDateInput((sprint as any)?.startDate ?? (sprint as any)?.StartDate);
+    const end = this.toDateInput((sprint as any)?.endDate ?? (sprint as any)?.EndDate);
+
+    if (!start || !end) {
+      return null;
+    }
+
+    return { start, end };
   }
 
   private loadUserStoriesForProjects(projectIds: number[]): Observable<UserStoryDto[]> {

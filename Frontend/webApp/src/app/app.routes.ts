@@ -15,6 +15,7 @@ import { TeamManage } from './Component/Page/Team/team-manage/team-manage';
 import { TaskManager } from './Component/Page/Task/task-manager/task-manager';
 import { UserStoryManagerComponent } from './Component/Page/UserStory/user-story-manager/user-story-manager';
 import { KanbanComponent } from './Component/kanban/kanban';
+import { Backlog } from './Component/BackLog/backlog/backlog';
 import { ResetPassword } from './Component/Auth/reset-password/reset-password';
 import { AppRole } from './Component/Auth/model/auth.model';
 import { authGuard, guestGuard, roleGuard } from './Component/Auth/Service/auth.guards';
@@ -59,6 +60,7 @@ export const routes: Routes = [
             },
 
             { path: 'kanban', component: KanbanComponent },
+            { path: 'Backlog', component: Backlog },
           
             
             { path: 'users', component: UserManage },

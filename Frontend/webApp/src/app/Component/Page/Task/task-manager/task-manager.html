@@ -35,10 +35,7 @@
                     <input [(ngModel)]="formModel.complexity" type="number" min="1" />
                 </div>
 
-                <div class="form-group">
-                    <label>Estimated Hours</label>
-                    <input [(ngModel)]="formModel.estimatedHours" type="number" min="1" />
-                </div>
+       
             </div>
 
             <div class="form-row">
@@ -124,7 +121,7 @@
 
                     <div class="meta">
                         <span>{{ getUserStoryLabel(task.userStoryId) }}</span>
-                        <span>{{ task.estimatedHours }}h</span>
+                     
                     </div>
 
                     <div class="item-actions">

@@ -13,13 +13,12 @@ export interface  UserStoryDto {
   id: string;
   title: string;
   description: string;
-  startDate?: Date;
-  endDate?: Date;
+
   estimatedDuration?: number;
   userStoryState?: number;
   acceptanceCriteria: string;
   storyPoints: number;
-  priority: number;
+
   status?: UserStoryStateValue;
   sprintId: string;
   assignedToId?: string;
@@ -72,8 +71,8 @@ export interface UpdateUserStoryRequest {
   id: number;
   name: string;
   description: string;
-  startDate: Date;
-  endDate: Date;
+  
+
   estimatedDuration: number;
   userStoryState: number;
   projectId: number;
@@ -81,7 +80,7 @@ export interface UpdateUserStoryRequest {
   title?: string;
   acceptanceCriteria?: string;
   storyPoints?: number;
-  priority?: number;
+
   status?: UserStoryStateValue;
   assignedToId?: string;
 }

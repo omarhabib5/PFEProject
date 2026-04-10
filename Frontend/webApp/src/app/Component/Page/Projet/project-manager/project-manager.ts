@@ -416,6 +416,11 @@ export class ProjectManager implements OnInit {
     this.router.navigate(['/kanban'], { queryParams: projectId ? { projectId } : {} });
   }
 
+  openProjectBacklog(): void {
+    const projectId = this.selectedProject?.id;
+    this.router.navigate(['/Backlog'], { queryParams: projectId ? { projectId } : {} });
+  }
+
   validateForm(): boolean {
     if (!this.newProject.name || this.newProject.name.trim() === '') {
       this.error = 'Project name is required';
@@ -834,8 +839,7 @@ export class ProjectManager implements OnInit {
     this.newDetailUserStory = {
       name: story.name || story.title || '',
       description: story.description || '',
-      startDate: story.startDate ? this.formatDateForInput(new Date(story.startDate)) : this.formatDateForInput(new Date()),
-      endDate: story.endDate ? this.formatDateForInput(new Date(story.endDate)) : this.formatDateForInput(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+
       estimatedDuration: story.estimatedDuration ?? 1,
       userStoryState: story.userStoryState ?? this.mapStatusToState(story.status),
       sprintId: story.sprintId,
@@ -900,8 +904,8 @@ export class ProjectManager implements OnInit {
       id: Number(this.editingUserStoryDetailId),
       name: this.newDetailUserStory.name,
       description: this.newDetailUserStory.description,
-      startDate: new Date(this.newDetailUserStory.startDate),
-      endDate: new Date(this.newDetailUserStory.endDate),
+      
+    
       estimatedDuration: Number(this.newDetailUserStory.estimatedDuration),
       userStoryState: Number(this.newDetailUserStory.userStoryState),
       projectId: this.selectedProject.id,
@@ -1180,13 +1184,12 @@ export class ProjectManager implements OnInit {
       name: request.name,
       title: request.name,
       description: request.description,
-      startDate: request.startDate,
-      endDate: request.endDate,
+ 
       estimatedDuration: request.estimatedDuration,
       userStoryState: request.userStoryState,
       acceptanceCriteria: '',
       storyPoints: 0,
-      priority: 0,
+  
       status: State.todo,
       sprintId: String(request.sprintId),
       taskCount: 0,

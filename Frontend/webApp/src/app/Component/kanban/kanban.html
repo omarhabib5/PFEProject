@@ -15,6 +15,7 @@
 
   
         <div *ngIf="error" class="global-state global-state-error">{{ error }}</div>
+    <div *ngIf="!error" class="global-state">Taches affichees: {{ visibleTaskCount }}</div>
 
         <div class="board" cdkDropListGroup>
             <section class="board-column" [ngClass]="'board-column--' + column.id" *ngFor="let column of columns; trackBy: trackById">
