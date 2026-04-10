@@ -1,0 +1,141 @@
+<section class="backlog-page">
+	<header class="backlog-header">
+		<div>
+			<h1>Project Backlog</h1>
+			<p>Sprints and all related user stories for each project.</p>
+		</div>
+		<button type="button" class="refresh-btn" (click)="loadBacklog()">Refresh</button>
+	</header>
+
+	<div class="status-card" *ngIf="loading">Loading backlog...</div>
+	<div class="status-card error" *ngIf="!loading && errorMessage">{{ errorMessage }}</div>
+
+	<div class="status-card" *ngIf="!loading && !errorMessage && projectBacklogs.length === 0">
+		No projects found.
+	</div>
+
+	<div class="status-card" *ngIf="!loading && !errorMessage && selectedProjectId !== null">
+		Showing backlog for project ID: {{ selectedProjectId }}
+	</div>
+
+	<div class="status-card error" *ngIf="!loading && !errorMessage && filterProjectNotFound">
+		Project {{ selectedProjectId }} was not found in loaded projects.
+		<button type="button" class="refresh-btn" (click)="clearProjectFilter()">Show all projects</button>
+	</div>
+
+	<div class="project-list" *ngIf="!loading && !errorMessage && projectBacklogs.length > 0">
+		<article class="project-card" *ngFor="let item of projectBacklogs">
+			<header class="project-card-header">
+				<div>
+					<h2>{{ item.project.name }}</h2>
+					<p>{{ item.project.description || 'No project description.' }}</p>
+				</div>
+				<div class="project-meta">
+					<span class="chip">State: {{ getProjectStateLabel(item.project.projectState) }}</span>
+					<span class="chip">User Stories: {{ item.totalUserStories }}</span>
+					<span class="chip">Start: {{ formatDate(item.project.startDate) }}</span>
+					<span class="chip">End: {{ formatDate(item.project.endDate) }}</span>
+				</div>
+			</header>
+
+			<div class="sprint-empty" *ngIf="item.sprints.length === 0">
+				No sprints available for this project.
+			</div>
+
+			<div class="sprint-list" *ngIf="item.sprints.length > 0">
+				<section class="sprint-section" *ngFor="let sprintItem of item.sprints">
+					<!-- Sprint Header -->
+					<div class="sprint-header">
+						<div class="sprint-title">
+							<span class="sprint-icon">⚡</span>
+							<h3>{{ sprintItem.sprint.name }}</h3>
+							<span class="sprint-status-badge" [ngClass]="'status-' + getProjectStateLabel(sprintItem.sprint.sprintState).toLowerCase()">
+								{{ getProjectStateLabel(sprintItem.sprint.sprintState) }}
+							</span>
+						</div>
+						<p class="sprint-description">{{ sprintItem.sprint.description || 'No sprint description.' }}</p>
+						<div class="sprint-meta">
+							<div class="sprint-meta-item">
+								<span class="meta-label">Début:</span>
+								<span class="meta-value">{{ formatDate(sprintItem.sprint.startDate) }}</span>
+							</div>
+							<div class="sprint-meta-item">
+								<span class="meta-label">Fin:</span>
+								<span class="meta-value">{{ formatDate(sprintItem.sprint.endDate) }}</span>
+							</div>
+							<div class="sprint-meta-item">
+								<span class="meta-label">Vélocité:</span>
+								<span class="meta-value">{{ sprintItem.velocity }} pts</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="user-stories-empty" *ngIf="sprintItem.userStories.length === 0">
+						No user stories in this sprint.
+					</div>
+
+					<!-- User Stories Table -->
+					<div class="user-stories-container" *ngIf="sprintItem.userStories.length > 0">
+						<div class="table-header">
+							<div class="col-user-story">USER STORY</div>
+							<div class="col-status">STATUT</div>
+							<div class="col-priority">PRIORITÉ</div>
+							<div class="col-points">POINTS</div>
+							<div class="col-tasks">TÂCHES</div>
+							<div class="col-assignee">ASSIGNÉ À</div>
+						</div>
+
+						<div class="table-body">
+							<div class="user-story-row" *ngFor="let storyItem of sprintItem.userStories">
+								<!-- User Story Row -->
+								<div class="user-story-content">
+									<div class="col-user-story">
+										<div class="user-story-title">{{ storyItem.userStory.title }}</div>
+										<div class="user-story-description">{{ storyItem.userStory.description }}</div>
+									</div>
+									<div class="col-status">
+										<span class="status-badge" [ngClass]="'status-' + getUserStoryStatusLabel(storyItem.userStory.status).toLowerCase().replace(' ', '-')">
+											{{ getUserStoryStatusLabel(storyItem.userStory.status) }}
+										</span>
+									</div>
+									<div class="col-priority">
+										<span class="priority-badge" [ngClass]="'priority-' + storyItem.userStory.priority">
+											{{ getUserStoryPriorityLabel(storyItem.userStory.priority) }}
+										</span>
+									</div>
+									<div class="col-points">{{ storyItem.userStory.storyPoints }}</div>
+									<div class="col-tasks">
+										<div class="tasks-count">{{ storyItem.userStory.taskCount }}</div>
+										<div class="tasks-label">tâches</div>
+									</div>
+									<div class="col-assignee">
+										<div class="assignee-avatar" *ngIf="storyItem.userStory.assignedToName">
+											{{ storyItem.userStory.assignedToName.charAt(0).toUpperCase() }}
+										</div>
+										<div class="assignee-avatar empty" *ngIf="!storyItem.userStory.assignedToName">—</div>
+									</div>
+								</div>
+
+								<!-- Associated Tasks -->
+								<div class="associated-tasks" *ngIf="storyItem.tasks.length > 0">
+									<div class="tasks-header">TÂCHES ASSOCIÉES</div>
+									<div class="tasks-list">
+										<div class="task-item" *ngFor="let task of storyItem.tasks">
+											<span class="task-marker">●</span>
+											<div class="task-info">
+												<div class="task-name">{{ task.title }}</div>
+												<div class="task-meta">
+													<span class="task-status">{{ getTaskStatusLabel(task.status) }}</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</article>
+	</div>
+</section>
