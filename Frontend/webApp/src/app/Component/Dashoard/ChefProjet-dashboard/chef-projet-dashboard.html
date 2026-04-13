@@ -332,7 +332,7 @@
                 <p class="text-sm text-slate-600">{{ story.description || 'No description' }}</p>
 
                 <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
-                  <span>🗓️ {{ formatDate(story.startDate) }} - {{ formatDate(story.endDate) }}</span>
+
                   <span>🏁 {{ getSprintName(+story.sprintId) }}</span>
                 </div>
 

@@ -71,6 +71,7 @@ export class KanbanComponent implements OnInit, OnChanges {
 
   loading = false;
   error = '';
+  visibleTaskCount = 0;
   userStoryNameMap: Record<number, string> = {};
   userNameMap: Record<number, string> = {};
 
@@ -235,6 +236,7 @@ export class KanbanComponent implements OnInit, OnChanges {
   private loadTasks(): void {
     this.loading = true;
     this.error = '';
+    this.visibleTaskCount = 0;
 
     if (this.hasProjectContext()) {
       forkJoin({
@@ -253,12 +255,12 @@ export class KanbanComponent implements OnInit, OnChanges {
               .filter((id: number) => Number.isFinite(id) && id > 0)
           );
 
-          const filteredTasks = (Array.isArray(tasks) ? tasks : []).filter((task) =>
-            allowedStoryIds.has(Number(task.userStoryId))
-          );
+          const allTasks = Array.isArray(tasks) ? tasks : [];
+          const filteredTasks = allTasks.filter((task) => this.belongsToProjectContext(task, allowedStoryIds));
 
-          this.renderTasks(filteredTasks);
+          this.renderTasks(filteredTasks.length > 0 ? filteredTasks : allTasks);
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loading = false;
@@ -273,6 +275,7 @@ export class KanbanComponent implements OnInit, OnChanges {
       next: (tasks: TaskDto[]) => {
         this.renderTasks(tasks);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
@@ -299,9 +302,25 @@ export class KanbanComponent implements OnInit, OnChanges {
       const column = this.boardColumns.find((item) => this.columnIdToStatus(item.id) === displayStatus);
       if (column) {
         column.tasks.push(task);
-        this.cdr.detectChanges();
       }
     });
+
+    this.visibleTaskCount = visibleTasks.length;
+    this.cdr.detectChanges();
+  }
+
+  private belongsToProjectContext(task: TaskDto, allowedStoryIds: Set<number>): boolean {
+    const taskStoryId = Number(task.userStoryId ?? -1);
+    if (allowedStoryIds.size > 0) {
+      return allowedStoryIds.has(taskStoryId);
+    }
+
+    const directProjectId = Number((task as any)?.projectId ?? (task as any)?.ProjectId ?? -1);
+    if (this.hasProjectContext() && Number.isFinite(directProjectId) && directProjectId > 0) {
+      return directProjectId === this.projectId;
+    }
+
+    return true;
   }
 
   private loadUserStories(): void {

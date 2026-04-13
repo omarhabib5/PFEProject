@@ -253,13 +253,13 @@
               <span>Story points</span>
             </div>
             <div>
-              <strong>{{ getStoryPriorityLabel(story.priority) }}</strong>
+            
               <span>Priority</span>
             </div>
           </div>
 
           <div class="chip-row">
-            <span class="priority-chip" [ngClass]="getStoryPriorityClass(story.priority)">{{ getStoryPriorityLabel(story.priority) }}</span>
+
             <span>{{ story.acceptanceCriteria || 'No acceptance criteria defined.' }}</span>
           </div>
         </article>

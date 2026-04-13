@@ -1136,7 +1136,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     const notifications: DeadlineNotification[] = [
       ...this.buildTaskDeadlineNotifications(),
       ...this.buildSprintDeadlineNotifications(),
-      ...this.buildUserStoryDeadlineNotifications()
+   
     ].sort((a, b) => a.daysLeft - b.daysLeft || a.title.localeCompare(b.title));
 
     this.deadlineNotifications = notifications;
@@ -1193,31 +1193,8 @@ private adminNotificationsSubscription: Subscription | null = null;
       });
   }
 
-  private buildUserStoryDeadlineNotifications(): DeadlineNotification[] {
-    return this.userStories
-      .filter((story) => {
-        if (!story.endDate || this.isUserStoryDone(story)) {
-          return false;
-        }
 
-        const daysLeft = this.getDaysLeft(story.endDate);
-        return daysLeft !== null && daysLeft >= 0 && daysLeft <= 3;
-      })
-      .map((story) => {
-        const daysLeft = this.getDaysLeft(story.endDate!) ?? 0;
-        const endDateLabel = this.formatDate(story.endDate!);
-        const displayName = story.title || story.name || `User Story #${story.id}`;
-
-        return {
-          id: `userstory-${story.id}`,
-          type: 'userStory' as const,
-          title: displayName,
-          daysLeft,
-          endDateLabel,
-          message: `User story "${displayName}" ends in ${daysLeft} day(s) (${endDateLabel}).`
-        };
-      });
-  }
+  
 
   private getDaysLeft(dateValue: Date | string): number | null {
     const target = new Date(dateValue);

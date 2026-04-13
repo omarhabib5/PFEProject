@@ -175,7 +175,7 @@ export class UserStoryService {
     const acceptanceCriteria = (request.acceptanceCriteria ?? '').trim();
 
     const storyPoints = this.toOptionalNumber(request.storyPoints);
-    const priority = this.toOptionalNumber(request.priority);
+  
     const assignedToId = this.toOptionalNumber(request.assignedToId);
     const sprintId = this.toOptionalNumber(request.sprintId);
     const status = this.normalizeStateValue(request.status ?? request.userStoryState);
@@ -186,7 +186,7 @@ export class UserStoryService {
       ...(description ? { description } : {}),
       ...(acceptanceCriteria ? { acceptanceCriteria } : {}),
       ...(storyPoints !== undefined ? { storyPoints: this.clamp(Math.round(storyPoints), 1, 100) } : {}),
-      ...(priority !== undefined ? { priority: this.clamp(Math.round(priority), 1, 5) } : {}),
+
       ...(assignedToId !== undefined ? { assignedToId } : {}),
       ...(sprintId !== undefined ? { sprintId } : {}),
       ...(status !== undefined ? { status } : {}),

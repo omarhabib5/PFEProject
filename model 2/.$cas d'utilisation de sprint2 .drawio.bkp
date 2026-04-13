@@ -1,0 +1,66 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram name="Page-1" id="qbODg6IB6eldzHcMRXKR">
+    <mxGraphModel dx="692" dy="595" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="SUlvmeM_VABJda_BXMQU-22" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="SUlvmeM_VABJda_BXMQU-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-23" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;" target="SUlvmeM_VABJda_BXMQU-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Responsable de service&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="80" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-18" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;fillColor=#008a00;strokeColor=#005700;" target="SUlvmeM_VABJda_BXMQU-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="130" />
+              <mxPoint x="210" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrateur" vertex="1">
+          <mxGeometry height="60" width="30" x="90" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Sprint 2" vertex="1">
+          <mxGeometry height="530" width="200" x="260" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-11" parent="SUlvmeM_VABJda_BXMQU-8" style="ellipse;whiteSpace=wrap;html=1;" value="Gerer Projet" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-10" parent="SUlvmeM_VABJda_BXMQU-8" style="ellipse;whiteSpace=wrap;html=1;" value="Affecter les membres aux projet" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-9" parent="SUlvmeM_VABJda_BXMQU-8" style="ellipse;whiteSpace=wrap;html=1;" value="Gerer les equipes" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-21" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=-0.007;entryY=0.608;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#1ba1e2;strokeColor=#006EAF;" target="SUlvmeM_VABJda_BXMQU-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="205" y="330" />
+              <mxPoint x="205" y="109" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-24" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.375;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#008a00;strokeColor=#005700;" target="SUlvmeM_VABJda_BXMQU-9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="130" />
+              <mxPoint x="140" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SUlvmeM_VABJda_BXMQU-25" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.02;entryY=0.392;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#008a00;strokeColor=#005700;" target="SUlvmeM_VABJda_BXMQU-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="130" />
+              <mxPoint x="180" y="461" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

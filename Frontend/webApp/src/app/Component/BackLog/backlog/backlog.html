@@ -1,0 +1,127 @@
+<section class="backlog-page">
+	<div class="backlog-shell">
+		<header class="backlog-header">
+			<div class="backlog-header__text">
+				<p class="backlog-kicker">Delivery backlog</p>
+				<h1>Project Backlog</h1>
+				<p class="backlog-subtitle">Sprint cards with user stories and associated tasks, organized by project.</p>
+			</div>
+			<div class="backlog-header__actions">
+				<button class="primary-btn" (click)="navigateToProjectDetails()">Back To Project Detail</button>
+				<button type="button" class="secondary-btn" (click)="loadBacklog()">Refresh</button>
+				<button type="button" class="primary-btn" *ngIf="selectedProjectId !== null" (click)="clearProjectFilter()">Show all projects</button>
+			</div>
+		</header>
+
+		<div class="banner banner-loading" *ngIf="loading">Loading backlog...</div>
+		<div class="banner banner-error" *ngIf="!loading && errorMessage">{{ errorMessage }}</div>
+		<div class="banner banner-info" *ngIf="!loading && selectedProjectId !== null && !filterProjectNotFound">
+			Showing backlog for project #{{ selectedProjectId }}.
+		</div>
+		<div class="banner banner-error" *ngIf="!loading && filterProjectNotFound">
+			Project {{ selectedProjectId }} was not found in loaded projects.
+		</div>
+
+		<div class="empty-state" *ngIf="!loading && !errorMessage && projectBacklogs.length === 0">
+			<h2>No backlog data</h2>
+			<p>The selected project has no sprints or the API returned no projects.</p>
+		</div>
+
+		<div class="project-list" *ngIf="!loading && !errorMessage && projectBacklogs.length > 0">
+			<article class="project-card" *ngFor="let item of projectBacklogs">
+				<header class="project-card__header">
+					<div>
+						<h2>{{ item.project.name }}</h2>
+						<p>{{ item.project.description || 'No project description.' }}</p>
+					</div>
+					<div class="project-card__meta">
+						<span class="chip chip--state">State: {{ getProjectStateLabel(item.project.projectState) }}</span>
+						<span class="chip">Stories: {{ item.totalUserStories }}</span>
+						<span class="chip">Start: {{ formatDate(item.project.startDate) }}</span>
+						<span class="chip">End: {{ formatDate(item.project.endDate) }}</span>
+					</div>
+				</header>
+
+				<div class="sprint-empty" *ngIf="item.sprints.length === 0">
+					No sprints available for this project.
+				</div>
+
+				<section class="sprint-card" *ngFor="let sprintItem of item.sprints">
+					<header class="sprint-card__header">
+						<div class="sprint-title-row">
+							<span class="sprint-icon">S</span>
+							<div>
+								<h3>{{ sprintItem.sprint.name }}</h3>
+								<p>{{ sprintItem.sprint.description || 'No sprint description.' }}</p>
+							</div>
+							<span class="chip chip--sprint">{{ getProjectStateLabel(sprintItem.sprint.sprintState) }}</span>
+						</div>
+						<div class="sprint-card__meta">
+							<span><strong>Début:</strong> {{ formatDate(sprintItem.sprint.startDate) }}</span>
+							<span><strong>Fin:</strong> {{ formatDate(sprintItem.sprint.endDate) }}</span>
+							<span><strong>Estimated duration:</strong> {{ sprintItem.sprint.estimatedDuration }} </span>
+						</div>
+					</header>
+
+					<div class="story-empty" *ngIf="sprintItem.userStories.length === 0">
+						No user stories in this sprint.
+					</div>
+
+					<div class="story-table" *ngIf="sprintItem.userStories.length > 0">
+						<div class="story-table__header">
+							<div>USER STORY</div>
+							<div>STATUT</div>
+						
+							<div>TÂCHES</div>
+							
+						</div>
+
+						<div class="story-table__body">
+							<div class="story-row" *ngFor="let storyItem of sprintItem.userStories">
+								<div class="story-main">
+									<div class="story-title">{{ storyItem.userStory.title }}</div>
+									<div class="story-description">{{ storyItem.userStory.description }}</div>
+								</div>
+
+								<div class="story-cell">
+									<span class="status-badge" [ngClass]="'status-' + getUserStoryStatusLabel(storyItem.userStory.status).toLowerCase().replace(/\s+/g, '-')">
+										{{ getUserStoryStatusLabel(storyItem.userStory.status) }}
+									</span>
+								</div>
+
+								
+
+	
+
+								<div class="story-cell story-cell--tasks">
+									<div class="tasks-count">{{ getTaskCount(storyItem) }}</div>
+									<div class="tasks-label">tâches</div>
+								</div>
+
+								
+							</div>
+						</div>
+
+						<div class="associated-tasks" *ngFor="let storyItem of sprintItem.userStories" [class.hidden-section]="storyItem.tasks.length === 0">
+							<div class="associated-tasks__title">TÂCHES ASSOCIÉES</div>
+							<div class="tasks-list">
+								<div class="task-item" *ngFor="let task of storyItem.tasks">
+									<span class="task-marker">●</span>
+									<div class="task-info">
+										<div class="task-name">{{ task.title }}</div>
+										<div class="task-subtitle">{{ task.description || 'No task description.' }}</div>
+									</div>
+									<div class="task-badges">
+										<span class="status-chip" [ngClass]="getTaskStatusChipClass(task.status)">{{ getTaskStatusLabel(task.status) }}</span>
+										<span class="task-assignee">Assigné à: {{ getTaskAssigneeLabel(task) }}</span>
+										<span class="task-priority">{{ getTaskComplexityLabel(task) }}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</article>
+		</div>
+	</div>
+</section>
