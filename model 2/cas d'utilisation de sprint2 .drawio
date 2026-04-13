@@ -16,7 +16,7 @@
         <mxCell id="SUlvmeM_VABJda_BXMQU-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=light-dark(#000000,#000000);fontColor=#ffffff;strokeColor=light-dark(#000000,#000000);" value="Responsable de service&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="30" x="16" y="287" as="geometry" />
         </mxCell>
-        <mxCell id="SUlvmeM_VABJda_BXMQU-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#FFFFFF,#FFFFFF);gradientColor=light-dark(#009900,#FFFFFF);" value="Sprint 2" vertex="1">
+        <mxCell id="SUlvmeM_VABJda_BXMQU-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#FFFFFF,#FFFFFF);gradientColor=light-dark(#009900,#FFFFFF);" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(9, 9, 9));&quot;&gt;Sprint 2&lt;/font&gt;" vertex="1">
           <mxGeometry height="1181" width="798" x="161" y="-175" as="geometry" />
         </mxCell>
         <mxCell id="SUlvmeM_VABJda_BXMQU-11" parent="SUlvmeM_VABJda_BXMQU-8" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#FFD966,#FFD966);strokeColor=light-dark(#FFD966,#FFD966);fontColor=light-dark(#000000,#000000);gradientColor=light-dark(#FFD966,#FFE599);" value="Gerer les Projets&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
@@ -197,7 +197,9 @@
         <mxCell id="_6FVSmWOMrqVbw43xgSN-78" edge="1" parent="1" source="SUlvmeM_VABJda_BXMQU-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.008;entryY=0.666;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=light-dark(#000000,#000000);curved=1;" target="_6FVSmWOMrqVbw43xgSN-41">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="47" y="955" />
+              <mxPoint x="31" y="879" />
+              <mxPoint x="47" y="879" />
+              <mxPoint x="47" y="952" />
             </Array>
           </mxGeometry>
         </mxCell>
