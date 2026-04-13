@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36">
   <diagram name="Page-1" id="qbODg6IB6eldzHcMRXKR">
-    <mxGraphModel dx="1853" dy="1518" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="light-dark(#FFFFFF,#FFFFFF)" math="0" shadow="0">
+    <mxGraphModel dx="2396" dy="1782" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="light-dark(#FFFFFF,#FFFFFF)" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -16,7 +16,7 @@
         <mxCell id="SUlvmeM_VABJda_BXMQU-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=light-dark(#000000,#000000);fontColor=#ffffff;strokeColor=light-dark(#000000,#000000);" value="Responsable de service&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="30" x="16" y="287" as="geometry" />
         </mxCell>
-        <mxCell id="SUlvmeM_VABJda_BXMQU-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#FFFFFF,#FFFFFF);gradientColor=light-dark(#009900,#FFFFFF);" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(9, 9, 9));&quot;&gt;Sprint 2&lt;/font&gt;" vertex="1">
+        <mxCell id="SUlvmeM_VABJda_BXMQU-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;strokeColor=light-dark(#000000,#090909);fillColor=light-dark(#FFFFFF,#FFFFFF);fontColor=light-dark(#FFFFFF,#FFFFFF);gradientColor=light-dark(#009900,#FFFFFF);" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(9, 9, 9));&quot;&gt;Sprint 2&lt;/font&gt;" vertex="1">
           <mxGeometry height="1181" width="798" x="161" y="-175" as="geometry" />
         </mxCell>
         <mxCell id="SUlvmeM_VABJda_BXMQU-11" parent="SUlvmeM_VABJda_BXMQU-8" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#FFD966,#FFFF99);strokeColor=light-dark(#000000,#090909);fontColor=light-dark(#000000,#000000);gradientColor=none;" value="Gerer les Projets&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
