@@ -120,6 +120,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   profileImageUrl = '';
 
   currentUserId: number | null = null;
+  currentUserServiceId: number | null = null;
 
   profileSaving = false;
   passwordSaving = false;
@@ -853,6 +854,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     const idRaw = data?.userId ?? data?.id;
     const parsed = Number(idRaw);
     this.currentUserId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+
+    const serviceRaw = (data as any)?.serviceId ?? (data as any)?.Serviceid ?? (data as any)?.serviceid;
+    const parsedService = Number(serviceRaw);
+    this.currentUserServiceId = Number.isFinite(parsedService) && parsedService > 0 ? parsedService : null;
   }
 
   private loadEmployeeData(): void {
@@ -921,6 +926,27 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
             }
           });
           this.userNameById = userNameById;
+
+          const tokenEmail = String((this.tokenService.getUserData() as any)?.email ?? '').trim().toLowerCase();
+          const currentUserFromDirectory = users.find((user) => Number((user as any)?.id ?? 0) === Number(this.currentUserId ?? 0))
+            ?? users.find((user) => String((user as any)?.email ?? '').trim().toLowerCase() === tokenEmail);
+
+          if (currentUserFromDirectory) {
+            const directoryServiceId = Number(
+              (currentUserFromDirectory as any)?.serviceId
+              ?? (currentUserFromDirectory as any)?.serviceid
+              ?? (currentUserFromDirectory as any)?.Serviceid
+              ?? 0
+            );
+            this.currentUserServiceId = Number.isFinite(directoryServiceId) && directoryServiceId > 0
+              ? directoryServiceId
+              : this.currentUserServiceId;
+
+            if (!this.currentUserId) {
+              const resolvedUserId = Number((currentUserFromDirectory as any)?.id ?? 0);
+              this.currentUserId = Number.isFinite(resolvedUserId) && resolvedUserId > 0 ? resolvedUserId : this.currentUserId;
+            }
+          }
 
           this.observerContacts = users
             .filter((user) => this.isObserverRole((user as any)?.role))
@@ -1178,7 +1204,16 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
         })
         .filter((name) => name.trim().length > 0)
     ));
-    this.serviceLabel = myServiceNames.length > 0 ? myServiceNames.join(', ') : 'Service not defined';
+    if (myServiceNames.length > 0) {
+      this.serviceLabel = myServiceNames.join(', ');
+    } else {
+      const fallbackServiceName = this.currentUserServiceId ? (serviceById.get(this.currentUserServiceId)?.name ?? '') : '';
+      this.serviceLabel = fallbackServiceName.trim().length > 0
+        ? fallbackServiceName
+        : this.currentUserServiceId
+          ? `Service #${this.currentUserServiceId}`
+          : 'Service not defined';
+    }
 
     this.syncNotificationsForView();
     this.buildCalendar();

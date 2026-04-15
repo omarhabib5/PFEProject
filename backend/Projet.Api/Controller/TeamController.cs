@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Projet.Domain.Command.Team;
 using Projet.Domain.Command.TeamUser;
+using Projet.Domain.Model;
 using Projet.Domain.Querie.Team;
 using Projet.Domain.Querie.TeamUser;
+using Projet.Infrastructure.Service;
 
 namespace Projet.Api.Controller
 {
@@ -12,10 +14,14 @@ namespace Projet.Api.Controller
     public class TeamController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly INotificationService _notificationService;
+        private readonly ILogger<TeamController> _logger;
 
-        public TeamController(IMediator mediator)
+        public TeamController(IMediator mediator, INotificationService notificationService, ILogger<TeamController> logger)
         {
             _mediator = mediator;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         #region Team CRUD Operations
@@ -130,6 +136,25 @@ namespace Projet.Api.Controller
             try
             {
                 var memberId = await _mediator.Send(command);
+
+                try
+                {
+                    var team = await _mediator.Send(new GetTeamById { id = teamId });
+                    var roleLabel = command.role == Role.ProjectLeader ? "Project Leader" : "Employee";
+
+                    await _notificationService.CreateNotificationAsync(
+                        userId: command.UserId,
+                        title: "Added to Team",
+                        message: $"You have been added to team '{team.name}' as {roleLabel}.",
+                        type: NotificationType.Info,
+                        category: NotificationCategory.UserUpdate,
+                        link: "/TeamManage");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Unable to send team membership notification to user {UserId} for team {TeamId}", command.UserId, teamId);
+                }
+
                 return CreatedAtAction(nameof(GetMembers), new { teamId }, new { id = memberId });
             }
             catch (KeyNotFoundException ex)

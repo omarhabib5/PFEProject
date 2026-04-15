@@ -111,7 +111,7 @@
                     <p class="desc">Service ID: {{ service.id }}</p>
                     <p class="meta-line"> {{ getMembersCountForService(service) }} members</p>
                     <p class="meta-line"> {{ getServiceProjectsCount(service) }} projects</p>
-                    <p class="meta-line">Team Manager: {{ getResponsibleLabel(service) }}</p>
+                    <p class="meta-line">Service Manager: {{ getResponsibleLabel(service) }}</p>
 
                     <div class="members-block"
                         *ngIf="hasTeamsForService(service) || getMembersCountForService(service) > 0">
@@ -133,39 +133,11 @@
         </section>
 
         <section *ngIf="!loading && serviceViewMode === 'detail' && selectedService" class="service-detail-view">
-            <div class="service-header-card">
-                <div class="service-left">
-                    <div class="service-initial">{{ getInitials(selectedService.name) }}</div>
-                    <div>
-                        <h3>{{ selectedService.name }}</h3>
-                        <p>Team Manager: {{ getResponsibleLabel(selectedService) }}</p>
-                        <div class="detail-meta">
-                            <span><strong>{{ membersCount }}</strong> Members</span>
-                            <span><strong>{{ projectsCount }}</strong> Projects</span>
-                            <span><strong>{{ teamsCount }}</strong> Teams</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tabs-card">
-                <div class="tabs-header">
-                    <button [class.active]="activeTab === 'dashboard'" (click)="setTab('dashboard')">Dashboard</button>
-                    <button [class.active]="activeTab === 'projects'" (click)="setTab('projects')">Projects</button>
-                    <button [class.active]="activeTab === 'sprints'" (click)="setTab('sprints')">Sprints</button>
-                    <button [class.active]="activeTab === 'userStories'" (click)="setTab('userStories')">User stories</button>
-                    <button [class.active]="activeTab === 'teamMembers'" (click)="setTab('teamMembers')">Team & members</button>
-                    <button [class.active]="activeTab === 'calendar'" (click)="setTab('calendar')">Calendar</button>
-                    <button [class.active]="activeTab === 'notifications'"
-                        (click)="setTab('notifications')">Notifications</button>
-                    <button [class.active]="activeTab === 'settings'" (click)="setTab('settings')">Settings</button>
-                </div>
-
                 <div *ngIf="activeTab === 'dashboard'" class="dashboard-tab-content">
                     <section class="overview-hero">
                         <div class="overview-hero-main">
                             <h4>{{ selectedService.name }}</h4>
-                            <p>Team Manager: {{ getResponsibleLabel(selectedService) }}</p>
+                            <p>Service Manager: {{ getResponsibleLabel(selectedService) }}</p>
                             <p>Overview of the service activity</p>
                             <div class="overview-progress-wrap">
                                 <span>Overall progress</span>
@@ -300,7 +272,7 @@
                                     <td>
                                         <div class="inline-actions">
                                             <button class="tiny-btn" type="button" (click)="$event.stopPropagation(); selectProject(project)">Details</button>
-                                            <button class="tiny-btn danger" type="button" [disabled]="projectSubmitting" (click)="$event.stopPropagation(); deleteProject(project)">Delete</button>
+                                            <button class="tiny-btn danger" type="button" [disabled]="projectSubmitting || !canDeleteProject(project)" [attr.title]="canDeleteProject(project) ? 'Delete project' : 'Delete is only allowed for pending projects without sprints, tasks or user stories'" (click)="$event.stopPropagation(); deleteProject(project)">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -445,100 +417,178 @@
                     </div>
                     <p class="empty-line">Only project managers can create user stories.</p>
 
-                    <div class="team-table-wrap" *ngIf="selectedProjectUserStories.length > 0">
-                        <table class="team-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Project</th>
-                                    <th>Sprint</th>
-                                    <th>Status</th>
-                                    <th>Story points</th>
-                                    <th>Priority</th>
-                                    <th>Tasks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let story of selectedProjectUserStories">
-                                    <td>
-                                        <strong>{{ story.title || story.name }}</strong>
-                                        <small class="table-subtext">{{ story.description || 'No description' }}</small>
-                                    </td>
-                                    <td>{{ getProjectNameByUserStory(story) }}</td>
-                                    <td>{{ getSprintNameByUserStory(story) }}</td>
-                                    <td>
-                                        <span class="status-chip" [ngClass]="getUserStoryStatusClass(getSelectedUserStoryStatus(story))">
-                                            {{ getUserStoryStatusLabel(getSelectedUserStoryStatus(story)) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ story.storyPoints }}</td>
-                                   
-                                    <td>{{ story.completedTaskCount }} / {{ story.taskCount }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="user-stories-section">
+                        <div class="stories-grid" *ngIf="selectedProjectUserStories.length > 0">
+                            <div class="story-card" *ngFor="let story of selectedProjectUserStories">
+                                <div class="story-header">
+                                    <div class="story-title-block">
+                                        <h5 class="story-title">{{ story.title || story.name }}</h5>
+                                        <p class="story-description">{{ story.description || 'No description provided' }}</p>
+                                    </div>
+                                    <span class="status-badge" [ngClass]="'status-' + getSelectedUserStoryStatus(story)">
+                                        {{ getUserStoryStatusLabel(getSelectedUserStoryStatus(story)) }}
+                                    </span>
+                                </div>
+
+                                <div class="story-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Project</span>
+                                        <span class="meta-value">{{ getProjectNameByUserStory(story) }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Sprint</span>
+                                        <span class="meta-value">{{ getSprintNameByUserStory(story) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="story-footer">
+                                    <div class="task-count">
+                                        <span class="task-icon">✓</span>
+                                        <span class="task-text">{{ story.completedTaskCount || 0 }} / {{ story.taskCount || 0 }} tasks</span>
+                                    </div>
+                                    <button class="view-btn" type="button" title="View full details of this user story" (click)="selectUserStory(story)">View Details</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <p *ngIf="selectedProjectUserStories.length === 0" class="empty-team">No user stories available for the selected project.</p>
+
+                    <!-- User Story Details Modal -->
+                    <div *ngIf="showUserStoryDetails && selectedUserStory" class="modal-overlay-story" (click)="closeUserStoryDetails()">
+                        <div class="modal-card-story" (click)="$event.stopPropagation()">
+                            <div class="modal-header-story">
+                                <h3>{{ selectedUserStory.title || selectedUserStory.name }}</h3>
+                                <button class="close-btn" type="button" (click)="closeUserStoryDetails()">✕</button>
+                            </div>
+
+                            <div class="modal-body-story">
+                                <div class="detail-section">
+                                    <h4>Status</h4>
+                                    <span class="status-badge" [ngClass]="'status-' + getSelectedUserStoryStatus(selectedUserStory)">
+                                        {{ getUserStoryStatusLabel(getSelectedUserStoryStatus(selectedUserStory)) }}
+                                    </span>
+                                </div>
+
+                                <div class="detail-section">
+                                    <h4>Description</h4>
+                                    <p>{{ selectedUserStory.description || 'No description provided' }}</p>
+                                </div>
+
+                                <div class="detail-row">
+                                    <div class="detail-section">
+                                        <h4>Project</h4>
+                                        <p>{{ getProjectNameByUserStory(selectedUserStory) }}</p>
+                                    </div>
+                                    <div class="detail-section">
+                                        <h4>Sprint</h4>
+                                        <p>{{ getSprintNameByUserStory(selectedUserStory) }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="detail-row">
+                                    <div class="detail-section">
+                                        <h4>Tasks Progress</h4>
+                                        <p><strong>{{ selectedUserStory.completedTaskCount || 0 }} / {{ selectedUserStory.taskCount || 0 }}</strong> tasks completed</p>
+                                    </div>
+                                    <div class="detail-section">
+                                        <h4>Created Date</h4>
+                                        <p>{{ selectedUserStory.createdAt ? (selectedUserStory.createdAt | date:'short') : 'Not specified' }}</p>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="selectedUserStory.acceptanceCriteria" class="detail-section">
+                                    <h4>Acceptance Criteria</h4>
+                                    <p>{{ selectedUserStory.acceptanceCriteria }}</p>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer-story">
+                                <button class="primary-btn" type="button" (click)="closeUserStoryDetails()">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div *ngIf="activeTab === 'teamMembers'" class="team-tab-content">
                     <div class="section-title-row">
                         <h4>Service teams and members</h4>
                         <div class="inline-actions">
-                            <button class="secondary-btn" type="button" (click)="openCreateTeam()">Add
-                                team</button>
-                            <button class="secondary-btn" type="button" (click)="openAddMembers()">Add
-                                member</button>
+                            <button class="secondary-btn" type="button" (click)="openCreateTeam()">Add team</button>
                         </div>
                     </div>
-                    <p>{{ selectedService.name }}</p>
 
-                    <div class="team-table-wrap" *ngIf="selectedServiceTeams.length > 0">
-                        <table class="team-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Team name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let team of selectedServiceTeams">
-                                    <td>{{ team.id }}</td>
-                                    <td>{{ team.name }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Teams Section -->
+                    <div *ngIf="selectedServiceTeams.length > 0" class="teams-section">
+                        <div class="section-subtitle-row">
+                            <h5 class="section-subtitle">Teams</h5>
+                            <p class="section-hint">Select a team to see its members.</p>
+                        </div>
+                        <div class="teams-grid">
+                            <button
+                                type="button"
+                                class="team-card"
+                                *ngFor="let team of selectedServiceTeams"
+                                [class.active]="isSelectedTeam(team)"
+                                (click)="selectTeam(team)">
+                                <div class="team-card-header">
+                                    <h6 class="team-name">{{ team.name }}</h6>
+                                </div>
+                                <div class="team-card-body">
+                                    <p class="team-id">ID: <strong>{{ team.id }}</strong></p>
+                                    <p class="team-members">Members: <strong>{{ getTeamMemberCount(team) }}</strong></p>
+                                </div>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="team-table-wrap" *ngIf="teamRows.length > 0">
-                        <table class="team-table">
-                            <thead>
-                                <tr>
-                                    <th>Member</th>
-                                    <th>Role</th>
-                                    <th>Tasks in progress</th>
-                                    <th>Completed tasks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let row of teamRows">
-                                    <td>
-                                        <div class="member-cell">
-                                            <span class="mini-avatar big">{{ row.avatar }}</span>
-                                            <div><strong>{{ row.fullName }} </strong><small>{{ row.email }}</small></div>
+                    <!-- Members Section -->
+                    <div *ngIf="selectedTeam" class="members-section">
+                        <div class="section-subtitle-row">
+                            <h5 class="section-subtitle">Team Members</h5>
+                            <div class="team-actions-inline">
+                                <p class="section-hint">{{ selectedTeam.name }}</p>
+                                <button class="secondary-btn secondary-btn--small" type="button" (click)="openAddMembers(selectedTeam)">Add member</button>
+                            </div>
+                        </div>
+                        <div *ngIf="teamRows.length === 0" class="empty-team empty-team--compact">
+                            No members in the selected team.
+                        </div>
+                        <div class="members-grid">
+                            <div class="member-card" *ngFor="let row of teamRows">
+                                <div class="member-card-header">
+                                    <div class="member-info">
+                                        <h6 class="member-name">{{ row.fullName }}</h6>
+                                        <p class="member-email">{{ row.email }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="member-card-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">Role</span>
+                                        <span class="role-pill" [ngClass]="row.roleClass">{{ row.roleLabel }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="member-card-progress">
+                                    <div class="progress-item">
+                                        <div class="progress-details">
+                                            <span class="progress-label">In Progress</span>
+                                            <span class="progress-value">{{ row.activeTasks }}</span>
                                         </div>
-                                    </td>
-                                    <td><span class="role-pill" [ngClass]="row.roleClass">{{ row.roleLabel }}</span>
-                                    </td>
-                                    <td>{{ row.activeTasks }}</td>
-                                    <td>{{ row.completedTasks }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-details">
+                                            <span class="progress-label">Completed</span>
+                                            <span class="progress-value">{{ row.completedTasks }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p *ngIf="selectedServiceTeams.length === 0 && teamRows.length === 0" class="empty-team">No
-                        team in this service.</p>
+
+                    <p *ngIf="selectedServiceTeams.length === 0" class="empty-team">No team in this service.</p>
                 </div>
 
                 <div *ngIf="activeTab === 'calendar'" class="dashboard-tab-content">
@@ -767,7 +817,6 @@
                         </article>
                     </div>
                 </div>
-            </div>
         </section>
     </main>
 </div>

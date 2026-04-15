@@ -8,7 +8,10 @@ export interface UserDto {
     lastName: string;
     email: string;
     profileImageUrl?: string;
-    role?: string;
+    role?: string | number;
+    serviceId?: number | null;
+    serviceid?: number | null;
+    Serviceid?: number | null;
 }
 
 export interface CreateEmployeeRequest {

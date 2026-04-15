@@ -67,8 +67,7 @@ namespace Projet.Infrastructure.Service
             
             <p class='warning'>⚠️ IMPORTANT: Please change your password after your first login for security purposes.</p>
             
-            <p>You can access the system at: <a href='https://yourcompany.com'>https://yourcompany.com</a></p>
-            
+              
             <p>If you have any questions or need assistance, please contact IT support.</p>
             
             <p>Best regards,<br>HR Department</p>

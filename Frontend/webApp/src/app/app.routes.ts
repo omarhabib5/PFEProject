@@ -73,6 +73,8 @@ export const routes: Routes = [
 
             { path: 'ProjectManage', component: ProjectManager },
             { path: 'SprintManage', component: SprintManager },
+            { path: 'SprintManage/:projectId', component: SprintManager },
+            { path: 'sprint/manage', component: SprintManager },
             { path: 'sprint/manage/:projectId', component: SprintManager },
             { path: 'TeamManage', component: TeamManage },
             {

@@ -76,6 +76,9 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   selectedServiceMembers: TeamUser[] = [];
   selectedServiceId: number | null = null;
   selectedProjectId: number | null = null;
+  selectedTeamId: number | null = null;
+  selectedUserStory: ServiceUserStoryRow | null = null;
+  showUserStoryDetails = false;
 
   showProjectForm = false;
   projectSubmitting = false;
@@ -253,6 +256,17 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return this.serviceTeams.filter((team) => this.areSameIds(this.getTeamServiceId(team), this.selectedServiceId));
   }
 
+  get selectedTeam(): TeamEntity | null {
+    const teams = this.selectedServiceTeams;
+    if (teams.length === 0) return null;
+
+    if (this.selectedTeamId !== null) {
+      return teams.find((team) => Number(team.id) === Number(this.selectedTeamId)) ?? teams[0] ?? null;
+    }
+
+    return teams[0] ?? null;
+  }
+
   get selectedServiceProjects(): ProjectEntity[] {
     if (!this.selectedServiceId) return [];
     return this.allProjects.filter((project) => this.belongsToSelectedService(project));
@@ -271,6 +285,12 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
 
   get selectedProjectTeamMembers(): TeamUser[] {
     const team = this.selectedProjectTeam;
+    if (!team) return [];
+    return this.selectedServiceMembers.filter((member) => Number(member.teamId) === Number(team.id));
+  }
+
+  get selectedTeamMembers(): TeamUser[] {
+    const team = this.selectedTeam;
     if (!team) return [];
     return this.selectedServiceMembers.filter((member) => Number(member.teamId) === Number(team.id));
   }
@@ -354,9 +374,10 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   get teamRows(): TeamMemberRow[] {
-    if (!this.selectedService || this.selectedServiceMembers.length === 0) return [];
+    const teamMembers = this.selectedTeamMembers;
+    if (!this.selectedService || teamMembers.length === 0) return [];
 
-    return this.selectedServiceMembers.map((member) => {
+    return teamMembers.map((member) => {
       const memberUser = member.user;
       const isManager = this.selectedService?.responsibleId === member.userId;
       const firstName = memberUser?.firstName ?? 'Member';
@@ -383,6 +404,10 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
         subtitle: isManager ? 'Service Manager' : undefined,
       };
     });
+  }
+
+  getTeamMemberCount(team: TeamEntity): number {
+    return this.selectedServiceMembers.filter((member) => Number(member.teamId) === Number(team.id)).length;
   }
 
   get membersCount(): number {
@@ -559,6 +584,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.activeSection = 'services';
     this.activeTab = 'dashboard';
     this.selectedProjectId = null;
+    this.selectedTeamId = null;
     this.loadUsersForSelectedService();
     this.loadMembersForSelectedService();
     this.loadTeams();
@@ -569,6 +595,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.serviceViewMode = 'list';
     this.selectedServiceId = null;
     this.selectedProjectId = null;
+    this.selectedTeamId = null;
     this.selectedServiceMemberIds = new Set<number>();
     this.selectedServiceMembers = [];
     this.serviceUserStories = [];
@@ -798,6 +825,27 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.selectedProjectId = projectId;
   }
 
+  selectUserStory(story: ServiceUserStoryRow): void {
+    const storyId = Number(story.id ?? 0);
+    if (!storyId) return;
+    
+    this.selectedUserStory = story;
+    this.showUserStoryDetails = true;
+  }
+
+  selectTeam(team: TeamEntity): void {
+    this.selectedTeamId = Number(team.id ?? 0);
+  }
+
+  isSelectedTeam(team: TeamEntity): boolean {
+    return this.selectedTeamId !== null && Number(team.id ?? 0) === Number(this.selectedTeamId);
+  }
+
+  closeUserStoryDetails(): void {
+    this.showUserStoryDetails = false;
+    this.selectedUserStory = null;
+  }
+
   openCreateProjectForm(): void {
     if (!this.selectedServiceId) {
       this.error = 'Open a service before creating a project.';
@@ -951,6 +999,12 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     const projectId = Number(project.id ?? 0);
     if (!projectId) return;
 
+    const deletionBlockers = this.getProjectDeletionBlockers(project);
+    if (deletionBlockers.length > 0) {
+      this.error = `Cannot delete project "${project.name}" because ${deletionBlockers.join(', ')}.`;
+      return;
+    }
+
     const confirmed = typeof window === 'undefined'
       ? true
       : window.confirm(`Delete project "${project.name}"?`);
@@ -982,11 +1036,14 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       });
   }
 
-  openAddMembers(): void {
+  openAddMembers(team?: TeamEntity | null): void {
+    const teamId = Number(team?.id ?? this.selectedTeamId ?? this.selectedTeam?.id ?? 0);
     this.router.navigate(['/TeamManage'], {
       queryParams: {
         serviceId: this.selectedServiceId ?? undefined,
-        source: 'service-manager'
+        teamId: teamId > 0 ? teamId : undefined,
+        source: 'service-manager',
+        action: 'add-member'
       }
     });
   }
@@ -1017,7 +1074,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/SprintManage', firstProjectId], {
+    this.router.navigate(['/sprint/manage', firstProjectId], {
       queryParams: { source: 'service-manager' }
     });
   }
@@ -1045,7 +1102,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/SprintManage', numericProjectId], {
+    this.router.navigate(['/sprint/manage', numericProjectId], {
       queryParams: {
         serviceId: this.selectedServiceId ?? undefined,
         source: 'service-manager'
@@ -1707,6 +1764,44 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     return this.availableSprints.filter((sprint) => Number(sprint.projectId) === projectId).length;
   }
 
+  getProjectTaskCount(project: ProjectEntity): number {
+    const projectId = Number(project.id ?? 0);
+    if (!projectId) return 0;
+    return this.serviceTasks.filter((task) => this.getTaskProjectId(task) === projectId).length;
+  }
+
+  getProjectUserStoryCount(project: ProjectEntity): number {
+    const projectId = Number(project.id ?? 0);
+    if (!projectId) return 0;
+    return this.serviceUserStories.filter((story) => Number((story as any)?.projectId ?? 0) === projectId).length;
+  }
+
+  getProjectDeletionBlockers(project: ProjectEntity): string[] {
+    const blockers: string[] = [];
+
+    if (Number(project.projectState ?? ProjectState.todo) !== ProjectState.pending) {
+      blockers.push('it is not pending');
+    }
+
+    if (this.getProjectSprintCount(project) > 0) {
+      blockers.push('it still has sprints');
+    }
+
+    if (this.getProjectTaskCount(project) > 0) {
+      blockers.push('it still has tasks');
+    }
+
+    if (this.getProjectUserStoryCount(project) > 0) {
+      blockers.push('it still has user stories');
+    }
+
+    return blockers;
+  }
+
+  canDeleteProject(project: ProjectEntity): boolean {
+    return this.getProjectDeletionBlockers(project).length === 0;
+  }
+
   getProjectMemberCount(project: ProjectEntity): number {
     return this.getProjectTeamMembers(project).length;
   }
@@ -2027,10 +2122,19 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     this.teamService.getTeams().subscribe({
       next: (teams) => {
         this.serviceTeams = teams ?? [];
+        if (this.selectedTeamId === null && this.selectedServiceTeams.length > 0) {
+          this.selectedTeamId = Number(this.selectedServiceTeams[0].id);
+        } else if (this.selectedTeamId !== null) {
+          const teamExists = this.selectedServiceTeams.some((team) => Number(team.id) === Number(this.selectedTeamId));
+          if (!teamExists) {
+            this.selectedTeamId = this.selectedServiceTeams[0] ? Number(this.selectedServiceTeams[0].id) : null;
+          }
+        }
         this.loadMembersForSelectedService();
       },
       error: () => {
         this.serviceTeams = [];
+        this.selectedTeamId = null;
         this.selectedServiceMemberIds = new Set<number>();
       }
     });

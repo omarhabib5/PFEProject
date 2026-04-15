@@ -24,8 +24,8 @@ namespace Projet.Domain.Handler.TeamUser
                 throw new KeyNotFoundException($"User with ID {request.UserId} not found.");
             }
 
-            var teamExists = await _context.Teams.AnyAsync(t => t.id == request.TeamId.Value, cancellationToken);
-            if (!teamExists)
+            var team = await _context.Teams.FirstOrDefaultAsync(t => t.id == request.TeamId.Value, cancellationToken);
+            if (team == null)
             {
                 throw new KeyNotFoundException($"Team with ID {request.TeamId.Value} not found.");
             }
@@ -51,6 +51,12 @@ namespace Projet.Domain.Handler.TeamUser
             if (request.role == Model.Role.ProjectLeader && user.role == UserRole.Employee)
             {
                 user.role = UserRole.ProjectManager;
+            }
+
+            // Ensure the employee is associated with the same service as the selected team.
+            if (user.Serviceid != team.ServiceId)
+            {
+                user.Serviceid = team.ServiceId;
             }
 
             _context.Set<Model.TeamUser>().Add(teamUser);

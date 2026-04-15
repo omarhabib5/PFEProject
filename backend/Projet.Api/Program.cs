@@ -166,7 +166,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(ex, "Impossible d'appliquer les migrations au démarrage. L'application continue, mais certaines fonctionnalités BD peuvent échouer tant que la base n'est pas prête.");
+        app.Logger.LogWarning(ex, "Unable to apply migrations at startup. The application will continue, but some database features may fail until the database is ready.");
     }
 }
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TeamService, Team, TeamUser, CreateTeamRequest, UpdateTeamRequest, AddMemberRequest, Role, UserInTeam } from '../Service/TeamService';
 import { ServiceService, Service } from '../Service/ServiceService';
 import { UserApiService, UserDto } from '../Service/UserApiService';
@@ -21,6 +21,7 @@ export class TeamManage implements OnInit {
   private serviceService = inject(ServiceService);
   private userApiService = inject(UserApiService);
   private tokenService = inject(TokenService);
+  private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef); 
 
   
@@ -47,6 +48,10 @@ export class TeamManage implements OnInit {
     role: Role.Employer
   };
 
+  private routeTeamId: number | null = null;
+  private routeServiceId: number | null = null;
+  private routeAction: string | null = null;
+
 
   memberFilter: 'all' | 'leaders' | 'employees' = 'all';
   
@@ -63,6 +68,14 @@ export class TeamManage implements OnInit {
 
   ngOnInit(): void {
     this.showBackToDashboardButton = this.tokenService.getUserRole() === AppRole.ServiceManager;
+
+    const queryParams = this.route.snapshot.queryParamMap;
+    const serviceIdValue = Number(queryParams.get('serviceId') ?? 0);
+    this.routeServiceId = serviceIdValue > 0 ? serviceIdValue : null;
+    const teamIdValue = Number(queryParams.get('teamId') ?? 0);
+    this.routeTeamId = teamIdValue > 0 ? teamIdValue : null;
+    this.routeAction = queryParams.get('action');
+
     this.loadTeams();
     this.loadServices();
     this.loadUsers();
@@ -162,6 +175,7 @@ export class TeamManage implements OnInit {
     this.teamService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
+        this.applyRouteSelection();
         this.loading = false;
         this.cdr.detectChanges(); 
       },
@@ -297,6 +311,13 @@ export class TeamManage implements OnInit {
     this.memberFilter = 'all';
     this.editingMemberId = null;
     this.loadTeamMembers(team.id);
+    this.cdr.detectChanges();
+  }
+
+  openAddMemberForTeam(team: Team): void {
+    this.selectTeam(team);
+    this.resetNewMemberForm();
+    this.showAddMemberForm = true;
     this.cdr.detectChanges();
   }
 
@@ -554,6 +575,38 @@ export class TeamManage implements OnInit {
       userId: 0,
       role: Role.Employer
     };
+  }
+
+  private applyRouteSelection(): void {
+    if (this.routeAction !== 'add-member') {
+      return;
+    }
+
+    let teamToOpen: Team | undefined;
+
+    if (this.routeTeamId !== null) {
+      teamToOpen = this.teams.find((team) => team.id === this.routeTeamId);
+    }
+
+    if (!teamToOpen && this.routeServiceId !== null) {
+      teamToOpen = this.teams.find((team) => Number(team.serviceId ?? 0) === this.routeServiceId);
+    }
+
+    if (!teamToOpen) {
+      teamToOpen = this.teams[0];
+    }
+
+    if (!teamToOpen) {
+      return;
+    }
+
+    this.selectedTeam = teamToOpen;
+    this.memberFilter = 'all';
+    this.editingMemberId = null;
+    this.loadTeamMembers(teamToOpen.id);
+    this.resetNewMemberForm();
+    this.showAddMemberForm = true;
+    this.cdr.detectChanges();
   }
 
   getRoleName(role: Role): string {

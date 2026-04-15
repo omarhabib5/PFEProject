@@ -25,13 +25,13 @@ namespace Projet.Domain.Handler.UserHandler
                 .AnyAsync(p => p.ProjectManagerId == request.Id, cancellationToken);
 
             if (isProjectManager)
-                throw new InvalidOperationException("Impossible de supprimer cet utilisateur: il est Project Manager d'au moins un projet.");
+                throw new InvalidOperationException("Cannot delete this user: they are the Project Manager of at least one project.");
 
             var hasCreatedUserStories = await _context.UserStories
                 .AnyAsync(us => us.CreatedById == request.Id, cancellationToken);
 
             if (hasCreatedUserStories)
-                throw new InvalidOperationException("Impossible de supprimer cet utilisateur: il a cree des user stories. Reassignez ou supprimez-les d'abord.");
+                throw new InvalidOperationException("Cannot delete this user: they have created user stories. Reassign or delete them first.");
 
             var assignedTasks = await _context.Tasks
                 .Where(t => t.AssignedToId == request.Id)

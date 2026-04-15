@@ -117,21 +117,21 @@ namespace Projet.Infrastructure.Service
         {
             var task = await _context.Set<DomainTask>().FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null)
-                throw new InvalidOperationException("Tâche non trouvée");
+                throw new InvalidOperationException("Task not found");
 
-            var title = "Changement de Statut de Tâche";
+            var title = "Task Status Change";
             var link = $"/tasks/{taskId}";
 
             Notification? employeeNotification = null;
             if (assignedToId > 0)
             {
                 var employeeMessage = newStatus.Equals(nameof(State.pending), StringComparison.OrdinalIgnoreCase)
-                    ? $"Votre tâche '{task.Title}' est marquée comme not confirmed."
+                    ? $"Your task '{task.Title}' is marked as not confirmed."
                     : newStatus.Equals(nameof(State.validated), StringComparison.OrdinalIgnoreCase)
-                        ? $"Votre tâche '{task.Title}' a été validée."
+                        ? $"Your task '{task.Title}' has been validated."
                         : newStatus.Equals(nameof(State.done), StringComparison.OrdinalIgnoreCase)
-                            ? $"Votre tâche '{task.Title}' est marquée comme terminée."
-                            : $"La tâche '{task.Title}' a changé de statut: {oldStatus} → {newStatus}";
+                            ? $"Your task '{task.Title}' is marked as completed."
+                            : $"Task '{task.Title}' has changed status: {oldStatus} → {newStatus}";
 
                 employeeNotification = await CreateNotificationAsync(
                     userId: assignedToId,
@@ -149,7 +149,7 @@ namespace Projet.Infrastructure.Service
             Notification? pmNotification = null;
             if (projectManagerId > 0 && projectManagerId != assignedToId)
             {
-                var pmMessage = $"La tâche '{task.Title}' a changé de statut: {oldStatus} → {newStatus}";
+                var pmMessage = $"Task '{task.Title}' has changed status: {oldStatus} → {newStatus}";
 
                 pmNotification = await CreateNotificationAsync(
                     userId: projectManagerId,
@@ -165,7 +165,7 @@ namespace Projet.Infrastructure.Service
             }
 
             return employeeNotification ?? pmNotification
-                ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification de statut de tâche");
+                ?? throw new InvalidOperationException("No valid recipient found for the task status notification");
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyTaskAssignedAsync(int taskId, int projectManagerId,
@@ -179,12 +179,12 @@ namespace Projet.Infrastructure.Service
 
             if (task == null)
             {
-                throw new InvalidOperationException("Tâche non trouvée");
+                throw new InvalidOperationException("Task not found");
             }
 
-            var projectName = task.UserStory?.Project?.name ?? "Projet";
+            var projectName = task.UserStory?.Project?.name ?? "Project";
             var link = $"/tasks/{taskId}";
-            var title = "Tâche affectée";
+            var title = "Task Assigned";
             var assignedUserName = task.AssignedTo != null
                 ? $"{task.AssignedTo.FirstName} {task.AssignedTo.LastName}".Trim()
                 : "l'employé";
@@ -195,7 +195,7 @@ namespace Projet.Infrastructure.Service
                 assigneeNotification = await CreateNotificationAsync(
                     userId: assignedToId,
                     title: title,
-                    message: $"Une tâche '{task.Title}' vous a été affectée sur le projet '{projectName}'.",
+                    message: $"A task '{task.Title}' has been assigned to you on project '{projectName}'.",
                     type: NotificationType.Info,
                     category: NotificationCategory.TaskUpdate,
                     link: link,
@@ -212,7 +212,7 @@ namespace Projet.Infrastructure.Service
                 pmNotification = await CreateNotificationAsync(
                     userId: projectManagerId,
                     title: title,
-                    message: $"La tâche '{task.Title}' a été affectée à {assignedUserName} dans le projet '{projectName}'.",
+                    message: $"Task '{task.Title}' has been assigned to {assignedUserName} in project '{projectName}'.",
                     type: NotificationType.Info,
                     category: NotificationCategory.TaskUpdate,
                     link: link,
@@ -224,7 +224,7 @@ namespace Projet.Infrastructure.Service
             }
 
             return assigneeNotification ?? pmNotification
-                ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification d'affectation de tâche");
+                ?? throw new InvalidOperationException("No valid recipient found for the task assignment notification");
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyTaskAddedAsync(int taskId)
@@ -236,12 +236,12 @@ namespace Projet.Infrastructure.Service
 
             if (task == null)
             {
-                throw new InvalidOperationException("Tâche non trouvée");
+                throw new InvalidOperationException("Task not found");
             }
 
-            var title = "Nouvelle Tâche Assignée";
+            var title = "New Task Assigned";
             var link = $"/tasks/{taskId}";
-            var message = $"Une nouvelle tâche '{task.Title}' a été ajoutée.";
+            var message = $"A new task '{task.Title}' has been added.";
 
             var recipients = new HashSet<int>();
 
@@ -273,10 +273,10 @@ namespace Projet.Infrastructure.Service
             foreach (var recipientId in recipients)
             {
                 var recipientMessage = recipientId == task.AssignedToId
-                    ? $"Une nouvelle tâche '{task.Title}' vous a été assignée."
+                    ? $"A new task '{task.Title}' has been assigned to you."
                     : recipientId == projectManagerId
-                        ? $"Une nouvelle tâche '{task.Title}' a été ajoutée au projet."
-                        : $"Une nouvelle tâche '{task.Title}' a été ajoutée au projet '{task.UserStory?.Project?.name ?? "Projet"}'.";
+                        ? $"A new task '{task.Title}' has been added to the project."
+                        : $"A new task '{task.Title}' has been added to project '{task.UserStory?.Project?.name ?? "Project"}'.";
 
                 var notification = await CreateNotificationAsync(
                     userId: recipientId,
@@ -294,7 +294,7 @@ namespace Projet.Infrastructure.Service
                 firstNotification ??= notification;
             }
 
-            return firstNotification ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification de création de tâche");
+            return firstNotification ?? throw new InvalidOperationException("No valid recipient found for the task creation notification");
         }
 
         public async System.Threading.Tasks.Task<Notification> NotifyUserStoryAddedAsync(int userStoryId, int projectManagerId,
@@ -302,10 +302,10 @@ namespace Projet.Infrastructure.Service
         {
             var userStory = await _context.Set<UserStory>().FirstOrDefaultAsync(us => us.Id == userStoryId);
             if (userStory == null)
-                throw new InvalidOperationException("User Story non trouvée");
+                throw new InvalidOperationException("User story not found");
 
-            var title = "Nouvelle User Story Assignée";
-            var message = $"Une nouvelle user story '{userStory.Title}' vous a été assignée et doit être complétée.";
+            var title = "New User Story Assigned";
+            var message = $"A new user story '{userStory.Title}' has been assigned to you and must be completed.";
             var link = $"/user-stories/{userStoryId}";
 
             var notification = await CreateNotificationAsync(
@@ -326,24 +326,24 @@ namespace Projet.Infrastructure.Service
         {
             var project = await _context.Set<Project>().FirstOrDefaultAsync(p => p.id == projectId);
             if (project == null)
-                throw new InvalidOperationException("Projet non trouvé");
+                throw new InvalidOperationException("Project not found");
 
             var link = $"/projects/{projectId}";
-            var message = $"Un nouveau projet '{project.name}' a été créé.";
+            var message = $"A new project '{project.name}' has been created.";
 
             if (createdByUserId.HasValue)
             {
                 var creator = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == createdByUserId.Value);
                 if (creator != null)
                 {
-                    message = $"Un nouveau projet '{project.name}' a été créé par {creator.FirstName} {creator.LastName} ({creator.role}).";
+                    message = $"A new project '{project.name}' has been created by {creator.FirstName} {creator.LastName} ({creator.role}).";
                 }
             }
 
             
             var pmNotification = await CreateNotificationAsync(
                 userId: projectManagerId,
-                title: "Nouveau Projet Créé",
+                title: "New Project Created",
                 message: message,
                 type: NotificationType.ProjectAdded,
                 category: NotificationCategory.ProjectUpdate,
@@ -354,7 +354,7 @@ namespace Projet.Infrastructure.Service
             {
                 await CreateNotificationAsync(
                     userId: serviceManagerId.Value,
-                    title: "Nouveau Projet dans le Service",
+                    title: "New Project in Service",
                     message: message,
                     type: NotificationType.ProjectAdded,
                     category: NotificationCategory.ProjectUpdate,
@@ -366,7 +366,7 @@ namespace Projet.Infrastructure.Service
             {
                 await CreateNotificationAsync(
                     userId: adminUserId.Value,
-                    title: "Nouveau Projet Créé",
+                    title: "New Project Created",
                     message: message,
                     type: NotificationType.ProjectAdded,
                     category: NotificationCategory.ProjectUpdate,
@@ -385,24 +385,24 @@ namespace Projet.Infrastructure.Service
                 .FirstOrDefaultAsync(s => s.Id == sprintId);
 
             if (sprint == null)
-                throw new InvalidOperationException("Sprint non trouvé");
+                throw new InvalidOperationException("Sprint not found");
 
-            var projectName = sprint.Project?.name ?? $"Projet #{sprint.ProjectId}";
+            var projectName = sprint.Project?.name ?? $"Project #{sprint.ProjectId}";
             var link = $"/sprints/{sprintId}";
-            var message = $"Un nouveau sprint '{sprint.Name}' a été créé pour le projet '{projectName}'.";
+            var message = $"A new sprint '{sprint.Name}' has been created for project '{projectName}'.";
 
             if (createdByUserId.HasValue)
             {
                 var creator = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == createdByUserId.Value);
                 if (creator != null)
                 {
-                    message = $"Un nouveau sprint '{sprint.Name}' a été créé pour le projet '{projectName}' par {creator.FirstName} {creator.LastName} ({creator.role}).";
+                    message = $"A new sprint '{sprint.Name}' has been created for project '{projectName}' by {creator.FirstName} {creator.LastName} ({creator.role}).";
                 }
             }
 
             var pmNotification = await CreateNotificationAsync(
                 userId: projectManagerId,
-                title: "Nouveau Sprint Créé",
+                title: "New Sprint Created",
                 message: message,
                 type: NotificationType.ProjectAdded,
                 category: NotificationCategory.ProjectUpdate,
@@ -414,7 +414,7 @@ namespace Projet.Infrastructure.Service
             {
                 await CreateNotificationAsync(
                     userId: serviceManagerId.Value,
-                    title: "Nouveau Sprint dans le Service",
+                    title: "New Sprint in Service",
                     message: message,
                     type: NotificationType.ProjectAdded,
                     category: NotificationCategory.ProjectUpdate,
@@ -427,7 +427,7 @@ namespace Projet.Infrastructure.Service
             {
                 await CreateNotificationAsync(
                     userId: adminUserId.Value,
-                    title: "Nouveau Sprint Créé",
+                    title: "New Sprint Created",
                     message: message,
                     type: NotificationType.ProjectAdded,
                     category: NotificationCategory.ProjectUpdate,
@@ -444,10 +444,10 @@ namespace Projet.Infrastructure.Service
         {
             var user = await _context.Set<User>().FirstOrDefaultAsync(u => u.Id == changedUserId);
             if (user == null)
-                throw new InvalidOperationException("Utilisateur non trouvé");
+                throw new InvalidOperationException("User not found");
 
-            var title = "Modification de Rôle";
-            var message = $"Votre rôle a été modifié: {oldRole} → {newRole}";
+            var title = "Role Changed";
+            var message = $"Your role has been changed: {oldRole} → {newRole}";
             var link = $"/profile";
 
             var notification = await CreateNotificationAsync(
@@ -469,12 +469,12 @@ namespace Projet.Infrastructure.Service
         {
             var task = await _context.Set<DomainTask>().FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null)
-                throw new InvalidOperationException("Tâche non trouvée");
+                throw new InvalidOperationException("Task not found");
 
-            var title = urgencyLevel == "OVERDUE" ? "Tâche Dépassée" : "Date Limite Approchante";
+            var title = urgencyLevel == "OVERDUE" ? "Task Overdue" : "Upcoming Deadline";
             var message = urgencyLevel == "OVERDUE"
-                ? $"La tâche '{task.Title}' a dépassé sa date limite!"
-                : $"La date limite pour la tâche '{task.Title}' approche! Date limite: {task.EndDate:dd/MM/yyyy}";
+                ? $"The task '{task.Title}' has exceeded its deadline!"
+                : $"The deadline for task '{task.Title}' is approaching! Deadline: {task.EndDate:dd/MM/yyyy}";
 
             var link = $"/tasks/{taskId}";
             var notificationType = urgencyLevel == "OVERDUE" ? NotificationType.TaskOverdue : NotificationType.TaskDeadlineApproaching;
@@ -513,9 +513,9 @@ namespace Projet.Infrastructure.Service
                 var recipientMessage = recipientId == assignedToId
                     ? message
                     : recipientId == projectManagerId
-                        ? $"La tâche '{task.Title}' assignée à {assignedUser?.FirstName ?? "l'utilisateur"} " +
-                          (urgencyLevel == "OVERDUE" ? "a dépassé sa date limite!" : "approche de sa date limite!")
-                        : $"La tâche '{task.Title}' du projet est { (urgencyLevel == "OVERDUE" ? "en retard" : "proche de sa date limite") }.";
+                        ? $"Task '{task.Title}' assigned to {assignedUser?.FirstName ?? "the user"} " +
+                          (urgencyLevel == "OVERDUE" ? "has exceeded its deadline!" : "is approaching its deadline!")
+                        : $"Task '{task.Title}' from the project is { (urgencyLevel == "OVERDUE" ? "overdue" : "approaching its deadline") }.";
 
                 var notification = await CreateNotificationAsync(
                     userId: recipientId,
@@ -531,7 +531,7 @@ namespace Projet.Infrastructure.Service
                 firstNotification ??= notification;
             }
 
-            return firstNotification ?? throw new InvalidOperationException("Aucun destinataire valide pour la notification d'échéance");
+            return firstNotification ?? throw new InvalidOperationException("No valid recipient found for the deadline notification");
         }
 
         public async System.Threading.Tasks.Task SendUnreadNotificationEmailsAsync(int daysOld = 1)
@@ -549,7 +549,7 @@ namespace Projet.Infrastructure.Service
                 if (user != null)
                 {
                     var notificationsList = userNotifications.OrderByDescending(n => n.CreatedAt).ToList();
-                    var subject = $"Rappel: {notificationsList.Count} Notifications Non Lues";
+                    var subject = $"Reminder: {notificationsList.Count} Unread Notifications";
                     var body = GenerateUnreadNotificationsEmailBody(user.FirstName, notificationsList);
 
                     await SendNotificationEmailAsync(user.Email, subject, body);
@@ -585,14 +585,14 @@ namespace Projet.Infrastructure.Service
                     continue;
                 }
 
-                var subject = $"Alert: Tâche Dépassée - {task.Title}";
+                var subject = $"Alert: Overdue Task - {task.Title}";
                 var body = $@"
-                    <h2>Tâche Dépassée</h2>
-                    <p>Bonjour {assignedUser.FirstName},</p>
-                    <p>La tâche <strong>{task.Title}</strong> n'est pas terminée et a dépassé sa date limite.</p>
-                    <p><strong>Date limite:</strong> {task.EndDate:dd/MM/yyyy HH:mm}</p>
+                    <h2>Overdue Task</h2>
+                    <p>Hello {assignedUser.FirstName},</p>
+                    <p>The task <strong>{task.Title}</strong> is not completed and has exceeded its deadline.</p>
+                    <p><strong>Deadline:</strong> {task.EndDate:dd/MM/yyyy HH:mm}</p>
                     <p><strong>Description:</strong> {task.Description}</p>
-                    <p>Veuillez la terminer dès que possible.</p>
+                    <p>Please complete it as soon as possible.</p>
                 ";
 
                 await SendNotificationEmailAsync(assignedUser.Email, subject, body);
@@ -661,7 +661,7 @@ namespace Projet.Infrastructure.Service
                                     {message}
                                 </div>
                                 <div class='footer'>
-                                    <p>Ceci est un email automatique. Veuillez ne pas y répondre.</p>
+                                    <p>This is an automated email. Please do not reply.</p>
                                 </div>
                             </div>
                         </body>
@@ -672,19 +672,19 @@ namespace Projet.Infrastructure.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de l'envoi de l'email à {toEmail}: {ex.Message}");
+                Console.WriteLine($"Error while sending the email to {toEmail}: {ex.Message}");
             }
         }
 
         private string GenerateUnreadNotificationsEmailBody(string userName, List<Notification> notifications)
         {
             var notificationsHtml = string.Join(Environment.NewLine, notifications.Take(10).Select(n =>
-                $@"<li><strong>{n.Title}</strong> - {n.Message} (créée le {n.CreatedAt:dd/MM/yyyy HH:mm})</li>"
+                $@"<li><strong>{n.Title}</strong> - {n.Message} (created on {n.CreatedAt:dd/MM/yyyy HH:mm})</li>"
             ));
 
             return $@"
-                <p>Bonjour {userName},</p>
-                <p>Vous avez <strong>{notifications.Count}</strong> notifications non lues:</p>
+                <p>Hello {userName},</p>
+                <p>You have <strong>{notifications.Count}</strong> unread notifications:</p>
                 <ul>
                     {notificationsHtml}
                 </ul>

@@ -35,7 +35,7 @@ namespace Projet.Api.BackgroundJobs
 
         protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Service de notifications de fond en cours de démarrage...");
+            _logger.LogInformation("Background notification service is starting...");
 
             
             _timer = new Timer(
@@ -57,14 +57,14 @@ namespace Projet.Api.BackgroundJobs
 
                     if (!await dbContext.Database.CanConnectAsync())
                     {
-                        _logger.LogWarning("Base de données indisponible. Vérification des notifications reportée.");
+                        _logger.LogWarning("Database is unavailable. Notification check postponed.");
                         return;
                     }
 
                     var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
                     if (pendingMigrations.Any())
                     {
-                        _logger.LogWarning("Migrations en attente détectées ({Count}). Vérification des notifications reportée.", pendingMigrations.Count());
+                        _logger.LogWarning("Pending migrations detected ({Count}). Notification check postponed.", pendingMigrations.Count());
                         return;
                     }
 
@@ -73,43 +73,43 @@ namespace Projet.Api.BackgroundJobs
                     
                     try
                     {
-                        _logger.LogInformation("Vérification des notifications non lues depuis 1 jour...");
+                        _logger.LogInformation("Checking unread notifications from the last day...");
                         await notificationService.SendUnreadNotificationEmailsAsync(daysOld: 1);
-                        _logger.LogInformation("Emails de rappel envoyés avec succès");
+                        _logger.LogInformation("Reminder emails sent successfully");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"Erreur lors de l'envoi des emails de rappel: {ex.Message}");
+                        _logger.LogError($"Error while sending reminder emails: {ex.Message}");
                     }
 
                     
                     try
                     {
-                        _logger.LogInformation("Vérification des tâches en retard...");
+                        _logger.LogInformation("Checking overdue tasks...");
                         await notificationService.SendOverdueTaskEmailsAsync();
-                        _logger.LogInformation("Emails pour tâches en retard envoyés avec succès");
+                        _logger.LogInformation("Overdue task emails sent successfully");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"Erreur lors de l'envoi des emails pour tâches en retard: {ex.Message}");
+                        _logger.LogError($"Error while sending overdue task emails: {ex.Message}");
                     }
 
                     
                     try
                     {
-                        _logger.LogInformation("Vérification des dates limites approchantes...");
+                        _logger.LogInformation("Checking upcoming deadlines...");
                         await SendUpcomingDeadlineAlertsAsync(notificationService);
-                        _logger.LogInformation("Alertes de dates limites approchantes envoyées");
+                        _logger.LogInformation("Upcoming deadline alerts sent successfully");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"Erreur lors de l'envoi des alertes de dates limites: {ex.Message}");
+                        _logger.LogError($"Error while sending deadline alerts: {ex.Message}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erreur critique dans le service de notifications de fond: {ex}");
+                _logger.LogError($"Critical error in the background notification service: {ex}");
             }
         }
 
@@ -187,14 +187,14 @@ namespace Projet.Api.BackgroundJobs
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Erreur lors de l'envoi de l'alerte de date limite pour la tache {TaskId}", task.Id);
+                    _logger.LogError(ex, "Error while sending the deadline alert for task {TaskId}", task.Id);
                 }
             }
         }
 
         public override async System.Threading.Tasks.Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Service de notifications de fond en cours d'arrêt...");
+            _logger.LogInformation("Background notification service is stopping...");
             _timer?.Change(Timeout.Infinite, 0);
             _timer?.Dispose();
             await base.StopAsync(cancellationToken);
