@@ -207,6 +207,9 @@
                     <div class="section-title-row">
                         <h4>Service projects</h4>
                         <div class="inline-actions">
+                            <button class="secondary-btn" type="button" [disabled]="!selectedProject" (click)="openProjectManager(selectedProject?.id)">
+                                Open project manager
+                            </button>
                             <button class="secondary-btn" type="button" (click)="openTaskManager(selectedProject?.id)">
                                 Create task (no assignee)
                             </button>
@@ -221,7 +224,7 @@
                             <div class="service-initial">{{ getInitials(selectedProject.name) }}</div>
                             <div>
                                 <h3>{{ selectedProject.name }}</h3>
-                                <p>{{ selectedProject.description || 'No description provided.' }}</p>
+                                <p class="selected-project-description" [attr.title]="selectedProject.description || 'No description provided.'">{{ selectedProject.description || 'No description provided.' }}</p>
                                 <div class="detail-meta">
                                     <span><strong>Team:</strong> {{ getProjectTeamLabel(selectedProject) }}</span>
                                     <span><strong>Period:</strong> {{ formatDate(selectedProject.startDate) }} - {{ formatDate(selectedProject.endDate) }}</span>
@@ -251,7 +254,7 @@
                         <div class="progress-fill" [style.width.%]="selectedProjectProgressPercent"></div>
                     </div>
 
-                    <div class="team-table-wrap" *ngIf="selectedServiceProjects.length > 0">
+                    <div class="team-table-wrap project-table-wrap" *ngIf="selectedServiceProjects.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>
@@ -265,13 +268,14 @@
                                 <tr *ngFor="let project of selectedServiceProjects" [class.selected-row]="selectedProjectId === project.id" (click)="selectProject(project)">
                                     <td>
                                         <strong>{{ project.name }}</strong>
-                                        <small class="table-subtext">{{ project.description || 'No description' }}</small>
+                                        <small class="table-subtext" [attr.title]="project.description || 'No description'">{{ project.description || 'No description' }}</small>
                                     </td>
                                     <td><span class="status-chip" [ngClass]="getProjectStatusClass(project)">{{ getProjectStatusLabel(project) }}</span></td>
                                     <td>{{ getProjectTeamLabel(project) }}</td>
                                     <td>
-                                        <div class="inline-actions">
-                                            <button class="tiny-btn" type="button" (click)="$event.stopPropagation(); selectProject(project)">Details</button>
+                                        <div class="inline-actions project-actions">
+                                            <button class="tiny-btn" [class.active]="selectedProjectId === project.id" type="button" (click)="$event.stopPropagation(); selectProject(project)">Select</button>
+                                            <button class="tiny-btn" type="button" (click)="$event.stopPropagation(); openProjectManager(project.id)">Open manager</button>
                                             <button class="tiny-btn danger" type="button" [disabled]="projectSubmitting || !canDeleteProject(project)" [attr.title]="canDeleteProject(project) ? 'Delete project' : 'Delete is only allowed for pending projects without sprints, tasks or user stories'" (click)="$event.stopPropagation(); deleteProject(project)">Delete</button>
                                         </div>
                                     </td>
@@ -280,7 +284,10 @@
                         </table>
                     </div>
 
-                    <div class="team-table-wrap" *ngIf="selectedProjectTeamMembers.length > 0">
+                    <div class="member-list-heading" *ngIf="selectedProjectTeamMembers.length > 0">
+                        Team assigned to selected project
+                    </div>
+                    <div class="team-table-wrap member-table-wrap" *ngIf="selectedProjectTeamMembers.length > 0">
                         <table class="team-table">
                             <thead>
                                 <tr>

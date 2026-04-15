@@ -2,21 +2,29 @@
   
   <div class="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-200">
     <h1 class="text-3xl font-bold text-gray-800">Sprint Management</h1>
-    <button 
-      class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
-      (click)="toggleCreateSprintForm()" 
-      *ngIf="!selectedSprint"
-      [disabled]="loading">
-      <span *ngIf="!showCreateSprintForm">+ Create New Sprint</span>
-      <span *ngIf="showCreateSprintForm && !isEditMode">Cancel</span>
-      <span *ngIf="showCreateSprintForm && isEditMode">Cancel Edit</span>
-    </button>
-    <button 
-      class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg" 
-      (click)="backToSprintsList()" 
-      *ngIf="selectedSprint">
-      ← Back to Sprints
-    </button>
+    <div class="flex items-center gap-3">
+      <button
+        class="px-5 py-2.5 bg-slate-700 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-lg"
+        type="button"
+        (click)="backToDashboard()">
+        ← Back to Dashboard
+      </button>
+      <button 
+        class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
+        (click)="toggleCreateSprintForm()" 
+        *ngIf="!selectedSprint"
+        [disabled]="loading">
+        <span *ngIf="!showCreateSprintForm">+ Create New Sprint</span>
+        <span *ngIf="showCreateSprintForm && !isEditMode">Cancel</span>
+        <span *ngIf="showCreateSprintForm && isEditMode">Cancel Edit</span>
+      </button>
+      <button 
+        class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg" 
+        (click)="backToSprintsList()" 
+        *ngIf="selectedSprint">
+        ← Back to Sprints
+      </button>
+    </div>
   </div>
 
   

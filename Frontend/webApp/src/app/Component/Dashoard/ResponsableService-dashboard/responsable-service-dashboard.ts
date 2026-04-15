@@ -809,10 +809,16 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   }
 
   openProjectManager(projectId?: number): void {
-    if (!projectId) return;
+    const targetProjectId = Number(projectId ?? this.selectedProjectId ?? 0);
+    if (!targetProjectId) {
+      this.error = 'Select a project first to open project manager.';
+      return;
+    }
+
+    this.error = '';
     this.router.navigate(['/ProjectManage'], {
       queryParams: {
-        projectId,
+        projectId: targetProjectId,
         serviceId: this.selectedServiceId ?? undefined,
         source: 'service-manager'
       }
@@ -1066,15 +1072,15 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     });
   }
 
-  openSprints(): void {
+  openSprints(projectId?: number): void {
     this.error = '';
-    const firstProjectId = Number(this.selectedServiceProjects[0]?.id ?? 0);
-    if (!firstProjectId) {
+    const targetProjectId = Number(projectId ?? this.selectedProjectId ?? this.selectedServiceProjects[0]?.id ?? 0);
+    if (!targetProjectId) {
       this.error = 'Add a project to this service to manage sprints.';
       return;
     }
 
-    this.router.navigate(['/sprint/manage', firstProjectId], {
+    this.router.navigate(['/sprint/manage', targetProjectId], {
       queryParams: { source: 'service-manager' }
     });
   }
@@ -1098,7 +1104,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
   openSprintManager(projectId?: number): void {
     const numericProjectId = Number(projectId ?? 0);
     if (!numericProjectId) {
-      this.openSprints();
+      this.openSprints(this.selectedProjectId ?? undefined);
       return;
     }
 

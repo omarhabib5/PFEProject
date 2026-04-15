@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SprintService, Sprint, CreateSprintDto, UpdateSprintDto, State } from '../Service/SprintService';
 import { ProjectService, project } from '../../Projet/Service/ProjectService';
+import { TokenService } from '../../../Auth/Service/token.service';
+import { AppRole } from '../../../Auth/model/auth.model';
 
 @Component({
   selector: 'app-sprint-manager',
@@ -16,6 +18,8 @@ export class SprintManager implements OnInit {
   private projectService = inject(ProjectService);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private tokenService = inject(TokenService);
 
   sprints: Sprint[] = [];
   projects: project[] = [];
@@ -28,6 +32,7 @@ export class SprintManager implements OnInit {
   filterProjectId: number | undefined = undefined;
   error: string | null = null;
   successMessage: string | null = null;
+  sourceContext = '';
 
 
   newSprint: any = {
@@ -62,6 +67,8 @@ export class SprintManager implements OnInit {
       if (editId) {
         this.prefillEdit(editId);
       }
+
+      this.sourceContext = String(params['source'] ?? '').trim().toLowerCase();
     });
 
     this.loadSprints();
@@ -268,6 +275,46 @@ export class SprintManager implements OnInit {
 
   backToSprintsList(): void {
     this.selectedSprint = null;
+  }
+
+  backToDashboard(): void {
+    if (this.sourceContext === 'service-manager') {
+      this.router.navigate(['/ResponsableServiceDashboard']);
+      return;
+    }
+
+    if (this.sourceContext === 'project-manager') {
+      this.router.navigate(['/ChefProjetDashboard']);
+      return;
+    }
+
+    const role = this.tokenService.getUserRole();
+    if (role === AppRole.ServiceManager) {
+      this.router.navigate(['/ResponsableServiceDashboard']);
+      return;
+    }
+
+    if (role === AppRole.ProjectManager) {
+      this.router.navigate(['/ChefProjetDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Admin) {
+      this.router.navigate(['/AdminDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Employee) {
+      this.router.navigate(['/EmployeeDashboard']);
+      return;
+    }
+
+    if (role === AppRole.Observer) {
+      this.router.navigate(['/ObserverDashboard']);
+      return;
+    }
+
+    this.router.navigate(['/login']);
   }
 
   validateForm(): boolean {
