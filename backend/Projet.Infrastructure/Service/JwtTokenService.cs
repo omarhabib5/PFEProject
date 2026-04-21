@@ -113,7 +113,7 @@ namespace Projet.Infrastructure.Service
                     return null;
                 }
 
-                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
                 if (!int.TryParse(userIdClaim, out var userId))
                 {
                     return null;
