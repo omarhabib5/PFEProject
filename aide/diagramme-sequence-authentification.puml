@@ -1,0 +1,87 @@
+@startuml
+title Sprint 1 - Authentification & gestion d'accès
+actor "Utilisateur" as U
+participant "Client/Frontend" as FE
+participant "AuthController" as AC
+participant "MediatR" as Med
+participant "LoginCommandHandler" as LCH
+participant "AuthenticationService" as AS
+database "ApplicationDbContext" as DB
+participant "PasswordHasher" as Hasher
+participant "JwtTokenService" as Jwt
+participant "RefreshTokenRepository" as RTR
+participant "JWT Middleware" as JWT
+participant "UserController (ressource protégée)" as UC
+
+== Connexion ==
+U -> FE: saisir email + mot de passe
+FE -> AC: POST /api/auth/login
+AC -> Med: Send LoginCommand
+Med -> LCH: Handle
+LCH -> AS: LoginAsync
+AS -> DB: Users.FirstOrDefault(email)
+AS -> Hasher: VerifyPassword
+alt email/mot de passe invalides
+  AS --> LCH: UnauthorizedAccessException\n"Invalid email or password"
+  LCH --> Med: erreur
+  Med --> AC: 401
+  AC --> FE: Exception 1.1.1
+else compte verrouillé
+  AS --> LCH: UnauthorizedAccessException\n"Account is locked until {date}"
+  LCH --> Med: erreur
+  Med --> AC: 401
+  AC --> FE: Exception 1.1.2
+else OK
+  AS -> DB: UpdateLastLogin + SaveChanges
+  AS -> Jwt: GenerateAccessToken\n(claims: sub, email, role, exp)
+  AS -> Jwt: GenerateRefreshToken\n(jti, userId, expiresAt)
+  AS -> RTR: Create(refreshToken, expiresAt)
+  AS --> LCH: AuthResponse\n(accessToken, refreshToken,\naccessTokenExpiresAt, refreshTokenExpiresAt,\nrole, roleDisplayName)
+  LCH --> Med: AuthResponse
+  Med --> AC: AuthResponse
+  AC --> FE: 200 OK + tokens
+  FE -> FE: Stocker tokens + données utilisateur
+  alt role = Admin
+    FE -> FE: Rediriger vers AdminDashboard
+  else role = ServiceManager
+    FE -> FE: Rediriger vers ResponsableServiceDashboard
+  else role = ProjectManager
+    FE -> FE: Rediriger vers ChefProjetDashboard
+  else role = Employee
+    FE -> FE: Rediriger vers EmployeeDashboard
+  else role = Observer
+    FE -> FE: Rediriger vers ObserverDashboard
+  end
+end
+
+== Refresh token ==
+FE -> AC: POST /api/auth/refresh-token
+AC -> Med: Send RefreshTokenCommand
+Med -> AS: RefreshTokenAsync
+AS -> RTR: GetByToken(token)
+alt token invalide/expiré
+  AS --> Med: UnauthorizedAccessException\n"Invalid or expired refresh token"
+  Med --> AC: 401
+  AC --> FE: Exception 1.1.4
+else OK
+  AS -> DB: Users.FirstOrDefault(userId)
+  AS -> RTR: Revoke(oldToken)
+  AS -> Jwt: GenerateAccessToken\n(claims mis à jour)
+  AS -> Jwt: GenerateRefreshToken\n(nouveau jti + expiresAt)
+  AS -> RTR: Create(newRefreshToken)
+  AS --> Med: AuthResponse\n(new tokens + expirations)
+  Med --> AC: AuthResponse
+  AC --> FE: 200 OK + new tokens
+end
+
+== Accès ressource protégée ==
+FE -> UC: GET /api/user/me (exemple)
+UC -> JWT: validation du token
+alt non authentifié
+  JWT --> UC: invalid
+  UC --> FE: 401 "User not authenticated" (Exception 1.1.5)
+else authentifié
+  JWT --> UC: Claims (userId, role, exp)
+  UC --> FE: 200 OK + user
+end
+@enduml
