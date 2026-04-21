@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Projet.Domain.Command.Sprint;
 using Projet.Domain.Interface;
+using Projet.Domain.Utilities;
 
 namespace Projet.Domain.Handler.Sprint
 {
@@ -24,8 +25,18 @@ namespace Projet.Domain.Handler.Sprint
             {
                 throw new KeyNotFoundException($"Sprint with ID {request.Id} not found.");
             }
+
+            var projectId = sprint.ProjectId;
+
             context.Sprints.Remove(sprint);
             await context.SaveChangesAsync(cancellationToken);
+
+            await SprintStateSynchronizer.SyncProjectStateAsync(
+                context,
+                projectId,
+                cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+
             return Unit.Value;
         }
     }
