@@ -42,10 +42,23 @@ namespace Projet.Domain.Handler.TaskHandler
 
             await _context.SaveChangesAsync(cancellationToken);
 
-         
-            if (previousSprintId != task.SprintId)
+            var sprintIdsToSync = new[] { previousSprintId, task.SprintId }
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .Distinct()
+                .ToList();
+
+            foreach (var sprintId in sprintIdsToSync)
             {
-                
+                await SprintStateSynchronizer.SyncSprintAndProjectStateAsync(
+                    _context,
+                    sprintId,
+                    cancellationToken);
+            }
+
+            if (sprintIdsToSync.Count > 0)
+            {
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
             return Unit.Value;

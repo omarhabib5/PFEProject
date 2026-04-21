@@ -7,6 +7,7 @@ import { TeamService, Team, TeamUser } from '../../Team/Service/TeamService';
 import { ServiceService, Service } from '../../Team/Service/ServiceService';
 import { UserApiService, UserDto } from '../../Team/Service/UserApiService';
 import { SprintService, Sprint, CreateSprintDto, UpdateSprintDto, State as SprintState } from '../../Sprint/Service/SprintService';
+import { TaskService, TaskDto } from '../../Task/Service/TaskService';
 import { UserStoryService } from '../../UserStory/Service/UserStoryService';
 import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus } from '../../UserStory/Models/userstory.model';
 import { TokenService } from '../../../Auth/Service/token.service';
@@ -24,6 +25,7 @@ export class ProjectManager implements OnInit {
   private serviceService = inject(ServiceService);
   private userService = inject(UserApiService);
   private sprintService = inject(SprintService);
+  private taskService = inject(TaskService);
   private userStoryService = inject(UserStoryService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -35,6 +37,7 @@ export class ProjectManager implements OnInit {
   teams: Team[] = [];
   services: Service[] = [];
   users: UserDto[] = [];
+  tasks: TaskDto[] = [];
   projectManagerUsers: UserDto[] = [];
   selectedServiceFilter: number | null = null;
   private requestedProjectId: number | null = null;
@@ -152,6 +155,7 @@ export class ProjectManager implements OnInit {
     this.loadTeams();
     this.loadServices();
     this.loadUsers();
+    this.loadTasks();
   }
 
   loadProjects(): void {
@@ -213,6 +217,18 @@ export class ProjectManager implements OnInit {
       error: (err) => {
         this.projectManagerUsers = [];
         console.error('Failed to load users:', err);
+      }
+    });
+  }
+
+  loadTasks(): void {
+    this.taskService.getAll().subscribe({
+      next: (data) => {
+        this.tasks = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load tasks:', err);
       }
     });
   }
@@ -367,6 +383,22 @@ export class ProjectManager implements OnInit {
     if (project.id) {
       this.loadProjectSprints(project.id);
       this.loadProjectUserStories(project.id);
+    }
+  }
+
+  openProjectExportChooser(): void {
+    if (!this.selectedProject?.id) {
+      return;
+    }
+
+    const choice = (window.prompt('Export this project as: pdf or excel', 'pdf') ?? '').trim().toLowerCase();
+    if (choice === 'pdf') {
+      this.exportSelectedProjectToPdf();
+      return;
+    }
+
+    if (choice === 'excel' || choice === 'xlsx' || choice === 'csv') {
+      this.exportSelectedProjectToExcel();
     }
   }
 
@@ -679,9 +711,9 @@ export class ProjectManager implements OnInit {
       return 0;
     }
 
-    return this.projectUserStories
-      .filter((story) => Number(story.sprintId) === normalizedSprintId)
-      .reduce((total, story) => total + Number(story.taskCount ?? 0), 0);
+    return this.getSelectedProjectTasks()
+      .filter((task) => Number(task.sprintId ?? 0) === normalizedSprintId)
+      .length;
   }
 
   toggleDetailSprintForm(): void {
@@ -1306,6 +1338,225 @@ export class ProjectManager implements OnInit {
 
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('en-US');
+  }
+
+  private exportSelectedProjectToExcel(): void {
+    const rows = this.buildSelectedProjectExportRows();
+    const csvContent = rows.map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.getExportFileBaseName()}-${this.buildTimestampSuffix()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private exportSelectedProjectToPdf(): void {
+    const rows = this.buildSelectedProjectExportRows();
+    const headers = rows[0] ?? [];
+    const dataRows = rows.slice(1);
+
+    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    if (!printWindow) {
+      return;
+    }
+
+    const headHtml = headers.map((header) => `<th>${this.escapeHtml(header)}</th>`).join('');
+    const bodyHtml = dataRows.map((row) => `<tr>${row.map((cell) => `<td>${this.escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
+
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>${this.escapeHtml(this.getExportFileBaseName())}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 18px; color: #111827; }
+          h1 { margin: 0 0 8px 0; font-size: 20px; }
+          p { margin: 0 0 14px 0; font-size: 12px; color: #4b5563; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; }
+          th, td { border: 1px solid #d1d5db; padding: 6px; text-align: left; vertical-align: top; }
+          th { background: #f3f4f6; }
+        </style>
+      </head>
+      <body>
+        <h1>${this.escapeHtml(this.selectedProject?.name ?? 'Project')} Report</h1>
+        <p>Generated at: ${new Date().toLocaleString()}</p>
+        <table>
+          <thead><tr>${headHtml}</tr></thead>
+          <tbody>${bodyHtml}</tbody>
+        </table>
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  }
+
+  private buildSelectedProjectExportRows(): string[][] {
+    const projectItem = this.selectedProject;
+    if (!projectItem?.id) {
+      return [];
+    }
+
+    const headers = [
+      'Project',
+      'Project State',
+      'Sprint',
+      'Sprint State',
+      'User Story',
+      'User Story State',
+      'Task',
+      'Task State',
+      'Task Start',
+      'Task End'
+    ];
+
+    const rows: string[][] = [headers];
+    const projectSprints = this.projectSprints;
+    const projectStories = this.projectUserStories;
+    const projectTasks = this.getSelectedProjectTasks();
+
+    if (projectSprints.length === 0 && projectStories.length === 0) {
+      rows.push([
+        projectItem.name,
+        this.getStateLabel(projectItem.projectState),
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-',
+        '-'
+      ]);
+      return rows;
+    }
+
+    projectSprints.forEach((sprint) => {
+      const sprintStories = projectStories.filter((story) => Number(story.sprintId) === Number(sprint.id));
+
+      if (sprintStories.length === 0) {
+        rows.push([
+          projectItem.name,
+          this.getStateLabel(projectItem.projectState),
+          sprint.name,
+          this.getSprintStateName(sprint.sprintState),
+          '-',
+          '-',
+          '-',
+          '-',
+          '-',
+          '-'
+        ]);
+        return;
+      }
+
+      sprintStories.forEach((story) => {
+        const storyTasks = projectTasks.filter((task) => Number(task.userStoryId) === Number(story.id));
+
+        if (storyTasks.length === 0) {
+          rows.push([
+            projectItem.name,
+            this.getStateLabel(projectItem.projectState),
+            sprint.name,
+            this.getSprintStateName(sprint.sprintState),
+            story.name || story.title,
+            this.getUserStoryStatusDisplay(story),
+            '-',
+            '-',
+            '-',
+            '-'
+          ]);
+          return;
+        }
+
+        storyTasks.forEach((task) => {
+          rows.push([
+            projectItem.name,
+            this.getStateLabel(projectItem.projectState),
+            sprint.name,
+            this.getSprintStateName(sprint.sprintState),
+            story.name || story.title,
+            this.getUserStoryStatusDisplay(story),
+            task.title,
+            this.getTaskStatusLabel(task.status),
+            task.startDate ? this.formatDate(new Date(task.startDate)) : '-',
+            task.endDate ? this.formatDate(new Date(task.endDate)) : '-'
+          ]);
+        });
+      });
+    });
+
+    return rows;
+  }
+
+  private getSelectedProjectTasks(): TaskDto[] {
+    const projectId = this.selectedProject?.id;
+    if (!projectId) {
+      return [];
+    }
+
+    const storyIds = new Set(this.projectUserStories.map((story) => Number(story.id)));
+    return this.tasks.filter((task) => {
+      const taskProjectMatch = this.projectUserStories.some((story) => Number(story.id) === Number(task.userStoryId));
+      return taskProjectMatch || storyIds.has(Number(task.userStoryId));
+    });
+  }
+
+  private getTaskStatusLabel(status: TaskDto['status']): string {
+    const normalized = this.mapTaskStatus(status);
+    const labels: Record<string, string> = {
+      pending: 'Pending',
+      todo: 'To Do',
+      inProgress: 'In Progress',
+      done: 'Done',
+      validated: 'Validated'
+    };
+
+    return labels[normalized] ?? 'Unknown';
+  }
+
+  private mapTaskStatus(status: TaskDto['status']): 'pending' | 'todo' | 'inProgress' | 'done' | 'validated' {
+    if (typeof status === 'number') {
+      return ['pending', 'todo', 'inProgress', 'done', 'validated'][status] as any ?? 'pending';
+    }
+
+    const normalized = String(status ?? '').trim().toLowerCase();
+    if (normalized === 'inprogress') return 'inProgress';
+    if (normalized === 'pending' || normalized === 'todo' || normalized === 'done' || normalized === 'validated') {
+      return normalized as any;
+    }
+
+    return 'pending';
+  }
+
+  private getExportFileBaseName(): string {
+    return this.selectedProject?.name ? `${this.selectedProject.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')}-project` : 'project';
+  }
+
+  private escapeCsvValue(value: string): string {
+    return `"${String(value ?? '').replace(/"/g, '""')}"`;
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private buildTimestampSuffix(): string {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    return `${yyyy}${mm}${dd}-${hh}${min}`;
   }
 
   formatDateForInput(date: Date): string {

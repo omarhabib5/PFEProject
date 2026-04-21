@@ -1008,6 +1008,11 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     const deletionBlockers = this.getProjectDeletionBlockers(project);
     if (deletionBlockers.length > 0) {
       this.error = `Cannot delete project "${project.name}" because ${deletionBlockers.join(', ')}.`;
+      
+      setTimeout(() => {
+        this.error = '';
+        this.cdr.detectChanges();
+      }, 5000);
       return;
     }
 
@@ -1035,9 +1040,42 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
           this.success = 'Project deleted successfully.';
           this.loadProjects();
           this.cdr.detectChanges();
+          
+          setTimeout(() => {
+            this.success = '';
+            this.cdr.detectChanges();
+          }, 5000);
         },
-        error: () => {
-          this.error = 'Unable to delete project.';
+        error: (err: any) => {
+          let errorMessage = 'Unable to delete project.';
+          let detailedCause = '';
+          
+     
+          if (err && err.error) {
+            if (typeof err.error === 'string') {
+              detailedCause = err.error;
+            } else if (err.error.message) {
+              detailedCause = err.error.message;
+            } else if (err.error.detail) {
+              detailedCause = err.error.detail;
+            }
+          } else if (err && err.message) {
+            detailedCause = err.message;
+          }
+          
+          // Format error message with cause
+          if (detailedCause) {
+            errorMessage = `Delete project failed: ${detailedCause}`;
+          }
+          
+          this.error = errorMessage;
+          console.error('Project deletion error:', { error: err, cause: detailedCause });
+          this.cdr.detectChanges();
+          // Auto-clear error message after 5 seconds
+          setTimeout(() => {
+            this.error = '';
+            this.cdr.detectChanges();
+          }, 5000);
         }
       });
   }
@@ -1179,7 +1217,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     );
   }
 
-  submitSprintForm(): void {
+  VerifierSprint(): void {
     const projectId = Number(this.sprintForm.projectId ?? 0);
     const name = this.sprintForm.name.trim();
     const startDate = this.sprintForm.startDate;
@@ -1284,9 +1322,42 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
           this.success = 'Sprint deleted successfully.';
           this.loadProjects();
           this.cdr.detectChanges();
+     
+          setTimeout(() => {
+            this.success = '';
+            this.cdr.detectChanges();
+          }, 5000);
         },
-        error: () => {
-          this.error = 'Unable to delete sprint.';
+        error: (err: any) => {
+          let errorMessage = 'Unable to delete sprint.';
+          let detailedCause = '';
+          
+          
+          if (err && err.error) {
+            if (typeof err.error === 'string') {
+              detailedCause = err.error;
+            } else if (err.error.message) {
+              detailedCause = err.error.message;
+            } else if (err.error.detail) {
+              detailedCause = err.error.detail;
+            }
+          } else if (err && err.message) {
+            detailedCause = err.message;
+          }
+          
+         
+          if (detailedCause) {
+            errorMessage = `Delete sprint failed: ${detailedCause}`;
+          }
+          
+          this.error = errorMessage;
+          console.error('Sprint deletion error:', { error: err, cause: detailedCause });
+          this.cdr.detectChanges();
+          // Auto-clear error message after 5 seconds
+          setTimeout(() => {
+            this.error = '';
+            this.cdr.detectChanges();
+          }, 5000);
         }
       });
   }

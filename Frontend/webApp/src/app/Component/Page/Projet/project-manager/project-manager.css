@@ -34,6 +34,31 @@
 	border-color: rgba(148, 163, 184, 0.28);
 }
 
+.project-manager-page .project-detail-actions {
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.project-manager-page .project-export-button {
+	border: 0;
+	border-radius: 999px;
+	padding: 0.75rem 1.25rem;
+	background: linear-gradient(135deg, #2563eb, #0f172a);
+	color: #ffffff;
+	font-size: 0.85rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.project-manager-page .project-export-button:hover {
+	transform: translateY(-2px);
+	filter: brightness(1.02);
+	box-shadow: 0 18px 36px rgba(15, 23, 42, 0.22);
+}
+
 .project-manager-page .page-kicker {
 	color: #0f766e;
 }
@@ -112,6 +137,16 @@
 	box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
 }
 
+.project-manager-page .project-card-actions .bg-cyan-600,
+.project-manager-page .project-card-actions .bg-yellow-600,
+.project-manager-page .project-card-actions .bg-red-600,
+.project-manager-page .project-footer-actions .bg-amber-600,
+.project-manager-page .project-footer-actions .bg-rose-600,
+.project-manager-page .project-subpanel .bg-blue-600,
+.project-manager-page .project-subpanel .bg-emerald-600 {
+	box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
 .project-manager-page .project-card-meta p {
 	color: #475569;
 }
@@ -137,6 +172,20 @@
 	box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
 }
 
+.project-manager-page .project-hero .rounded-full {
+	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.project-manager-page .project-hero .bg-linear-to-br,
+.project-manager-page .project-hero .bg-linear-to-r {
+	background-image: linear-gradient(135deg, #f8fafc 0%, #ffffff 48%, #eff6ff 100%);
+}
+
+.project-manager-page .project-detail-panel {
+	border-radius: 30px;
+	box-shadow: 0 24px 52px rgba(15, 23, 42, 0.1);
+}
+
 .project-manager-page .project-hero h2,
 .project-manager-page .project-subpanel h3,
 .project-manager-page .project-subpanel h4 {
@@ -150,6 +199,14 @@
 
 .project-manager-page .project-tabs {
 	background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.96));
+}
+
+.project-manager-page .project-tabs button {
+	border: 1px solid transparent;
+}
+
+.project-manager-page .project-tabs button.bg-blue-600 {
+	border-color: rgba(37, 99, 235, 0.18);
 }
 
 .project-manager-page .project-tabs button {
@@ -169,6 +226,11 @@
 	border-radius: 24px;
 	border: 1px solid rgba(226, 232, 240, 0.95);
 	box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+.project-manager-page .detail-card {
+	border-color: rgba(226, 232, 240, 0.95);
+	background: rgba(255, 255, 255, 0.92);
 }
 
 .project-manager-page .detail-card {
@@ -212,6 +274,14 @@
 
 .project-manager-page .project-footer-actions {
 	padding-bottom: 0.25rem;
+}
+
+.project-manager-page .project-footer-actions button:first-child {
+	background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.project-manager-page .project-footer-actions button:last-child {
+	background: linear-gradient(135deg, #e11d48, #be123c);
 }
 
 @media (max-width: 768px) {

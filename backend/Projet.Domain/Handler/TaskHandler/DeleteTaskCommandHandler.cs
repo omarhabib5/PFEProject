@@ -30,7 +30,14 @@ namespace Projet.Domain.Handler.TaskHandler
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync(cancellationToken);
 
-           
+            if (sprintId.HasValue)
+            {
+                await SprintStateSynchronizer.SyncSprintAndProjectStateAsync(
+                    _context,
+                    sprintId.Value,
+                    cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
 
             return Unit.Value;
         }

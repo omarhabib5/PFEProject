@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Projet.Domain.Command.Sprint;
 using Projet.Domain.Interface;
+using Projet.Domain.Utilities;
 
 namespace Projet.Domain.Handler.Sprint
 {
@@ -39,6 +40,13 @@ namespace Projet.Domain.Handler.Sprint
             };
             context.Sprints.Add(sprint);
             await context.SaveChangesAsync(cancellationToken);
+
+            await SprintStateSynchronizer.SyncProjectStateAsync(
+                context,
+                sprint.ProjectId,
+                cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+
             return sprint.Id;
         }
     }
