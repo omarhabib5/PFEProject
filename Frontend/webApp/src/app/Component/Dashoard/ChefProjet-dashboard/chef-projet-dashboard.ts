@@ -146,7 +146,9 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   showTaskMessageComposerForId: number | null = null;
   sendingTaskMessageId: number | null = null;
   assigningTaskId: number | null = null;
+  updatingTaskDateId: number | null = null;
   selectedAssigneeByTaskId: Record<number, number | null> = {};
+  taskDateDraftByTaskId: Record<number, { startDate: string; endDate: string }> = {};
   messagingContacts: MessagingContact[] = [];
   selectedMessagingUserId: number | null = null;
   conversationMessages: AppNotification[] = [];
@@ -1540,9 +1542,79 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     return assignedId > 0 ? assignedId : null;
   }
 
+  getTaskDateDraft(task: TaskDto, key: 'startDate' | 'endDate'): string {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return '';
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(this.taskDateDraftByTaskId, taskId)) {
+      this.taskDateDraftByTaskId[taskId] = {
+        startDate: this.toDateInput(task.startDate),
+        endDate: this.toDateInput(task.endDate),
+      };
+    }
+
+    return this.taskDateDraftByTaskId[taskId]?.[key] ?? '';
+  }
+
+  setTaskDateDraft(task: TaskDto, key: 'startDate' | 'endDate', value: string): void {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(this.taskDateDraftByTaskId, taskId)) {
+      this.taskDateDraftByTaskId[taskId] = {
+        startDate: this.toDateInput(task.startDate),
+        endDate: this.toDateInput(task.endDate),
+      };
+    }
+
+    this.taskDateDraftByTaskId[taskId][key] = value;
+
+    if (key === 'startDate' && this.taskDateDraftByTaskId[taskId].endDate < value) {
+      this.taskDateDraftByTaskId[taskId].endDate = value;
+    }
+  }
+
+  getTaskDateMin(task: TaskDto): string {
+    return this.getTaskDateRange(task).min;
+  }
+
+  getTaskDateMax(task: TaskDto): string {
+    return this.getTaskDateRange(task).max;
+  }
+
+  isTaskDateDraftWithinProjectRange(task: TaskDto): boolean {
+    const startDate = this.getTaskDateDraft(task, 'startDate');
+    const endDate = this.getTaskDateDraft(task, 'endDate');
+    const projectStart = this.projectStartDateInput;
+    const projectEnd = this.projectEndDateInput;
+
+    if (!startDate || !endDate || !projectStart || !projectEnd) {
+      return false;
+    }
+
+    return this.isDateInRange(startDate, projectStart, projectEnd)
+      && this.isDateInRange(endDate, projectStart, projectEnd);
+  }
+
+  getTaskDateProjectValidationMessage(task: TaskDto): string {
+    if (this.isTaskDateDraftWithinProjectRange(task)) {
+      return '';
+    }
+
+    return `Task dates must be between project dates (${this.formatDate(this.projectStartDateInput)} - ${this.formatDate(this.projectEndDateInput)}).`;
+  }
+
   setSelectedAssignee(task: TaskDto, value: number | null): void {
     const taskId = Number(task.id ?? 0);
     if (!taskId) {
+      return;
+    }
+
+    if (this.isTaskCompleted(task)) {
       return;
     }
 
@@ -1553,6 +1625,12 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   assignEmployeeToTask(task: TaskDto): void {
     const taskId = Number(task.id ?? 0);
     if (!taskId) {
+      return;
+    }
+
+    if (this.isTaskCompleted(task)) {
+      this.error = 'Completed tasks cannot be reassigned.';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -1599,6 +1677,79 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       error: (err) => {
         this.error = err?.error?.message || 'Unable to assign employee to task.';
         this.assigningTaskId = null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  updateTaskDates(task: TaskDto): void {
+    const taskId = Number(task.id ?? 0);
+    if (!taskId) {
+      return;
+    }
+
+    if (this.isTaskCompleted(task)) {
+      this.error = 'Completed tasks cannot be edited.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const startDate = this.getTaskDateDraft(task, 'startDate');
+    const endDate = this.getTaskDateDraft(task, 'endDate');
+
+    if (!startDate || !endDate) {
+      this.error = 'Task start date and end date are required.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (endDate < startDate) {
+      this.error = 'Task end date must be after or equal to start date.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.isTaskDateDraftWithinProjectRange(task)) {
+      this.error = this.getTaskDateProjectValidationMessage(task);
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const range = this.getTaskDateRange(task);
+    if (!this.isDateInRange(startDate, range.min, range.max) || !this.isDateInRange(endDate, range.min, range.max)) {
+      this.error = 'Task dates are outside the allowed range.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const payload: UpdateTaskRequest = {
+      id: taskId,
+      title: String(task.title ?? '').trim(),
+      description: String(task.description ?? '').trim(),
+      estimatedHours: Number(task.estimatedHours ?? 0),
+      status: this.normalizeTaskState(task.status),
+      complexity: Number(task.complexity ?? 1),
+      startDate,
+      endDate,
+      userStoryId: Number(task.userStoryId ?? 0),
+      sprintId: task.sprintId != null ? Number(task.sprintId) : null,
+      assignedToId: Number((task as any)?.assignedToId ?? 0) || null,
+    };
+
+    this.clearMessages();
+    this.updatingTaskDateId = taskId;
+
+    this.taskService.update(payload).subscribe({
+      next: () => {
+        task.startDate = startDate;
+        task.endDate = endDate;
+        this.success = 'Task dates updated successfully.';
+        this.updatingTaskDateId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'Unable to update task dates.';
+        this.updatingTaskDateId = null;
         this.cdr.detectChanges();
       }
     });
@@ -2052,6 +2203,17 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     }
 
     return { start, end };
+  }
+
+  private getTaskDateRange(task: TaskDto): { min: string; max: string } {
+    const sprint = this.sprints.find((item) => Number(item.id) === Number(task.sprintId ?? 0));
+    const sprintStart = sprint ? this.toDateInput(sprint.startDate) : '';
+    const sprintEnd = sprint ? this.toDateInput(sprint.endDate) : '';
+
+    const min = this.maxDateString(this.projectStartDateInput, sprintStart);
+    const max = this.minDateString(this.projectEndDateInput, sprintEnd);
+
+    return { min, max };
   }
 
   private loadUserStoriesForProjects(projectIds: number[]): Observable<UserStoryDto[]> {
