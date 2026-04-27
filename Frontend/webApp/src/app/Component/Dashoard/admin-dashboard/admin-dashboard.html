@@ -160,6 +160,7 @@
                     <input type="text" [(ngModel)]="editService.name" name="editServiceName" placeholder="Service name" required />
                     <select [(ngModel)]="editService.responsibleId" name="editResponsibleId">
                         <option [value]="undefined">Select a manager</option>
+                        <option [value]="0">No assignee</option>
                         <option *ngFor="let user of serviceManagerUsers" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
                     </select>
                     <button type="submit" class="btn-primary" [disabled]="serviceFormLoading">

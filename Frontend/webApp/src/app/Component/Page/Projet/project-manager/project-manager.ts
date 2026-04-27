@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -61,6 +61,7 @@ export class ProjectManager implements OnInit {
   editingUserStoryDetailId: string | null = null;
   openSprintMenuId: number | null = null;
   openUserStoryMenuId: string | null = null;
+  showExportMenu = false;
   currentDateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     day: '2-digit',
@@ -391,14 +392,33 @@ export class ProjectManager implements OnInit {
       return;
     }
 
-    const choice = (window.prompt('Export this project as: pdf or excel', 'pdf') ?? '').trim().toLowerCase();
-    if (choice === 'pdf') {
+    this.showExportMenu = !this.showExportMenu;
+  }
+
+  closeProjectExportChooser(): void {
+    this.showExportMenu = false;
+  }
+
+  exportProjectAs(format: 'pdf' | 'excel'): void {
+    if (format === 'pdf') {
       this.exportSelectedProjectToPdf();
+    } else {
+      this.exportSelectedProjectToExcel();
+    }
+
+    this.showExportMenu = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) {
       return;
     }
 
-    if (choice === 'excel' || choice === 'xlsx' || choice === 'csv') {
-      this.exportSelectedProjectToExcel();
+    const clickedInsideExportArea = !!target.closest('.project-export-wrap');
+    if (!clickedInsideExportArea) {
+      this.showExportMenu = false;
     }
   }
 
@@ -410,6 +430,7 @@ export class ProjectManager implements OnInit {
     }
 
     this.selectedProject = null;
+    this.showExportMenu = false;
     this.selectedProjectMembers = [];
     this.projectSprints = [];
     this.projectUserStories = [];
@@ -1353,45 +1374,177 @@ export class ProjectManager implements OnInit {
   }
 
   private exportSelectedProjectToPdf(): void {
-    const rows = this.buildSelectedProjectExportRows();
-    const headers = rows[0] ?? [];
-    const dataRows = rows.slice(1);
-
-    const printWindow = window.open('', '_blank', 'width=1200,height=800');
-    if (!printWindow) {
+    const projectItem = this.selectedProject;
+    if (!projectItem?.id) {
       return;
     }
 
-    const headHtml = headers.map((header) => `<th>${this.escapeHtml(header)}</th>`).join('');
-    const bodyHtml = dataRows.map((row) => `<tr>${row.map((cell) => `<td>${this.escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
+    const sprints = this.projectSprints ?? [];
+    const stories = this.projectUserStories ?? [];
+    const projectTasks = this.getSelectedProjectTasks();
+
+    const formatDateFr = (dateValue: Date | string | undefined): string => {
+      if (!dateValue) {
+        return '-';
+      }
+
+      return new Date(dateValue).toLocaleDateString('fr-FR');
+    };
+
+    const sprintBlocksHtml = sprints.map((sprint, index) => {
+      const sprintStories = stories.filter((story) => Number(story.sprintId ?? 0) === Number(sprint.id));
+
+      const storiesHtml = sprintStories.length > 0
+        ? `
+          <ul class="story-list">
+            ${sprintStories.map((story) => {
+              const storyName = story.name || story.title || 'User story';
+              const storyTasks = projectTasks.filter((task) => Number(task.userStoryId) === Number(story.id));
+              const taskHtml = storyTasks.length > 0
+                ? `
+                    <ul class="task-list">
+                      ${storyTasks.map((task) => `
+                        <li>
+                          <div class="task-title">- ${this.escapeHtml(task.title || 'Task')}</div>
+                          <div class="task-meta">${this.escapeHtml(task.description || 'No description')}</div>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  `
+                : '<p class="empty-text">Aucune tache assignee</p>';
+
+              return `
+                <li>
+                  <div class="story-title">• ${this.escapeHtml(storyName)}</div>
+                  <div class="story-meta">${this.escapeHtml(story.description || 'No description')}</div>
+                  ${taskHtml}
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        `
+        : '<p class="empty-text">Aucune user story assignee</p>';
+
+      return `
+        <section class="sprint-block">
+          <h2>${index + 1}. ${this.escapeHtml(sprint.name)}</h2>
+          <p class="line">${this.escapeHtml(sprint.description || 'No description')}</p>
+          ${storiesHtml}
+        </section>
+      `;
+    }).join('');
+
+    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    if (!printWindow) {
+      this.error = 'Popup blocked. Please allow popups for this site to open PDF export.';
+      return;
+    }
 
     printWindow.document.write(`
       <html>
       <head>
         <title>${this.escapeHtml(this.getExportFileBaseName())}</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 18px; color: #111827; }
-          h1 { margin: 0 0 8px 0; font-size: 20px; }
-          p { margin: 0 0 14px 0; font-size: 12px; color: #4b5563; }
-          table { width: 100%; border-collapse: collapse; font-size: 11px; }
-          th, td { border: 1px solid #d1d5db; padding: 6px; text-align: left; vertical-align: top; }
-          th { background: #f3f4f6; }
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 22px;
+            color: #111827;
+            line-height: 1.35;
+          }
+          h1 {
+            margin: 0 0 14px 0;
+            font-size: 46px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+          }
+          .summary-line {
+            margin: 0 0 8px 0;
+            font-size: 36px;
+            color: #111827;
+          }
+          hr {
+            border: 0;
+            border-top: 1px solid #d1d5db;
+            margin: 30px 0;
+          }
+          .sprint-block {
+            margin-bottom: 30px;
+          }
+          .sprint-block h2 {
+            margin: 0 0 10px 0;
+            font-size: 42px;
+            color: #0b61c9;
+            font-weight: 800;
+          }
+          .line {
+            margin: 0 0 6px 0;
+            font-size: 34px;
+            color: #3f4752;
+          }
+          .story-list {
+            margin: 16px 0 0 22px;
+            padding: 0;
+            list-style: none;
+          }
+          .story-list li {
+            margin: 0 0 10px 0;
+          }
+          .story-title {
+            font-size: 38px;
+            color: #1f2937;
+            margin-bottom: 2px;
+          }
+          .story-meta {
+            font-size: 30px;
+            color: #374151;
+            margin-left: 20px;
+          }
+          .task-list {
+            margin: 8px 0 0 42px;
+            padding: 0;
+            list-style: none;
+          }
+          .task-list li {
+            margin: 0 0 8px 0;
+          }
+          .task-title {
+            font-size: 32px;
+            color: #1f2937;
+          }
+          .task-meta {
+            font-size: 28px;
+            color: #4b5563;
+            margin-left: 12px;
+          }
+          .empty-text {
+            margin: 14px 0 0 20px;
+            font-size: 34px;
+            color: #8a8f98;
+          }
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
         </style>
       </head>
       <body>
-        <h1>${this.escapeHtml(this.selectedProject?.name ?? 'Project')} Report</h1>
-        <p>Generated at: ${new Date().toLocaleString()}</p>
-        <table>
-          <thead><tr>${headHtml}</tr></thead>
-          <tbody>${bodyHtml}</tbody>
-        </table>
+        <h1>${this.escapeHtml(projectItem.name)}</h1>
+        <p class="summary-line">Service: ${this.escapeHtml(this.getServiceName(projectItem.serviceId))} | Progression: ${this.escapeHtml(String(this.getProjectProgress(projectItem)))}%</p>
+        <p class="summary-line">Periode: ${formatDateFr(projectItem.startDate)} - ${formatDateFr(projectItem.endDate)}</p>
+        <p class="summary-line">Chef de projet: ${this.escapeHtml(this.getUserName(projectItem.projectManagerId))}</p>
+        <hr />
+        ${sprintBlocksHtml || '<p class="empty-text">Aucun sprint assigne</p>'}
       </body>
       </html>
     `);
 
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
+    setTimeout(() => {
+      printWindow.print();
+    }, 150);
   }
 
   private buildSelectedProjectExportRows(): string[][] {

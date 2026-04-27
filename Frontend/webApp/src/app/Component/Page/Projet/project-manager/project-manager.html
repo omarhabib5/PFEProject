@@ -22,12 +22,22 @@
       *ngIf="!selectedProject">
       ← Back to Services List
     </button>
-    <button 
-      class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg" 
-      (click)="backToProjectsList()" 
-      *ngIf="selectedProject">
-      ← Back to Service Projects
-    </button>
+    <div class="top-selected-actions" *ngIf="selectedProject">
+      <div class="project-export-actions">
+        <button type="button" class="project-export-button" (click)="exportProjectAs('pdf')">
+          Export PDF
+        </button>
+        <button type="button" class="project-export-button project-export-button--alt" (click)="exportProjectAs('excel')">
+          Export Excel
+        </button>
+      </div>
+
+      <button 
+        class="px-5 py-2.5 bg-gray-600 text-white rounded-lg font-medium uppercase tracking-wide transition-all duration-300 hover:bg-gray-700 hover:-translate-y-0.5 hover:shadow-lg" 
+        (click)="backToProjectsList()">
+        ← Back to Service Projects
+      </button>
+    </div>
   </div>
 
  
@@ -257,11 +267,6 @@
           <p class="text-base md:text-lg text-slate-600">Service: <span class="font-semibold text-slate-800">{{ getServiceName(selectedProject.serviceId) }}</span></p>
         </div>
 
-        <div class="project-detail-actions flex items-start md:items-center">
-          <button type="button" class="project-export-button" (click)="openProjectExportChooser()">
-            Export
-          </button>
-        </div>
       </div>
 
       <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-slate-200">

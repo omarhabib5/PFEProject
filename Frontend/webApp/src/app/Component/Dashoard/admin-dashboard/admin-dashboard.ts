@@ -553,7 +553,6 @@ private adminNotificationsSubscription: Subscription | null = null;
     link.click();
     URL.revokeObjectURL(url);
   }
-
   prevMonth(): void {
     this.currentMonthDate = new Date(
       this.currentMonthDate.getFullYear(),
@@ -1273,7 +1272,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.serviceFormLoading = true;
     const payload: CreateServiceDto = {
       name: this.newService.name.trim(),
-      responsibleId: this.newService.responsibleId || undefined
+      responsibleId: this.normalizeResponsibleId(this.newService.responsibleId)
     };
 
     this.serviceService.createService(payload).subscribe({
@@ -1337,7 +1336,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     const payload: UpdateServiceDto = {
       id: this.editingServiceId,
       name: this.editService.name.trim(),
-      responsibleId: this.editService.responsibleId || undefined
+      responsibleId: this.normalizeResponsibleId(this.editService.responsibleId)
     };
 
     this.serviceService.updateService(this.editingServiceId, payload).subscribe({
@@ -1398,6 +1397,19 @@ private adminNotificationsSubscription: Subscription | null = null;
         this.serviceFormLoading = false;
       }
     });
+  }
+
+  private normalizeResponsibleId(value: unknown): number | undefined {
+    if (value === null || value === undefined || value === '' || value === 'undefined' || value === 'null') {
+      return undefined;
+    }
+
+    const parsedValue = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      return undefined;
+    }
+
+    return parsedValue;
   }
 
   private getServiceDeleteBlockReason(service: Service): string | null {

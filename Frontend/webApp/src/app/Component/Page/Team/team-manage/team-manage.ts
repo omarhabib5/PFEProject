@@ -236,7 +236,7 @@ export class TeamManage implements OnInit {
     }
     
     if (!this.newTeam.serviceId || this.newTeam.serviceId === 0) {
-      this.error = 'Please select a service';
+      this.error = 'select a service';
       setTimeout(() => this.error = null, 5000);
       return;
     }

@@ -32,11 +32,31 @@
 	gap: 1.5rem;
 	padding-bottom: 1.25rem;
 	border-color: rgba(148, 163, 184, 0.28);
+	overflow: visible;
 }
 
 .project-manager-page .project-detail-actions {
 	margin-left: auto;
 	flex-shrink: 0;
+}
+
+.project-manager-page .top-selected-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-left: auto;
+	overflow: visible;
+}
+
+.project-manager-page .project-export-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.project-manager-page .project-export-wrap {
+	position: relative;
+	overflow: visible;
 }
 
 .project-manager-page .project-export-button {
@@ -57,6 +77,51 @@
 	transform: translateY(-2px);
 	filter: brightness(1.02);
 	box-shadow: 0 18px 36px rgba(15, 23, 42, 0.22);
+}
+
+.project-manager-page .project-export-button--alt {
+	background: linear-gradient(135deg, #0ea5e9, #1e40af);
+}
+
+.project-manager-page .project-export-menu {
+	position: absolute;
+	top: calc(100% + 0.45rem);
+	right: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	min-width: 11.5rem;
+	padding: 0.45rem;
+	border-radius: 0.75rem;
+	border: 1px solid rgba(148, 163, 184, 0.3);
+	background: #ffffff;
+	box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+	z-index: 999;
+	overflow: visible;
+}
+
+.project-manager-page .project-export-option {
+	display: block;
+	width: 100%;
+	border: 0;
+	border-radius: 0.55rem;
+	padding: 0.6rem 0.7rem;
+	background: transparent;
+	color: #0f172a;
+	text-align: left;
+	font-size: 0.9rem;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.project-manager-page .project-export-option + .project-export-option {
+	margin-top: 0.2rem;
+}
+
+.project-manager-page .project-export-option:hover {
+	background: #f1f5f9;
 }
 
 .project-manager-page .page-kicker {
