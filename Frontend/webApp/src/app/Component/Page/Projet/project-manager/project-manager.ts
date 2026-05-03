@@ -1362,8 +1362,140 @@ export class ProjectManager implements OnInit {
   }
 
   private exportSelectedProjectToExcel(): void {
-    const rows = this.buildSelectedProjectExportRows();
-    const csvContent = rows.map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(',')).join('\n');
+    const projectItem = this.selectedProject;
+    if (!projectItem?.id) {
+      return;
+    }
+
+    const sprints = this.projectSprints ?? [];
+    const stories = this.projectUserStories ?? [];
+    const projectTasks = this.getSelectedProjectTasks();
+
+    // Sheet 1: Project Overview
+    const projectOverviewRows: string[][] = [];
+    projectOverviewRows.push(['PROJECT OVERVIEW']);
+    projectOverviewRows.push([]);
+    projectOverviewRows.push(['Project Name', projectItem.name]);
+    projectOverviewRows.push(['Status', this.getStateLabel(projectItem.projectState)]);
+    projectOverviewRows.push(['Description', projectItem.description || 'N/A']);
+    projectOverviewRows.push(['Service', this.getServiceName(projectItem.serviceId)]);
+    projectOverviewRows.push(['Project Manager', this.getUserName(projectItem.projectManagerId)]);
+    projectOverviewRows.push(['Start Date', projectItem.startDate ? this.formatDate(new Date(projectItem.startDate)) : '-']);
+    projectOverviewRows.push(['End Date', projectItem.endDate ? this.formatDate(new Date(projectItem.endDate)) : '-']);
+    projectOverviewRows.push(['Estimated Duration (days)', String(projectItem.estimatedDuration || '-')]);
+    projectOverviewRows.push(['Progress', `${this.getProjectProgress(projectItem)}%`]);
+    projectOverviewRows.push([]);
+    projectOverviewRows.push(['STATISTICS']);
+    projectOverviewRows.push(['Total Sprints', String(sprints.length)]);
+    projectOverviewRows.push(['Total User Stories', String(stories.length)]);
+    projectOverviewRows.push(['Total Tasks', String(projectTasks.length)]);
+    projectOverviewRows.push(['Completed Tasks', String(projectTasks.filter(t => this.mapTaskStatus(t.status) === 'done' || this.mapTaskStatus(t.status) === 'validated').length)]);
+
+    // Sheet 2: Sprints & Stories
+    const sprintsStoriesRows: string[][] = [];
+    sprintsStoriesRows.push(['SPRINTS & USER STORIES']);
+    sprintsStoriesRows.push([]);
+    sprintsStoriesRows.push([
+      'Sprint Name',
+      'Sprint Status',
+      'Sprint Duration',
+      'Sprint Start Date',
+      'Sprint End Date',
+      'User Story Name',
+      'Story Status',
+      'Story Points',
+      'Story Duration',
+      'Story Assigned To',
+      'Tasks Count',
+      'Completed Tasks',
+      'Acceptance Criteria'
+    ]);
+
+    sprints.forEach((sprint) => {
+      const sprintStories = stories.filter((story) => Number(story.sprintId) === Number(sprint.id));
+      
+      if (sprintStories.length === 0) {
+        sprintsStoriesRows.push([
+          sprint.name,
+          this.getSprintStateName(sprint.sprintState),
+          String(sprint.estimatedDuration || '-'),
+          sprint.startDate ? this.formatDate(new Date(sprint.startDate)) : '-',
+          sprint.endDate ? this.formatDate(new Date(sprint.endDate)) : '-',
+          '-', '-', '-', '-', '-', '-', '-', '-'
+        ]);
+      } else {
+        sprintStories.forEach((story, index) => {
+          const storyTasks = projectTasks.filter((task) => Number(task.userStoryId) === Number(story.id));
+          sprintsStoriesRows.push([
+            index === 0 ? sprint.name : '',
+            index === 0 ? this.getSprintStateName(sprint.sprintState) : '',
+            index === 0 ? String(sprint.estimatedDuration || '-') : '',
+            index === 0 ? (sprint.startDate ? this.formatDate(new Date(sprint.startDate)) : '-') : '',
+            index === 0 ? (sprint.endDate ? this.formatDate(new Date(sprint.endDate)) : '-') : '',
+            story.name || story.title,
+            this.getUserStoryStatusDisplay(story),
+            String(story.storyPoints || '-'),
+            String(story.estimatedDuration || '-'),
+            story.assignedToName || 'Unassigned',
+            String(story.taskCount || 0),
+            String(story.completedTaskCount || 0),
+            story.acceptanceCriteria || '-'
+          ]);
+        });
+      }
+    });
+
+    // Sheet 3: Tasks
+    const tasksRows: string[][] = [];
+    tasksRows.push(['TASKS']);
+    tasksRows.push([]);
+    tasksRows.push([
+      'User Story',
+      'Sprint',
+      'Task Title',
+      'Task Status',
+      'Description',
+      'Estimated Hours',
+      'Actual Hours',
+      'Complexity',
+      'Assigned To',
+      'Start Date',
+      'End Date',
+      'Created Date'
+    ]);
+
+    projectTasks.forEach((task) => {
+      const story = stories.find(s => Number(s.id) === Number(task.userStoryId));
+      const sprint = sprints.find(s => Number(s.id) === Number(task.sprintId));
+      
+      tasksRows.push([
+        story?.name || story?.title || '-',
+        sprint?.name || '-',
+        task.title,
+        this.getTaskStatusLabel(task.status),
+        task.description || '-',
+        String(task.estimatedHours || '-'),
+        String(task.actualHours || '-'),
+        String(task.complexity || '-'),
+        task.assignedToName || 'Unassigned',
+        task.startDate ? this.formatDate(new Date(task.startDate)) : '-',
+        task.endDate ? this.formatDate(new Date(task.endDate)) : '-',
+        task.createdAt ? this.formatDate(new Date(task.createdAt)) : '-'
+      ]);
+    });
+
+    // Combine all sheets
+    const allRows = [
+      ...projectOverviewRows,
+      [],
+      [],
+      ...sprintsStoriesRows,
+      [],
+      [],
+      ...tasksRows
+    ];
+
+    const csvContent = allRows.map((row) => row.map((cell) => this.escapeCsvValue(cell)).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1382,17 +1514,20 @@ export class ProjectManager implements OnInit {
     const sprints = this.projectSprints ?? [];
     const stories = this.projectUserStories ?? [];
     const projectTasks = this.getSelectedProjectTasks();
+    const projectManagerName = this.getUserName(projectItem.projectManagerId);
+    const serviceName = this.getServiceName(projectItem.serviceId);
 
     const formatDateFr = (dateValue: Date | string | undefined): string => {
       if (!dateValue) {
         return '-';
       }
-
       return new Date(dateValue).toLocaleDateString('fr-FR');
     };
 
-    const sprintBlocksHtml = sprints.map((sprint, index) => {
+    const sprintBlocksHtml = sprints.map((sprint, sprintIndex) => {
       const sprintStories = stories.filter((story) => Number(story.sprintId ?? 0) === Number(sprint.id));
+      const sprintStartDate = formatDateFr(sprint.startDate);
+      const sprintEndDate = formatDateFr(sprint.endDate);
 
       const storiesHtml = sprintStories.length > 0
         ? `
@@ -1400,142 +1535,318 @@ export class ProjectManager implements OnInit {
             ${sprintStories.map((story) => {
               const storyName = story.name || story.title || 'User story';
               const storyTasks = projectTasks.filter((task) => Number(task.userStoryId) === Number(story.id));
+              const storyCreatedDate = story.createdAt ? formatDateFr(story.createdAt) : '-';
+              
+              const storyDetailsHtml = `
+                <div class="story-details">
+                  <div class="detail-item"><strong>Description:</strong> ${this.escapeHtml(story.description || 'No description')}</div>
+                  <div class="detail-item"><strong>Acceptance Criteria:</strong> ${this.escapeHtml(story.acceptanceCriteria || 'N/A')}</div>
+                  <div class="detail-item"><strong>Story Points:</strong> ${story.storyPoints || '-'} | <strong>Est. Duration:</strong> ${story.estimatedDuration || '-'} days</div>
+                  <div class="detail-item"><strong>Assigned To:</strong> ${this.escapeHtml(story.assignedToName || 'Unassigned')} | <strong>Progress:</strong> ${story.completedTaskCount || 0}/${story.taskCount || 0} tasks completed</div>
+                  <div class="detail-item"><strong>Created:</strong> ${storyCreatedDate}</div>
+                </div>
+              `;
+
               const taskHtml = storyTasks.length > 0
                 ? `
                     <ul class="task-list">
-                      ${storyTasks.map((task) => `
-                        <li>
-                          <div class="task-title">- ${this.escapeHtml(task.title || 'Task')}</div>
-                          <div class="task-meta">${this.escapeHtml(task.description || 'No description')}</div>
-                        </li>
-                      `).join('')}
+                      ${storyTasks.map((task) => {
+                        const taskStartDate = task.startDate ? formatDateFr(task.startDate) : '-';
+                        const taskEndDate = task.endDate ? formatDateFr(task.endDate) : '-';
+                        const taskCreatedDate = task.createdAt ? formatDateFr(task.createdAt) : '-';
+                        return `
+                          <li>
+                            <div class="task-title">• ${this.escapeHtml(task.title || 'Task')}</div>
+                            <div class="task-meta">
+                              <div><strong>Description:</strong> ${this.escapeHtml(task.description || 'No description')}</div>
+                              <div><strong>Status:</strong> ${this.getTaskStatusLabel(task.status)} | <strong>Complexity:</strong> ${task.complexity || '-'}</div>
+                              <div><strong>Est. Hours:</strong> ${task.estimatedHours || '-'} | <strong>Actual Hours:</strong> ${task.actualHours || '-'}</div>
+                              <div><strong>Assigned To:</strong> ${this.escapeHtml(task.assignedToName || 'Unassigned')} | <strong>Start:</strong> ${taskStartDate} | <strong>End:</strong> ${taskEndDate}</div>
+                              <div><strong>Created:</strong> ${taskCreatedDate}</div>
+                            </div>
+                          </li>
+                        `;
+                      }).join('')}
                     </ul>
                   `
-                : '<p class="empty-text">Aucune tache assignee</p>';
+                : '<p class="empty-text">No tasks assigned</p>';
 
               return `
                 <li>
-                  <div class="story-title">• ${this.escapeHtml(storyName)}</div>
-                  <div class="story-meta">${this.escapeHtml(story.description || 'No description')}</div>
-                  ${taskHtml}
+                  <div class="story-title">→ ${this.escapeHtml(storyName)}</div>
+                  ${storyDetailsHtml}
+                  <div class="tasks-section">
+                    <p class="tasks-title">Tasks:</p>
+                    ${taskHtml}
+                  </div>
                 </li>
               `;
             }).join('')}
           </ul>
         `
-        : '<p class="empty-text">Aucune user story assignee</p>';
+        : '<p class="empty-text">No user stories assigned</p>';
 
       return `
         <section class="sprint-block">
-          <h2>${index + 1}. ${this.escapeHtml(sprint.name)}</h2>
-          <p class="line">${this.escapeHtml(sprint.description || 'No description')}</p>
-          ${storiesHtml}
+          <h2>Sprint ${sprintIndex + 1}: ${this.escapeHtml(sprint.name)}</h2>
+          <div class="sprint-info">
+            <div><strong>Status:</strong> ${this.getSprintStateName(sprint.sprintState)} | <strong>Duration:</strong> ${sprint.estimatedDuration || '-'} days</div>
+            <div><strong>Period:</strong> ${sprintStartDate} to ${sprintEndDate}</div>
+            <div><strong>Description:</strong> ${this.escapeHtml(sprint.description || 'No description')}</div>
+          </div>
+          <div class="stories-section">
+            <p class="stories-title">User Stories:</p>
+            ${storiesHtml}
+          </div>
         </section>
       `;
     }).join('');
 
-    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    const printWindow = window.open('', '_blank', 'width=1400,height=900');
     if (!printWindow) {
       this.error = 'Popup blocked. Please allow popups for this site to open PDF export.';
       return;
     }
+
+    const projectDescription = projectItem.description || 'No description provided';
+    const projectStartDate = formatDateFr(projectItem.startDate);
+    const projectEndDate = formatDateFr(projectItem.endDate);
 
     printWindow.document.write(`
       <html>
       <head>
         <title>${this.escapeHtml(this.getExportFileBaseName())}</title>
         <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
-            font-family: Arial, Helvetica, sans-serif;
-            padding: 22px;
-            color: #111827;
-            line-height: 1.35;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            color: #1f2937;
+            line-height: 1.6;
+            background-color: #f9fafb;
           }
+          
+          .header {
+            border-bottom: 3px solid #2563eb;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+          }
+          
           h1 {
-            margin: 0 0 14px 0;
-            font-size: 46px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-size: 32px;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 10px;
           }
-          .summary-line {
-            margin: 0 0 8px 0;
-            font-size: 36px;
-            color: #111827;
+          
+          .project-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
           }
+          
+          .summary-item {
+            font-size: 14px;
+            margin: 5px 0;
+          }
+          
+          .summary-item strong {
+            color: #2563eb;
+            min-width: 120px;
+            display: inline-block;
+          }
+          
+          .project-description {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            line-height: 1.5;
+          }
+          
+          .sprint-block {
+            margin-bottom: 35px;
+            break-inside: avoid;
+          }
+          
+          .sprint-block h2 {
+            font-size: 22px;
+            color: #1e40af;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3b82f6;
+          }
+          
+          .sprint-info {
+            padding: 12px 15px;
+            background-color: #ecf0ff;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.8;
+          }
+          
+          .sprint-info div {
+            margin: 5px 0;
+          }
+          
+          .stories-section {
+            margin-top: 15px;
+          }
+          
+          .stories-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+            padding-left: 5px;
+            border-left: 3px solid #10b981;
+          }
+          
+          .story-list {
+            list-style: none;
+            margin-left: 0;
+            padding: 0;
+          }
+          
+          .story-list li {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f5f5f5;
+            border-left: 4px solid #10b981;
+            border-radius: 4px;
+            break-inside: avoid;
+          }
+          
+          .story-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #047857;
+            margin-bottom: 8px;
+          }
+          
+          .story-details {
+            font-size: 13px;
+            margin: 8px 0;
+            padding: 8px;
+            background-color: #f0fdf4;
+            border-radius: 3px;
+          }
+          
+          .detail-item {
+            margin: 4px 0;
+            line-height: 1.4;
+          }
+          
+          .detail-item strong {
+            color: #065f46;
+          }
+          
+          .tasks-section {
+            margin-top: 12px;
+            padding-left: 10px;
+          }
+          
+          .tasks-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ea580c;
+            margin-bottom: 8px;
+            padding-left: 5px;
+            border-left: 3px solid #f97316;
+          }
+          
+          .task-list {
+            list-style: none;
+            margin: 8px 0;
+            padding: 0;
+          }
+          
+          .task-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fef3c7;
+            border-left: 3px solid #f97316;
+            border-radius: 3px;
+            break-inside: avoid;
+          }
+          
+          .task-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 6px;
+          }
+          
+          .task-meta {
+            font-size: 12px;
+            color: #78350f;
+            line-height: 1.5;
+          }
+          
+          .task-meta div {
+            margin: 3px 0;
+          }
+          
+          .empty-text {
+            font-size: 13px;
+            color: #9ca3af;
+            font-style: italic;
+            margin-left: 10px;
+          }
+          
           hr {
             border: 0;
-            border-top: 1px solid #d1d5db;
+            border-top: 2px solid #e5e7eb;
             margin: 30px 0;
           }
-          .sprint-block {
-            margin-bottom: 30px;
-          }
-          .sprint-block h2 {
-            margin: 0 0 10px 0;
-            font-size: 42px;
-            color: #0b61c9;
-            font-weight: 800;
-          }
-          .line {
-            margin: 0 0 6px 0;
-            font-size: 34px;
-            color: #3f4752;
-          }
-          .story-list {
-            margin: 16px 0 0 22px;
-            padding: 0;
-            list-style: none;
-          }
-          .story-list li {
-            margin: 0 0 10px 0;
-          }
-          .story-title {
-            font-size: 38px;
-            color: #1f2937;
-            margin-bottom: 2px;
-          }
-          .story-meta {
-            font-size: 30px;
-            color: #374151;
-            margin-left: 20px;
-          }
-          .task-list {
-            margin: 8px 0 0 42px;
-            padding: 0;
-            list-style: none;
-          }
-          .task-list li {
-            margin: 0 0 8px 0;
-          }
-          .task-title {
-            font-size: 32px;
-            color: #1f2937;
-          }
-          .task-meta {
-            font-size: 28px;
-            color: #4b5563;
-            margin-left: 12px;
-          }
-          .empty-text {
-            margin: 14px 0 0 20px;
-            font-size: 34px;
-            color: #8a8f98;
-          }
+          
           @media print {
             body {
+              background-color: white;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
+            }
+            .sprint-block {
+              page-break-inside: avoid;
+            }
+            .story-list li {
+              page-break-inside: avoid;
+            }
+            .task-list li {
+              page-break-inside: avoid;
             }
           }
         </style>
       </head>
       <body>
-        <h1>${this.escapeHtml(projectItem.name)}</h1>
-        <p class="summary-line">Service: ${this.escapeHtml(this.getServiceName(projectItem.serviceId))} | Progression: ${this.escapeHtml(String(this.getProjectProgress(projectItem)))}%</p>
-        <p class="summary-line">Periode: ${formatDateFr(projectItem.startDate)} - ${formatDateFr(projectItem.endDate)}</p>
-        <p class="summary-line">Chef de projet: ${this.escapeHtml(this.getUserName(projectItem.projectManagerId))}</p>
+        <div class="header">
+          <h1>${this.escapeHtml(projectItem.name)}</h1>
+          <div class="project-summary">
+            <div class="summary-item"><strong>Status:</strong> ${this.getStateLabel(projectItem.projectState)}</div>
+            <div class="summary-item"><strong>Service:</strong> ${this.escapeHtml(serviceName)}</div>
+            <div class="summary-item"><strong>Project Manager:</strong> ${this.escapeHtml(projectManagerName)}</div>
+            <div class="summary-item"><strong>Progress:</strong> ${this.getProjectProgress(projectItem)}%</div>
+            <div class="summary-item"><strong>Period:</strong> ${projectStartDate} to ${projectEndDate}</div>
+            <div class="summary-item"><strong>Estimated Duration:</strong> ${projectItem.estimatedDuration || '-'} days</div>
+          </div>
+        </div>
+        
+        <div class="project-description">
+          <strong>Description:</strong><br/>
+          ${this.escapeHtml(projectDescription)}
+        </div>
+        
         <hr />
-        ${sprintBlocksHtml || '<p class="empty-text">Aucun sprint assigne</p>'}
+        
+        ${sprintBlocksHtml || '<p class="empty-text">No sprints assigned</p>'}
       </body>
       </html>
     `);
@@ -1554,89 +1865,173 @@ export class ProjectManager implements OnInit {
     }
 
     const headers = [
-      'Project',
+      'Project Name',
       'Project State',
-      'Sprint',
+      'Project Description',
+      'Project Start Date',
+      'Project End Date',
+      'Project Duration (days)',
+      'Project Manager',
+      'Service',
+      'Sprint Name',
       'Sprint State',
-      'User Story',
+      'Sprint Description',
+      'Sprint Duration (days)',
+      'Sprint Start Date',
+      'Sprint End Date',
+      'User Story Name',
       'User Story State',
-      'Task',
+      'User Story Description',
+      'Acceptance Criteria',
+      'Story Points',
+      'Story Est. Duration (days)',
+      'Story Assigned To',
+      'Story Task Count',
+      'Story Completed Tasks',
+      'Story Created Date',
+      'Task Title',
       'Task State',
-      'Task Start',
-      'Task End'
+      'Task Description',
+      'Task Est. Hours',
+      'Task Actual Hours',
+      'Task Complexity',
+      'Task Assigned To',
+      'Task Start Date',
+      'Task End Date',
+      'Task Created Date'
     ];
 
     const rows: string[][] = [headers];
     const projectSprints = this.projectSprints;
     const projectStories = this.projectUserStories;
     const projectTasks = this.getSelectedProjectTasks();
+    const projectManagerName = this.getUserName(projectItem.projectManagerId);
+    const serviceName = this.getServiceName(projectItem.serviceId);
+    const projectStartDate = projectItem.startDate ? this.formatDate(new Date(projectItem.startDate)) : '-';
+    const projectEndDate = projectItem.endDate ? this.formatDate(new Date(projectItem.endDate)) : '-';
 
     if (projectSprints.length === 0 && projectStories.length === 0) {
       rows.push([
         projectItem.name,
         this.getStateLabel(projectItem.projectState),
-        '-',
-        '-',
-        '-',
-        '-',
-        '-',
-        '-',
-        '-',
-        '-'
+        projectItem.description || '-',
+        projectStartDate,
+        projectEndDate,
+        String(projectItem.estimatedDuration || '-'),
+        projectManagerName,
+        serviceName,
+        '-', '-', '-', '-', '-', '-',
+        '-', '-', '-', '-', '-', '-', '-', '-', '-', '-',
+        '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'
       ]);
       return rows;
     }
 
     projectSprints.forEach((sprint) => {
       const sprintStories = projectStories.filter((story) => Number(story.sprintId) === Number(sprint.id));
+      const sprintStartDate = sprint.startDate ? this.formatDate(new Date(sprint.startDate)) : '-';
+      const sprintEndDate = sprint.endDate ? this.formatDate(new Date(sprint.endDate)) : '-';
 
       if (sprintStories.length === 0) {
         rows.push([
           projectItem.name,
           this.getStateLabel(projectItem.projectState),
+          projectItem.description || '-',
+          projectStartDate,
+          projectEndDate,
+          String(projectItem.estimatedDuration || '-'),
+          projectManagerName,
+          serviceName,
           sprint.name,
           this.getSprintStateName(sprint.sprintState),
-          '-',
-          '-',
-          '-',
-          '-',
-          '-',
-          '-'
+          sprint.description || '-',
+          String(sprint.estimatedDuration || '-'),
+          sprintStartDate,
+          sprintEndDate,
+          '-', '-', '-', '-', '-', '-', '-', '-', '-', '-',
+          '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'
         ]);
         return;
       }
 
       sprintStories.forEach((story) => {
         const storyTasks = projectTasks.filter((task) => Number(task.userStoryId) === Number(story.id));
+        const storyAssignedName = story.assignedToName || '-';
+        const storyCreatedDate = story.createdAt ? this.formatDate(new Date(story.createdAt)) : '-';
+        const storyCompletedCount = story.completedTaskCount || 0;
 
         if (storyTasks.length === 0) {
           rows.push([
             projectItem.name,
             this.getStateLabel(projectItem.projectState),
+            projectItem.description || '-',
+            projectStartDate,
+            projectEndDate,
+            String(projectItem.estimatedDuration || '-'),
+            projectManagerName,
+            serviceName,
             sprint.name,
             this.getSprintStateName(sprint.sprintState),
+            sprint.description || '-',
+            String(sprint.estimatedDuration || '-'),
+            sprintStartDate,
+            sprintEndDate,
             story.name || story.title,
             this.getUserStoryStatusDisplay(story),
-            '-',
-            '-',
-            '-',
-            '-'
+            story.description || '-',
+            story.acceptanceCriteria || '-',
+            String(story.storyPoints || '-'),
+            String(story.estimatedDuration || '-'),
+            storyAssignedName,
+            String(story.taskCount || '-'),
+            String(storyCompletedCount),
+            storyCreatedDate,
+            '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'
           ]);
           return;
         }
 
         storyTasks.forEach((task) => {
+          const taskAssignedName = task.assignedToName || '-';
+          const taskStartDate = task.startDate ? this.formatDate(new Date(task.startDate)) : '-';
+          const taskEndDate = task.endDate ? this.formatDate(new Date(task.endDate)) : '-';
+          const taskCreatedDate = task.createdAt ? this.formatDate(new Date(task.createdAt)) : '-';
+
           rows.push([
             projectItem.name,
             this.getStateLabel(projectItem.projectState),
+            projectItem.description || '-',
+            projectStartDate,
+            projectEndDate,
+            String(projectItem.estimatedDuration || '-'),
+            projectManagerName,
+            serviceName,
             sprint.name,
             this.getSprintStateName(sprint.sprintState),
+            sprint.description || '-',
+            String(sprint.estimatedDuration || '-'),
+            sprintStartDate,
+            sprintEndDate,
             story.name || story.title,
             this.getUserStoryStatusDisplay(story),
+            story.description || '-',
+            story.acceptanceCriteria || '-',
+            String(story.storyPoints || '-'),
+            String(story.estimatedDuration || '-'),
+            storyAssignedName,
+            String(story.taskCount || '-'),
+            String(storyCompletedCount),
+            storyCreatedDate,
             task.title,
             this.getTaskStatusLabel(task.status),
-            task.startDate ? this.formatDate(new Date(task.startDate)) : '-',
-            task.endDate ? this.formatDate(new Date(task.endDate)) : '-'
+            task.description || '-',
+            String(task.estimatedHours || '-'),
+            String(task.actualHours || '-'),
+            String(task.complexity || '-'),
+            taskAssignedName,
+            taskStartDate,
+            taskEndDate,
+            taskCreatedDate
           ]);
         });
       });

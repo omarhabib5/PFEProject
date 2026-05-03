@@ -77,7 +77,7 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   private teamService = inject(TeamService);
   private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
-  teamManageComponent = TeamManage;
+  teamManageComponent = TeamManage;  
 
   userName = 'Administrator';
   userRole = 'Admin';
