@@ -16,6 +16,7 @@ export class TokenService {
     '2': AppRole.ProjectManager,
     '3': AppRole.Employee,
     '4': AppRole.Observer,
+    '5': AppRole.Observer,
     admin: AppRole.Admin,
     administrator: AppRole.Admin,
     servicemanager: AppRole.ServiceManager,

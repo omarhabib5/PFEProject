@@ -140,7 +140,9 @@ namespace Projet.Api.Controller
                 try
                 {
                     var team = await _mediator.Send(new GetTeamById { id = teamId });
-                    var roleLabel = command.role == Role.ProjectLeader ? "Project Leader" : "Employee";
+                    var roleLabel = command.role == Role.ProjectLeader ? "Project Leader" 
+                        : command.role == Role.Observateur ? "Observateur" 
+                        : "Employee";
 
                     await _notificationService.CreateNotificationAsync(
                         userId: command.UserId,

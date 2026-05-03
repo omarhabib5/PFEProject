@@ -8,7 +8,8 @@ namespace Projet.Domain.Model
 {
    public enum Role
     {
-        Employer,
-        ProjectLeader
+        Employer = 0,
+        ProjectLeader = 1,
+        Observateur = 2
     }
 }

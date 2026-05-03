@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Projet.Application.DTOs.Auth;
 using Projet.Domain.Command.Auth;
 using Projet.Domain.Querie.Auth;
@@ -13,10 +14,12 @@ namespace Projet.Api.Controller
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IMediator mediator)
+        public AuthController(IMediator mediator, ILogger<AuthController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         private int? GetAuthenticatedUserId()
@@ -201,9 +204,11 @@ namespace Projet.Api.Controller
         [Authorize]
         public async Task<IActionResult> Logout()
         {
+            int? userId = null;
+
             try
             {
-                var userId = GetAuthenticatedUserId();
+                userId = GetAuthenticatedUserId();
 
                 if (userId == null)
                 {
@@ -221,6 +226,7 @@ namespace Projet.Api.Controller
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, "An error occurred during logout for user {UserId}", userId);
                 return StatusCode(500, new { message = "An error occurred during logout", error = ex.Message });
             }
         }

@@ -155,7 +155,7 @@
 
             </option>
           </select>
-          <p class="mt-1 text-xs text-gray-500">Only employees are shown in this list.</p>
+          <p class="mt-1 text-xs text-gray-500">Only employees and observateurs are shown in this list.</p>
         </div>
         
         <div class="mb-5">
@@ -169,8 +169,10 @@
             [disabled]="loading">
             <option [ngValue]="0">Employee</option>
             <option [ngValue]="1">Project Leader</option>
+            <option [ngValue]="2">Observateur</option>
           </select>
             <p class="mt-1 text-xs text-gray-500" *ngIf="!canAssignProjectLeader()">This team already has a project leader.</p>
+            <p class="mt-1 text-xs text-gray-500" *ngIf="!canAssignObservateur()">This team already has an observateur.</p>
         </div>
 
         <div class="flex gap-2.5 mt-5">
@@ -212,7 +214,13 @@
             [disabled]="loading">
             Employees
           </button>
-        </div>
+          <button 
+            class="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300"
+            [ngClass]="memberFilter === 'observateurs' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+            (click)="filterMembers('observateurs')"
+            [disabled]="loading">
+            Observateurs
+          </button>
       </div>
       
       <div class="overflow-x-auto" *ngIf="teamMembers.length > 0">
@@ -238,6 +246,7 @@
                
                 <span *ngIf="editingMemberId !== member.id" class="inline-block px-3 py-1 rounded-full text-xs font-medium" 
                   [ngClass]="member.role === Role.ProjectLeader ? 'bg-yellow-400 text-black' : 
+                             member.role === Role.Observateur ? 'bg-purple-400 text-white' :
                              member.role === Role.Employer ? 'bg-gray-200 text-gray-700' : 
                              'bg-red-200 text-red-800'">
                   {{ getRoleName(member.role) }}
@@ -250,6 +259,7 @@
                   [disabled]="loading">
                   <option [ngValue]="Role.Employer">Employee</option>
                   <option [ngValue]="Role.ProjectLeader">Project Leader</option>
+                  <option [ngValue]="Role.Observateur">Observateur</option>
                 </select>
               </td>
               <td class="p-3 border-b border-gray-200 text-gray-600">
