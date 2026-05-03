@@ -1105,17 +1105,27 @@ export class ObserverDashboard implements OnInit {
   }
 
   private isMessageNotification(item: Notification): boolean {
+    // A message notification is a direct message from/to a user (has relatedUserId)
+    const hasRelatedUserId = Number(item?.relatedUserId ?? 0) > 0;
+    const hasRelatedTaskId = Number(item?.relatedTaskId ?? 0) > 0;
+    const hasRelatedProjectId = Number((item as any)?.relatedProjectId ?? 0) > 0;
+    const hasRelatedUserStoryId = Number((item as any)?.relatedUserStoryId ?? 0) > 0;
+
+    // If it has relatedUserId and no other relation, it's a direct message
+    if (hasRelatedUserId && !hasRelatedTaskId && !hasRelatedProjectId && !hasRelatedUserStoryId) {
+      return true;
+    }
+
+    // Fallback to type-based detection for backward compatibility
+    const type = String(item?.type ?? '').toLowerCase();
+    if (type === 'message') {
+      return true;
+    }
+
+    // Fallback to title/message keyword detection
     const title = String(item?.title ?? '').toLowerCase();
     const message = String(item?.message ?? '').toLowerCase();
-    const type = String(item?.type ?? '').toLowerCase();
-    const hasMessageKeyword = title.includes('message') || message.includes('message') || title.includes('msg');
-
-    const hasOnlyRelatedUser = Number(item?.relatedUserId ?? 0) > 0
-      && Number(item?.relatedTaskId ?? 0) === 0
-      && Number((item as any)?.relatedProjectId ?? 0) === 0
-      && Number((item as any)?.relatedUserStoryId ?? 0) === 0;
-
-    return hasMessageKeyword || type === 'message' || hasOnlyRelatedUser;
+    return title.includes('message') || message.includes('message') || title.includes('msg');
   }
 
   private validatePasswordForm(): string | null {

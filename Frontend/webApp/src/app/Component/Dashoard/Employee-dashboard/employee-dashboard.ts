@@ -18,7 +18,7 @@ import { KanbanComponent } from '../../kanban/kanban';
 
 type SidebarSection = 'dashboard' | 'calendar' | 'notifications' | 'messagerie' | 'settings';
 type EmployeeTab = 'overview' | 'tasks' | 'kanban' | 'projects' | 'sprints';
-type TaskBucket = 'todo' | 'inProgress' | 'review' | 'done';
+type TaskBucket = 'pending' | 'todo' | 'inProgress' | 'done' | 'validated';
 type NotificationViewFilter = 'notifications' | 'messages';
 
 interface UiTask {
@@ -180,12 +180,13 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
 
   readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  readonly bucketOrder: TaskBucket[] = ['todo', 'inProgress', 'review', 'done'];
+  readonly bucketOrder: TaskBucket[] = ['pending', 'todo', 'inProgress', 'done', 'validated'];
   readonly bucketLabels: Record<TaskBucket, string> = {
+    pending: 'Not validate',
     todo: 'To do',
     inProgress: 'In progress',
-    review: 'To review',
-    done: 'Done'
+    done: 'Done',
+    validated: 'Validated'
   };
 
   ngOnInit(): void {
@@ -234,10 +235,6 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
     return this.countByBucket('inProgress');
   }
 
-  get reviewCount(): number {
-    return this.countByBucket('review');
-  }
-
   get doneCount(): number {
     return this.countByBucket('done');
   }
@@ -252,7 +249,7 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
 
   get inProgressTasks(): UiTask[] {
     return this.myTasks
-      .filter((task) => task.bucket === 'todo' || task.bucket === 'inProgress' || task.bucket === 'review')
+      .filter((task) => task.bucket === 'todo' || task.bucket === 'inProgress' || task.bucket === 'done')
       .slice(0, 5);
   }
 
@@ -647,8 +644,9 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
 
   getCalendarTaskStateClass(task: UiTask): string {
     if (task.bucket === 'done') return 'done';
+    if (task.bucket === 'validated') return 'validated';
     if (task.bucket === 'inProgress') return 'inprogress';
-    if (task.bucket === 'review') return 'review';
+    if (task.bucket === 'pending') return 'pending';
     return 'todo';
   }
 
@@ -1153,10 +1151,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
       });
 
       const counts: Record<TaskBucket, number> = {
+        pending: myProjectTasks.filter((t) => t.bucket === 'pending').length,
         todo: myProjectTasks.filter((t) => t.bucket === 'todo').length,
         inProgress: myProjectTasks.filter((t) => t.bucket === 'inProgress').length,
-        review: myProjectTasks.filter((t) => t.bucket === 'review').length,
-        done: myProjectTasks.filter((t) => t.bucket === 'done').length
+        done: myProjectTasks.filter((t) => t.bucket === 'done').length,
+        validated: myProjectTasks.filter((t) => t.bucket === 'validated').length
       };
 
       const doneAll = allProjectTasks.filter((t) => this.mapBucket(t.status) === 'done').length;
@@ -1559,6 +1558,17 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
   }
 
   isMessageNotification(item: Notification): boolean {
+    // A message notification is a direct message from/to a user (has relatedUserId)
+    // Not a task-related notification
+    const hasRelatedUserId = Number(item.relatedUserId ?? 0) > 0;
+    const hasRelatedTaskId = Number(item.relatedTaskId ?? 0) > 0;
+    
+    // If it has relatedUserId and no relatedTaskId, it's a direct message
+    if (hasRelatedUserId && !hasRelatedTaskId) {
+      return true;
+    }
+    
+    // Fallback to title-based detection for backward compatibility
     const title = String(item.title ?? '').toLowerCase();
     return title.includes('message')
       || title.includes('nouveau message')
@@ -1628,11 +1638,11 @@ export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
   private mapBucket(status: TaskDto['status']): TaskBucket {
     const normalized = typeof status === 'string' ? status.toLowerCase() : Number(status);
 
+    if (normalized === 'pending' || normalized === 0) return 'pending';
     if (normalized === 'todo' || normalized === 'to do' || normalized === 1) return 'todo';
     if (normalized === 'inprogress' || normalized === 'in progress' || normalized === 2) return 'inProgress';
-    if (normalized === 'review') return 'review';
-    if (normalized === 'done' || normalized === 'validated' || normalized === 3 || normalized === 4) return 'done';
-    if (normalized === 'pending' || normalized === 0) return 'todo';
+    if (normalized === 'done' || normalized === 3) return 'done';
+    if (normalized === 'validated' || normalized === 4) return 'validated';
     return 'todo';
   }
 

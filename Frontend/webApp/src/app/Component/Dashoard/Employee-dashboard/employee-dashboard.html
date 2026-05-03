@@ -75,8 +75,8 @@
                 </div>
                 <div class="hero-stats">
                     <article><strong>{{ inProgressCount }}</strong><span>In progress</span></article>
-                    <article><strong>{{ reviewCount }}</strong><span>To review</span></article>
                     <article><strong>{{ doneCount }}</strong><span>Completed</span></article>
+                    <article><strong>{{ myTasks.length - doneCount }}</strong><span>Remaining</span></article>
                 </div>
             </section>
 
@@ -101,23 +101,22 @@
                     <article class="kpi purple">
                         <h4>My tasks</h4><strong>{{ myTasks.length }}</strong><small>assigned workload</small>
                     </article>
-                    <article class="kpi red">
-                        <h4>High priority</h4><strong>{{ highPriorityCount }}</strong><small>to monitor</small>
-                    </article>
                 </div>
 
                 <div class="overview-grid">
                     <article class="card">
                         <h3>My tasks by status</h3>
                         <div class="status-list">
+                            <div><span class="dot pending"></span> Not validate <strong>{{ countByBucket('pending') }}</strong>
+                            </div>
                             <div><span class="dot todo"></span> To do <strong>{{ countByBucket('todo') }}</strong>
                             </div>
                             <div><span class="dot progress"></span> In progress <strong>{{ countByBucket('inProgress')
                                     }}</strong></div>
-                            <div><span class="dot review"></span> To review <strong>{{ countByBucket('review')
-                                    }}</strong></div>
                             <div><span class="dot done"></span> Done <strong>{{ countByBucket('done') }}</strong>
                             </div>
+                            <div><span class="dot validated"></span> Validated <strong>{{ countByBucket('validated')
+                                    }}</strong></div>
                         </div>
                     </article>
 
@@ -179,12 +178,12 @@
                     <div class="filters">
                         <strong>Status:</strong>
                         <button [class.active]="statusFilter==='all'" (click)="setStatusFilter('all')">All</button>
+                        <button [class.active]="statusFilter==='pending'" (click)="setStatusFilter('pending')">Pending</button>
                         <button [class.active]="statusFilter==='todo'" (click)="setStatusFilter('todo')">To do</button>
                         <button [class.active]="statusFilter==='inProgress'" (click)="setStatusFilter('inProgress')">In
                             progress</button>
-                        <button [class.active]="statusFilter==='review'" (click)="setStatusFilter('review')">To
-                            review</button>
                         <button [class.active]="statusFilter==='done'" (click)="setStatusFilter('done')">Done</button>
+                        <button [class.active]="statusFilter==='validated'" (click)="setStatusFilter('validated')">Validated</button>
 
                         <strong>Priority:</strong>
                         <button [class.active]="priorityFilter==='all'" (click)="setPriorityFilter('all')">All</button>
@@ -276,10 +275,11 @@
                         <div>
                             <h4>My tasks ({{ project.myTasks.length }})</h4>
                             <div class="status-boxes">
+                                <span>Not validate {{ project.counts.pending }}</span>
                                 <span>To do {{ project.counts.todo }}</span>
                                 <span>In progress {{ project.counts.inProgress }}</span>
-                                <span>To review {{ project.counts.review }}</span>
                                 <span>Done {{ project.counts.done }}</span>
+                                <span>Validated {{ project.counts.validated }}</span>
                             </div>
                             <p *ngFor="let task of project.myTasks | slice:0:4">• {{ task.title }}</p>
                         </div>

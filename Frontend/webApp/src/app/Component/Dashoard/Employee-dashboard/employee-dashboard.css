@@ -631,6 +631,12 @@
 	padding: 1.2rem 0;
 }
 
+.status-list {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px 24px;
+}
+
 .status-list div {
 	display: flex;
 	justify-content: space-between;
@@ -648,6 +654,10 @@
 	margin-right: 6px;
 }
 
+.dot.pending {
+	background: #8b5cf6;
+}
+
 .dot.todo {
 	background: #94a3b8;
 }
@@ -656,12 +666,12 @@
 	background: #3b82f6;
 }
 
-.dot.review {
-	background: #f59e0b;
-}
-
 .dot.done {
 	background: #22c55e;
+}
+
+.dot.validated {
+	background: #10b981;
 }
 
 .bars {
@@ -856,19 +866,24 @@
 	background: #f1f5f9;
 }
 
+.task-group.pending header {
+	background: #ede9fe;
+	color: #6d28d9;
+}
+
 .task-group.inProgress header {
 	background: #dbeafe;
 	color: #1d4ed8;
 }
 
-.task-group.review header {
-	background: #fef3c7;
-	color: #b45309;
-}
-
 .task-group.done header {
 	background: #dcfce7;
 	color: #166534;
+}
+
+.task-group.validated header {
+	background: #ccfbf1;
+	color: #065f46;
 }
 
 .project-card {
@@ -1187,14 +1202,14 @@
 	color: #1e40af;
 }
 
-.task-item.review {
-	border-left: 4px solid #f59e0b;
-	background: #fffbeb;
+.task-item.pending {
+	border-left: 4px solid #8b5cf6;
+	background: #faf5ff;
 }
 
-.task-item.review .task-badge {
-	background: #fef3c7;
-	color: #b45309;
+.task-item.pending .task-badge {
+	background: #ede9fe;
+	color: #6d28d9;
 }
 
 .task-item.done {
@@ -1205,6 +1220,16 @@
 .task-item.done .task-badge {
 	background: #dcfce7;
 	color: #166534;
+}
+
+.task-item.validated {
+	border-left: 4px solid #10b981;
+	background: #f0fdf4;
+}
+
+.task-item.validated .task-badge {
+	background: #ccfbf1;
+	color: #065f46;
 }
 
 .task-item p {
