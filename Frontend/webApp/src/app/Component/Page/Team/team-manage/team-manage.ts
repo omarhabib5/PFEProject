@@ -28,11 +28,13 @@ export class TeamManage implements OnInit {
   teams: Team[] = [];
   selectedTeam: Team | null = null;
   teamMembers: TeamUser[] = [];
+  allTeamMembers: { [teamId: number]: TeamUser[] } = {}; // Store members for each team
   
   
   services: Service[] = [];
   users: UserDto[] = [];
   employeeUsers: UserDto[] = [];
+  observateurUser: UserDto[] = [];
 
   showCreateTeamForm = false;
   isEditMode = false;
@@ -45,7 +47,7 @@ export class TeamManage implements OnInit {
   showAddMemberForm = false;
   newMember: AddMemberRequest = {
     userId: 0,
-    role: Role.Employer
+    role: Role.Employer,
   };
 
   private routeTeamId: number | null = null;
@@ -53,7 +55,7 @@ export class TeamManage implements OnInit {
   private routeAction: string | null = null;
 
 
-  memberFilter: 'all' | 'leaders' | 'employees' = 'all';
+  memberFilter: 'all' | 'leaders' | 'employees' | 'observateurs' = 'all';
   
  
   editingMemberId: number | null = null;
@@ -98,6 +100,7 @@ export class TeamManage implements OnInit {
       next: (data) => {
         this.users = data;
         this.employeeUsers = data.filter((user) => this.isEmployeeUser(user));
+        this.observateurUser= data.filter((user) => this.isObservateurUser(user));
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -116,7 +119,14 @@ export class TeamManage implements OnInit {
     const user = this.users.find(u => u.id === userId);
     return user ? `${user.firstName} ${user.lastName}` : `User ${userId}`;
   }
-
+private isObservateurUser(user: UserDto): boolean {
+    const role = user.role;
+    if (typeof role === 'number') {
+      return role === 4;
+    }
+    const normalized = String(role ?? '').trim().toLowerCase();
+    return normalized === 'observateur' || normalized === '4';
+  }
   private isEmployeeUser(user: UserDto): boolean {
     const role = user.role;
 
@@ -129,6 +139,7 @@ export class TeamManage implements OnInit {
       || normalized === 'employer'
       || normalized === '3'
       || normalized === 'role.employee';
+      
   }
 
   hasProjectLeader(memberIdToIgnore?: number): boolean {
@@ -142,10 +153,31 @@ export class TeamManage implements OnInit {
   }
   get availableUsersForTeam(): UserDto[] {
     const currentMemberIds = new Set(this.teamMembers.map((member) => Number(member.userId)));
-    return this.employeeUsers.filter((user) => {
-      const alreadyInTeam = currentMemberIds.has(Number(user.id));
-      return !alreadyInTeam;
+    // Get all users already assigned to any team
+    const usersInAnyTeam = new Set<number>();
+    this.teams.forEach((team) => {
+      const members = this.allTeamMembers[team.id] || [];
+      members.forEach((member) => {
+        usersInAnyTeam.add(Number(member.userId));
+      });
     });
+    
+    // Include both employees and observateurs
+    const availableUsers = [...this.employeeUsers, ...this.observateurUser];
+    
+    return availableUsers.filter((user) => {
+      const userId = Number(user.id);
+      const alreadyInCurrentTeam = currentMemberIds.has(userId);
+      const alreadyInAnyTeam = usersInAnyTeam.has(userId) && !alreadyInCurrentTeam;
+      // Allow observateurs to be assigned to multiple teams
+      if (this.isObservateurUser(user)) {
+        return !alreadyInCurrentTeam;
+      }
+      return !alreadyInCurrentTeam && !alreadyInAnyTeam;
+    });
+  }
+  canAssignObservateur(): boolean {
+    return !this.teamMembers.some((member) => member.role === Role.Observateur);
   }
 
   getUserRoleDisplay(role: string | number | undefined): string {
@@ -153,7 +185,9 @@ export class TeamManage implements OnInit {
     if (normalized === '0' || normalized === 'admin') return 'Admin';
     if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 'Team Manager';
     if (normalized === '2' || normalized === 'projectmanager' || normalized === 'project manager') return 'Project Manager';
+  
     if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 'Employee';
+    if (normalized === '4' || normalized === 'observateur') return 'Observateur';
     return normalized ? String(role) : 'Employee';
   }
 
@@ -175,6 +209,8 @@ export class TeamManage implements OnInit {
     this.teamService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
+        // Load all team members for all teams to check user assignments
+        this.loadAllTeamMembers(data);
         this.applyRouteSelection();
         this.loading = false;
         this.cdr.detectChanges(); 
@@ -188,23 +224,38 @@ export class TeamManage implements OnInit {
     });
   }
 
+  private loadAllTeamMembers(teams: Team[]): void {
+    teams.forEach((team) => {
+      this.teamService.getMembersByTeamId(team.id).subscribe({
+        next: (members) => {
+          // Store members for each team to check user assignments
+          this.allTeamMembers[team.id] = members;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error(`Failed to load members for team ${team.id}:`, err);
+        }
+      });
+    });
+  }
+
   loadTeamMembers(teamId: number): void {
     this.loading = true;
     this.error = null;
     
-    let memberObservable;
-    
-    if (this.memberFilter === 'leaders') {
-      memberObservable = this.teamService.getLeadersByTeamId(teamId);
-    } else if (this.memberFilter === 'employees') {
-      memberObservable = this.teamService.getEmployeesByTeamId(teamId);
-    } else {
-      memberObservable = this.teamService.getMembersByTeamId(teamId);
-    }
-    
-    memberObservable.subscribe({
+    // Always get all members first
+    this.teamService.getMembersByTeamId(teamId).subscribe({
       next: (data) => {
-        this.teamMembers = data;
+        // Filter based on memberFilter selection
+        if (this.memberFilter === 'leaders') {
+          this.teamMembers = data.filter(member => member.role === Role.ProjectLeader);
+        } else if (this.memberFilter === 'employees') {
+          this.teamMembers = data.filter(member => member.role === Role.Employer);
+        } else if (this.memberFilter === 'observateurs') {
+          this.teamMembers = data.filter(member => member.role === Role.Observateur);
+        } else {
+          this.teamMembers = data;
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -217,7 +268,7 @@ export class TeamManage implements OnInit {
     });
   }
 
-  filterMembers(filter: 'all' | 'leaders' | 'employees'): void {
+  filterMembers(filter: 'all' | 'leaders' | 'employees'| 'observateurs'): void {
     if (!this.selectedTeam) return;
     this.memberFilter = filter;
     this.loadTeamMembers(this.selectedTeam.id);
@@ -327,89 +378,22 @@ export class TeamManage implements OnInit {
     if (!this.selectedTeam || this.newMember.userId === 0) {
       this.error = 'Please select a user';
       return;
-
     }
+    // Only restrict Observateur to a single team. Other roles can be in multiple teams.
+    // Allow Observateur to be assigned to multiple teams (no cross-team restriction)
 
-    if (this.newMember.role === Role.ProjectLeader && !this.canAssignProjectLeader()) {
+    if (Number(this.newMember.role) === Number(Role.ProjectLeader) && !this.canAssignProjectLeader()) {
       this.error = 'Only one project leader is allowed per team.';
       return;
     }
-
-    const selectedUser = this.users.find(u => u.id === this.newMember.userId);
-    if (selectedUser && !this.isEmployeeUser(selectedUser)) {
-      this.error = 'Only users with Employee role can be added to a team.';
+    if (Number(this.newMember.role) === Number(Role.Observateur) && !this.canAssignObservateur()) {
+      this.error = 'Only one observateur is allowed per team.';
       return;
     }
-    const tempMember: TeamUser = {
-      id: -Date.now(), 
-      userId: this.newMember.userId,
-      teamId: this.selectedTeam.id,
-      role: this.newMember.role,
-   
-      user: selectedUser ? { 
-        id: this.newMember.userId,
-        firstName: selectedUser.firstName,
-        lastName: selectedUser.lastName,
-        email: selectedUser.email,
-        role: this.toUserRoleNumber(selectedUser.role)
-      } : undefined
-    };
 
-  
-    this.teamMembers = [...this.teamMembers, tempMember];
-    this.showAddMemberForm = false;
-    this.cdr.detectChanges(); 
-
-    this.loading = true;
-    this.error = null;
-
-    console.log('Adding member with data:', this.newMember);
-    console.log('Role value:', this.newMember.role, 'Type:', typeof this.newMember.role);
-
-    this.teamService.addMemberToTeam(this.selectedTeam.id, this.newMember).subscribe({
-      next: (response) => {
-     
-        this.teamService.getMembersByTeamId(this.selectedTeam!.id).subscribe({
-          next: (members) => {
-            this.teamMembers = members;
-            this.successMessage = 'Member added successfully!';
-            this.resetNewMemberForm();
-            this.loading = false;
-            setTimeout(() => this.successMessage = null, 3000);
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            this.error = 'Failed to load members after adding: ' + (err.error?.message || err.message);
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
-        });
-      },
-      error: (err) => {
-       
-        this.teamMembers = this.teamMembers.filter(m => m.id !== tempMember.id);
-        
-        
-        let errorMsg = 'Failed to add member';
-        if (err.error?.message) {
-          errorMsg = err.error.message;
-        } else if (err.error?.title) {
-          errorMsg = err.error.title;
-        } else if (err.error?.errors) {
-     
-          const validationErrors = Object.values(err.error.errors).flat();
-          errorMsg = validationErrors.join(', ');
-        } else if (err.message) {
-          errorMsg = err.message;
-        }
-        
-        this.error = errorMsg;
-        this.loading = false;
-        console.error('Error adding member:', err);
-        console.error('Error details:', err.error);
-        this.cdr.detectChanges();
-      }
-    });
+    // perform the add flow
+    this.performAddMemberAfterChecks();
+    return;
   }
 
   startEditMember(member: TeamUser): void {
@@ -431,6 +415,11 @@ export class TeamManage implements OnInit {
       return;
     }
 
+    if (this.editMemberRole === Role.Observateur && !this.canAssignObservateur()) {
+      this.error = 'Only one observateur is allowed per team.';
+      return;
+    }
+
     this.loading = true;
     this.error = null;
 
@@ -438,10 +427,23 @@ export class TeamManage implements OnInit {
       next: () => {
         this.successMessage = 'Member role updated successfully!';
         this.editingMemberId = null;
-        this.loadTeamMembers(this.selectedTeam!.id);
-        this.loading = false;
-        setTimeout(() => this.successMessage = null, 3000);
-        this.cdr.detectChanges();
+        this.teamService.getMembersByTeamId(this.selectedTeam!.id).subscribe({
+          next: (members) => {
+            this.teamMembers = members;
+            // Update the allTeamMembers cache
+            if (this.selectedTeam) {
+              this.allTeamMembers[this.selectedTeam.id] = members;
+            }
+            this.loading = false;
+            setTimeout(() => this.successMessage = null, 3000);
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.error = 'Failed to load members after updating: ' + (err.error?.message || err.message);
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: (err) => {
         this.error = 'Failed to update member role: ' + (err.error?.message || err.message);
@@ -472,6 +474,10 @@ export class TeamManage implements OnInit {
     this.teamService.removeMemberFromTeam(this.selectedTeam.id, memberId).subscribe({
       next: () => {
         this.successMessage = 'Member removed successfully!';
+        // Update the allTeamMembers cache
+        if (this.selectedTeam) {
+          this.allTeamMembers[this.selectedTeam.id] = this.teamMembers;
+        }
         this.loading = false;
         setTimeout(() => this.successMessage = null, 3000);
         this.cdr.detectChanges();
@@ -577,6 +583,79 @@ export class TeamManage implements OnInit {
     };
   }
 
+  private performAddMemberAfterChecks(): void {
+    if (!this.selectedTeam) return;
+
+    const selectedUser = this.users.find(u => u.id === this.newMember.userId);
+    if (selectedUser && !this.isEmployeeUser(selectedUser) && !this.isObservateurUser(selectedUser)) {
+      this.error = 'Only users with Employee or Observateur role can be added to a team.';
+      return;
+    }
+
+    const tempMember: TeamUser = {
+      id: -Date.now(),
+      userId: this.newMember.userId,
+      teamId: this.selectedTeam.id,
+      role: this.newMember.role,
+      user: selectedUser ? {
+        id: this.newMember.userId,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        email: selectedUser.email,
+        role: this.toUserRoleNumber(selectedUser.role)
+      } : undefined
+    };
+
+    this.teamMembers = [...this.teamMembers, tempMember];
+    this.showAddMemberForm = false;
+    this.cdr.detectChanges();
+
+    this.loading = true;
+    this.error = null;
+
+    this.teamService.addMemberToTeam(this.selectedTeam.id, this.newMember).subscribe({
+      next: (response) => {
+        this.teamService.getMembersByTeamId(this.selectedTeam!.id).subscribe({
+          next: (members) => {
+            this.teamMembers = members;
+            if (this.selectedTeam) {
+              this.allTeamMembers[this.selectedTeam.id] = members;
+            }
+            this.successMessage = 'Member added successfully!';
+            this.resetNewMemberForm();
+            this.loading = false;
+            setTimeout(() => this.successMessage = null, 3000);
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.error = 'Failed to load members after adding: ' + (err.error?.message || err.message);
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (err) => {
+        this.teamMembers = this.teamMembers.filter(m => m.id !== tempMember.id);
+        let errorMsg = 'Failed to add member';
+        if (err.error?.message) {
+          errorMsg = err.error.message;
+        } else if (err.error?.title) {
+          errorMsg = err.error.title;
+        } else if (err.error?.errors) {
+          const validationErrors = Object.values(err.error.errors).flat();
+          errorMsg = validationErrors.join(', ');
+        } else if (err.message) {
+          errorMsg = err.message;
+        }
+        this.error = errorMsg;
+        this.loading = false;
+        console.error('Error adding member:', err);
+        console.error('Error details:', err.error);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   private applyRouteSelection(): void {
     if (this.routeAction !== 'add-member') {
       return;
@@ -612,6 +691,7 @@ export class TeamManage implements OnInit {
   getRoleName(role: Role): string {
     if (role === Role.Employer) return 'Employee';
     if (role === Role.ProjectLeader) return 'Project Leader';
+    if (role === Role.Observateur) return 'Observateur';
     return 'Unknown Role';  
   }
 
@@ -630,6 +710,7 @@ export class TeamManage implements OnInit {
     if (normalized === '1' || normalized === 'servicemanager' || normalized === 'service manager') return 1;
     if (normalized === '2' || normalized === 'projectmanager' || normalized === 'project manager') return 2;
     if (normalized === '3' || normalized === 'employee' || normalized === 'employe') return 3;
+    if (normalized === '4' || normalized === 'observateur') return 4;
     return undefined;
   }
 

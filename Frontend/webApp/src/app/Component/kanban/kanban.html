@@ -3,11 +3,11 @@
         <header class="kanban-header">
             <div class="kanban-title-wrap">
                 <p class="eyebrow">Delivery Board</p>
-                <h1>{{ employeeMode ? 'My Kanban' : 'Kanban Workspace' }}</h1>
-                <p>{{ employeeMode ? 'You can only update the status of your own tasks between To Do, In Progress, and Done.' : 'Track work across every stage and keep the team aligned.' }}</p>
+                <h1>{{ boardTitle }}</h1>
+                <p>{{ boardDescription }}</p>
             </div>
 
-            <div class="kanban-actions" *ngIf="!employeeMode">
+            <div class="kanban-actions" *ngIf="showBoardActions">
                 <a class="ghost-button" routerLink="/TaskManage" [queryParams]="hasProjectContext() ? { projectId: projectId } : null">Task Manager</a>
                 <button type="button" class="ghost-button" (click)="goToProjectDetails()" [disabled]="!hasProjectContext()">Project Details</button>
             </div>
@@ -25,14 +25,20 @@
                 </header>
 
                 <div class="card-list" cdkDropList [id]="column.id" [cdkDropListData]="column.tasks"
-                    [cdkDropListConnectedTo]="connectedIds" [cdkDropListDisabled]="employeeMode && column.id === 'validated' || isDragDropDisabled()"
+                    [cdkDropListConnectedTo]="connectedIds"
+                    [cdkDropListEnterPredicate]="canEnterDrop"
                     (cdkDropListDropped)="drop($event, column)">
-                    <article class="card" *ngFor="let task of column.tasks; trackBy: trackByTask" cdkDrag>
+                    <article class="card" *ngFor="let task of column.tasks; trackBy: trackByTask" cdkDrag [cdkDragData]="task">
+                        
                         <div class="card-head">
                             <strong>{{ task.title }}</strong>
                         </div>
 
                         <p class="card-description">{{ task.description || 'No description' }}</p>
+
+                        <div class="card-status" [ngClass]="getTaskStatusClass(task)">
+                            {{ getTaskStatusLabel(task) }}
+                        </div>
 
                         <div class="card-owner">{{ getAssignedUserLabel(task) }}</div>
 

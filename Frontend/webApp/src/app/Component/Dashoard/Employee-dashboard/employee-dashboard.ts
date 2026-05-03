@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, AfterViewInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription, catchError, finalize, forkJoin, of, timeout } from 'rxjs';
@@ -89,7 +89,7 @@ interface MessagingContact {
   templateUrl: './employee-dashboard.html',
   styleUrl: './employee-dashboard.css',
 })
-export class EmployeeDashboard implements OnInit, OnDestroy {
+export class EmployeeDashboard implements OnInit, OnDestroy, AfterViewInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
@@ -104,6 +104,8 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
   private notificationCountSubscription: Subscription | null = null;
   private notificationsSubscription: Subscription | null = null;
   private conversationLoading = false;
+
+  @ViewChild(KanbanComponent) private kanbanComponent?: KanbanComponent;
 
   sidebarSection: SidebarSection = 'dashboard';
   activeTab: EmployeeTab = 'overview';
@@ -209,6 +211,10 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.notificationCountSubscription?.unsubscribe();
     this.notificationCountSubscription = null;
     this.notificationsSubscription?.unsubscribe();
+  }
+
+  ngAfterViewInit(): void {
+    // no-op: placeholder for future actions once kanban ViewChild is ready
   }
 
   get pageTitle(): string {
@@ -1323,6 +1329,32 @@ export class EmployeeDashboard implements OnInit, OnDestroy {
     this.notificationsSubscription = this.notificationService.notifications$.subscribe((items) => {
       this.apiNotifications = items;
       this.syncNotificationsForView();
+      // If any notification relates to a task status change, refresh dashboard data
+      try {
+        const shouldRefresh = (items ?? []).some((it) => {
+          const type = String(it?.type ?? '').toLowerCase();
+          const title = String(it?.title ?? '').toLowerCase();
+          const relatedTaskId = Number(it?.relatedTaskId ?? 0);
+          if (relatedTaskId > 0) return true;
+          if (type.includes('taskstatuschanged') || type.includes('task')) return true;
+          if (title.includes('status') || title.includes('task')) return true;
+          return false;
+        });
+
+        if (shouldRefresh) {
+          // reload tasks/projects/users to reflect external status changes
+          this.loadEmployeeData();
+          try {
+            // also refresh kanban child if present
+            this.kanbanComponent?.refresh();
+          } catch (ex) {
+            // ignore
+          }
+        }
+      } catch (e) {
+        // swallow any unexpected errors to avoid breaking notification flow
+        console.warn('Error processing notifications for dashboard refresh', e);
+      }
     });
 
     this.refreshNotifications();

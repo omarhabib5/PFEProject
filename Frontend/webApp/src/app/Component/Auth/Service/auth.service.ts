@@ -72,7 +72,12 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/logout`, {}).pipe(
-      catchError(() => of(void 0)),
+      catchError((err) => {
+        // Log the error to help debugging (client-side visibility)
+        // The method still resolves so UI flow continues, but the console will show the server error details.
+        console.error('Logout API error:', err);
+        return of(void 0);
+      }),
       finalize(() => this.tokens.clear())
     );
   }

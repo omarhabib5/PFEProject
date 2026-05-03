@@ -1,0 +1,455 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="SD authentification : utilisateur" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="10" width="1700" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Actor -->
+    <mxCell id="act_U" value="User" style="shape=umlActor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="60" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_U" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="70" y="140" as="sourcePoint"/>
+        <mxPoint x="70" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- LoginComponent -->
+    <mxCell id="hdr_UI" value="LoginComponent&lt;br&gt;(Angular)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="180" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_UI" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="120" as="sourcePoint"/>
+        <mxPoint x="250" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- AuthService -->
+    <mxCell id="hdr_AUTH" value="AuthService&lt;br&gt;(Angular)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_AUTH" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="120" as="sourcePoint"/>
+        <mxPoint x="450" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- RoleGuard -->
+    <mxCell id="hdr_GUARD" value="RoleGuard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="560" y="60" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_GUARD" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="120" as="sourcePoint"/>
+        <mxPoint x="620" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- AuthController -->
+    <mxCell id="hdr_CTRL" value="AuthController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="740" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_CTRL" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="120" as="sourcePoint"/>
+        <mxPoint x="810" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MediatR -->
+    <mxCell id="hdr_MED" value="MediatR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="940" y="60" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_MED" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="120" as="sourcePoint"/>
+        <mxPoint x="1000" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- LoginCommandHandler -->
+    <mxCell id="hdr_HAND" value="LoginCommandHandler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="1110" y="60" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_HAND" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="120" as="sourcePoint"/>
+        <mxPoint x="1185" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- IAuthenticationService / AuthenticationService -->
+    <mxCell id="hdr_ASVC" value="IAuthenticationService&lt;br&gt;AuthenticationService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1310" y="60" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_ASVC" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="120" as="sourcePoint"/>
+        <mxPoint x="1400" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Users -->
+    <mxCell id="hdr_USERS" value="Users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1540" y="60" width="100" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_USERS" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1590" y="120" as="sourcePoint"/>
+        <mxPoint x="1590" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- JwtTokenService -->
+    <mxCell id="hdr_JWT" value="JwtTokenService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1680" y="60" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_JWT" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1745" y="120" as="sourcePoint"/>
+        <mxPoint x="1745" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- RefreshTokenRepository -->
+    <mxCell id="hdr_REF" value="RefreshTokenRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1850" y="60" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_REF" value="" style="endArrow=none;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1930" y="120" as="sourcePoint"/>
+        <mxPoint x="1930" y="1600" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Messages initiaux -->
+    <mxCell id="m1" value="saisir(email, password)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="70" y="170" as="sourcePoint"/>
+        <mxPoint x="250" y="170" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="onSubmit()" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="70" y="200" as="sourcePoint"/>
+        <mxPoint x="250" y="200" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: formulaire invalide -->
+    <mxCell id="alt1_box" value="alt [formulaire invalide]" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="130" y="215" width="260" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="m3" value="markAllAsTouched() [self]" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="245" as="sourcePoint"/>
+        <mxPoint x="250" y="258" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="320" y="245"/>
+          <mxPoint x="320" y="258"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: formulaire valide (conteneur principal) -->
+    <mxCell id="alt2_box" value="[formulaire valide]" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="130" y="285" width="1820" height="1200" as="geometry"/>
+    </mxCell>
+
+    <!-- Messages séquence principale -->
+    <mxCell id="m4" value="login({email, password, rememberMe})" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="330" as="sourcePoint"/>
+        <mxPoint x="450" y="330" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="HTTP POST /api/Auth/login (LoginRequestDto)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="360" as="sourcePoint"/>
+        <mxPoint x="810" y="360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="Send(LoginCommand)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="390" as="sourcePoint"/>
+        <mxPoint x="1000" y="390" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="Handle(LoginCommand)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="420" as="sourcePoint"/>
+        <mxPoint x="1185" y="420" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m8" value="LoginAsync(email, password)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="450" as="sourcePoint"/>
+        <mxPoint x="1400" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m9" value="FirstOrDefaultAsync(u =&gt; u.Email == email)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="480" as="sourcePoint"/>
+        <mxPoint x="1590" y="480" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: utilisateur introuvable -->
+    <mxCell id="alt3_box" value="alt [utilisateur introuvable]" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="500" width="1700" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="m10a" value="UnauthorizedAccessException &quot;Invalid email or password&quot;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="530" as="sourcePoint"/>
+        <mxPoint x="1185" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10b" value="exception" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="542" as="sourcePoint"/>
+        <mxPoint x="810" y="542" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10c" value="401 + message" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="552" as="sourcePoint"/>
+        <mxPoint x="450" y="552" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10d" value="erreur" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="558" as="sourcePoint"/>
+        <mxPoint x="250" y="558" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10e" value="afficher(&quot;Invalid email or password&quot;)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="563" as="sourcePoint"/>
+        <mxPoint x="70" y="563" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: compte verrouillé -->
+    <mxCell id="alt4_box" value="[compte verrouillé]" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="590" width="1700" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="m11a" value="UnauthorizedAccessException &quot;Account is locked until {date}&quot;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="620" as="sourcePoint"/>
+        <mxPoint x="1185" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m11b" value="exception" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="632" as="sourcePoint"/>
+        <mxPoint x="810" y="632" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m11c" value="401 + message" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="642" as="sourcePoint"/>
+        <mxPoint x="450" y="642" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m11d" value="erreur" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="648" as="sourcePoint"/>
+        <mxPoint x="250" y="648" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m11e" value="afficher(&quot;Account is locked until {date}&quot;)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="653" as="sourcePoint"/>
+        <mxPoint x="70" y="653" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: mot de passe invalide -->
+    <mxCell id="alt5_box" value="[mot de passe invalide]" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="680" width="1700" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="m12a" value="IncrementFailedLoginAttempts()" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="706" as="sourcePoint"/>
+        <mxPoint x="1590" y="706" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12b" value="UnauthorizedAccessException &quot;Invalid email or password&quot;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="724" as="sourcePoint"/>
+        <mxPoint x="1185" y="724" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12c" value="exception" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="735" as="sourcePoint"/>
+        <mxPoint x="810" y="735" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12d" value="401 + message" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="744" as="sourcePoint"/>
+        <mxPoint x="450" y="744" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12e" value="erreur" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="750" as="sourcePoint"/>
+        <mxPoint x="250" y="750" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12f" value="afficher(&quot;Invalid email or password&quot;)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="756" as="sourcePoint"/>
+        <mxPoint x="70" y="756" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: authentification OK -->
+    <mxCell id="alt6_box" value="[authentification OK]" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="780" width="1700" height="490" as="geometry"/>
+    </mxCell>
+    <mxCell id="m13" value="UpdateLastLogin()" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="820" as="sourcePoint"/>
+        <mxPoint x="1590" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m14" value="GenerateAccessToken(user)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="850" as="sourcePoint"/>
+        <mxPoint x="1745" y="850" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m15" value="GenerateRefreshToken()" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="880" as="sourcePoint"/>
+        <mxPoint x="1745" y="880" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m16" value="CreateAsync(refreshToken)" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="910" as="sourcePoint"/>
+        <mxPoint x="1930" y="910" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m17" value="AuthResponse" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="940" as="sourcePoint"/>
+        <mxPoint x="1185" y="940" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m18" value="AuthResponse" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="960" as="sourcePoint"/>
+        <mxPoint x="810" y="960" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m19" value="AuthResponseDto" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="980" as="sourcePoint"/>
+        <mxPoint x="450" y="980" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m20" value="setTokens(accessToken, refreshToken, userData)" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="1000" as="sourcePoint"/>
+        <mxPoint x="450" y="1015" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="540" y="1000"/>
+          <mxPoint x="540" y="1015"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m21" value="success" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="1040" as="sourcePoint"/>
+        <mxPoint x="250" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m22" value="redirectToDashboard()" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="1070" as="sourcePoint"/>
+        <mxPoint x="620" y="1070" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT roles -->
+    <mxCell id="alt_roles" value="alt [role == admin / projectmanager / servicemanager / employee / observer]" style="swimlane;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="300" y="1090" width="460" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="m23a" value="navigateByUrl('/AdminDashboard')" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="1115" as="sourcePoint"/>
+        <mxPoint x="250" y="1115" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m23b" value="navigateByUrl('/ChefProjetDashboard')" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="1133" as="sourcePoint"/>
+        <mxPoint x="250" y="1133" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m23c" value="navigateByUrl('/ResponsableServiceDashboard')" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="1151" as="sourcePoint"/>
+        <mxPoint x="250" y="1151" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m23d" value="navigateByUrl('/EmployeeDashboard')" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="1169" as="sourcePoint"/>
+        <mxPoint x="250" y="1169" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m23e" value="navigateByUrl('/ObserverDashboard')" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="620" y="1187" as="sourcePoint"/>
+        <mxPoint x="250" y="1187" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ALT: erreur technique -->
+    <mxCell id="alt7_box" value="[erreur technique]" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="1290" width="1700" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="m24a" value="Exception" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1400" y="1318" as="sourcePoint"/>
+        <mxPoint x="1185" y="1318" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m24b" value="exception" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1185" y="1330" as="sourcePoint"/>
+        <mxPoint x="810" y="1330" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m24c" value="500 + &quot;An error occurred during login&quot;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="810" y="1342" as="sourcePoint"/>
+        <mxPoint x="450" y="1342" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m24d" value="erreur" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="1352" as="sourcePoint"/>
+        <mxPoint x="250" y="1352" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m24e" value="afficher(&quot;An error occurred during login&quot;)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="250" y="1360" as="sourcePoint"/>
+        <mxPoint x="70" y="1360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

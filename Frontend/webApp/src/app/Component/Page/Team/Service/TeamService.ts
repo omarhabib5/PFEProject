@@ -35,7 +35,8 @@ export interface User {
 
 export enum Role {
     Employer = 0,
-    ProjectLeader = 1  
+    ProjectLeader = 1,
+    Observateur = 2,
 }
 
 export interface CreateTeamRequest {

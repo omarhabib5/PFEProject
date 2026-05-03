@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin, of, Subscription } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../Auth/Service/auth.service';
 import { TokenService } from '../../Auth/Service/token.service';
 import { Notification } from '../../Page/Notifiation/Models/Notification.Model';
@@ -12,6 +12,7 @@ import { project, ProjectService } from '../../Page/Projet/Service/ProjectServic
 import { Sprint, SprintService } from '../../Page/Sprint/Service/SprintService';
 import { TaskDto, TaskService } from '../../Page/Task/Service/TaskService';
 import { UserApiService } from '../../Page/Team/Service/UserApiService';
+import { Role, Team, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
 import { UserStoryDto } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { KanbanComponent } from '../../kanban/kanban';
@@ -60,6 +61,7 @@ export class ObserverDashboard implements OnInit {
   private readonly sprintService = inject(SprintService);
   private readonly taskService = inject(TaskService);
   private readonly userApiService = inject(UserApiService);
+  private readonly teamService = inject(TeamService);
   private readonly userStoryService = inject(UserStoryService);
   private readonly notificationService = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -92,6 +94,7 @@ export class ObserverDashboard implements OnInit {
 
   userName = 'Observer';
   selectedProjectId: number | 'all' = 'all';
+  private observerTeamIds: number[] = [];
   unreadNotifications = 0;
   notifications: Notification[] = [];
   selectedNotificationFilter: ObserverNotificationFilter = 'all';
@@ -102,7 +105,22 @@ export class ObserverDashboard implements OnInit {
   sprints: Sprint[] = [];
   stories: UserStoryDto[] = [];
   tasks: TaskDto[] = [];
-   
+  private availableTeams: Team[] = [];
+
+  // ✅ FIX: Getters pour passer les bons inputs au KanbanComponent sans null projectId
+  get kanbanProjectId(): number | null {
+    return this.selectedProjectId === 'all' ? null : Number(this.selectedProjectId);
+  }
+
+  get kanbanAllowedProjectIds(): number[] {
+    // Si un projet spécifique est sélectionné, on passe [] car projectId suffit
+    if (this.selectedProjectId !== 'all') {
+      return [];
+    }
+    // Si "all", on passe tous les projectIds de l'observer
+    return this.observerProjectIds;
+  }
+
   ngOnInit(): void {
     if (!this.tokenService.isAuthenticated()) {
       this.router.navigate(['/login']);
@@ -147,28 +165,42 @@ export class ObserverDashboard implements OnInit {
       projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as project[]))),
       sprints: this.sprintService.getAllSprints().pipe(catchError(() => of([] as Sprint[]))),
       stories: this.userStoryService.getAllUserStories().pipe(catchError(() => of([] as UserStoryDto[]))),
-      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[])))
+      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[]))),
+      teams: this.teamService.getTeams().pipe(catchError(() => of([] as Team[])))
     })
-      .pipe(finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }))
-      .subscribe({
-        next: ({ projects, sprints, stories, tasks }) => {
-          this.projects = Array.isArray(projects) ? projects : [];
-          this.sprints = Array.isArray(sprints) ? sprints : [];
-          this.stories = Array.isArray(stories) ? stories : [];
-          this.tasks = Array.isArray(tasks) ? tasks : [];
-          if (this.selectedProjectId !== 'all' && !this.projects.some((project) => Number(project.id) === Number(this.selectedProjectId))) {
-            this.selectedProjectId = 'all';
-          }
-          this.buildCalendar();
-          this.refreshMessagingContacts();
-          this.refreshNotifications();
-        },
-        error: () => {
-          this.error = 'Unable to load observer dashboard data.';
+      .pipe(
+        switchMap(({ projects, sprints, stories, tasks, teams }) =>
+          this.resolveObserverTeamIds(Array.isArray(teams) ? teams : []).pipe(
+            map((observerTeamIds) => ({ projects, sprints, stories, tasks, teams, observerTeamIds }))
+          )
+        ),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe((result: any) => {
+        const { projects, sprints, stories, tasks, observerTeamIds } = result as {
+          projects: project[];
+          sprints: Sprint[];
+          stories: UserStoryDto[];
+          tasks: TaskDto[];
+          teams: Team[];
+          observerTeamIds: number[];
+        };
+
+        this.projects = Array.isArray(projects) ? projects : [];
+        this.sprints = Array.isArray(sprints) ? sprints : [];
+        this.stories = Array.isArray(stories) ? stories : [];
+        this.tasks = Array.isArray(tasks) ? tasks : [];
+        this.availableTeams = Array.isArray((result as { teams?: Team[] }).teams) ? (result as { teams?: Team[] }).teams ?? [] : [];
+        this.observerTeamIds = Array.isArray(observerTeamIds) ? observerTeamIds : [];
+        if (this.selectedProjectId !== 'all' && !this.filteredProjects.some((project) => Number(project.id) === Number(this.selectedProjectId))) {
+          this.selectedProjectId = 'all';
         }
+        this.buildCalendar();
+        this.refreshMessagingContacts();
+        this.refreshNotifications();
       });
   }
 
@@ -178,49 +210,60 @@ export class ObserverDashboard implements OnInit {
   }
 
   get filteredProjects(): project[] {
+    const scopedProjects = this.getProjectsForObserverTeam();
+
     if (this.selectedProjectId === 'all') {
-      return this.projects;
+      return scopedProjects;
     }
 
-    return this.projects.filter((project) => Number(project.id) === Number(this.selectedProjectId));
+    return scopedProjects.filter((project) => Number(project.id) === Number(this.selectedProjectId));
   }
 
   get filteredSprints(): Sprint[] {
-    if (this.selectedProjectId === 'all') {
-      return this.sprints;
+    const projectIds = new Set(this.filteredProjects.map((project) => Number(project.id)));
+    if (projectIds.size === 0) {
+      return [];
     }
 
-    return this.sprints.filter((sprint) => Number(sprint.projectId) === Number(this.selectedProjectId));
+    return this.sprints.filter((sprint) => projectIds.has(Number(sprint.projectId)));
   }
 
   get filteredStories(): UserStoryDto[] {
-    if (this.selectedProjectId === 'all') {
-      return this.stories;
-    }
+    const projectIds = new Set(this.filteredProjects.map((project) => Number(project.id)));
+    const projectSprintIds = new Set(this.sprints.filter((sprint) => projectIds.has(Number(sprint.projectId))).map((sprint) => Number(sprint.id)));
 
-    const projectSprintIds = new Set(
-      this.sprints
-        .filter((sprint) => Number(sprint.projectId) === Number(this.selectedProjectId))
-        .map((sprint) => Number(sprint.id))
-    );
+    if (projectIds.size === 0) {
+      return [];
+    }
 
     return this.stories.filter((story) => {
       const projectId = Number((story as any).projectId ?? 0);
       const sprintId = Number(story.sprintId ?? 0);
-      return projectId === Number(this.selectedProjectId) || projectSprintIds.has(sprintId);
+      return projectIds.has(projectId) || projectSprintIds.has(sprintId);
     });
   }
 
   get filteredTasks(): TaskDto[] {
-    if (this.selectedProjectId === 'all') {
-      return this.tasks;
+    const projectIds = new Set(this.filteredProjects.map((project) => Number(project.id)));
+    if (projectIds.size === 0) {
+      return [];
     }
 
-    return this.tasks.filter((task) => this.getTaskProjectId(task) === Number(this.selectedProjectId));
+    return this.tasks.filter((task) => projectIds.has(this.getTaskProjectId(task)));
   }
 
   get filteredProjectsCount(): number {
     return this.filteredProjects.length;
+  }
+
+  get observerProjects(): project[] {
+    return this.getProjectsForObserverTeam();
+  }
+
+  get observerProjectIds(): number[] {
+    return this.getProjectsForObserverTeam()
+      .map((project) => Number(project.id))
+      .filter((projectId) => Number.isFinite(projectId) && projectId > 0);
   }
 
   get calendarMonthLabel(): string {
@@ -290,7 +333,7 @@ export class ObserverDashboard implements OnInit {
       return null;
     }
 
-    return this.projects.find((item) => Number(item.id) === Number(this.selectedProjectId)) ?? null;
+    return this.filteredProjects.find((item) => Number(item.id) === Number(this.selectedProjectId)) ?? null;
   }
 
   getProjectStateLabel(state: number | string | undefined): string {
@@ -417,12 +460,23 @@ export class ObserverDashboard implements OnInit {
   }
 
   getProjectManagerName(projectItem: project): string {
-    const managerId = Number(projectItem.projectManagerId ?? 0);
-    return projectItem.projectManager ? `${projectItem.projectManager.firstName ?? ''} ${projectItem.projectManager.lastName ?? ''}`.trim() || 'Project manager' : 'Project manager';
+    return projectItem.projectManager
+      ? `${projectItem.projectManager.firstName ?? ''} ${projectItem.projectManager.lastName ?? ''}`.trim() || 'Project manager'
+      : 'Project manager';
   }
 
   getProjectTeamName(projectItem: project): string {
-    return projectItem.team?.name?.trim() || 'No team assigned';
+    const directName = projectItem.team?.name?.trim();
+    if (directName) {
+      return directName;
+    }
+
+    const teamId = this.getProjectTeamId(projectItem);
+    if (!teamId) {
+      return 'No team assigned';
+    }
+
+    return this.availableTeams.find((team) => Number(team.id) === teamId)?.name?.trim() || 'No team assigned';
   }
 
   getProjectSummaryLabel(projectItem: project): string {
@@ -570,11 +624,7 @@ export class ObserverDashboard implements OnInit {
     }).pipe(finalize(() => (this.passwordSaving = false))).subscribe({
       next: () => {
         this.settingsSuccess = 'Password updated successfully.';
-        this.passwordForm = {
-          currentPassword: '',
-          newPassword: '',
-          confirmNewPassword: ''
-        };
+        this.passwordForm = { currentPassword: '', newPassword: '', confirmNewPassword: '' };
         this.cdr.markForCheck();
       },
       error: (err: unknown) => {
@@ -605,17 +655,35 @@ export class ObserverDashboard implements OnInit {
   }
 
   refreshMessagingContacts(): void {
-    this.userApiService.getUsers().subscribe({
-      next: (users) => {
+    const teamId = this.getPrimaryObserverTeamId();
+    if (!teamId) {
+      this.messagingContacts = [];
+      this.selectedMessagingUserId = null;
+      this.conversationMessages = [];
+      this.cdr.markForCheck();
+      return;
+    }
+
+    forkJoin({
+      members: this.teamService.getMembersByTeamId(teamId).pipe(catchError(() => of([] as TeamUser[]))),
+      users: this.userApiService.getUsers().pipe(catchError(() => of([] as any[])))
+    }).subscribe({
+      next: ({ members, users }) => {
+        const currentUserId = this.getCurrentUserId();
+        const activeMemberIds = new Set(
+          (members ?? [])
+            .filter((member) => Number(member.userId ?? 0) > 0 && !member.leftAt && Number(member.role) === Number(Role.Employer))
+            .map((member) => Number(member.userId))
+        );
+
         this.messagingContacts = (users ?? [])
+          .filter((user) => activeMemberIds.has(Number((user as any)?.id ?? 0)))
           .filter((user) => this.isEmployeeRole((user as any)?.role))
+          .filter((user) => Number((user as any)?.id ?? 0) !== Number(currentUserId ?? 0))
           .map((user) => {
             const id = Number((user as any)?.id ?? 0);
             const name = `${String((user as any)?.firstName ?? '').trim()} ${String((user as any)?.lastName ?? '').trim()}`.trim();
-            return {
-              id,
-              name: name || `Employee #${id}`
-            } as MessagingContact;
+            return { id, name: name || `Team member #${id}` } as MessagingContact;
           })
           .filter((contact) => contact.id > 0)
           .sort((a, b) => a.name.localeCompare(b.name));
@@ -628,6 +696,8 @@ export class ObserverDashboard implements OnInit {
       },
       error: () => {
         this.messagingContacts = [];
+        this.selectedMessagingUserId = null;
+        this.conversationMessages = [];
         this.cdr.markForCheck();
       }
     });
@@ -704,10 +774,10 @@ export class ObserverDashboard implements OnInit {
 
   getSelectedMessagingUserName(): string {
     if (!this.selectedMessagingUserId) {
-      return 'Select an employee';
+      return 'Select a team member';
     }
 
-    return this.messagingContacts.find((item) => item.id === this.selectedMessagingUserId)?.name ?? 'Employee';
+    return this.messagingContacts.find((item) => item.id === this.selectedMessagingUserId)?.name ?? 'Team member';
   }
 
   isMessageSentByCurrentUser(item: Notification): boolean {
@@ -960,6 +1030,80 @@ export class ObserverDashboard implements OnInit {
     return Number.isFinite(fromClaims) && fromClaims > 0 ? fromClaims : null;
   }
 
+  private getProjectsForObserverTeam(): project[] {
+    if (this.projects.length === 0) {
+      return [];
+    }
+
+    if (!Array.isArray(this.observerTeamIds) || this.observerTeamIds.length === 0) {
+      return [];
+    }
+
+    const scopedTeamIds = new Set(this.observerTeamIds.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0));
+    return this.projects.filter((project) => scopedTeamIds.has(this.getProjectTeamId(project)));
+  }
+
+  private getPrimaryObserverTeamId(): number | null {
+    if (!Array.isArray(this.observerTeamIds) || this.observerTeamIds.length === 0) {
+      return null;
+    }
+
+    const selectedProject = this.selectedProjectId === 'all'
+      ? null
+      : this.projects.find((item) => Number(item.id) === Number(this.selectedProjectId));
+
+    const selectedProjectTeamId = selectedProject ? this.getProjectTeamId(selectedProject) : 0;
+    if (selectedProjectTeamId > 0 && this.observerTeamIds.includes(selectedProjectTeamId)) {
+      return selectedProjectTeamId;
+    }
+
+    return Number(this.observerTeamIds[0]) || null;
+  }
+
+  private getProjectTeamId(projectItem: project): number {
+    return Number(
+      projectItem.teamId
+      ?? (projectItem as any)?.TeamId
+      ?? (projectItem as any)?.team?.id
+      ?? 0
+    );
+  }
+
+  private resolveObserverTeamIds(teams: Team[]): any {
+    const currentUserId = this.getCurrentUserId();
+    if (!currentUserId || !Array.isArray(teams) || teams.length === 0) {
+      return of([] as number[]);
+    }
+
+    return forkJoin(
+      teams.map((team) =>
+        this.teamService.getMembersByTeamId(Number(team.id)).pipe(catchError(() => of([] as TeamUser[])))
+      )
+    ).pipe(
+      map((membersByTeam) => {
+        const observerTeamIds = teams
+          .filter((_, index) =>
+            membersByTeam[index]?.some((member) =>
+              Number(member.userId) === Number(currentUserId) && Number(member.role) === Number(Role.Observateur)
+            )
+          )
+          .map((team) => Number(team.id))
+          .filter((teamId) => Number.isFinite(teamId) && teamId > 0);
+
+        if (observerTeamIds.length > 0) {
+          return observerTeamIds;
+        }
+
+        return teams
+          .filter((_, index) =>
+            membersByTeam[index]?.some((member) => Number(member.userId) === Number(currentUserId))
+          )
+          .map((team) => Number(team.id))
+          .filter((teamId) => Number.isFinite(teamId) && teamId > 0);
+      })
+    );
+  }
+
   private isMessageNotification(item: Notification): boolean {
     const title = String(item?.title ?? '').toLowerCase();
     const message = String(item?.message ?? '').toLowerCase();
@@ -996,6 +1140,6 @@ export class ObserverDashboard implements OnInit {
 
   private isEmployeeRole(role: unknown): boolean {
     const normalized = String(role ?? '').trim().toLowerCase();
-    return normalized === 'employee' || normalized === 'employe' || normalized === '3';
+    return normalized === 'employee' || normalized === 'employe' || normalized === '3' || normalized === 'role.employee';
   }
 }

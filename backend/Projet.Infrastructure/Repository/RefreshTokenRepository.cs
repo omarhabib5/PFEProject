@@ -42,8 +42,9 @@ namespace Projet.Infrastructure.Repository
 
         public async System.Threading.Tasks.Task RevokeAllByUserIdAsync(int userId, string? reason = null, CancellationToken cancellationToken = default)
         {
+            var now = DateTime.UtcNow;
             var tokens = await _context.RefreshTokens
-                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .Where(rt => rt.UserId == userId && rt.RevokedAt == null && rt.ExpiresAt > now)
                 .ToListAsync(cancellationToken);
 
             foreach (var token in tokens)
@@ -57,8 +58,9 @@ namespace Projet.Infrastructure.Repository
 
         public async System.Threading.Tasks.Task<List<RefreshToken>> GetActiveTokensByUserIdAsync(int userId, CancellationToken cancellationToken = default)
         {
+            var now = DateTime.UtcNow;
             return await _context.RefreshTokens
-                .Where(rt => rt.UserId == userId && !rt.IsRevoked && !rt.IsExpired)
+                .Where(rt => rt.UserId == userId && rt.RevokedAt == null && rt.ExpiresAt > now)
                 .ToListAsync(cancellationToken);
         }
     }

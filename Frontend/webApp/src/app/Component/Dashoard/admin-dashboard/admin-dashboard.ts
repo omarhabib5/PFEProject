@@ -1269,6 +1269,13 @@ private adminNotificationsSubscription: Subscription | null = null;
       return;
     }
 
+    const newName = this.newService.name.trim();
+    const duplicate = this.services.some((s) => (s.name ?? '').trim().toLowerCase() === newName.toLowerCase());
+    if (duplicate) {
+      this.serviceFormError = 'A service with this name already exists.';
+      return;
+    }
+
     this.serviceFormLoading = true;
     const payload: CreateServiceDto = {
       name: this.newService.name.trim(),
@@ -1329,6 +1336,13 @@ private adminNotificationsSubscription: Subscription | null = null;
     }
 
     if (this.editingServiceId == null) {
+      return;
+    }
+
+    const updatedName = this.editService.name.trim();
+    const duplicateUpdate = this.services.some((s) => Number(s.id) !== Number(this.editingServiceId) && (s.name ?? '').trim().toLowerCase() === updatedName.toLowerCase());
+    if (duplicateUpdate) {
+      this.serviceFormError = 'A service with this name already exists.';
       return;
     }
 
