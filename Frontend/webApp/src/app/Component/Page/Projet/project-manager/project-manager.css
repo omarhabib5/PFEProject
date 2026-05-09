@@ -349,6 +349,105 @@
 	background: linear-gradient(135deg, #e11d48, #be123c);
 }
 
+/* ============================================ */
+/* PROJECT CREATE FORM COLOR SCHEME */
+/* ============================================ */
+
+.project-manager-page .project-panel--form {
+	background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(240, 249, 255, 0.95)) !important;
+	border: 1.5px solid rgba(15, 118, 110, 0.15);
+}
+
+.project-manager-page .project-panel--form h2 {
+	color: #0f172a;
+	background: linear-gradient(135deg, #0f766e, #0891b2);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* Form Input Colors */
+.project-panel--form .w-full {
+	border-color: #cbd5e1;
+	background: rgba(255, 255, 255, 0.98);
+	color: #1e293b;
+}
+
+.project-panel--form input,
+.project-panel--form select,
+.project-panel--form textarea {
+	border-color: rgba(15, 118, 110, 0.2) !important;
+	background: rgba(255, 255, 255, 0.98) !important;
+	color: #0f172a !important;
+}
+
+.project-panel--form input::placeholder,
+.project-panel--form textarea::placeholder {
+	color: #94a3b8;
+}
+
+.project-panel--form input:focus,
+.project-panel--form select:focus,
+.project-panel--form textarea:focus {
+	border-color: #0f766e !important;
+	box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1) !important;
+	background: #ffffff !important;
+}
+
+/* Form Labels */
+.project-panel--form label {
+	color: #0f172a !important;
+	font-weight: 600;
+}
+
+/* Form Section Styling */
+.project-panel--form > div:first-child {
+	margin-bottom: 1.5rem;
+	padding-bottom: 1.25rem;
+	border-bottom: 2px solid rgba(15, 118, 110, 0.1);
+}
+
+/* Button Colors */
+.project-panel--form button[type="submit"] {
+	background: linear-gradient(135deg, #0f766e, #0891b2) !important;
+	color: #ffffff !important;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	border: none;
+	box-shadow: 0 12px 28px rgba(15, 118, 110, 0.25);
+	transition: all 0.3s ease;
+}
+
+.project-panel--form button[type="submit"]:hover:not(:disabled) {
+	transform: translateY(-3px);
+	box-shadow: 0 16px 36px rgba(15, 118, 110, 0.35);
+	filter: brightness(1.08);
+}
+
+.project-panel--form button[type="button"] {
+	background: linear-gradient(135deg, #64748b, #475569) !important;
+	color: #ffffff !important;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	border: none;
+	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15);
+	transition: all 0.3s ease;
+}
+
+.project-panel--form button[type="button"]:hover:not(:disabled) {
+	transform: translateY(-3px);
+	box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2);
+	filter: brightness(1.08);
+}
+
+.project-panel--form button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none !important;
+}
+
 @media (max-width: 768px) {
 	.project-manager-page {
 		padding: 1rem;
@@ -368,4 +467,5 @@
 	.project-manager-page .empty-state {
 		border-radius: 20px;
 	}
+
 }

@@ -9,9 +9,10 @@ import { RoleGuard } from '../Service/role.guard';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css'],
 })
 export class Login implements OnInit {
   private fb = inject(FormBuilder);
