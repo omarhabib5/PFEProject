@@ -2,20 +2,40 @@
   <div class="login-shell">
     <aside class="login-side">
       <div class="brand-block">
-        <img src="/pic12420.gif" alt="TaskFlow Pro Logo" class="logo-img-login">
+        <div class="brand-mark">
+          <img src="/pic12420.gif" alt="TaskFlow Pro Logo" class="logo-img-login">
+        </div>
+        <div class="brand-copy">
+          
+          <h2>Project control, without the noise.</h2>
+          <p>
+            Bring tasks, sprints, users, and dashboards together in one clean workspace.
+          </p>
+        </div>
       </div>
 
       <div class="side-content">
-        <h2>Welcome</h2>
-        <p>
-          Sign in to track your projects, user stories, and sprints in the same interface as your dashboards.
-        </p>
+        <div class="feature-list" aria-label="Key benefits">
+          <div class="feature-item">
+            <span class="feature-title">Fast access</span>
+            <span class="feature-text">Jump straight into your dashboard after a secure sign-in.</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-title">Role based</span>
+            <span class="feature-text">Admin, manager, and team views stay organized from the start.</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-title">Project ready</span>
+            <span class="feature-text">Track planning, execution, and follow-up without switching tools.</span>
+          </div>
+        </div>
 
         <div class="role-chips">
           <span class="chip">Admin</span>
           <span class="chip">ServiceManager</span>
           <span class="chip">ProjectManager</span>
           <span class="chip">Employee</span>
+          <span class="chip">Observer</span>
         </div>
       </div>
     </aside>
@@ -23,15 +43,16 @@
     <main class="login-main">
       <section class="login-card">
         <header class="login-header">
-          <h3>Sign in</h3>
-          <p>Enter your credentials to access your workspace.</p>
+          <span class="login-badge">Secure access</span>
+          <h3>Sign in to your workspace</h3>
+          <p>Use your project account to continue where you left off.</p>
         </header>
 
-        <div *ngIf="errorMessage" class="message error-message">
+        <div *ngIf="errorMessage" class="message error-message" role="alert">
           {{ errorMessage }}
         </div>
 
-        <div *ngIf="infoMessage" class="message success-message">
+        <div *ngIf="infoMessage" class="message success-message" role="status">
           {{ infoMessage }}
         </div>
 
@@ -43,6 +64,7 @@
               type="email"
               formControlName="email"
               placeholder="you@example.com"
+              autocomplete="email"
             />
             <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Invalid email address</small>
           </div>
@@ -65,6 +87,7 @@
               type="password"
               formControlName="password"
               placeholder="Minimum 6 characters"
+              autocomplete="current-password"
             />
             <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Minimum 6 characters required</small>
           </div>
@@ -82,6 +105,10 @@
             <ng-container *ngIf="!isLoading">Sign in</ng-container>
             <ng-container *ngIf="isLoading">Signing in...</ng-container>
           </button>
+
+          <p class="form-note">
+            Need help with access? Use password recovery from the link above.
+          </p>
         </form>
       </section>
     </main>

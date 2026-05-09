@@ -36,15 +36,23 @@ interface UiProjectCard {
 interface CalendarCell {
   date: Date;
   inCurrentMonth: boolean;
+  isToday: boolean;
 }
 
 interface CalendarProjectEntry {
   id: number;
+  kind: 'project' | 'task';
   name: string;
+  projectLabel: string;
   serviceLabel: string;
+  ownerLabel: string;
+  statusLabel: string;
   startLabel: string;
   endLabel: string;
   endDateKey: string;
+  rawStartDate: string | Date;
+  rawEndDate: string | Date;
+  description?: string;
 }
 
 interface DeadlineNotification {
@@ -169,6 +177,10 @@ export class AdminDashboard implements OnInit, OnDestroy, AfterViewInit {
   calendarTitle = '';
   calendarCells: CalendarCell[] = [];
   calendarProjectsByDate: Record<string, CalendarProjectEntry[]> = {};
+  readonly calendarWeekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  selectedCalendarProjectId: number | 'all' = 'all';
+  selectedCalendarServiceId: number | 'all' = 'all';
+  selectedCalendarEmployeeId: number | 'all' = 'all';
 
 
 private projectStatusPieChart?: Chart;
@@ -236,7 +248,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.currentDate = new Date().toLocaleDateString('en-US', options);
   }
   goToServiceManager(){
-    this.router.navigate(['/Services']);
+    this.router.navigate(['/Service']);
   }
 
   setActiveTab(tab: DashboardTab): void {
@@ -443,6 +455,29 @@ private adminNotificationsSubscription: Subscription | null = null;
     return service?.name ?? 'No service assigned';
   }
 
+  getUserDisplayName(userId?: number | null): string {
+    if (!userId) {
+      return 'No employee assigned';
+    }
+
+    const user = this.users.find((item) => Number(item.id) === Number(userId));
+    if (!user) {
+      return `Employee #${userId}`;
+    }
+
+    return `${user.firstName} ${user.lastName}`.trim();
+  }
+
+  get calendarEmployeeOptions(): UserDto[] {
+    return [...this.users]
+      .filter((user) => this.roleLabelToValue(user.role) !== 0)
+      .sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
+  }
+
+  private getCalendarMode(): 'projects' | 'tasks' {
+    return this.selectedCalendarEmployeeId === 'all' ? 'projects' : 'tasks';
+  }
+
 
   filterProjects(): void {
     const term = this.activeTab === 'calendar'
@@ -470,16 +505,48 @@ private adminNotificationsSubscription: Subscription | null = null;
     }
   }
 
+  onCalendarFilterChange(): void {
+    this.updateCalendarProjectsMap();
+  }
+
   private focusCalendarOnMatchedProjectStartMonth(term: string): boolean {
     if (!term) {
       return false;
     }
 
-    const visibleProjects = this.filteredProjectCards
-      .map((card) => this.projects.find((projectItem) => (projectItem.id ?? 0) === card.id))
-      .filter((projectItem): projectItem is project => !!projectItem);
+    const mode = this.getCalendarMode();
 
-    const source = visibleProjects.length > 0 ? visibleProjects : this.projects;
+    if (mode === 'tasks') {
+      const source = this.getCalendarSourceTasks();
+      const matchedTask = source.find((item) => (item.title ?? '').toLowerCase() === term)
+        ?? source.find((item) => (item.title ?? '').toLowerCase().startsWith(term))
+        ?? source.find((item) => (item.title ?? '').toLowerCase().includes(term))
+        ?? source.find((item) => (item.assignedToName ?? '').toLowerCase().includes(term));
+
+      if (!matchedTask) {
+        return false;
+      }
+
+      const startDate = this.parseCalendarDate(matchedTask.startDate);
+      if (!startDate) {
+        return false;
+      }
+
+      const targetYear = startDate.getFullYear();
+      const targetMonth = startDate.getMonth();
+      const currentYear = this.currentMonthDate.getFullYear();
+      const currentMonth = this.currentMonthDate.getMonth();
+
+      if (targetYear === currentYear && targetMonth === currentMonth) {
+        return false;
+      }
+
+      this.currentMonthDate = new Date(targetYear, targetMonth, 1);
+      this.buildCalendar();
+      return true;
+    }
+
+    const source = this.getCalendarSourceProjects();
 
     const matchedProject = source.find((item) => (item.name ?? '').toLowerCase() === term)
       ?? source.find((item) => (item.name ?? '').toLowerCase().startsWith(term))
@@ -568,6 +635,12 @@ private adminNotificationsSubscription: Subscription | null = null;
       this.currentMonthDate.getMonth() + 1,
       1
     );
+    this.buildCalendar();
+  }
+
+  goToCurrentCalendarMonth(): void {
+    const today = new Date();
+    this.currentMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
     this.buildCalendar();
   }
 
@@ -850,7 +923,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.projectStatusPieChart = new Chart('projectStatusPieChart', {
       type: 'pie',
       data: {
-        labels: ['In progress', 'Validated', 'Done', 'To do', 'Pending'],
+        labels: ['In Progress', 'Validated', 'Done', 'To Do', 'Pending'],
         datasets: [{
           data: [
             statusCounts.inProgress,
@@ -947,6 +1020,7 @@ private adminNotificationsSubscription: Subscription | null = null;
   private buildCalendar(): void {
     const year = this.currentMonthDate.getFullYear();
     const month = this.currentMonthDate.getMonth();
+    const todayKey = this.toDateKey(new Date());
 
     this.calendarTitle = new Date(year, month, 1).toLocaleDateString('en-US', {
       month: 'long',
@@ -954,15 +1028,16 @@ private adminNotificationsSubscription: Subscription | null = null;
     });
 
     const firstDay = new Date(year, month, 1);
-    const startOffset = firstDay.getDay();
+    const startOffset = (firstDay.getDay() + 6) % 7;
     const startDate = new Date(year, month, 1 - startOffset);
 
-    this.calendarCells = Array.from({ length: 35 }).map((_, index) => {
+    this.calendarCells = Array.from({ length: 42 }).map((_, index) => {
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + index);
       return {
         date,
-        inCurrentMonth: date.getMonth() === month
+        inCurrentMonth: date.getMonth() === month,
+        isToday: this.toDateKey(date) === todayKey
       };
     });
 
@@ -971,9 +1046,11 @@ private adminNotificationsSubscription: Subscription | null = null;
 
   private updateCalendarProjectsMap(): void {
     const map: Record<string, CalendarProjectEntry[]> = {};
-    const projectsToRender = this.getCalendarSourceProjects();
+    const timelineEntries = this.getCalendarMode() === 'tasks'
+      ? this.getCalendarSourceTasks().map((item) => this.toCalendarTaskEntry(item))
+      : this.getCalendarSourceProjects().map((item) => this.toCalendarProjectEntry(item));
 
-    if (this.calendarCells.length === 0 || projectsToRender.length === 0) {
+    if (this.calendarCells.length === 0 || timelineEntries.length === 0) {
       this.calendarProjectsByDate = map;
       return;
     }
@@ -981,11 +1058,11 @@ private adminNotificationsSubscription: Subscription | null = null;
     const cellStart = new Date(this.calendarCells[0].date);
     const cellEnd = new Date(this.calendarCells[this.calendarCells.length - 1].date);
 
-    for (const item of projectsToRender) {
-      const projectStart = new Date(item.startDate);
-      const projectEnd = new Date(item.endDate);
+    for (const item of timelineEntries) {
+      const projectStart = this.parseCalendarDate(item.rawStartDate);
+      const projectEnd = this.parseCalendarDate(item.rawEndDate);
 
-      if (Number.isNaN(projectStart.getTime()) || Number.isNaN(projectEnd.getTime())) {
+      if (!projectStart || !projectEnd) {
         continue;
       }
 
@@ -996,22 +1073,13 @@ private adminNotificationsSubscription: Subscription | null = null;
       const rangeStart = new Date(projectStart > cellStart ? projectStart : cellStart);
       const rangeEnd = new Date(projectEnd < cellEnd ? projectEnd : cellEnd);
 
-      const entry: CalendarProjectEntry = {
-        id: item.id ?? 0,
-        name: item.name,
-        serviceLabel: this.getCalendarServiceLabel(item.serviceId),
-        startLabel: this.formatDate(item.startDate),
-        endLabel: this.formatDate(item.endDate),
-        endDateKey: this.toDateKey(projectEnd)
-      };
-
       const cursor = new Date(rangeStart);
       while (cursor <= rangeEnd) {
         const key = this.toDateKey(cursor);
         if (!map[key]) {
           map[key] = [];
         }
-        map[key].push(entry);
+        map[key].push(item);
         cursor.setDate(cursor.getDate() + 1);
       }
     }
@@ -1021,11 +1089,122 @@ private adminNotificationsSubscription: Subscription | null = null;
 
   private getCalendarSourceProjects(): project[] {
     const term = this.searchTerm.trim().toLowerCase();
-    if (!term) {
-      return [...this.projects];
+    return this.projects.filter((item) => {
+      const matchesTerm = !term
+        || (item.name ?? '').toLowerCase().includes(term)
+        || this.getCalendarServiceLabel(item.serviceId).toLowerCase().includes(term)
+        || this.getUserDisplayName(item.projectManagerId).toLowerCase().includes(term);
+
+      const matchesProject = this.selectedCalendarProjectId === 'all'
+        || Number(item.id ?? -1) === this.selectedCalendarProjectId;
+
+      const matchesService = this.selectedCalendarServiceId === 'all'
+        || Number(item.serviceId ?? -1) === this.selectedCalendarServiceId;
+
+      const matchesEmployee = this.selectedCalendarEmployeeId === 'all'
+        || Number(item.projectManagerId ?? -1) === this.selectedCalendarEmployeeId;
+
+      return matchesTerm && matchesProject && matchesService && matchesEmployee;
+    });
+  }
+
+  private getCalendarSourceTasks(): TaskDto[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.tasks.filter((task) => {
+      const taskProject = this.getTaskProject(task);
+      const taskProjectId = Number(taskProject?.id ?? -1);
+      const matchesProject = this.selectedCalendarProjectId === 'all'
+        || taskProjectId === this.selectedCalendarProjectId;
+
+      const matchesService = this.selectedCalendarServiceId === 'all'
+        || Number(taskProject?.serviceId ?? -1) === this.selectedCalendarServiceId;
+
+      const matchesEmployee = this.selectedCalendarEmployeeId === 'all'
+        || Number(task.assignedToId ?? -1) === this.selectedCalendarEmployeeId;
+
+      const searchOwner = (task.assignedToName ?? this.getUserDisplayName(task.assignedToId)).toLowerCase();
+      const searchProject = (taskProject?.name ?? '').toLowerCase();
+      const searchService = this.getCalendarServiceLabel(taskProject?.serviceId).toLowerCase();
+      const searchText = [task.title, task.description, searchOwner, searchProject, searchService].join(' ').toLowerCase();
+      const matchesTerm = !term || searchText.includes(term);
+
+      return matchesTerm && matchesProject && matchesService && matchesEmployee;
+    });
+  }
+
+  private toCalendarProjectEntry(item: project): CalendarProjectEntry {
+    const projectEnd = this.parseCalendarDate(item.endDate) ?? new Date(item.endDate);
+    return {
+      id: item.id ?? 0,
+      kind: 'project',
+      name: item.name,
+      projectLabel: item.name,
+      serviceLabel: this.getCalendarServiceLabel(item.serviceId),
+      ownerLabel: this.getUserDisplayName(item.projectManagerId),
+      statusLabel: this.getProjectStateLabel(item.projectState),
+      startLabel: this.formatDate(item.startDate),
+      endLabel: this.formatDate(item.endDate),
+      endDateKey: this.toDateKey(projectEnd),
+      rawStartDate: item.startDate,
+      rawEndDate: item.endDate,
+      description: item.description || 'Project timeline'
+    };
+  }
+
+  private toCalendarTaskEntry(task: TaskDto): CalendarProjectEntry {
+    const taskProject = this.getTaskProject(task);
+    const taskEnd = this.parseCalendarDate(task.endDate) ?? new Date(task.endDate ?? task.startDate ?? new Date());
+    return {
+      id: task.id,
+      kind: 'task',
+      name: task.title,
+      projectLabel: taskProject?.name ?? 'No project assigned',
+      serviceLabel: this.getCalendarServiceLabel(taskProject?.serviceId),
+      ownerLabel: task.assignedToName ?? this.getUserDisplayName(task.assignedToId),
+      statusLabel: this.getTaskStateLabel(task.status),
+      startLabel: this.formatDate(task.startDate ?? task.endDate ?? new Date()),
+      endLabel: this.formatDate(task.endDate ?? task.startDate ?? new Date()),
+      endDateKey: this.toDateKey(taskEnd),
+      rawStartDate: task.startDate ?? task.endDate ?? new Date(),
+      rawEndDate: task.endDate ?? task.startDate ?? new Date(),
+      description: task.description || 'Task'
+    };
+  }
+
+  private getTaskProject(task: TaskDto): project | undefined {
+    const userStoryId = Number(task.userStoryId ?? 0);
+    return this.projects.find((projectItem) =>
+      projectItem.userStories?.some((story) => Number(story.id) === userStoryId)
+    );
+  }
+
+  private parseCalendarDate(value: string | Date | undefined | null): Date | null {
+    if (!value) {
+      return null;
     }
 
-    return this.projects.filter((item) => (item.name ?? '').toLowerCase().includes(term));
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private getTaskStateLabel(status: TaskDto['status']): string {
+    const normalized = typeof status === 'number' ? status : String(status ?? '').toLowerCase();
+    if (normalized === 0 || normalized === 'pending') return 'Pending';
+    if (normalized === 1 || normalized === 'todo') return 'To do';
+    if (normalized === 2 || normalized === 'inprogress') return 'In progress';
+    if (normalized === 3 || normalized === 'done') return 'Done';
+    if (normalized === 4 || normalized === 'validated') return 'Validated';
+    return 'Task';
+  }
+
+  private getProjectStateLabel(state: project['projectState']): string {
+    const normalized = Number(state);
+    if (normalized === State.pending) return 'Pending';
+    if (normalized === State.todo) return 'To do';
+    if (normalized === State.inProgress) return 'In progress';
+    if (normalized === State.done) return 'Done';
+    if (normalized === State.validated) return 'Validated';
+    return 'Project';
   }
 
   private getCalendarServiceLabel(serviceId?: number): string {
