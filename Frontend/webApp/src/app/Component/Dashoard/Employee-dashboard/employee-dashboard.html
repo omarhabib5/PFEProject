@@ -1,4 +1,4 @@
-<div class="employee-layout">
+<div class="layout">
     <aside class="sidebar">
         <div>
             <div class="brand">
@@ -272,7 +272,7 @@
                     </div>
 
                     <div class="project-body">
-                        <div>
+                        <div class="project-body-main">
                             <h4>My tasks ({{ project.myTasks.length }})</h4>
                             <div class="status-boxes">
                                 <span>Not validate {{ project.counts.pending }}</span>
@@ -281,7 +281,13 @@
                                 <span>Done {{ project.counts.done }}</span>
                                 <span>Validated {{ project.counts.validated }}</span>
                             </div>
-                            <p *ngFor="let task of project.myTasks | slice:0:4">• {{ task.title }}</p>
+                            <div class="project-task-list" *ngIf="project.myTasks.length > 0">
+                                <div class="project-task-item" *ngFor="let task of project.myTasks | slice:0:4">
+                                    <span class="project-task-bullet"></span>
+                                    <span class="project-task-title">{{ task.title }}</span>
+                                </div>
+                            </div>
+                            <p *ngIf="project.myTasks.length === 0" class="empty project-empty">No tasks assigned.</p>
                         </div>
 
                         <div class="sprint-box" *ngIf="project.activeSprint; else noSprint">

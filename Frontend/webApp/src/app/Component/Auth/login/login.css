@@ -13,8 +13,9 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   font-family: Inter, "Segoe UI", sans-serif;
 
@@ -29,7 +30,8 @@ body {
   position: relative;
 
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
 
   display: flex;
   align-items: center;
@@ -62,9 +64,9 @@ body {
 
 .login-shell {
   width: 100%;
-  max-width: 920px;
-
-  height: 590px;
+  max-width: 1080px;
+  min-height: 640px;
+  height: auto;
 
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -90,7 +92,7 @@ body {
 .login-side {
   position: relative;
 
-  padding: 20px;
+  padding: 24px;
 
   display: flex;
   flex-direction: column;
@@ -169,7 +171,7 @@ body {
 .brand-copy h2 {
   margin: 0;
 
-  font-size: 1.55rem;
+  font-size: 1.45rem;
 
   line-height: 1.05;
 
@@ -268,7 +270,7 @@ body {
   align-items: center;
   justify-content: center;
 
-  padding: 22px;
+  padding: 28px;
 
   background:
     linear-gradient(
@@ -284,9 +286,9 @@ body {
 
 .login-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
 
-  padding: 24px;
+  padding: 32px;
 
   border-radius: 22px;
 
@@ -336,7 +338,7 @@ body {
 .login-header h3 {
   margin: 0;
 
-  font-size: 1.8rem;
+  font-size: 1.65rem;
 
   font-weight: 700;
 
@@ -387,7 +389,7 @@ body {
 /* Inputs */
 
 .field input {
-  height: 46px;
+  height: 48px;
 
   padding: 0 14px;
 
@@ -474,7 +476,7 @@ body {
 ========================= */
 
 .submit-btn {
-  height: 48px;
+  height: 50px;
 
   border: none;
   border-radius: 14px;
@@ -532,8 +534,7 @@ body {
     grid-template-columns: 1fr;
 
     max-width: 540px;
-
-    height: auto;
+    min-height: auto;
   }
 
   .login-side {
@@ -541,7 +542,7 @@ body {
   }
 
   .login-main {
-    padding: 18px;
+    padding: 20px;
   }
 }
 
