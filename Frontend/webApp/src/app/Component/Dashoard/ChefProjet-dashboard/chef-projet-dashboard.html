@@ -88,174 +88,134 @@
         <div *ngIf="error" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ error }}</div>
         <div *ngIf="success" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{{ success }}</div>
 
-        <section *ngIf="activeSection === 'projects'">
-          <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 class="text-2xl font-black text-slate-900">My Projects</h2>
+        <section *ngIf="activeSection === 'projects'" class="projects-section">
+          <div class="section-hero">
+            <div>
+              <span class="section-chip">Projects</span>
+              <h2>Delivery overview</h2>
+              <p>Track progress, sprint completion, and team execution in one place.</p>
+            </div>
+            <div class="section-hero-actions">
               <button
                 *ngIf="hasSelectedProject"
                 type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                class="section-ghost-button"
                 (click)="clearProjectSelection()">
-                Back to Projects
+                Back to projects
               </button>
             </div>
+          </div>
 
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" *ngIf="projects.length > 0; else noAssignedProjects">
+          <section class="metric-grid" *ngIf="hasSelectedProject">
+            <article class="metric-card metric-card--blue">
+              <span>User stories</span>
+              <strong>{{ filteredUserStories.length }}</strong>
+              <small>stories linked to the selected project</small>
+            </article>
+            <article class="metric-card metric-card--green">
+              <span>Sprints completed</span>
+              <strong>{{ completedSprintsCount }}</strong>
+              <small>{{ filteredSprints.length }} total sprints</small>
+            </article>
+            <article class="metric-card metric-card--purple">
+              <span>Tasks</span>
+              <strong>{{ selectedProjectTasks.length }}</strong>
+              <small>{{ completedTasksCount }} tasks completed</small>
+            </article>
+            <article class="metric-card metric-card--amber">
+              <span>Progress</span>
+              <strong>{{ globalProgress }}%</strong>
+              <small>overall project progress</small>
+            </article>
+          </section>
+
+          <div class="project-shell">
+            <div class="project-shell-head">
+              <div>
+                <h3>My projects</h3>
+                <p>Select a project to inspect its timeline, team, and progress.</p>
+              </div>
+            </div>
+
+            <div class="project-picker" *ngIf="projects.length > 0; else noAssignedProjects">
               <button
                 type="button"
                 *ngFor="let item of projects"
-                class="rounded-2xl border p-4 text-left transition"
-                [ngClass]="(+(item.id ?? 0)) === (+selectedProjectFilter)
-                  ? 'border-blue-300 bg-blue-50'
-                  : 'border-slate-200 bg-white hover:border-blue-200 hover:bg-slate-50'"
+                class="project-option"
+                [class.active]="(+(item.id ?? 0)) === (+selectedProjectFilter)"
                 (click)="selectProject(+(item.id ?? 0))">
-                <h3 class="text-base font-bold text-slate-900">{{ item.name }}</h3>
-                <p class="mt-1 line-clamp-2 text-sm text-slate-600">{{ item.description || 'No description' }}</p>
-                <small class="mt-2 block text-xs text-slate-500">{{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</small>
+                <div class="project-option-top">
+                  <h4>{{ item.name }}</h4>
+                  <span class="project-option-pill">{{ formatDate(item.startDate) }}</span>
+                </div>
+                <p>{{ item.description || 'No description available for this project.' }}</p>
+                <small>{{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</small>
               </button>
             </div>
 
             <ng-template #noAssignedProjects>
-              <p class="text-sm text-slate-500">No project is assigned to this project manager.</p>
+              <p class="empty-projects">No project is assigned to this project manager.</p>
             </ng-template>
           </div>
 
-          <ng-container *ngIf="hasSelectedProject">
-
-          <div>
-            
-          </div>
-          <section class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <article class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="mb-3 flex items-start justify-between">
-                <div>
-                  <p class="text-sm font-medium text-slate-600">User Stories</p>
-                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ filteredUserStories.length }}</h3>
-                </div>
-                <span class="text-2xl text-blue-600">📘</span>
-              </div>
-            
-            </article>
-
-            <article class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="mb-3 flex items-start justify-between">
-                <div>
-                  <p class="text-sm font-medium text-slate-600">Sprints Completed</p>
-                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ completedSprintsCount }}</h3>
-                </div>
-                <span class="text-2xl text-emerald-600">📅</span>
-              </div>
-              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
-                <span class="block h-full bg-slate-900" [style.width.%]="sprintProgress"></span>
-              </div>
-              <small class="mt-2 block text-xs text-slate-500">{{ filteredSprints.length }} total sprints</small>
-            </article>
-
-            <article class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="mb-3 flex items-start justify-between">
-                <div>
-                  <p class="text-sm font-medium text-slate-600">Tasks</p>
-                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ selectedProjectTasks.length }}</h3>
-                </div>
-                <span class="text-2xl text-violet-600">☑️</span>
-              </div>
-              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
-                <span class="block h-full bg-slate-900" [style.width.%]="tasksProgress"></span>
-              </div>
-              <small class="mt-2 block text-xs text-slate-500">{{ completedTasksCount }} tasks completed</small>
-            </article>
-
-            <article class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="mb-3 flex items-start justify-between">
-                <div>
-                  <p class="text-sm font-medium text-slate-600">Progress</p>
-                  <h3 class="mt-1 text-4xl font-black leading-none text-slate-900">{{ globalProgress }}%</h3>
-                </div>
-                <span class="text-2xl text-orange-600">📈</span>
-              </div>
-              <div class="h-2 overflow-hidden rounded-full bg-slate-200">
-                <span class="block h-full bg-slate-900" [style.width.%]="globalProgress"></span>
-              </div>
-              <small class="mt-2 block text-xs text-slate-500">Overall project progress</small>
-            </article>
-          </section>
-
-          <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-5" *ngIf="currentProject as project; else noProject">
-            <h2 class="mb-5 text-2xl font-black text-slate-900">◎ Project Details</h2>
-
-            <div class="grid gap-5 sm:grid-cols-2">
+          <div class="project-detail-shell" *ngIf="currentProject as project; else noProject">
+            <div class="project-detail-head">
               <div>
-                <p class="mb-1 text-sm text-slate-500">Description</p>
-                <p class="text-sm font-semibold text-slate-900">{{ project.description || project.name }}</p>
+                <span class="section-chip section-chip--soft">Selected project</span>
+                <h3>{{ project.name }}</h3>
+                <p>{{ project.description || 'No description available.' }}</p>
+              </div>
+              <span class="project-status" [ngClass]="projectStatusClass">{{ projectStatusLabel }}</span>
+            </div>
+
+            <div class="project-detail-grid">
+              <div>
+                <span class="detail-label">Start date</span>
+                <strong>{{ formatDate(project.startDate) }}</strong>
               </div>
               <div>
-                <p class="mb-1 text-sm text-slate-500">Status</p>
-                <span
-                  class="inline-flex rounded-full px-3 py-1 text-xs font-bold"
-                  [ngClass]="{
-                    'bg-emerald-100 text-emerald-700': projectStatusClass === 'state-done',
-                    'bg-blue-100 text-blue-700': projectStatusClass === 'state-progress',
-                    'bg-slate-200 text-slate-700': projectStatusClass === 'state-pending'
-                  }">
-                  {{ projectStatusLabel }}
-                </span>
-              </div>
-
-              <div>
-                <p class="mb-1 text-sm text-slate-500">Start Date</p>
-                <p class="text-sm font-semibold text-slate-900">{{ formatDate(project.startDate) }}</p>
+                <span class="detail-label">End date</span>
+                <strong>{{ formatDate(project.endDate) }}</strong>
               </div>
               <div>
-                <p class="mb-1 text-sm text-slate-500">End Date</p>
-                <p class="text-sm font-semibold text-slate-900">{{ formatDate(project.endDate) }}</p>
-              </div>
-
-
-              <div>
-                <p class="mb-1 text-sm text-slate-500">Manager</p>
-                <div class="flex items-center gap-2">
+                <span class="detail-label">Manager</span>
+                <div class="detail-inline">
                   <img
                     *ngIf="managerProfileImageUrl"
                     [src]="managerProfileImageUrl"
                     alt="Manager profile"
-                    class="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                    class="detail-avatar"
                     loading="lazy" />
                   <span
                     *ngIf="!managerProfileImageUrl"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xs font-black text-slate-700">
+                    class="detail-avatar detail-avatar--fallback">
                     {{ getUserInitials(managerDisplayName) }}
                   </span>
-                  <p class="text-sm font-semibold text-slate-900">{{ managerDisplayName }}</p>
+                  <strong>{{ managerDisplayName }}</strong>
                 </div>
               </div>
               <div>
-                <p class="mb-1 text-sm text-slate-500">Team</p>
-                <div class="flex flex-wrap gap-2" *ngIf="teamDisplayMemberProfiles.length > 0; else emptyTeam">
-                  <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs" *ngFor="let member of teamDisplayMemberProfiles">
+                <span class="detail-label">Team</span>
+                <div class="team-chips" *ngIf="teamDisplayMemberProfiles.length > 0; else emptyTeam">
+                  <span class="team-chip" *ngFor="let member of teamDisplayMemberProfiles">
                     <img
                       *ngIf="member.avatarUrl"
                       [src]="member.avatarUrl"
                       [alt]="member.name"
-                      class="h-6 w-6 rounded-full border border-slate-200 object-cover"
                       loading="lazy" />
-                    <span
-                      *ngIf="!member.avatarUrl"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-black text-slate-700">
-                      {{ getUserInitials(member.name) }}
-                    </span>
-                    <span>{{ member.name }}</span>
-                  </div>
+                    <span *ngIf="!member.avatarUrl" class="team-chip-fallback">{{ getUserInitials(member.name) }}</span>
+                    {{ member.name }}
+                  </span>
                 </div>
                 <ng-template #emptyTeam>
-                  <p class="text-sm text-slate-500">No team member assigned</p>
+                  <p class="empty-projects">No team member assigned</p>
                 </ng-template>
               </div>
             </div>
           </div>
 
           <ng-template #noProject>
-            <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">No project is assigned to this project manager.</div>
+            <div class="project-detail-shell project-detail-shell--empty">No project is assigned to this project manager.</div>
           </ng-template>
 
           <div class="mb-4 grid grid-cols-3 gap-1 rounded-2xl bg-slate-200 p-1">
@@ -532,8 +492,6 @@
               <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">No task.</div>
             </ng-template>
           </section>
-          </ng-container>
-
           <div *ngIf="!hasSelectedProject && projects.length > 0" class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-medium text-blue-700">
             Select a project to view its details, user stories, sprints, and tasks.
           </div>
