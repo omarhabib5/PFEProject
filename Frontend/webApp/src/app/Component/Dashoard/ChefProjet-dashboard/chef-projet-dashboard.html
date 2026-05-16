@@ -430,7 +430,7 @@
                       type="date"
                       [ngModel]="getTaskDateDraft(task, 'endDate')"
                       (ngModelChange)="setTaskDateDraft(task, 'endDate', $event)"
-                      [min]="getTaskDateDraft(task, 'startDate') || getTaskDateMin(task)"
+                      [min]="getTaskEndDateMin(task)"
                       [max]="getTaskDateMax(task)"
                       [name]="'taskEndDate' + task.id"
                       [disabled]="isTaskCompleted(task) || updatingTaskDateId === task.id" />
@@ -475,14 +475,14 @@
                     [ngModel]="getSelectedAssignee(task)"
                     (ngModelChange)="setSelectedAssignee(task, $event)"
                     [disabled]="isTaskCompleted(task)">
-                    <option [ngValue]="null">Select Employee</option>
+                    <option [ngValue]="null">{{ assignableUsers.length > 0 ? 'Select Employee' : 'No employee available' }}</option>
                     <option *ngFor="let user of assignableUsers" [ngValue]="user.id">{{ getEmployeeLabel(user) }}</option>
                   </select>
                   <button
                     type="button"
                     class="rounded-lg border border-slate-900 bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                     (click)="assignEmployeeToTask(task)"
-                    [disabled]="assigningTaskId === task.id || isTaskCompleted(task)">
+                    [disabled]="assigningTaskId === task.id || isTaskCompleted(task) || assignableUsers.length === 0">
                     {{ assigningTaskId === task.id ? 'Assigning...' : 'Affect Employee' }}
                   </button>
                 </div>
