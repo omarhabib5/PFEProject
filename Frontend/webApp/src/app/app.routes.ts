@@ -6,8 +6,8 @@ import { ObserverDashboard } from './Component/Dashoard/Observateur-dashboard/ob
 import { ResponsableServiceDashboard } from './Component/Dashoard/ResponsableService-dashboard/responsable-service-dashboard';
 import { Login } from './Component/Auth/login/login';
 import { UserManage } from './Component/Page/user-manage/user-manage';
-import { servicepage } from './Component/Page/service-page/service-page';
-import { ProjectView } from './Component/Page/Projet/project-view/project-view';
+
+
 import { SprintView } from './Component/Page/Sprint/sprint-view/sprint-view';
 import { ProjectManager } from './Component/Page/Projet/project-manager/project-manager';
 import { SprintManager } from './Component/Page/Sprint/sprint-manager/sprint-manager';
@@ -64,9 +64,9 @@ export const routes: Routes = [
           
             
             { path: 'users', component: UserManage },
-            { path: 'Service', component: servicepage },
+    
 
-            { path: 'ProjectView', component: ProjectView },
+           
             { path: 'SprintView', component: SprintView },
             { path: 'sprint/view/:id', component: SprintView },
            
@@ -133,6 +133,6 @@ export const routes: Routes = [
             }
         ]
     },
-    { path: '**', redirectTo: '' }
+    
 ];
 
