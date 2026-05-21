@@ -513,13 +513,18 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     void this.router.navigate(['/userstory/manage', targetSprintId]);
   }
 
-  openCreateUserStory(): void {
+  openCreateUserStory(preselectedSprintId?: number): void {
     if (!this.currentProject) {
       this.error = 'Select a project first.';
       return;
     }
 
-    const defaultSprintId = Number(this.selectedProjectSprints[0]?.id ?? 0);
+    const requestedSprintId = Number(preselectedSprintId ?? 0);
+    const hasRequestedSprint = requestedSprintId > 0
+      && this.selectedProjectSprints.some((sprint) => Number(sprint.id) === requestedSprintId);
+    const defaultSprintId = hasRequestedSprint ? requestedSprintId : 0;
+
+    this.activeProjectTab = 'userStories';
     this.userStoryForm = this.getEmptyUserStoryForm();
     this.userStoryForm.sprintId = defaultSprintId > 0 ? defaultSprintId : null;
     this.userStoryFormMode = 'create';
@@ -557,7 +562,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
     const sprintId = Number(this.userStoryForm.sprintId ?? 0);
     if (!sprintId || !this.selectedProjectSprints.some((sprint) => Number(sprint.id) === sprintId)) {
-      this.error = 'Select a sprint from the selected project.';
+      this.error = 'Sprint is required.';
       return;
     }
 

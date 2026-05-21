@@ -251,7 +251,7 @@
                 </label>
                 <label class="text-xs font-semibold text-slate-600">
                   Sprint
-                  <select class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.sprintId" name="userStorySprintId">
+                  <select class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" [(ngModel)]="userStoryForm.sprintId" name="userStorySprintId" required>
                     <option [ngValue]="null">Select sprint</option>
                     <option *ngFor="let sprint of selectedProjectSprints" [ngValue]="+sprint.id">{{ sprint.name }}</option>
                   </select>
@@ -325,7 +325,16 @@
           <section *ngIf="activeProjectTab === 'sprints'">
             <div class="mb-3 flex items-center justify-between">
               <h3 class="text-2xl font-black text-slate-900">Sprint List</h3>
-              <span class="text-xs font-semibold text-slate-500">Sprint management is handled by Service Manager.</span>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-900 bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  (click)="openCreateUserStory()"
+                  [disabled]="selectedProjectSprints.length === 0">
+                  + New User Story
+                </button>
+                <span class="text-xs font-semibold text-slate-500">Sprint management is handled by Service Manager.</span>
+              </div>
             </div>
 
             <form *ngIf="showSprintForm" class="mb-3 rounded-2xl border border-slate-200 bg-white p-4" (ngSubmit)="submitSprint()">
@@ -370,6 +379,14 @@
                       {{ getSprintStateLabel(sprint.sprintState) }}
                     </span>
                   </div>
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="rounded-lg border border-slate-900 bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white"
+                    (click)="openCreateUserStory(+sprint.id)">
+                    New User Story
+                  </button>
                 </div>
            
               </article>

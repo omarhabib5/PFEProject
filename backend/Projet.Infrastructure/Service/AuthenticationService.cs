@@ -100,7 +100,7 @@ namespace Projet.Infrastructure.Service
 
             if (user == null)
             {
-                throw new UnauthorizedAccessException("Invalid email or password");
+                throw new UnauthorizedAccessException("No account found with this email address");
             }
 
             if (user.IsLockedOut())
@@ -112,7 +112,7 @@ namespace Projet.Infrastructure.Service
             {
                 user.IncrementFailedLoginAttempts();
                 await _context.SaveChangesAsync(cancellationToken);
-                throw new UnauthorizedAccessException("Invalid email or password");
+                throw new UnauthorizedAccessException("No password is configured for this account");
             }
 
             var isPasswordValid = false;
@@ -129,7 +129,7 @@ namespace Projet.Infrastructure.Service
             {
                 user.IncrementFailedLoginAttempts();
                 await _context.SaveChangesAsync(cancellationToken);
-                throw new UnauthorizedAccessException("Invalid email or password");
+                throw new UnauthorizedAccessException("Email address is valid, but the password is incorrect");
             }
 
             user.UpdateLastLogin();

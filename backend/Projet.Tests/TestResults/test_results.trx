@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="66cffc76-ddda-462c-bd53-8ffb066bd339" name="Rayen@DESKTOP-UJLRG1S 2026-05-18 18:29:51" runUser="DESKTOP-UJLRG1S\Rayen" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-05-18T18:29:51.9143922+01:00" queuing="2026-05-18T18:29:51.9143929+01:00" start="2026-05-18T18:29:49.4898930+01:00" finish="2026-05-18T18:29:53.3270341+01:00" />
+  <TestSettings name="default" id="f6dd4a41-a123-41de-941f-02d10f7577e7">
+    <Deployment runDeploymentRoot="Rayen_DESKTOP-UJLRG1S_2026-05-18_18_29_51" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0e249629-af5f-4483-8a47-3616f32b3bfe" testId="4e7aac0c-b949-50c2-578a-83a9e1dea578" testName="Projet.Tests.CreateUserStoryHandlerTests.CreateUserStory_CreatesUserStory" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9607832" startTime="2026-05-18T18:29:50.8922358+01:00" endTime="2026-05-18T18:29:52.8364751+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e249629-af5f-4483-8a47-3616f32b3bfe" />
+    <UnitTestResult executionId="0f6cf8a8-0071-42c0-9ecd-58d49bdfecf4" testId="b942f464-3dc2-bca8-9ad2-2d43371bb373" testName="Projet.Tests.RefreshTokenRepositoryTests.CreateAsync_PersistsToken" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0122457" startTime="2026-05-18T18:29:52.9135031+01:00" endTime="2026-05-18T18:29:52.9257282+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0f6cf8a8-0071-42c0-9ecd-58d49bdfecf4" />
+    <UnitTestResult executionId="b2ad1208-a301-4ddd-892b-1d81ea343d2f" testId="a13c2f27-7b17-8ed0-cc05-3e0a3d8712f4" testName="Projet.Tests.AuthenticationServiceTests.LoginAsync_WithValidPassword_ReturnsAuthResponse" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0086526" startTime="2026-05-18T18:29:52.9415220+01:00" endTime="2026-05-18T18:29:52.9498136+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2ad1208-a301-4ddd-892b-1d81ea343d2f" />
+    <UnitTestResult executionId="0d006edb-317f-4846-9729-5bbb87c6c376" testId="4a3079ea-1000-70a6-08e7-d965a38dba8b" testName="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_ContainsRequiredCharacterTypes" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0021752" startTime="2026-05-18T18:29:51.7622976+01:00" endTime="2026-05-18T18:29:51.7628089+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d006edb-317f-4846-9729-5bbb87c6c376" />
+    <UnitTestResult executionId="ab9fab4c-fbbc-4322-a78c-5848ba68673d" testId="3351359f-3ebb-a68e-b5c5-647880de510a" testName="Projet.Tests.PasswordHasherTests.VerifyPassword_ReturnsFalseForWrongPassword" computerName="DESKTOP-UJLRG1S" duration="00:00:00.7479341" startTime="2026-05-18T18:29:52.4352800+01:00" endTime="2026-05-18T18:29:53.1845041+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ab9fab4c-fbbc-4322-a78c-5848ba68673d" />
+    <UnitTestResult executionId="de6f437b-d7ce-42ad-bf3b-f59d945909a9" testId="e3618713-ee56-7ce5-b1f9-e29ac9a04515" testName="Projet.Tests.CreateSprintHandlerTests.CreateSprint_CreatesSprint" computerName="DESKTOP-UJLRG1S" duration="00:00:02.0093758" startTime="2026-05-18T18:29:50.8923034+01:00" endTime="2026-05-18T18:29:52.8844793+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="de6f437b-d7ce-42ad-bf3b-f59d945909a9" />
+    <UnitTestResult executionId="3d188cdf-16c7-452c-87d1-da2fd9c07c9c" testId="b83b8532-f6f9-cbc3-1fe9-1ff3a8c62c5f" testName="Projet.Tests.AuthControllerTests.RefreshToken_ReturnsOk_And_SendsRefreshTokenCommand" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0049824" startTime="2026-05-18T18:29:51.8964744+01:00" endTime="2026-05-18T18:29:51.9011032+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d188cdf-16c7-452c-87d1-da2fd9c07c9c" />
+    <UnitTestResult executionId="16f47f8c-9c13-434d-99d1-6b39aa4634a4" testId="94f29c87-87cd-d9f7-aaa9-a3ab75519e83" testName="Projet.Tests.AuthenticationServiceTests.RegisterAsync_WhenEmailExists_ThrowsInvalidOperationException" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0066465" startTime="2026-05-18T18:29:52.9307568+01:00" endTime="2026-05-18T18:29:52.9371001+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16f47f8c-9c13-434d-99d1-6b39aa4634a4" />
+    <UnitTestResult executionId="88789d69-7839-495a-90a6-a2b38ad4ccea" testId="6d759d1c-6d28-b49f-86b8-ea76d908e102" testName="Projet.Tests.RefreshTokenRepositoryTests.GetByTokenAsync_ReturnsTokenWithUser" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0707059" startTime="2026-05-18T18:29:52.9262299+01:00" endTime="2026-05-18T18:29:52.9966264+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88789d69-7839-495a-90a6-a2b38ad4ccea" />
+    <UnitTestResult executionId="650ebfd1-ce0c-479f-a064-7bad01be3286" testId="1c102059-8d46-dbe8-70c0-7c4cd835e585" testName="Projet.Tests.JwtTokenServiceTests.GenerateRefreshToken_ReturnsNonEmptyString" computerName="DESKTOP-UJLRG1S" duration="00:00:00.3350364" startTime="2026-05-18T18:29:50.8921296+01:00" endTime="2026-05-18T18:29:51.2143554+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="650ebfd1-ce0c-479f-a064-7bad01be3286" />
+    <UnitTestResult executionId="2a850e41-89a2-40ca-ac53-4c079d25cc65" testId="53655578-56f8-caf4-d1e5-dd89098178de" testName="Projet.Tests.RefreshTokenRepositoryTests.RevokeAsync_MarksTokenAsRevoked" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0171849" startTime="2026-05-18T18:29:52.9970560+01:00" endTime="2026-05-18T18:29:53.0139622+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a850e41-89a2-40ca-ac53-4c079d25cc65" />
+    <UnitTestResult executionId="16255564-38d6-4fa4-9f39-012bbc71add3" testId="cd134757-2528-bc55-dbf4-65828d813a1f" testName="Projet.Tests.AuthenticationServiceTests.LoginAsync_WithInvalidPassword_IncrementsFailedAttempts" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9780822" startTime="2026-05-18T18:29:50.8922665+01:00" endTime="2026-05-18T18:29:52.8587409+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16255564-38d6-4fa4-9f39-012bbc71add3" />
+    <UnitTestResult executionId="e43a447c-9f83-43a0-856e-08e465fe835e" testId="c9240390-8e1f-599c-2b17-b9af6abf5731" testName="Projet.Tests.AuthenticationServiceTests.LogoutAsync_CallsRepositoryAndReturnsTrue" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0037008" startTime="2026-05-18T18:29:52.9375349+01:00" endTime="2026-05-18T18:29:52.9410273+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e43a447c-9f83-43a0-856e-08e465fe835e" />
+    <UnitTestResult executionId="5848411a-b0e3-4b1d-bf5a-9f635e3e98bc" testId="848bc032-8c93-697e-1de9-b329790bc5d7" testName="Projet.Tests.CreateProjectCommandHandlerTests.CreateProject_CreatesProject" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9652371" startTime="2026-05-18T18:29:50.8921967+01:00" endTime="2026-05-18T18:29:52.8407250+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5848411a-b0e3-4b1d-bf5a-9f635e3e98bc" />
+    <UnitTestResult executionId="ced7804e-34fb-437b-8269-630c553caa5c" testId="bb3f6590-a03d-f83c-35e0-218d044a8f25" testName="Projet.Tests.AuthControllerTests.Login_WhenMediatorThrowsUnauthorized_ReturnsUnauthorized" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0055792" startTime="2026-05-18T18:29:51.8685641+01:00" endTime="2026-05-18T18:29:51.8732075+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ced7804e-34fb-437b-8269-630c553caa5c" />
+    <UnitTestResult executionId="120dc9f8-b660-42dc-9ba4-1a2ded640007" testId="da393751-e080-610c-7da5-619ff53673fe" testName="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_ReturnsPasswordWithRequestedLength" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0005361" startTime="2026-05-18T18:29:51.7633532+01:00" endTime="2026-05-18T18:29:51.7635787+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="120dc9f8-b660-42dc-9ba4-1a2ded640007" />
+    <UnitTestResult executionId="f3454835-c606-479a-9ee8-37f23e827517" testId="d671736c-474b-5d48-0f22-d75285ccc992" testName="Projet.Tests.CreateUserHandlerTests.CreateUser_CreatesUser" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9606801" startTime="2026-05-18T18:29:50.8923157+01:00" endTime="2026-05-18T18:29:52.8359085+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3454835-c606-479a-9ee8-37f23e827517" />
+    <UnitTestResult executionId="87a316a7-1d43-4fef-80aa-acc1e07276b1" testId="b72622d3-9ebe-f231-2d20-0c83419229e5" testName="Projet.Tests.RefreshTokenRepositoryTests.GetActiveTokensByUserIdAsync_ReturnsOnlyActiveTokens" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0597785" startTime="2026-05-18T18:29:52.8594200+01:00" endTime="2026-05-18T18:29:52.9131518+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="87a316a7-1d43-4fef-80aa-acc1e07276b1" />
+    <UnitTestResult executionId="74b4027f-86e0-4016-bda7-07842150d026" testId="6c313b5b-40bd-ea58-930a-cceded1f0732" testName="Projet.Tests.AuthenticationServiceTests.RefreshTokenAsync_WithActiveToken_ReturnsNewTokens" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0769334" startTime="2026-05-18T18:29:52.8594938+01:00" endTime="2026-05-18T18:29:52.9303013+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="74b4027f-86e0-4016-bda7-07842150d026" />
+    <UnitTestResult executionId="d4a0e588-fdd1-44e7-b5ce-38ce4166db25" testId="fa01d2dc-8ab0-68e0-c431-d35d49420f12" testName="Projet.Tests.PasswordHasherTests.HashPassword_ProducesNonEmptyHash_And_VerifyReturnsTrue" computerName="DESKTOP-UJLRG1S" duration="00:00:01.5596670" startTime="2026-05-18T18:29:50.8908431+01:00" endTime="2026-05-18T18:29:52.4348454+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4a0e588-fdd1-44e7-b5ce-38ce4166db25" />
+    <UnitTestResult executionId="d38666b2-37c0-4964-b734-7ea173bdfbc7" testId="cfadddc6-5ad1-bedd-6c04-a56cd1e00777" testName="Projet.Tests.AuthControllerTests.GetCurrentUser_WithAuthenticatedUser_ReturnsOkUserDto" computerName="DESKTOP-UJLRG1S" duration="00:00:00.9925196" startTime="2026-05-18T18:29:50.8922520+01:00" endTime="2026-05-18T18:29:51.8678587+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d38666b2-37c0-4964-b734-7ea173bdfbc7" />
+    <UnitTestResult executionId="d0001768-d57c-4b19-9d25-eb95b663cf07" testId="3cbe219c-816e-2591-ee31-984201973019" testName="Projet.Tests.AuthenticationServiceTests.RegisterAsync_CreatesUserAndReturnsTokens" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0223138" startTime="2026-05-18T18:29:52.9516549+01:00" endTime="2026-05-18T18:29:52.9722745+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d0001768-d57c-4b19-9d25-eb95b663cf07" />
+    <UnitTestResult executionId="f121f894-795a-465e-b7c9-b7deed950969" testId="4ce69a3d-a839-40ca-d56c-f0cf89b2f053" testName="Projet.Tests.CreateTaskCommandHandlerTests.CreateTask_CreatesTask" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9606724" startTime="2026-05-18T18:29:50.8923311+01:00" endTime="2026-05-18T18:29:52.8357586+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f121f894-795a-465e-b7c9-b7deed950969" />
+    <UnitTestResult executionId="055caca8-049c-42ab-ae5b-ee28a0d9a71f" testId="37d308b7-fe91-a521-4526-c7c477a659ea" testName="Projet.Tests.AuthControllerTests.Logout_WithAuthenticatedUser_ReturnsOk" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0055468" startTime="2026-05-18T18:29:51.8907488+01:00" endTime="2026-05-18T18:29:51.8959103+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="055caca8-049c-42ab-ae5b-ee28a0d9a71f" />
+    <UnitTestResult executionId="ee7977f4-1b1d-43f4-9920-655a2c60882f" testId="6bc0afac-00bf-7b6b-cfad-e2cc261b031e" testName="Projet.Tests.AuthControllerTests.Register_ReturnsOk_And_SendsRegisterCommand" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0168469" startTime="2026-05-18T18:29:51.8897642+01:00" endTime="2026-05-18T18:29:51.8901825+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ee7977f4-1b1d-43f4-9920-655a2c60882f" />
+    <UnitTestResult executionId="245ed7e3-eafc-49cf-9edb-39906da7f7fe" testId="5682a930-1673-09ad-b330-25afc99c3e88" testName="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_WhenLengthIsLessThanEight_ThrowsArgumentException" computerName="DESKTOP-UJLRG1S" duration="00:00:00.8854436" startTime="2026-05-18T18:29:50.8922196+01:00" endTime="2026-05-18T18:29:51.7605307+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="245ed7e3-eafc-49cf-9edb-39906da7f7fe" />
+    <UnitTestResult executionId="0c2eac3b-8209-42ad-b01a-c86482af600f" testId="6ecc422f-d840-5e8d-dbdf-f04e9488ccfd" testName="Projet.Tests.RefreshTokenRepositoryTests.RevokeAllByUserIdAsync_RevokesActiveTokensOnly" computerName="DESKTOP-UJLRG1S" duration="00:00:01.9781187" startTime="2026-05-18T18:29:50.8922865+01:00" endTime="2026-05-18T18:29:52.8531979+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0c2eac3b-8209-42ad-b01a-c86482af600f" />
+    <UnitTestResult executionId="96369334-649c-4ea8-b5be-cedfe9dd425d" testId="684e9f33-c14c-155d-ab66-566340edf4cc" testName="Projet.Tests.JwtTokenServiceTests.GenerateAccessToken_PrincipalContainsUserId" computerName="DESKTOP-UJLRG1S" duration="00:00:00.0052127" startTime="2026-05-18T18:29:51.8319560+01:00" endTime="2026-05-18T18:29:51.8368016+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="96369334-649c-4ea8-b5be-cedfe9dd425d" />
+    <UnitTestResult executionId="61ec2409-ddd4-492b-b8a1-9f5274b924e6" testId="5dd149b9-340b-5dc2-ef9d-876626eac876" testName="Projet.Tests.JwtTokenServiceTests.GeneratePasswordResetToken_ThenValidate_ReturnsUserId" computerName="DESKTOP-UJLRG1S" duration="00:00:00.6172611" startTime="2026-05-18T18:29:51.2300454+01:00" endTime="2026-05-18T18:29:51.8314357+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="61ec2409-ddd4-492b-b8a1-9f5274b924e6" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Projet.Tests.AuthControllerTests.RefreshToken_ReturnsOk_And_SendsRefreshTokenCommand" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="b83b8532-f6f9-cbc3-1fe9-1ff3a8c62c5f">
+      <Execution id="3d188cdf-16c7-452c-87d1-da2fd9c07c9c" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthControllerTests" name="RefreshToken_ReturnsOk_And_SendsRefreshTokenCommand" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthControllerTests.Register_ReturnsOk_And_SendsRegisterCommand" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="6bc0afac-00bf-7b6b-cfad-e2cc261b031e">
+      <Execution id="ee7977f4-1b1d-43f4-9920-655a2c60882f" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthControllerTests" name="Register_ReturnsOk_And_SendsRegisterCommand" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.CreateSprintHandlerTests.CreateSprint_CreatesSprint" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="e3618713-ee56-7ce5-b1f9-e29ac9a04515">
+      <Execution id="de6f437b-d7ce-42ad-bf3b-f59d945909a9" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.CreateSprintHandlerTests" name="CreateSprint_CreatesSprint" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.PasswordHasherTests.HashPassword_ProducesNonEmptyHash_And_VerifyReturnsTrue" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="fa01d2dc-8ab0-68e0-c431-d35d49420f12">
+      <Execution id="d4a0e588-fdd1-44e7-b5ce-38ce4166db25" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.PasswordHasherTests" name="HashPassword_ProducesNonEmptyHash_And_VerifyReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.RegisterAsync_CreatesUserAndReturnsTokens" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="3cbe219c-816e-2591-ee31-984201973019">
+      <Execution id="d0001768-d57c-4b19-9d25-eb95b663cf07" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="RegisterAsync_CreatesUserAndReturnsTokens" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.CreateTaskCommandHandlerTests.CreateTask_CreatesTask" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="4ce69a3d-a839-40ca-d56c-f0cf89b2f053">
+      <Execution id="f121f894-795a-465e-b7c9-b7deed950969" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.CreateTaskCommandHandlerTests" name="CreateTask_CreatesTask" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.LoginAsync_WithValidPassword_ReturnsAuthResponse" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="a13c2f27-7b17-8ed0-cc05-3e0a3d8712f4">
+      <Execution id="b2ad1208-a301-4ddd-892b-1d81ea343d2f" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="LoginAsync_WithValidPassword_ReturnsAuthResponse" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.RefreshTokenRepositoryTests.RevokeAsync_MarksTokenAsRevoked" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="53655578-56f8-caf4-d1e5-dd89098178de">
+      <Execution id="2a850e41-89a2-40ca-ac53-4c079d25cc65" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.RefreshTokenRepositoryTests" name="RevokeAsync_MarksTokenAsRevoked" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.RefreshTokenRepositoryTests.CreateAsync_PersistsToken" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="b942f464-3dc2-bca8-9ad2-2d43371bb373">
+      <Execution id="0f6cf8a8-0071-42c0-9ecd-58d49bdfecf4" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.RefreshTokenRepositoryTests" name="CreateAsync_PersistsToken" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.LoginAsync_WithInvalidPassword_IncrementsFailedAttempts" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="cd134757-2528-bc55-dbf4-65828d813a1f">
+      <Execution id="16255564-38d6-4fa4-9f39-012bbc71add3" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="LoginAsync_WithInvalidPassword_IncrementsFailedAttempts" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.LogoutAsync_CallsRepositoryAndReturnsTrue" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="c9240390-8e1f-599c-2b17-b9af6abf5731">
+      <Execution id="e43a447c-9f83-43a0-856e-08e465fe835e" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="LogoutAsync_CallsRepositoryAndReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.RegisterAsync_WhenEmailExists_ThrowsInvalidOperationException" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="94f29c87-87cd-d9f7-aaa9-a3ab75519e83">
+      <Execution id="16f47f8c-9c13-434d-99d1-6b39aa4634a4" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="RegisterAsync_WhenEmailExists_ThrowsInvalidOperationException" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthenticationServiceTests.RefreshTokenAsync_WithActiveToken_ReturnsNewTokens" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="6c313b5b-40bd-ea58-930a-cceded1f0732">
+      <Execution id="74b4027f-86e0-4016-bda7-07842150d026" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthenticationServiceTests" name="RefreshTokenAsync_WithActiveToken_ReturnsNewTokens" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_WhenLengthIsLessThanEight_ThrowsArgumentException" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="5682a930-1673-09ad-b330-25afc99c3e88">
+      <Execution id="245ed7e3-eafc-49cf-9edb-39906da7f7fe" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.PasswordGeneratorTests" name="GenerateSecurePassword_WhenLengthIsLessThanEight_ThrowsArgumentException" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.CreateUserHandlerTests.CreateUser_CreatesUser" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="d671736c-474b-5d48-0f22-d75285ccc992">
+      <Execution id="f3454835-c606-479a-9ee8-37f23e827517" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.CreateUserHandlerTests" name="CreateUser_CreatesUser" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.JwtTokenServiceTests.GenerateAccessToken_PrincipalContainsUserId" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="684e9f33-c14c-155d-ab66-566340edf4cc">
+      <Execution id="96369334-649c-4ea8-b5be-cedfe9dd425d" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.JwtTokenServiceTests" name="GenerateAccessToken_PrincipalContainsUserId" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_ReturnsPasswordWithRequestedLength" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="da393751-e080-610c-7da5-619ff53673fe">
+      <Execution id="120dc9f8-b660-42dc-9ba4-1a2ded640007" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.PasswordGeneratorTests" name="GenerateSecurePassword_ReturnsPasswordWithRequestedLength" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.CreateProjectCommandHandlerTests.CreateProject_CreatesProject" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="848bc032-8c93-697e-1de9-b329790bc5d7">
+      <Execution id="5848411a-b0e3-4b1d-bf5a-9f635e3e98bc" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.CreateProjectCommandHandlerTests" name="CreateProject_CreatesProject" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.JwtTokenServiceTests.GenerateRefreshToken_ReturnsNonEmptyString" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="1c102059-8d46-dbe8-70c0-7c4cd835e585">
+      <Execution id="650ebfd1-ce0c-479f-a064-7bad01be3286" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.JwtTokenServiceTests" name="GenerateRefreshToken_ReturnsNonEmptyString" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.PasswordHasherTests.VerifyPassword_ReturnsFalseForWrongPassword" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="3351359f-3ebb-a68e-b5c5-647880de510a">
+      <Execution id="ab9fab4c-fbbc-4322-a78c-5848ba68673d" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.PasswordHasherTests" name="VerifyPassword_ReturnsFalseForWrongPassword" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthControllerTests.Login_WhenMediatorThrowsUnauthorized_ReturnsUnauthorized" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="bb3f6590-a03d-f83c-35e0-218d044a8f25">
+      <Execution id="ced7804e-34fb-437b-8269-630c553caa5c" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthControllerTests" name="Login_WhenMediatorThrowsUnauthorized_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.CreateUserStoryHandlerTests.CreateUserStory_CreatesUserStory" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="4e7aac0c-b949-50c2-578a-83a9e1dea578">
+      <Execution id="0e249629-af5f-4483-8a47-3616f32b3bfe" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.CreateUserStoryHandlerTests" name="CreateUserStory_CreatesUserStory" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.RefreshTokenRepositoryTests.GetActiveTokensByUserIdAsync_ReturnsOnlyActiveTokens" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="b72622d3-9ebe-f231-2d20-0c83419229e5">
+      <Execution id="87a316a7-1d43-4fef-80aa-acc1e07276b1" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.RefreshTokenRepositoryTests" name="GetActiveTokensByUserIdAsync_ReturnsOnlyActiveTokens" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.RefreshTokenRepositoryTests.RevokeAllByUserIdAsync_RevokesActiveTokensOnly" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="6ecc422f-d840-5e8d-dbdf-f04e9488ccfd">
+      <Execution id="0c2eac3b-8209-42ad-b01a-c86482af600f" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.RefreshTokenRepositoryTests" name="RevokeAllByUserIdAsync_RevokesActiveTokensOnly" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthControllerTests.Logout_WithAuthenticatedUser_ReturnsOk" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="37d308b7-fe91-a521-4526-c7c477a659ea">
+      <Execution id="055caca8-049c-42ab-ae5b-ee28a0d9a71f" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthControllerTests" name="Logout_WithAuthenticatedUser_ReturnsOk" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.AuthControllerTests.GetCurrentUser_WithAuthenticatedUser_ReturnsOkUserDto" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="cfadddc6-5ad1-bedd-6c04-a56cd1e00777">
+      <Execution id="d38666b2-37c0-4964-b734-7ea173bdfbc7" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.AuthControllerTests" name="GetCurrentUser_WithAuthenticatedUser_ReturnsOkUserDto" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.JwtTokenServiceTests.GeneratePasswordResetToken_ThenValidate_ReturnsUserId" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="5dd149b9-340b-5dc2-ef9d-876626eac876">
+      <Execution id="61ec2409-ddd4-492b-b8a1-9f5274b924e6" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.JwtTokenServiceTests" name="GeneratePasswordResetToken_ThenValidate_ReturnsUserId" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.RefreshTokenRepositoryTests.GetByTokenAsync_ReturnsTokenWithUser" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="6d759d1c-6d28-b49f-86b8-ea76d908e102">
+      <Execution id="88789d69-7839-495a-90a6-a2b38ad4ccea" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.RefreshTokenRepositoryTests" name="GetByTokenAsync_ReturnsTokenWithUser" />
+    </UnitTest>
+    <UnitTest name="Projet.Tests.PasswordGeneratorTests.GenerateSecurePassword_ContainsRequiredCharacterTypes" storage="c:\users\rayen\documents\pfeproject\backend\projet.tests\bin\debug\net9.0\projet.tests.dll" id="4a3079ea-1000-70a6-08e7-d965a38dba8b">
+      <Execution id="0d006edb-317f-4846-9729-5bbb87c6c376" />
+      <TestMethod codeBase="c:\Users\Rayen\Documents\PFEProject\backend\Projet.Tests\bin\Debug\net9.0\Projet.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Projet.Tests.PasswordGeneratorTests" name="GenerateSecurePassword_ContainsRequiredCharacterTypes" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4e7aac0c-b949-50c2-578a-83a9e1dea578" executionId="0e249629-af5f-4483-8a47-3616f32b3bfe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b942f464-3dc2-bca8-9ad2-2d43371bb373" executionId="0f6cf8a8-0071-42c0-9ecd-58d49bdfecf4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a13c2f27-7b17-8ed0-cc05-3e0a3d8712f4" executionId="b2ad1208-a301-4ddd-892b-1d81ea343d2f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4a3079ea-1000-70a6-08e7-d965a38dba8b" executionId="0d006edb-317f-4846-9729-5bbb87c6c376" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3351359f-3ebb-a68e-b5c5-647880de510a" executionId="ab9fab4c-fbbc-4322-a78c-5848ba68673d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3618713-ee56-7ce5-b1f9-e29ac9a04515" executionId="de6f437b-d7ce-42ad-bf3b-f59d945909a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b83b8532-f6f9-cbc3-1fe9-1ff3a8c62c5f" executionId="3d188cdf-16c7-452c-87d1-da2fd9c07c9c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94f29c87-87cd-d9f7-aaa9-a3ab75519e83" executionId="16f47f8c-9c13-434d-99d1-6b39aa4634a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6d759d1c-6d28-b49f-86b8-ea76d908e102" executionId="88789d69-7839-495a-90a6-a2b38ad4ccea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c102059-8d46-dbe8-70c0-7c4cd835e585" executionId="650ebfd1-ce0c-479f-a064-7bad01be3286" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="53655578-56f8-caf4-d1e5-dd89098178de" executionId="2a850e41-89a2-40ca-ac53-4c079d25cc65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cd134757-2528-bc55-dbf4-65828d813a1f" executionId="16255564-38d6-4fa4-9f39-012bbc71add3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c9240390-8e1f-599c-2b17-b9af6abf5731" executionId="e43a447c-9f83-43a0-856e-08e465fe835e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="848bc032-8c93-697e-1de9-b329790bc5d7" executionId="5848411a-b0e3-4b1d-bf5a-9f635e3e98bc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bb3f6590-a03d-f83c-35e0-218d044a8f25" executionId="ced7804e-34fb-437b-8269-630c553caa5c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="da393751-e080-610c-7da5-619ff53673fe" executionId="120dc9f8-b660-42dc-9ba4-1a2ded640007" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d671736c-474b-5d48-0f22-d75285ccc992" executionId="f3454835-c606-479a-9ee8-37f23e827517" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b72622d3-9ebe-f231-2d20-0c83419229e5" executionId="87a316a7-1d43-4fef-80aa-acc1e07276b1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6c313b5b-40bd-ea58-930a-cceded1f0732" executionId="74b4027f-86e0-4016-bda7-07842150d026" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa01d2dc-8ab0-68e0-c431-d35d49420f12" executionId="d4a0e588-fdd1-44e7-b5ce-38ce4166db25" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cfadddc6-5ad1-bedd-6c04-a56cd1e00777" executionId="d38666b2-37c0-4964-b734-7ea173bdfbc7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3cbe219c-816e-2591-ee31-984201973019" executionId="d0001768-d57c-4b19-9d25-eb95b663cf07" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4ce69a3d-a839-40ca-d56c-f0cf89b2f053" executionId="f121f894-795a-465e-b7c9-b7deed950969" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="37d308b7-fe91-a521-4526-c7c477a659ea" executionId="055caca8-049c-42ab-ae5b-ee28a0d9a71f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6bc0afac-00bf-7b6b-cfad-e2cc261b031e" executionId="ee7977f4-1b1d-43f4-9920-655a2c60882f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5682a930-1673-09ad-b330-25afc99c3e88" executionId="245ed7e3-eafc-49cf-9edb-39906da7f7fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6ecc422f-d840-5e8d-dbdf-f04e9488ccfd" executionId="0c2eac3b-8209-42ad-b01a-c86482af600f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="684e9f33-c14c-155d-ab66-566340edf4cc" executionId="96369334-649c-4ea8-b5be-cedfe9dd425d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5dd149b9-340b-5dc2-ef9d-876626eac876" executionId="61ec2409-ddd4-492b-b8a1-9f5274b924e6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="29" executed="29" passed="29" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 9.0.16)&#xD;
+[xUnit.net 00:00:00.16]   Discovering: Projet.Tests&#xD;
+[xUnit.net 00:00:00.20]   Discovered:  Projet.Tests&#xD;
+[xUnit.net 00:00:00.22]   Starting:    Projet.Tests&#xD;
+     Warning:&#xD;
+     The component "Fluent Assertions" is governed by the rules defined in the Xceed License Agreement and&#xD;
+     the Xceed Fluent Assertions Community License. You may use Fluent Assertions free of charge for&#xD;
+     non-commercial use only. An active subscription is required to use Fluent Assertions for commercial use.&#xD;
+     Please contact Xceed Sales mailto:sales@xceed.com to acquire a subscription at a very low cost.&#xD;
+     A paid commercial license supports the development and continued increasing support of&#xD;
+     Fluent Assertions users under both commercial and community licenses. Help us&#xD;
+     keep Fluent Assertions at the forefront of unit testing.&#xD;
+     For more information, visit https://xceed.com/products/unit-testing/fluent-assertions/&#xD;
+[xUnit.net 00:00:02.57]   Finished:    Projet.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

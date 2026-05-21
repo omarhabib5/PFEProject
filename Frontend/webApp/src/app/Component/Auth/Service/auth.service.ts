@@ -31,8 +31,7 @@ export class AuthService {
           throw new Error('Access token missing in login response');
         }
         this.tokens.setTokens(accessToken, res.refreshToken, res);
-      }),
-      catchError((error: unknown) => throwError(() => this.toDomainError(error, 'Unable to login. Please try again.')))
+      })
     );
   }
 

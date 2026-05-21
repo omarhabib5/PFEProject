@@ -9,7 +9,7 @@ import { CreateProjectDto, ProjectService, State as ProjectState, UpdateProjectD
 import { Sprint, SprintService, State as SprintState } from '../../Page/Sprint/Service/SprintService';
 import { TaskDto, TaskService, TaskState } from '../../Page/Task/Service/TaskService';
 import { Team as TeamEntity, TeamService, TeamUser } from '../../Page/Team/Service/TeamService';
-import { CreateServiceDto, Service, ServiceService } from '../../Page/Team/Service/ServiceService';
+import { Service, ServiceService } from '../../Page/Team/Service/ServiceService';
 import { UserApiService } from '../../Page/Team/Service/UserApiService';
 import { CreateUserStoryRequest, UserStoryDto, UserStoryStatus, UserStoryStateValue } from '../../Page/UserStory/Models/userstory.model';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
@@ -99,12 +99,6 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     projectState: ProjectState.todo as ProjectState,
     teamId: null as number | null,
   };
-
-  showCreateModal = false;
-  serviceSubmitting = false;
-  serviceModalMode: 'create' | 'edit' = 'create';
-  newService: CreateServiceDto = { name: '', responsibleId: undefined };
-  editingServiceId: number | null = null;
 
   currentDateLabel = '';
   userName = '';
@@ -551,7 +545,7 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
             this.selectedServiceId = selectedStillExists
               ? previousSelectedServiceId
               : Number(this.services[0].id);
-            this.serviceViewMode = this.selectedServiceId ? 'detail' : 'list';
+            this.serviceViewMode = selectedStillExists ? 'detail' : 'list';
             this.selectedProjectId = null;
           } else if (this.services.length === 0) {
             this.serviceViewMode = 'list';
@@ -724,76 +718,6 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
       }
     });
   }
-
-  openCreateServiceModal(): void {
-    this.serviceModalMode = 'create';
-    this.editingServiceId = null;
-    this.newService = { name: '', responsibleId: this.currentResponsibleId ?? undefined };
-    this.showCreateModal = true;
-    this.error = '';
-  }
-
-
-
-  closeServiceModal(): void {
-    this.showCreateModal = false;
-    this.serviceSubmitting = false;
-    this.editingServiceId = null;
-    this.newService = { name: '', responsibleId: this.currentResponsibleId ?? undefined };
-  }
-
-  saveService(): void {
-    if (!this.newService.name.trim()) {
-      this.error = 'Service name is required';
-      return;
-    }
-
-    const payload: CreateServiceDto = {
-      name: this.newService.name.trim(),
-      responsibleId: this.currentResponsibleId ?? undefined
-    };
-
-    this.serviceSubmitting = true;
-    this.error = '';
-    this.success = '';
-
-    if (this.serviceModalMode === 'edit' && this.editingServiceId) {
-      this.serviceApi.updateService(this.editingServiceId, {
-        id: this.editingServiceId,
-        ...payload
-      }).pipe(finalize(() => (this.serviceSubmitting = false))).subscribe({
-        next: () => {
-          this.success = 'Service updated successfully.';
-          this.closeServiceModal();
-          this.loadServices();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.error = 'Unable to update service';
-        }
-      });
-      return;
-    }
-
-    this.serviceApi.createService(payload).pipe(finalize(() => (this.serviceSubmitting = false))).subscribe({
-      next: (created) => {
-        this.success = 'Service created successfully.';
-        const createdId = Number((created as any)?.id ?? 0);
-        this.closeServiceModal();
-        this.loadServices();
-        if (createdId > 0) {
-          this.selectedServiceId = createdId;
-          this.serviceViewMode = 'detail';
-        }
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Unable to create service';
-      }
-    });
-  }
-
-
 
   openProjects(): void {
     this.openCreateProjectForm();

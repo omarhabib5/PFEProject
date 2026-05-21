@@ -89,7 +89,6 @@
                     <h3>Services</h3>
                     <p>Manage your services and access their performance</p>
                 </div>
-                <button class="primary-btn" (click)="openCreateServiceModal()"><span class="btn-icon">+</span> New Service</button>
             </div>
 
             <div class="filters-row">
@@ -826,28 +825,6 @@
                 </div>
         </section>
     </main>
-</div>
-
-<div *ngIf="showCreateModal" class="modal-overlay">
-    <div class="modal-card service-modal-card">
-        <h3>{{ serviceModalMode === 'create' ? 'Create service' : 'Edit service' }}</h3>
-        <p class="service-modal-subtitle">
-            {{ serviceModalMode === 'create' ? 'Add a new service to your scope.' : 'Update the service name.' }}
-        </p>
-        <form class="service-modal-form" (ngSubmit)="saveService()">
-            <div class="service-modal-field">
-                <label>Service name</label>
-                <input type="text" [(ngModel)]="newService.name" name="serviceName"
-                    placeholder="Ex: Development Service" required />
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="secondary-btn" (click)="closeServiceModal()">Cancel</button>
-                <button type="submit" class="primary-btn" [disabled]="serviceSubmitting">
-                    {{ serviceSubmitting ? 'Saving...' : (serviceModalMode === 'create' ? 'Create' : 'Update') }}
-                </button>
-            </div>
-        </form>
-    </div>
 </div>
 
 <div *ngIf="showUserStoryModal" class="modal-overlay">

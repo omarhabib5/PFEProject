@@ -46,6 +46,9 @@ export class Login implements OnInit {
 
     const payload: LoginRequest = this.form.getRawValue();
 
+    this.errorMessage = '';
+    this.infoMessage = '';
+
     this.setLoadingState(true);
     this.auth
       .login(payload)
@@ -65,7 +68,7 @@ export class Login implements OnInit {
         },
         error: (error: unknown) => {
           this.setLoadingState(false);
-          this.errorMessage = this.extractErrorMessage(error);
+          this.errorMessage = this.extractLoginErrorMessage(error);
           this.cdr.detectChanges();
         }
       });
@@ -146,5 +149,28 @@ export class Login implements OnInit {
     }
 
     return 'Login failed. Check your credentials and try again.';
+  }
+
+  private extractLoginErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = this.extractErrorMessage(error);
+      if (backendMessage.trim().length > 0) {
+        return backendMessage;
+      }
+
+      if (error.status === 400) {
+        return 'Enter a valid email address.';
+      }
+
+      if (error.status === 401) {
+        return 'Check your email address and password.';
+      }
+    }
+
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return 'Unable to sign in. Check your email and password and try again.';
   }
 }
