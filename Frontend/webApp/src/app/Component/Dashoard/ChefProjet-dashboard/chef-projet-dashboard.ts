@@ -1299,8 +1299,8 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    if (new Date(this.taskForm.endDate) < new Date(this.taskForm.startDate)) {
-      this.error = 'End date must be after or equal to start date.';
+    if (new Date(this.taskForm.endDate) <= new Date(this.taskForm.startDate)) {
+      this.error = 'End date must be after start date.';
       return;
     }
 
@@ -1578,13 +1578,22 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
     this.taskDateDraftByTaskId[taskId][key] = value;
 
-    if (key === 'startDate' && this.taskDateDraftByTaskId[taskId].endDate < value) {
-      this.taskDateDraftByTaskId[taskId].endDate = value;
+    if (key === 'startDate' && this.taskDateDraftByTaskId[taskId].endDate <= value) {
+      this.taskDateDraftByTaskId[taskId].endDate = this.getNextDateInput(value);
     }
   }
 
   getTaskDateMin(task: TaskDto): string {
     return this.getTaskDateRange(task).min;
+  }
+
+  getTaskEndDateMin(task: TaskDto): string {
+    const startDate = this.getTaskDateDraft(task, 'startDate');
+    if (startDate) {
+      return this.getNextDateInput(startDate);
+    }
+
+    return this.getTaskDateMin(task);
   }
 
   getTaskDateMax(task: TaskDto): string {
@@ -1635,6 +1644,12 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
     if (this.isTaskCompleted(task)) {
       this.error = 'Completed tasks cannot be reassigned.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.assignableUsers.length === 0) {
+      this.error = 'No employee is available to assign to this task.';
       this.cdr.detectChanges();
       return;
     }
@@ -1708,8 +1723,8 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    if (endDate < startDate) {
-      this.error = 'Task end date must be after or equal to start date.';
+    if (endDate <= startDate) {
+      this.error = 'Task end date must be after start date.';
       this.cdr.detectChanges();
       return;
     }
@@ -2177,6 +2192,10 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private getNextDateInput(value: string): string {
+    return this.toDateInput(this.addDays(new Date(`${value}T00:00:00`), 1));
   }
 
   private getSelectedTaskUserStory(): UserStoryDto | undefined {
