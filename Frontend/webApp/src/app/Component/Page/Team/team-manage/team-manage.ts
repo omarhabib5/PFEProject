@@ -153,7 +153,7 @@ private isObservateurUser(user: UserDto): boolean {
   }
   get availableUsersForTeam(): UserDto[] {
     const currentMemberIds = new Set(this.teamMembers.map((member) => Number(member.userId)));
-    // Get all users already assigned to any team
+  
     const usersInAnyTeam = new Set<number>();
     this.teams.forEach((team) => {
       const members = this.allTeamMembers[team.id] || [];
@@ -162,14 +162,14 @@ private isObservateurUser(user: UserDto): boolean {
       });
     });
     
-    // Include both employees and observateurs
+    
     const availableUsers = [...this.employeeUsers, ...this.observateurUser];
     
     return availableUsers.filter((user) => {
       const userId = Number(user.id);
       const alreadyInCurrentTeam = currentMemberIds.has(userId);
       const alreadyInAnyTeam = usersInAnyTeam.has(userId) && !alreadyInCurrentTeam;
-      // Allow observateurs to be assigned to multiple teams
+    
       if (this.isObservateurUser(user)) {
         return !alreadyInCurrentTeam;
       }
@@ -209,7 +209,7 @@ private isObservateurUser(user: UserDto): boolean {
     this.teamService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
-        // Load all team members for all teams to check user assignments
+        
         this.loadAllTeamMembers(data);
         this.applyRouteSelection();
         this.loading = false;
@@ -228,7 +228,7 @@ private isObservateurUser(user: UserDto): boolean {
     teams.forEach((team) => {
       this.teamService.getMembersByTeamId(team.id).subscribe({
         next: (members) => {
-          // Store members for each team to check user assignments
+         
           this.allTeamMembers[team.id] = members;
           this.cdr.detectChanges();
         },
@@ -243,10 +243,10 @@ private isObservateurUser(user: UserDto): boolean {
     this.loading = true;
     this.error = null;
     
-    // Always get all members first
+
     this.teamService.getMembersByTeamId(teamId).subscribe({
       next: (data) => {
-        // Filter based on memberFilter selection
+        
         if (this.memberFilter === 'leaders') {
           this.teamMembers = data.filter(member => member.role === Role.ProjectLeader);
         } else if (this.memberFilter === 'employees') {
@@ -278,8 +278,16 @@ private isObservateurUser(user: UserDto): boolean {
   createTeam(): void {
 
     this.newTeam.name = this.newTeam.name?.trim() || '';
-    
-   
+
+   const newNameLower = this.newTeam.name.toLowerCase();
+const teamExists = this.teams.some(t =>
+  String(t.name ?? '').trim().toLowerCase() === newNameLower
+);
+if(teamExists){
+  this.error ='Team already exist ';
+   setTimeout(() => this.error = null, 5000);
+  return;
+}
     if (!this.newTeam.name) {
       this.error = 'Team name is required';
       setTimeout(() => this.error = null, 5000);
@@ -510,7 +518,18 @@ private isObservateurUser(user: UserDto): boolean {
   UpdateTeam(id: number): void {
   
   this.newTeam.name = this.newTeam.name?.trim() || '';
-  
+
+  const updatedNameLower = this.newTeam.name.toLowerCase();
+const nameConflict = this.teams.some(t =>
+  t.id !== id &&
+  String(t.name ?? '').trim().toLowerCase() === updatedNameLower
+);
+
+if (nameConflict) {
+  this.error = 'A team with this name already exists';
+  setTimeout(() => this.error = null, 5000);
+  return;
+}
   if (!this.newTeam.name) {
     this.error = 'Team name is required';
     setTimeout(() => this.error = null, 5000);
