@@ -1,6 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { of } from 'rxjs';
 
 import { SprintManager } from './sprint-manager';
+
+const activatedRouteMock = {
+  params: of({}),
+  queryParams: of({}),
+  queryParamMap: of(convertToParamMap({})),
+  snapshot: { queryParamMap: convertToParamMap({}) },
+};
+
+const routerMock = {
+  navigate: () => Promise.resolve(true),
+  navigateByUrl: () => Promise.resolve(true),
+  url: '/',
+  parseUrl: () => ({ queryParams: {} }),
+};
 
 describe('SprintManager', () => {
   let component: SprintManager;
@@ -8,7 +24,11 @@ describe('SprintManager', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SprintManager]
+      imports: [SprintManager],
+      providers: [
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: Router, useValue: routerMock },
+      ]
     })
     .compileComponents();
 

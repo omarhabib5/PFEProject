@@ -7,6 +7,7 @@ import { catchError } from 'rxjs/operators';
 import { project, ProjectService } from '../../Page/Projet/Service/ProjectService';
 import { Sprint, SprintService } from '../../Page/Sprint/Service/SprintService';
 import { TaskDto, TaskService } from '../../Page/Task/Service/TaskService';
+import { UserApiService, UserDto } from '../../Page/Team/Service/UserApiService';
 import { UserStoryService } from '../../Page/UserStory/Service/UserStoryService';
 import { UserStoryDto, UserStoryDetailDto } from '../../Page/UserStory/Models/userstory.model';
 
@@ -38,6 +39,7 @@ export class Backlog implements OnInit {
   private projectService = inject(ProjectService);
   private sprintService = inject(SprintService);
   private taskService = inject(TaskService);
+  private userApiService = inject(UserApiService);
   private userStoryService = inject(UserStoryService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -48,7 +50,9 @@ export class Backlog implements OnInit {
   errorMessage = '';
   projectBacklogs: ProjectBacklog[] = [];
   selectedProjectId: number | null = null;
+  selectedProjectName = '';
   filterProjectNotFound = false;
+  private userNameMap: Record<number, string> = {};
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
@@ -68,7 +72,8 @@ export class Backlog implements OnInit {
       projects: this.projectService.getAllProjects().pipe(catchError(() => of([] as project[]))),
       sprints: this.sprintService.getAllSprints().pipe(catchError(() => of([] as Sprint[]))),
       userStories: this.userStoryService.getAllUserStories().pipe(catchError(() => of([] as UserStoryDto[]))),
-      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[])))
+      tasks: this.taskService.getAll().pipe(catchError(() => of([] as TaskDto[]))),
+      users: this.userApiService.getUsers().pipe(catchError(() => of([] as UserDto[])))
     })
       .pipe(catchError(() => {
         this.errorMessage = 'Unable to load backlog data.';
@@ -76,10 +81,13 @@ export class Backlog implements OnInit {
           projects: [] as project[], 
           sprints: [] as Sprint[], 
           userStories: [] as UserStoryDto[], 
-          tasks: [] as TaskDto[] 
+          tasks: [] as TaskDto[],
+          users: [] as UserDto[]
         });
       }))
-      .subscribe(({ projects, sprints, userStories, tasks }) => {
+      .subscribe(({ projects, sprints, userStories, tasks, users }) => {
+        this.userNameMap = this.buildUserNameMap(users);
+        this.selectedProjectName = this.getSelectedProjectName(projects);
         this.projectBacklogs = this.buildProjectBacklogs(projects, sprints, userStories, tasks, this.selectedProjectId);
         if (this.selectedProjectId !== null && this.projectBacklogs.length === 0 && projects.length > 0) {
           this.filterProjectNotFound = true;
@@ -236,7 +244,45 @@ export class Backlog implements OnInit {
 
   getTaskAssigneeLabel(task: TaskDto): string {
     const assignedTo = String(task.assignedToName ?? '').trim();
-    return assignedTo || 'Unassigned';
+    if (assignedTo) {
+      return assignedTo;
+    }
+
+    const assignedToId = task.assignedToId;
+    if (assignedToId === null || assignedToId === undefined) {
+      return '—';
+    }
+
+    return this.userNameMap[assignedToId] ?? `User #${assignedToId}`;
+  }
+
+  getSelectedProjectLabel(): string {
+    return this.selectedProjectName || (this.selectedProjectId !== null ? `Project #${this.selectedProjectId}` : 'All projects');
+  }
+
+  private buildUserNameMap(users: UserDto[]): Record<number, string> {
+    return (Array.isArray(users) ? users : []).reduce((acc, user) => {
+      const userId = Number(user.id);
+      if (!Number.isFinite(userId)) {
+        return acc;
+      }
+
+      const fullName = `${String(user.firstName ?? '').trim()} ${String(user.lastName ?? '').trim()}`.trim();
+      acc[userId] = fullName || String(user.email ?? '').trim() || `User #${userId}`;
+      return acc;
+    }, {} as Record<number, string>);
+  }
+
+  private getSelectedProjectName(projects: project[]): string {
+    if (this.selectedProjectId === null) {
+      return '';
+    }
+
+    const selectedProject = (Array.isArray(projects) ? projects : []).find(
+      (projectItem) => Number(projectItem.id ?? -1) === Number(this.selectedProjectId)
+    );
+
+    return String(selectedProject?.name ?? '').trim();
   }
 
   getTaskComplexityLabel(task: TaskDto): string {
