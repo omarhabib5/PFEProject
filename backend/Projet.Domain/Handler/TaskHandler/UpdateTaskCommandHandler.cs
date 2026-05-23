@@ -27,8 +27,30 @@ namespace Projet.Domain.Handler.TaskHandler
             }
 
             var previousSprintId = task.SprintId;
+            var normalizedTitle = string.IsNullOrWhiteSpace(request.Title)
+                ? throw new ArgumentException("Title is required")
+                : request.Title.Trim();
 
-            task.Title = request.Title;
+            var effectiveSprintId = request.SprintId
+                ?? task.SprintId
+                ?? await _context.UserStories
+                    .Where(us => us.Id == request.UserStoryId)
+                    .Select(us => us.SprintId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+            var duplicateTaskExists = await _context.Tasks
+                .AnyAsync(existing =>
+                    existing.Id != task.Id
+                    && existing.SprintId == effectiveSprintId
+                    && existing.Title == normalizedTitle,
+                    cancellationToken);
+
+            if (duplicateTaskExists)
+            {
+                throw new InvalidOperationException("A task with the same title already exists in this sprint.");
+            }
+
+            task.Title = normalizedTitle;
             task.Description = request.Description;
             task.EstimatedHours = request.EstimatedHours;
             task.StartDate = request.StartDate;

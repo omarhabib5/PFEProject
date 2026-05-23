@@ -24,6 +24,7 @@ import { TokenService } from '../../../Auth/Service/token.service';
 })
 export class TaskManager implements OnInit {
   tasks: TaskDto[] = [];
+  private scopedTasksForDuplicateCheck: TaskDto[] = [];
   loading = false;
   saving = false;
   error = '';
@@ -36,6 +37,7 @@ export class TaskManager implements OnInit {
   userStoryNameMap: Record<number, string> = {};
   users: UserDto[] = [];
   assignableUsers: UserDto[] = [];
+  sprints: Sprint[] = [];
 
   private teamMembersByTeamId: Record<number, UserDto[]> = {};
   private projectTeamIdMap: Record<number, number> = {};
@@ -141,18 +143,53 @@ export class TaskManager implements OnInit {
   loadTasks(): void {
     this.loading = true;
     this.error = '';
+    this.scopedTasksForDuplicateCheck = [];
+
+    if (this.selectedProjectId) {
+      forkJoin({
+        tasks: this.taskService.getAll(),
+        stories: this.userStoryService.getByProjectId(this.selectedProjectId).pipe(catchError(() => of([] as UserStoryDto[])))
+      }).subscribe({
+        next: ({ tasks, stories }) => {
+          const storyIds = new Set(
+            (Array.isArray(stories) ? stories : [])
+              .map((story) => Number(story.id))
+              .filter((id) => Number.isFinite(id) && id > 0)
+          );
+
+          const filteredByProject = (Array.isArray(tasks) ? tasks : []).filter((task) => storyIds.has(Number(task.userStoryId)));
+          this.scopedTasksForDuplicateCheck = filteredByProject;
+
+          this.tasks = this.selectedUserStoryId
+            ? filteredByProject.filter((task) => Number(task.userStoryId) === this.selectedUserStoryId)
+            : filteredByProject;
+
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Error while loading tasks';
+          this.scopedTasksForDuplicateCheck = [];
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
 
     if (this.canManageTasks) {
       this.taskService.getAll().subscribe({
         next: (data) => {
+          this.scopedTasksForDuplicateCheck = Array.isArray(data) ? data : [];
           this.tasks = this.selectedUserStoryId
-            ? data.filter(task => task.userStoryId === this.selectedUserStoryId)
+            ? data.filter(task => Number(task.userStoryId) === Number(this.selectedUserStoryId))
             : data;
           this.loading = false;
           this.cdr.detectChanges();
         },
         error: () => {
           this.error = 'Error while loading tasks';
+          this.scopedTasksForDuplicateCheck = [];
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -192,6 +229,7 @@ export class TaskManager implements OnInit {
 
     this.taskService.getAll().subscribe({
       next: (data) => {
+        this.scopedTasksForDuplicateCheck = Array.isArray(data) ? data : [];
         this.tasks = this.selectedUserStoryId
           ? data.filter(task => task.userStoryId === this.selectedUserStoryId)
           : data;
@@ -200,6 +238,7 @@ export class TaskManager implements OnInit {
       },
       error: () => {
         this.error = 'Error while loading tasks';
+        this.scopedTasksForDuplicateCheck = [];
         this.loading = false;
            this.cdr.detectChanges();
       }
@@ -212,8 +251,14 @@ export class TaskManager implements OnInit {
     this.formModel = this.getEmptyForm();
     if (this.selectedUserStoryId) {
       this.formModel.userStoryId = this.selectedUserStoryId;
+      const selectedStory = this.userStories.find((story) => Number(story.id) === Number(this.selectedUserStoryId));
+      const storySprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+      if (storySprintId > 0) {
+        this.formModel.sprintId = storySprintId;
+      }
     }
     this.formModel.status = this.prefilledStatus;
+    this.onSprintChange();
     this.refreshAssignableUsers();
   }
 
@@ -231,16 +276,48 @@ export class TaskManager implements OnInit {
       endDate: this.toDateInput(task.endDate),
       userStoryId: task.userStoryId,
       assignedToId: task.assignedToId ?? null,
-      sprintId: task.sprintId ?? null
+      sprintId: task.sprintId ?? this.getSprintIdForTask(task)
     };
+    this.onSprintChange();
     this.refreshAssignableUsers();
   }
 
   saveTask(): void {
-    if (!this.formModel.title.trim() || !this.formModel.userStoryId) {
-      this.error = 'Title and user story are required';
+    const title = this.formModel.title.trim();
+    if (!title) {
+      this.error = 'Task title is required.';
       return;
     }
+
+    const sprintId = Number(this.formModel.sprintId ?? 0);
+    if (!sprintId) {
+      this.error = 'Sprint is required.';
+      return;
+    }
+
+    const resolvedUserStoryId = this.resolveUserStoryIdForSprint(sprintId, Number(this.formModel.userStoryId ?? 0));
+    if (!resolvedUserStoryId) {
+      this.error = 'No user story is linked to the selected sprint.';
+      return;
+    }
+
+    const duplicateTask = this.scopedTasksForDuplicateCheck.find((task) => {
+      const taskTitle = String(task.title ?? '').trim().toLowerCase();
+      const taskSprintId = Number(task.sprintId ?? 0);
+      const taskId = Number(task.id ?? 0);
+      if (taskId && this.editingTaskId && taskId === this.editingTaskId) {
+        return false;
+      }
+
+      return taskSprintId === sprintId && taskTitle === title.toLowerCase();
+    });
+
+    if (duplicateTask) {
+      this.error = 'Task already exists in this sprint.';
+      return;
+    }
+
+    this.formModel.userStoryId = resolvedUserStoryId;
 
     if (!this.isDateInRange(this.formModel.startDate, this.taskMinDateInput, this.taskMaxDateInput)
       || !this.isDateInRange(this.formModel.endDate, this.taskMinDateInput, this.taskMaxDateInput)) {
@@ -289,7 +366,7 @@ export class TaskManager implements OnInit {
     event.stopPropagation();
 
     if (!this.canDeleteTask(task)) {
-      this.error = 'You can delete a task only when it is pending.';
+      this.error = 'Only admin or service manager can delete tasks.';
       this.cdr.detectChanges();
       return;
     }
@@ -327,6 +404,14 @@ export class TaskManager implements OnInit {
     return this.userStoryNameMap[userStoryId] ?? `US #${userStoryId}`;
   }
 
+  get selectedProjectSprints(): Sprint[] {
+    if (!this.selectedProjectId) {
+      return [];
+    }
+
+    return this.sprints.filter((sprint) => Number(sprint.projectId) === Number(this.selectedProjectId));
+  }
+
   getUserLabel(user: UserDto): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email || `User #${user.id}`;
@@ -362,10 +447,14 @@ export class TaskManager implements OnInit {
     return new Date().toISOString().slice(0, 10);
   }
 
-  onUserStoryChange(): void {
-    const selectedStory = this.getSelectedUserStory();
-    const sprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
-    this.formModel.sprintId = sprintId > 0 ? sprintId : null;
+  onSprintChange(): void {
+    const sprintId = Number(this.formModel.sprintId ?? 0);
+    if (!sprintId) {
+      return;
+    }
+
+    const resolvedUserStoryId = this.resolveUserStoryIdForSprint(sprintId, Number(this.formModel.userStoryId ?? 0));
+    this.formModel.userStoryId = resolvedUserStoryId;
 
     const minDate = this.taskMinDateInput;
     const maxDate = this.taskMaxDateInput;
@@ -378,6 +467,13 @@ export class TaskManager implements OnInit {
       this.formModel.endDate = this.formModel.startDate;
     }
 
+    if (!resolvedUserStoryId) {
+      this.error = 'No user story is linked to the selected sprint.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.error = '';
     this.refreshAssignableUsers();
   }
 
@@ -407,7 +503,15 @@ export class TaskManager implements OnInit {
           this.formModel.userStoryId = 0;
         }
 
-        this.onUserStoryChange();
+        if (!this.formModel.sprintId && this.formModel.userStoryId) {
+          const selectedStory = stories.find((story) => Number(story.id) === Number(this.formModel.userStoryId));
+          const storySprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
+          if (storySprintId > 0) {
+            this.formModel.sprintId = storySprintId;
+          }
+        }
+
+        this.onSprintChange();
 
         this.cdr.detectChanges();
         this.refreshAssignableUsers();
@@ -439,6 +543,7 @@ export class TaskManager implements OnInit {
       sprints: this.sprintService.getAllSprints().pipe(catchError(() => of([] as Sprint[])))
     }).subscribe({
       next: ({ projects, sprints }) => {
+        this.sprints = Array.isArray(sprints) ? sprints : [];
         this.projectTeamIdMap = (Array.isArray(projects) ? projects : []).reduce((acc, item) => {
           const projectId = Number((item as any)?.id ?? (item as any)?.Id ?? 0);
           const teamId = Number(
@@ -479,7 +584,7 @@ export class TaskManager implements OnInit {
           return acc;
         }, {} as Record<number, { start: string; end: string }>);
 
-        this.onUserStoryChange();
+        this.onSprintChange();
 
         this.refreshAssignableUsers();
       },
@@ -509,7 +614,7 @@ export class TaskManager implements OnInit {
         this.editMode = true;
         this.editingTaskId = task.id;
         this.formModel = {
-          title: task.title,
+          title: String(task.title ?? '').trim(),
           description: task.description,
           estimatedHours: task.estimatedHours,
           status: this.normalizeStatus(task.status),
@@ -645,6 +750,16 @@ export class TaskManager implements OnInit {
     this.loadTasks();
   }
 
+  private filterTasksForProject(tasks: TaskDto[], stories: UserStoryDto[]): TaskDto[] {
+    const storyIds = new Set(
+      (Array.isArray(stories) ? stories : [])
+        .map((story) => Number(story.id))
+        .filter((id) => Number.isFinite(id) && id > 0)
+    );
+
+    return (Array.isArray(tasks) ? tasks : []).filter((task) => storyIds.has(Number(task.userStoryId)));
+  }
+
   private afterSaveError(message: string): void {
     this.error = message;
   }
@@ -655,9 +770,15 @@ export class TaskManager implements OnInit {
         return 'API connection unavailable. Check that the backend is running.';
       }
 
-      const apiMessage = error.error?.message || error.error?.title;
+      const apiMessage = String(error.error?.message || error.error?.title || '').trim();
+      const normalizedMessage = apiMessage.toLowerCase();
+
+      if (error.status === 409 || normalizedMessage.includes('already exists') || normalizedMessage.includes('already exist')) {
+        return 'Task already exists in this sprint.';
+      }
+
       if (apiMessage) {
-        return String(apiMessage);
+        return apiMessage;
       }
 
       return `${fallback} (HTTP ${error.status})`;
@@ -718,10 +839,36 @@ export class TaskManager implements OnInit {
     return this.userStories.find((story) => Number(story.id) === Number(this.formModel.userStoryId));
   }
 
+  private getUserStoriesForSprint(sprintId: number): UserStoryDto[] {
+    if (!sprintId) {
+      return [];
+    }
+
+    return this.userStories.filter((story) => Number((story as any)?.sprintId ?? (story as any)?.SprintId ?? 0) === sprintId);
+  }
+
+  private resolveUserStoryIdForSprint(sprintId: number, preferredUserStoryId: number): number {
+    const stories = this.getUserStoriesForSprint(sprintId);
+    if (stories.length === 0) {
+      return 0;
+    }
+
+    if (preferredUserStoryId > 0 && stories.some((story) => Number(story.id) === preferredUserStoryId)) {
+      return preferredUserStoryId;
+    }
+
+    return Number(stories[0].id ?? 0);
+  }
+
+  private getSprintIdForTask(task: TaskDto): number | null {
+    const taskStoryId = Number(task.userStoryId ?? 0);
+    const story = this.userStories.find((item) => Number(item.id) === taskStoryId);
+    const sprintId = Number((story as any)?.sprintId ?? (story as any)?.SprintId ?? 0);
+    return sprintId > 0 ? sprintId : null;
+  }
+
   private getSelectedSprintDateRange(): { start: string; end: string } | null {
-    const selectedStory = this.getSelectedUserStory();
-    const storySprintId = Number((selectedStory as any)?.sprintId ?? (selectedStory as any)?.SprintId ?? 0);
-    const sprintId = storySprintId > 0 ? storySprintId : Number(this.formModel.sprintId ?? 0);
+    const sprintId = Number(this.formModel.sprintId ?? 0);
 
     if (!Number.isFinite(sprintId) || sprintId <= 0) {
       return null;
@@ -731,11 +878,8 @@ export class TaskManager implements OnInit {
   }
 
   canDeleteTask(task: TaskDto): boolean {
-    if (this.canManageTasks) {
-      return true;
-    }
-
-    return this.normalizeStatus(task.status) === 'pending';
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ServiceManager;
   }
 
   private isDateInRange(value: string, minDate?: string, maxDate?: string): boolean {

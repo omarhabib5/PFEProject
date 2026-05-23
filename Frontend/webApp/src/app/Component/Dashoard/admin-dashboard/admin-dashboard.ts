@@ -248,7 +248,7 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.currentDate = new Date().toLocaleDateString('en-US', options);
   }
   goToServiceManager(){
-    this.router.navigate(['/Service']);
+    this.router.navigate(['/ResponsableServiceDashboard']);
   }
 
   setActiveTab(tab: DashboardTab): void {

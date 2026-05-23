@@ -158,6 +158,7 @@ namespace Projet.Application.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Title).IsRequired();
                 entity.Property(e => e.Description);
+                entity.HasIndex(e => new { e.ProjectId, e.Title });
 
 
                 entity.HasOne(e => e.Sprint)

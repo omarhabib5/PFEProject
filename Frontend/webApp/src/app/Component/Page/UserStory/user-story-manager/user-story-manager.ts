@@ -2,9 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { UserStoryService } from '../Service/UserStoryService';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateUserStoryRequest, UpdateUserStoryRequest, UserStoryDto, UserStoryStatus, UserStoryStateValue } from '../Models/userstory.model';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NgIf, NgForOf } from '@angular/common';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { TokenService } from '../../../Auth/Service/token.service';
+import { AppRole } from '../../../Auth/model/auth.model';
 
 @Component({
   selector: 'app-user-story-manager',
@@ -21,6 +24,7 @@ export class UserStoryManagerComponent implements OnInit {
   showCreateForm = false;
   createSubmitting = false;
   State = UserStoryStatus;
+  canManageUserStories = false;
   createForm: {
     title: string;
     description: string;
@@ -42,8 +46,12 @@ export class UserStoryManagerComponent implements OnInit {
     private userStoryService: UserStoryService,
     private route: Router,
     private activatedRoute: ActivatedRoute,
+    private tokenService: TokenService,
   ) { }
   ngOnInit(): void {
+    const role = this.tokenService.getUserRole();
+    this.canManageUserStories = role === AppRole.Admin || role === AppRole.ProjectManager;
+
     this.activatedRoute.params.subscribe(params => {
       const sprintIdFromPath = Number(params['sprintId']);
       const sprintIdFromQuery = Number(this.activatedRoute.snapshot.queryParamMap.get('sprintId'));
@@ -85,7 +93,7 @@ export class UserStoryManagerComponent implements OnInit {
         this.userStories = data;
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors du chargement des user stories';
+        this.error = this.extractErrorMessage(err, 'Erreur lors du chargement des user stories');
         console.error(err);
       }
       });
@@ -159,6 +167,10 @@ export class UserStoryManagerComponent implements OnInit {
       return false;
     }
 
+    if (this.canManageUserStories) {
+      return true;
+    }
+
     return this.normalizeStatusValue(userStory.status) === UserStoryStatus.TODO || Number(userStory.userStoryState ?? 1) === 1;
   }
 
@@ -167,6 +179,11 @@ export class UserStoryManagerComponent implements OnInit {
   }
 
   createUserStory(): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     if (this.sprintId === null) {
       this.error = 'Invalid sprint for creating a user story';
       return;
@@ -180,6 +197,11 @@ export class UserStoryManagerComponent implements OnInit {
   }
 
   submitCreateUserStory(): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     if (this.createSubmitting) {
       return;
     }
@@ -192,6 +214,11 @@ export class UserStoryManagerComponent implements OnInit {
     const title = this.createForm.title?.trim();
     if (!title) {
       this.error = 'Title is required';
+      return;
+    }
+
+    if (this.hasDuplicateUserStoryTitle(title)) {
+      this.error = 'A user story with this name already exists.';
       return;
     }
 
@@ -234,7 +261,7 @@ export class UserStoryManagerComponent implements OnInit {
           this.loadUserStories();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Error while creating the user story';
+          this.error = this.extractErrorMessage(err, 'Error while creating the user story');
           console.error(err);
         }
       });
@@ -248,6 +275,11 @@ export class UserStoryManagerComponent implements OnInit {
   editUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     const story = this.userStories.find(item => Number(item.id) === Number(id));
     if (!story) {
       return;
@@ -258,17 +290,34 @@ export class UserStoryManagerComponent implements OnInit {
       return;
     }
 
+    const normalizedTitle = title.trim();
+    if (this.hasDuplicateUserStoryTitle(normalizedTitle, Number(id))) {
+      this.error = 'A user story with this name already exists.';
+      return;
+    }
+
     const description = window.prompt('Description:', story.description) ?? story.description;
     const acceptanceCriteria = window.prompt('Acceptance criteria:', story.acceptanceCriteria) ?? story.acceptanceCriteria;
     const storyPoints = Number(window.prompt('Story points:', String(story.storyPoints)) ?? String(story.storyPoints));
+    const priority = Number(window.prompt('Priority (1-5):', String((story as any)?.priority ?? 3)) ?? String((story as any)?.priority ?? 3));
+
+    if (!this.isValidNumber(storyPoints, 1)) {
+      this.error = 'Story points must be greater than 0.';
+      return;
+    }
+
+    if (!this.isValidNumber(priority, 1, 5)) {
+      this.error = 'Priority must be between 1 and 5.';
+      return;
+    }
  
 
 
 
     const updatePayload: UpdateUserStoryRequest = {
       id: Number(id),
-      name: title.trim(),
-      title: title.trim(),
+      name: normalizedTitle,
+      title: normalizedTitle,
       description,
 
       estimatedDuration: Number(story.estimatedDuration ?? 1),
@@ -277,6 +326,7 @@ export class UserStoryManagerComponent implements OnInit {
       sprintId: Number(story.sprintId ?? this.sprintId ?? 0),
       acceptanceCriteria,
       storyPoints,
+      priority,
     
       assignedToId: story.assignedToId
     };
@@ -284,7 +334,7 @@ export class UserStoryManagerComponent implements OnInit {
     this.userStoryService.update(Number(id), updatePayload).subscribe({
       next: () => this.loadUserStories(),
       error: (err) => {
-        this.error = 'Error while updating the user story';
+        this.error = this.extractErrorMessage(err, 'Error while updating the user story');
         console.error(err);
       }
     });
@@ -293,19 +343,30 @@ export class UserStoryManagerComponent implements OnInit {
   deleteUserStory(id: string, event: Event): void {
     event.stopPropagation();
 
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     const story = this.userStories.find((item) => String(item.id) === String(id));
     if (!this.canDeleteUserStory(story)) {
-      this.error = 'You can delete a user story only when it is pending.';
+      this.error = 'Unable to delete this user story.';
+      return;
+    }
+
+    const normalizedId = String(id ?? '').trim();
+    if (!normalizedId) {
+      this.error = 'Invalid user story identifier.';
       return;
     }
 
     if (confirm('Are you sure you want to delete this user story and all its tasks?')) {
-      this.userStoryService.delete(Number(id)).subscribe({
+      this.userStoryService.delete(normalizedId).subscribe({
         next: () => {
           this.loadUserStories();
         },
         error: (err) => {
-          this.error = 'Error while deleting the user story';
+          this.error = this.extractErrorMessage(err, 'Error while deleting the user story');
           console.error(err);
         }
       });
@@ -361,6 +422,46 @@ export class UserStoryManagerComponent implements OnInit {
       clearTimeout(this.loadingWatchdogId);
       this.loadingWatchdogId = null;
     }
+  }
+
+  private extractErrorMessage(error: unknown, fallbackMessage: string): string {
+    if (error instanceof HttpErrorResponse) {
+      if (typeof error.error === 'string' && error.error.trim().length > 0) {
+        return error.error;
+      }
+
+      if (error.error && typeof error.error === 'object') {
+        const backendMessage = (error.error as { message?: unknown }).message;
+        if (typeof backendMessage === 'string' && backendMessage.trim().length > 0) {
+          return backendMessage;
+        }
+      }
+
+      if (error.message.trim().length > 0) {
+        return error.message;
+      }
+    }
+
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return fallbackMessage;
+  }
+
+  private hasDuplicateUserStoryTitle(title: string, excludedUserStoryId?: number): boolean {
+    const normalizedTitle = title.trim().toLowerCase();
+    if (!normalizedTitle) {
+      return false;
+    }
+
+    return this.userStories.some((story) => {
+      if (excludedUserStoryId !== undefined && Number(story.id) === Number(excludedUserStoryId)) {
+        return false;
+      }
+
+      return (story.title ?? '').trim().toLowerCase() === normalizedTitle;
+    });
   }
 
 }

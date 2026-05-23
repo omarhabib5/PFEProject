@@ -56,10 +56,12 @@ namespace Projet.Api.Controller
         }
 
         [HttpPost]
-        [Authorize(Roles = "ProjectManager,ServiceManager")]
+        [Authorize(Roles = "Admin,ProjectManager,ServiceManager")]
         public async Task<IActionResult> Create([FromBody] CreateTaskCommand command)
         {
-            if (!User.IsInRole("ProjectManager") && command.AssignedToId.HasValue)
+            if (command.AssignedToId.HasValue
+                && !User.IsInRole("Admin")
+                && !User.IsInRole("ProjectManager"))
             {
                 return Forbid();
             }
@@ -151,7 +153,7 @@ namespace Projet.Api.Controller
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,ProjectManager")]
+        [Authorize(Roles = "Admin,ServiceManager")]
         public async Task<IActionResult> Delete(int id)
         {
             try

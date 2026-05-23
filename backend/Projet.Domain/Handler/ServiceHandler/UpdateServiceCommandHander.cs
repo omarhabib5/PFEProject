@@ -37,7 +37,21 @@ namespace Projet.Domain.Handler.ServiceHandler
                 }
             }
 
-            service.name = request.name;
+            var normalizedName = request.name?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                throw new ArgumentException("Service name is required.");
+            }
+
+            var duplicateNameExists = await _context.Services
+                .AnyAsync(s => s.id != request.id && s.name != null && s.name.Trim().ToLower() == normalizedName.ToLower(), cancellationToken);
+
+            if (duplicateNameExists)
+            {
+                throw new InvalidOperationException("A service with this name already exists.");
+            }
+
+            service.name = normalizedName;
             service.ResponsibleId = request.ResponsibleId;
 
             await _context.SaveChangesAsync(cancellationToken);

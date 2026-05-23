@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Projet.Domain.Command.Sprint;
 using Projet.Domain.Interface;
 using Projet.Domain.Utilities;
@@ -21,6 +22,11 @@ namespace Projet.Domain.Handler.Sprint
         }
         public async Task<int> Handle(CreateSprintCommand request, CancellationToken cancellationToken)
         {
+            var normalizedName = request.Name?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                throw new ArgumentException("Sprint name is required.");
+            }
 
             var project = context.Projects.FirstOrDefault(p => p.id == request.ProjectId);
             if (project == null)
@@ -28,9 +34,19 @@ namespace Projet.Domain.Handler.Sprint
                 throw new KeyNotFoundException("project with the specified ID was not found.");
             }
 
+            var sprintAlreadyExists = await context.Sprints
+                .AnyAsync(s => s.ProjectId == request.ProjectId
+                    && s.Name != null
+                    && s.Name.Trim().ToLower() == normalizedName.ToLower(), cancellationToken);
+
+            if (sprintAlreadyExists)
+            {
+                throw new InvalidOperationException("A sprint with this name already existed.");
+            }
+
             var sprint = new Model.Sprint
             {
-                Name = request.Name,
+                Name = normalizedName,
                 Description = request.Description,
                 estimatedDuration = request.EstimatedDuration,
                 startDate = request.StartDate,

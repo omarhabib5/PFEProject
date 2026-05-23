@@ -16,6 +16,7 @@ export interface  UserStoryDto {
 
   estimatedDuration?: number;
   userStoryState?: number;
+  priority?: number;
   acceptanceCriteria: string;
   storyPoints: number;
 
@@ -80,6 +81,7 @@ export interface UpdateUserStoryRequest {
   title?: string;
   acceptanceCriteria?: string;
   storyPoints?: number;
+  priority?: number;
 
   status?: UserStoryStateValue;
   assignedToId?: string;

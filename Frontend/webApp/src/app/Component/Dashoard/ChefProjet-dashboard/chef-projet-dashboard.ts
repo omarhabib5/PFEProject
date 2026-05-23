@@ -29,6 +29,7 @@ import { Router } from '@angular/router';
 import { ChangePasswordRequest } from '../../Auth/model/auth.model';
 import { NotificationService } from '../../Page/Notifiation/Service/NotifcationService';
 import { Notification as AppNotification } from '../../Page/Notifiation/Models/Notification.Model';
+import { AppRole } from '../../Auth/model/auth.model';
 
 type DashboardSection = 'projects' | 'calendar' | 'notifications' | 'messagerie' | 'settings';
 type ProjectTab = 'userStories' | 'sprints' | 'tasks';
@@ -514,6 +515,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   openCreateUserStory(preselectedSprintId?: number): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     if (!this.currentProject) {
       this.error = 'Select a project first.';
       return;
@@ -645,6 +651,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   editUserStory(story: UserStoryDto): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     const storyId = Number((story as any)?.id ?? 0);
     if (!storyId) {
       this.error = 'Invalid user story.';
@@ -666,6 +677,11 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   deleteUserStory(story: UserStoryDto): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     const storyId = Number((story as any)?.id ?? 0);
     if (!storyId) {
       this.error = 'Invalid user story.';
@@ -673,7 +689,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
     }
 
     if (!this.canDeleteUserStory(story)) {
-      this.error = 'You can delete only a pending/to-do user story.';
+      this.error = 'Unable to delete this user story.';
       return;
     }
 
@@ -694,6 +710,10 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   canDeleteUserStory(story: UserStoryDto): boolean {
+    if (this.canManageUserStories) {
+      return true;
+    }
+
     const normalized = this.normalizeUserStoryStatus(story);
     return normalized === 'pending' || normalized === 'todo';
   }
@@ -877,6 +897,16 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   get managerRoleLabel(): string {
     const role = String(this.tokenService.getUserData()?.role ?? '').trim();
     return role || 'Project Manager';
+  }
+
+  get canManageTasks(): boolean {
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ProjectManager;
+  }
+
+  get canManageUserStories(): boolean {
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ProjectManager;
   }
 
   get calendarMonthLabel(): string {
@@ -1368,7 +1398,7 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
 
   deleteTask(task: TaskDto): void {
     if (!this.canDeleteTask(task)) {
-      this.error = 'You can delete a task only when it is pending.';
+      this.error = 'Only admin or service manager can delete tasks.';
       this.cdr.detectChanges();
       return;
     }
@@ -1881,7 +1911,8 @@ export class ChefProjetDashboard implements OnInit, OnDestroy {
   }
 
   canDeleteTask(task: TaskDto): boolean {
-    return this.normalizeTaskState(task.status) === 'pending';
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ServiceManager;
   }
 
   formatDate(value?: Date | string): string {

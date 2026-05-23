@@ -71,5 +71,52 @@ namespace Projet.Tests
 
             await Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(cmd, CancellationToken.None));
         }
+
+        [Fact]
+        public async Task CreateUserStory_Throws_WhenTitleAlreadyExistsInSameProject()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            await using var context = new ApplicationDbContext(options);
+
+            var project = new Project { id = 1, name = "P", description = "d", startDate = DateTime.UtcNow, endDate = DateTime.UtcNow.AddDays(1), estimatedDuration = 1, projectState = State.todo, ProjectManagerId = 1 };
+            context.Projects.Add(project);
+            await context.SaveChangesAsync();
+
+            var sprint = new Sprint { Id = 1, Name = "S1", Description = "s", estimatedDuration = 1, startDate = DateTime.UtcNow, endDate = DateTime.UtcNow.AddDays(7), ProjectId = project.id, SprintState = State.todo };
+            context.Sprints.Add(sprint);
+            context.UserStories.Add(new UserStory
+            {
+                Id = 1,
+                Title = "Story",
+                Description = "Existing",
+                StoryPoints = 3,
+                Priority = 2,
+                SprintId = sprint.Id,
+                ProjectId = project.id,
+                CreatedById = 1,
+                CreatedAt = DateTime.UtcNow,
+                Status = State.todo,
+                EstimatedDuration = 1
+            });
+            await context.SaveChangesAsync();
+
+            var handler = new CreateUserStoryHandler(context);
+
+            var cmd = new CreateUserStoryCommand
+            {
+                Title = " story ",
+                Description = "Desc",
+                AcceptanceCriteria = "AC",
+                StoryPoints = 3,
+                Priority = 2,
+                SprintId = sprint.Id,
+                CreatedById = 1
+            };
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await handler.Handle(cmd, CancellationToken.None));
+        }
     }
 }

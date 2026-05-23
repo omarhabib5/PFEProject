@@ -5,7 +5,7 @@ import { EmployeeDashboard } from './Component/Dashoard/Employee-dashboard/emplo
 import { ObserverDashboard } from './Component/Dashoard/Observateur-dashboard/observateur-dashboard';
 import { ResponsableServiceDashboard } from './Component/Dashoard/ResponsableService-dashboard/responsable-service-dashboard';
 import { Login } from './Component/Auth/login/login';
-import { UserManage } from './Component/Page/user-manage/user-manage';
+
 
 
 import { SprintView } from './Component/Page/Sprint/sprint-view/sprint-view';
@@ -63,7 +63,7 @@ export const routes: Routes = [
             { path: 'Backlog', component: Backlog },
           
             
-            { path: 'users', component: UserManage },
+            
     
 
            
@@ -111,25 +111,25 @@ export const routes: Routes = [
                 path: 'UserStoryManage',
                 component: UserStoryManagerComponent,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager] }
             },
             {
                 path: 'userstory/manage/:sprintId',
                 component: UserStoryManagerComponent,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager] }
             },
             {
                 path: 'userstory/create/:sprintId',
                 component: UserStoryManagerComponent,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager] }
             },
             {
                 path: 'userstory/edit/:id',
                 component: UserStoryManagerComponent,
                 canActivate: [roleGuard],
-                data: { roles: [AppRole.ProjectManager] }
+                data: { roles: [AppRole.Admin, AppRole.ProjectManager] }
             }
         ]
     },

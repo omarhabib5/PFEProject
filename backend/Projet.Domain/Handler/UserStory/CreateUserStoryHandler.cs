@@ -19,8 +19,24 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, in
 
     public async Task<int> Handle(CreateUserStoryCommand request, CancellationToken cancellationToken)
     {
+        var normalizedTitle = request.Title?.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedTitle))
+        {
+            throw new ArgumentException("Title is required");
+        }
+
         var sprint = await _context.Sprints.FindAsync(new object[] { request.SprintId }, cancellationToken)
             ?? throw new KeyNotFoundException($"Sprint with Id {request.SprintId} not found");
+
+        var duplicateUserStoryExists = await _context.UserStories
+            .AnyAsync(us => us.ProjectId == sprint.ProjectId
+                && us.Title != null
+                && us.Title == normalizedTitle, cancellationToken);
+
+        if (duplicateUserStoryExists)
+        {
+            throw new InvalidOperationException("A user story with this name already exists.");
+        }
 
         if (request.AssignedToId.HasValue)
         {
@@ -30,7 +46,7 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, in
 
         var userStory = new Domain.Model.UserStory
         {
-            Title = request.Title,
+            Title = normalizedTitle,
             Description = request.Description,
             AcceptanceCriteria = request.AcceptanceCriteria,
             StoryPoints = request.StoryPoints,

@@ -7,13 +7,13 @@
       </button>
       <h1>User Story Management</h1>
     </div>
-    <button class="btn-create" (click)="createUserStory()">
+    <button class="btn-create" *ngIf="canManageUserStories" (click)="createUserStory()">
       <span class="icon">+</span>
       {{ showCreateForm ? 'Close form' : 'New User Story' }}
     </button>
   </div>
 
-  <div class="story-form-card" *ngIf="showCreateForm && sprintId !== null">
+  <div class="story-form-card" *ngIf="showCreateForm && sprintId !== null && canManageUserStories">
     <h2>Create a User Story</h2>
 
     <div class="story-form-grid">
@@ -122,10 +122,10 @@
       </div>
 
       <div class="card-footer">
-        <button class="btn-edit" (click)="editUserStory(story.id, $event)" title="Edit">
+        <button class="btn-edit" *ngIf="canManageUserStories" (click)="editUserStory(story.id, $event)" title="Edit">
           ✏️ Edit
         </button>
-        <button class="btn-delete" (click)="deleteUserStory(story.id, $event)" title="Delete" [disabled]="!canDeleteUserStory(story)">
+        <button class="btn-delete" *ngIf="canManageUserStories" (click)="deleteUserStory(story.id, $event)" title="Delete" [disabled]="!canDeleteUserStory(story)">
           🗑️ Delete
         </button>
       </div>
@@ -136,7 +136,7 @@
     <div class="empty-icon">📝</div>
     <h2>No user stories</h2>
     <p>Start by creating your first user story for this sprint</p>
-    <button class="btn-create-large" (click)="createUserStory()">
+    <button class="btn-create-large" *ngIf="canManageUserStories" (click)="createUserStory()">
       + Create my first user story
     </button>
   </div>

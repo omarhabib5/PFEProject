@@ -172,44 +172,58 @@ public class UserStoryController : ControllerBase
     [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult<int>> Create([FromBody] CreateUserStoryRequest request)
     {
-        var command = new CreateUserStoryCommand
+        try
         {
-            Title = request.Title,
-            Description = request.Description,
-            AcceptanceCriteria = request.AcceptanceCriteria,
-            StoryPoints = request.StoryPoints,
-            Priority = request.Priority,
-            SprintId = request.SprintId,
-            AssignedToId = request.AssignedToId,
-            Status = request.Status,
-            EstimatedDuration = request.EstimatedDuration,
-            CreatedById = GetCurrentUserId()
-        };
+            var command = new CreateUserStoryCommand
+            {
+                Title = request.Title,
+                Description = request.Description,
+                AcceptanceCriteria = request.AcceptanceCriteria,
+                StoryPoints = request.StoryPoints,
+                Priority = request.Priority,
+                SprintId = request.SprintId,
+                AssignedToId = request.AssignedToId,
+                Status = request.Status,
+                EstimatedDuration = request.EstimatedDuration,
+                CreatedById = GetCurrentUserId()
+            };
 
-        var result = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetById), new { id = result }, result);
+            var result = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id = result }, result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = "ProjectManager")]
     public async Task<ActionResult> Update(int id, [FromBody] UpdateUserStoryRequest request)
     {
-        var command = new UpdateUserStoryCommand
+        try
         {
-            Id = id,
-            Title = request.Title,
-            Description = request.Description,
-            AcceptanceCriteria = request.AcceptanceCriteria,
-            StoryPoints = request.StoryPoints,
-            Priority = request.Priority,
-            AssignedToId = request.AssignedToId,
-            SprintId = request.SprintId,
-            Status = request.Status,
-            EstimatedDuration = request.EstimatedDuration
-        };
+            var command = new UpdateUserStoryCommand
+            {
+                Id = id,
+                Title = request.Title,
+                Description = request.Description,
+                AcceptanceCriteria = request.AcceptanceCriteria,
+                StoryPoints = request.StoryPoints,
+                Priority = request.Priority,
+                AssignedToId = request.AssignedToId,
+                SprintId = request.SprintId,
+                Status = request.Status,
+                EstimatedDuration = request.EstimatedDuration
+            };
 
-        await _mediator.Send(command);
-        return NoContent();
+            await _mediator.Send(command);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     [HttpPatch("{id:int}/status")]

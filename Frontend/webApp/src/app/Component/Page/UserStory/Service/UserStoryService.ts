@@ -244,7 +244,7 @@ export class UserStoryService {
     );
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: number | string): Observable<void> {
     return this.withFallback(
       this.http.delete<void>(
         `${this.apiUrl}/${id}`,

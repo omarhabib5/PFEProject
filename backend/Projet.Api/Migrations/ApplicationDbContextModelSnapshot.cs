@@ -485,6 +485,8 @@ namespace Projet.Api.Migrations
 
                     b.HasIndex("ProjectId");
 
+                    b.HasIndex("ProjectId", "Title");
+
                     b.HasIndex("SprintId");
 
                     b.ToTable("UserStories");

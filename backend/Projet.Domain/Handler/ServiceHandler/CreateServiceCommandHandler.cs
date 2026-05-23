@@ -16,6 +16,20 @@ namespace Projet.Domain.Handler.ServiceHandler
 
         public async Task<int> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
         {
+            var normalizedName = request.name?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                throw new ArgumentException("Service name is required.");
+            }
+
+            var duplicateNameExists = await _context.Services
+                .AnyAsync(s => s.name != null && s.name.Trim().ToLower() == normalizedName.ToLower(), cancellationToken);
+
+            if (duplicateNameExists)
+            {
+                throw new InvalidOperationException("A service with this name already exists.");
+            }
+
           
             if (request.ResponsibleId.HasValue)
             {
@@ -33,7 +47,7 @@ namespace Projet.Domain.Handler.ServiceHandler
 
             var service = new Model.Service
             {
-                name = request.name,
+                name = normalizedName,
                 ResponsibleId = request.ResponsibleId
             };
 

@@ -75,6 +75,11 @@ export class ProjectManager implements OnInit {
     return this.tokenService.getUserRole() !== AppRole.ServiceManager;
   }
 
+  get canManageUserStories(): boolean {
+    const role = this.tokenService.getUserRole();
+    return role === AppRole.Admin || role === AppRole.ProjectManager;
+  }
+
  
   newProject: any = {
     name: '',
@@ -420,6 +425,11 @@ export class ProjectManager implements OnInit {
     if (!clickedInsideExportArea) {
       this.showExportMenu = false;
     }
+
+    const clickedInsideUserStoryActions = !!target.closest('.user-story-actions-menu');
+    if (!clickedInsideUserStoryActions) {
+      this.closeUserStoryMenu();
+    }
   }
 
   backToProjectsList(): void {
@@ -538,11 +548,12 @@ export class ProjectManager implements OnInit {
       this.newDetailUserStory.startDate = minDate || this.newDetailUserStory.startDate;
     }
 
-    if (!this.isDateInRange(this.newDetailUserStory.endDate, minDate, maxDate)) {
+    if (!this.isDateInRange(this.newDetailUserStory.endDate, minDate, maxDate)
+      || this.newDetailUserStory.endDate < this.newDetailUserStory.startDate) {
       this.newDetailUserStory.endDate = this.newDetailUserStory.startDate;
     }
 
-    this.newDetailUserStory.estimatedDuration = this.calculateEstimatedDurationDays(this.newDetailUserStory.startDate, this.newDetailUserStory.endDate);
+    this.newDetailUserStory.estimatedDuration = Math.max(1, this.calculateEstimatedDurationDays(this.newDetailUserStory.startDate, this.newDetailUserStory.endDate));
   }
 
   get detailSprintMinDateInput(): string {
@@ -704,12 +715,17 @@ export class ProjectManager implements OnInit {
     this.openSprintMenuId = null;
   }
 
-  toggleUserStoryMenu(storyId: string): void {
-    this.openUserStoryMenuId = this.openUserStoryMenuId === storyId ? null : storyId;
+  toggleUserStoryMenu(storyId: string | number): void {
+    const normalizedId = String(storyId ?? '');
+    this.openUserStoryMenuId = this.openUserStoryMenuId === normalizedId ? null : normalizedId;
   }
 
   closeUserStoryMenu(): void {
     this.openUserStoryMenuId = null;
+  }
+
+  getUserStoryMenuId(story: UserStoryDto): string {
+    return String(story.id ?? '');
   }
 
   getUserStoryStatusLabel(status: UserStoryStatus | State | number | undefined): string {
@@ -878,6 +894,11 @@ export class ProjectManager implements OnInit {
   }
 
   toggleDetailUserStoryForm(): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     this.showCreateUserStoryFormInDetails = !this.showCreateUserStoryFormInDetails;
     if (!this.showCreateUserStoryFormInDetails) {
       this.resetDetailUserStoryForm();
@@ -885,17 +906,27 @@ export class ProjectManager implements OnInit {
   }
 
   startEditDetailUserStory(story: UserStoryDto): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
     this.isEditingUserStoryInDetails = true;
     this.editingUserStoryDetailId = story.id;
     this.showCreateUserStoryFormInDetails = true;
 
+    const rawStartDate = (story as any)?.startDate;
+    const rawEndDate = (story as any)?.endDate;
+
     this.newDetailUserStory = {
       name: story.name || story.title || '',
       description: story.description || '',
+      startDate: rawStartDate ? this.formatDateForInput(new Date(rawStartDate)) : this.newDetailUserStory.startDate,
+      endDate: rawEndDate ? this.formatDateForInput(new Date(rawEndDate)) : this.newDetailUserStory.endDate,
 
       estimatedDuration: story.estimatedDuration ?? 1,
       userStoryState: story.userStoryState ?? this.mapStatusToState(story.status),
-      sprintId: story.sprintId,
+      sprintId: String(story.sprintId ?? ''),
       projectId: this.selectedProject?.id ?? 0
     };
 
@@ -903,11 +934,22 @@ export class ProjectManager implements OnInit {
   }
 
   createDetailUserStory(): void {
-    if (!this.validateDetailUserStoryForm() || !this.selectedProject?.id) {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
       return;
     }
 
     this.onDetailUserStoryDatesChange();
+
+    if (!this.validateDetailUserStoryForm() || !this.selectedProject?.id) {
+      return;
+    }
+
+    const normalizedName = String(this.newDetailUserStory.name ?? '').trim();
+    if (this.hasDuplicateDetailUserStoryName(normalizedName)) {
+      this.error = 'A user story with this name already exists in this project.';
+      return;
+    }
 
     this.loading = true;
     this.error = null;
@@ -917,7 +959,7 @@ export class ProjectManager implements OnInit {
       description: this.newDetailUserStory.description,
       startDate: new Date(this.newDetailUserStory.startDate),
       endDate: new Date(this.newDetailUserStory.endDate),
-      estimatedDuration: Number(this.newDetailUserStory.estimatedDuration),
+      estimatedDuration: Math.max(1, Number(this.newDetailUserStory.estimatedDuration)),
       userStoryState: Number(this.newDetailUserStory.userStoryState),
       projectId: this.selectedProject.id,
       sprintId: Number(this.newDetailUserStory.sprintId),
@@ -944,11 +986,22 @@ export class ProjectManager implements OnInit {
   }
 
   updateDetailUserStory(): void {
-    if (!this.validateDetailUserStoryForm() || !this.editingUserStoryDetailId || !this.selectedProject?.id) {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
       return;
     }
 
     this.onDetailUserStoryDatesChange();
+
+    if (!this.validateDetailUserStoryForm() || !this.editingUserStoryDetailId || !this.selectedProject?.id) {
+      return;
+    }
+
+    const normalizedName = String(this.newDetailUserStory.name ?? '').trim();
+    if (this.hasDuplicateDetailUserStoryName(normalizedName, this.editingUserStoryDetailId)) {
+      this.error = 'A user story with this name already exists in this project.';
+      return;
+    }
 
     this.loading = true;
     this.error = null;
@@ -959,7 +1012,7 @@ export class ProjectManager implements OnInit {
       description: this.newDetailUserStory.description,
       
     
-      estimatedDuration: Number(this.newDetailUserStory.estimatedDuration),
+      estimatedDuration: Math.max(1, Number(this.newDetailUserStory.estimatedDuration)),
       userStoryState: Number(this.newDetailUserStory.userStoryState),
       projectId: this.selectedProject.id,
       sprintId: Number(this.newDetailUserStory.sprintId),
@@ -984,6 +1037,24 @@ export class ProjectManager implements OnInit {
   }
 
   deleteDetailUserStory(storyId: string): void {
+    if (!this.canManageUserStories) {
+      this.error = 'You are not allowed to manage user stories.';
+      return;
+    }
+
+    const normalizedStoryId = String(storyId ?? '').trim();
+    if (!normalizedStoryId) {
+      this.error = 'Invalid user story identifier.';
+      return;
+    }
+
+    if (normalizedStoryId.startsWith('tmp-')) {
+      this.projectUserStories = this.projectUserStories.filter((story) => String(story.id) !== normalizedStoryId);
+      this.successMessage = 'User story removed from the local preview.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this user story? This action cannot be undone.')) {
       return;
     }
@@ -995,7 +1066,7 @@ export class ProjectManager implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.userStoryService.delete(Number(storyId)).subscribe({
+    this.userStoryService.delete(normalizedStoryId).subscribe({
       next: () => {
         this.successMessage = 'User story deleted successfully!';
         this.loadProjectUserStories(this.selectedProject!.id!);
@@ -1075,7 +1146,16 @@ export class ProjectManager implements OnInit {
   }
 
   canDeleteUserStory(story?: UserStoryDto | null): boolean {
-    return !!story && this.getUserStoryStateValue(story) === State.pending;
+    if (!story) {
+      return false;
+    }
+
+    const role = this.tokenService.getUserRole();
+    if (role === AppRole.Admin || role === AppRole.ProjectManager) {
+      return true;
+    }
+
+    return this.getUserStoryStateValue(story) === State.pending;
   }
 
   private loadProjectSprints(projectId: number): void {
@@ -1155,6 +1235,13 @@ export class ProjectManager implements OnInit {
       return false;
     }
 
+    const startDate = new Date(this.newDetailUserStory.startDate);
+    const endDate = new Date(this.newDetailUserStory.endDate);
+    if (startDate > endDate) {
+      this.error = 'User story end date must be on or after start date';
+      return false;
+    }
+
     if (!this.isDateInRange(this.newDetailUserStory.startDate, this.detailUserStoryMinDateInput, this.detailUserStoryMaxDateInput)
       || !this.isDateInRange(this.newDetailUserStory.endDate, this.detailUserStoryMinDateInput, this.detailUserStoryMaxDateInput)) {
       this.error = 'User story dates must be within the selected sprint date interval';
@@ -1162,6 +1249,25 @@ export class ProjectManager implements OnInit {
     }
 
     return true;
+  }
+
+  private hasDuplicateDetailUserStoryName(name: string, excludeId?: string | null): boolean {
+    const normalized = String(name ?? '').trim().toLowerCase();
+    if (!normalized) {
+      return false;
+    }
+
+    const excluded = excludeId != null ? String(excludeId) : null;
+
+    return this.projectUserStories.some((story) => {
+      const storyId = String(story.id ?? '');
+      if (excluded !== null && storyId === excluded) {
+        return false;
+      }
+
+      const candidate = String(story.name ?? story.title ?? '').trim().toLowerCase();
+      return candidate === normalized;
+    });
   }
 
   private getSelectedDetailSprint(): Sprint | undefined {

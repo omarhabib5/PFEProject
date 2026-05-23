@@ -48,11 +48,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>User Story</label>
-                    <select [(ngModel)]="formModel.userStoryId" (ngModelChange)="onUserStoryChange()" [disabled]="selectedUserStoryId !== null">
-                        <option [ngValue]="0" disabled>Select a user story</option>
-                        <option *ngFor="let story of userStories" [ngValue]="+story.id">
-                            {{ story.name || story.title || ('US #' + story.id) }}
+                    <label>Sprint</label>
+                    <select [(ngModel)]="formModel.sprintId" (ngModelChange)="onSprintChange()" [disabled]="selectedProjectSprints.length === 0">
+                        <option [ngValue]="0" disabled>Select a sprint</option>
+                        <option *ngFor="let sprint of selectedProjectSprints" [ngValue]="+sprint.id">
+                            {{ sprint.name }}
                         </option>
                     </select>
                 </div>
