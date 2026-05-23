@@ -1141,11 +1141,27 @@ export class ResponsableServiceDashboard implements OnInit, OnDestroy {
     );
   }
 
-  VerifierSprint(): void {
+  VerifierSprint(): void {  
     const projectId = Number(this.sprintForm.projectId ?? 0);
     const name = this.sprintForm.name.trim();
+    const nameLower = name.toLowerCase();
     const startDate = this.sprintForm.startDate;
     const endDate = this.sprintForm.endDate;
+
+    if (projectId && nameLower) {
+      const sprintConflict = this.availableSprints.some(s =>
+        Number(s.projectId ?? 0) === projectId &&
+        String(s.name ?? '').trim().toLowerCase() === nameLower &&
+      
+        (!(this.sprintFormMode === 'edit' && this.editingSprintId) || Number(s.id ?? 0) !== Number(this.editingSprintId))
+      );
+
+      if (sprintConflict) {
+        this.error = 'A sprint with this name already exists in this project.';
+        this.sprintSubmitting = false;
+        return;
+      }
+    }
 
     if (!projectId || !name || !startDate || !endDate) {
       this.error = 'Name, project, start date, and end date are required.';

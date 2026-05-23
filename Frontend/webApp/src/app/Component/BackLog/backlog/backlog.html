@@ -16,10 +16,10 @@
 		<div class="banner banner-loading" *ngIf="loading">Loading backlog...</div>
 		<div class="banner banner-error" *ngIf="!loading && errorMessage">{{ errorMessage }}</div>
 		<div class="banner banner-info" *ngIf="!loading && selectedProjectId !== null && !filterProjectNotFound">
-			Showing backlog for project #{{ selectedProjectId }}.
+			Showing backlog for {{ getSelectedProjectLabel() }}.
 		</div>
 		<div class="banner banner-error" *ngIf="!loading && filterProjectNotFound">
-			Project {{ selectedProjectId }} was not found in loaded projects.
+			{{ getSelectedProjectLabel() }} was not found in loaded projects.
 		</div>
 
 		<div class="empty-state" *ngIf="!loading && !errorMessage && projectBacklogs.length === 0">

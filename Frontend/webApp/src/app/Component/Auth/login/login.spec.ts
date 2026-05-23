@@ -1,31 +1,30 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
-
-import 'jasmine';
+import { vi } from 'vitest';
 
 import { Login } from './login';
 import { AuthService } from '../Service/auth.service';
 import { RoleGuard } from '../Service/role.guard';
 
 const mockAuthService = {
-  isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(false),
-  login: jasmine.createSpy('login').and.returnValue(of({})),
-  forgotPassword: jasmine.createSpy('forgotPassword').and.returnValue(of({})),
+  isAuthenticated: vi.fn().mockReturnValue(false),
+  login: vi.fn().mockReturnValue(of({})),
+  forgotPassword: vi.fn().mockReturnValue(of({})),
 };
 
 const mockRoleGuard = {
-  redirectToDashboard: jasmine.createSpy('redirectToDashboard'),
+  redirectToDashboard: vi.fn(),
 };
 
 const mockRouter = {
-  navigate: jasmine.createSpy('navigate'),
-  navigateByUrl: jasmine.createSpy('navigateByUrl').and.returnValue(Promise.resolve(true)),
+  navigate: vi.fn(),
+  navigateByUrl: vi.fn().mockResolvedValue(true),
   url: '/',
-  parseUrl: jasmine.createSpy('parseUrl').and.returnValue({ queryParams: {} }),
+  parseUrl: vi.fn().mockReturnValue({ queryParams: {} }),
 };
 
 
@@ -33,11 +32,10 @@ const mockRouter = {
   let fixture: ComponentFixture<Login>;
 
   beforeEach(async () => {
-    
-    mockAuthService.isAuthenticated.calls.reset();
-    mockAuthService.login.calls.reset();
-    mockAuthService.forgotPassword.calls.reset();
-    mockRoleGuard.redirectToDashboard.calls.reset();
+    mockAuthService.isAuthenticated.mockClear();
+    mockAuthService.login.mockClear();
+    mockAuthService.forgotPassword.mockClear();
+    mockRoleGuard.redirectToDashboard.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [Login, ReactiveFormsModule],
@@ -70,13 +68,14 @@ const mockRouter = {
     });
 
     it('TC03 – devrait rediriger vers le dashboard si déjà authentifié', () => {
-      mockAuthService.isAuthenticated.and.returnValue(true);
+      mockAuthService.isAuthenticated.mockReturnValue(true);
       component.ngOnInit();
       expect(mockRoleGuard.redirectToDashboard).toHaveBeenCalled();
     });
 
     it('TC04 – ne devrait pas rediriger si non authentifié', () => {
-      mockAuthService.isAuthenticated.and.returnValue(false);
+      mockRoleGuard.redirectToDashboard.mockClear();
+      mockAuthService.isAuthenticated.mockReturnValue(false);
       component.ngOnInit();
       expect(mockRoleGuard.redirectToDashboard).not.toHaveBeenCalled();
     });
@@ -133,7 +132,7 @@ const mockRouter = {
     });
 
     it('TC12 – devrait appeler AuthService.login avec les bonnes données', () => {
-      mockAuthService.login.and.returnValue(of({}));
+      mockAuthService.login.mockReturnValue(of({}));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: 'Admin@123',
@@ -147,20 +146,19 @@ const mockRouter = {
       });
     });
 
-    it('TC13 – devrait rediriger vers le dashboard après connexion réussie', fakeAsync(() => {
-      mockAuthService.login.and.returnValue(of({}));
+    it('TC13 – devrait rediriger vers le dashboard après connexion réussie', () => {
+      mockAuthService.login.mockReturnValue(of({}));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: 'Admin@123',
         rememberMe: false,
       });
       component.onSubmit();
-      tick();
       expect(mockRoleGuard.redirectToDashboard).toHaveBeenCalled();
-    }));
+    });
 
-    it('TC14 – devrait effacer le message d\'erreur après connexion réussie', fakeAsync(() => {
-      mockAuthService.login.and.returnValue(of({}));
+    it('TC14 – devrait effacer le message d\'erreur après connexion réussie', () => {
+      mockAuthService.login.mockReturnValue(of({}));
       component.errorMessage = 'Erreur précédente';
       component.form.setValue({
         email: 'admin@poulina.com',
@@ -168,35 +166,32 @@ const mockRouter = {
         rememberMe: false,
       });
       component.onSubmit();
-      tick();
       expect(component.errorMessage).toBe('');
-    }));
+    });
 
-    it('TC15 – devrait afficher un message d\'erreur si login échoue (HTTP 401)', fakeAsync(() => {
+    it('TC15 – devrait afficher un message d\'erreur si login échoue (HTTP 401)', () => {
       const error = new HttpErrorResponse({ status: 401, error: 'Invalid credentials' });
-      mockAuthService.login.and.returnValue(throwError(() => error));
+      mockAuthService.login.mockReturnValue(throwError(() => error));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: 'wrongpassword',
         rememberMe: false,
       });
       component.onSubmit();
-      tick();
       expect(component.errorMessage).toBe('Invalid credentials');
-    }));
+    });
 
-    it('TC16 – isLoading doit être false après une erreur de connexion', fakeAsync(() => {
+    it('TC16 – isLoading doit être false après une erreur de connexion', () => {
       const error = new HttpErrorResponse({ status: 500, error: 'Server error' });
-      mockAuthService.login.and.returnValue(throwError(() => error));
+      mockAuthService.login.mockReturnValue(throwError(() => error));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: 'Admin@123',
         rememberMe: false,
       });
       component.onSubmit();
-      tick();
-      expect(component.isLoading).toBeFalse();
-    }));
+      expect(component.isLoading).toBeFalsy();
+    });
 
   });
 
@@ -217,41 +212,38 @@ const mockRouter = {
       expect(component.errorMessage).toBe('Enter a valid email address to reset your password.');
     });
 
-    it('TC19 – devrait appeler forgotPassword avec email valide', fakeAsync(() => {
-      mockAuthService.forgotPassword.and.returnValue(of({}));
+    it('TC19 – devrait appeler forgotPassword avec email valide', () => {
+      mockAuthService.forgotPassword.mockReturnValue(of({}));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: '',
         rememberMe: false,
       });
       component.onForgotPassword();
-      tick();
       expect(mockAuthService.forgotPassword).toHaveBeenCalledWith({ email: 'admin@poulina.com' });
-    }));
+    });
 
-    it('TC20 – devrait afficher message de succès après envoi email reset', fakeAsync(() => {
-      mockAuthService.forgotPassword.and.returnValue(of({}));
+    it('TC20 – devrait afficher message de succès après envoi email reset', () => {
+      mockAuthService.forgotPassword.mockReturnValue(of({}));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: '',
         rememberMe: false,
       });
       component.onForgotPassword();
-      tick();
       expect(component.infoMessage).toContain('lien de reinitialisation');
-    }));
+    });
 
-    it('TC21 – devrait afficher erreur si l\'API forgotPassword échoue', fakeAsync(() => {
+    it('TC21 – devrait afficher erreur si l\'API forgotPassword échoue', () => {
       const error = new HttpErrorResponse({ status: 500, error: 'Server error' });
-      mockAuthService.forgotPassword.and.returnValue(throwError(() => error));
+      mockAuthService.forgotPassword.mockReturnValue(throwError(() => error));
       component.form.setValue({
         email: 'admin@poulina.com',
         password: '',
         rememberMe: false,
       });
       component.onForgotPassword();
-      tick();
       expect(component.errorMessage).toBeTruthy();
-    }));
+    });
 
   });

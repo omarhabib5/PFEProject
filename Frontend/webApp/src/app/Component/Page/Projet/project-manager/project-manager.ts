@@ -263,6 +263,7 @@ export class ProjectManager implements OnInit {
       return;
     }
 
+
     this.onProjectDatesChange();
 
     this.loading = true;
@@ -274,6 +275,20 @@ export class ProjectManager implements OnInit {
       endDate: new Date(this.newProject.endDate),
       projectState: Number(this.newProject.projectState)
     };
+    const newName = projectData.name.trim();
+    if(!newName){
+      this.error='PROJECT NAME IS REQUIRED'
+    
+      return;
+    }
+   const nameExists = this.allProjects.some(p =>
+  String(p.name ?? '').trim().toLowerCase() === newName
+);
+if (nameExists) {
+  this.error = 'project already exist';
+  this.loading = false;
+  return;
+}
 
     this.projectService.createProject(projectData).subscribe({
       next: (response) => {
@@ -333,7 +348,20 @@ export class ProjectManager implements OnInit {
       teamId: this.newProject.teamId,
       projectManagerId: this.newProject.projectManagerId,
     };
-
+const updatedName = (this.newProject.name ?? '').trim().toLowerCase();
+if (!updatedName) {
+  this.error = 'Project name is required';
+  return;
+}
+const nameConflict = this.allProjects.some(p =>
+  p.id !== this.editingProjectId &&
+  String(p.name ?? '').trim().toLowerCase() === updatedName
+);
+if (nameConflict) {
+  this.error = 'A project with this name already exists.';
+  this.loading = false;
+  return;
+}
     this.projectService.updateProject(this.editingProjectId, updateData).subscribe({
       next: () => {
         this.successMessage = 'Project updated successfully!';
