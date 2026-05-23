@@ -314,6 +314,7 @@ export class TaskManager implements OnInit {
 
     if (duplicateTask) {
       this.error = 'Task already exists in this sprint.';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -367,6 +368,12 @@ export class TaskManager implements OnInit {
 
     if (!this.canDeleteTask(task)) {
       this.error = 'Only admin or service manager can delete tasks.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.normalizeStatus(task.status) !== 'pending') {
+      this.error = 'You can delete a task only when it is pending ';
       this.cdr.detectChanges();
       return;
     }
@@ -762,6 +769,7 @@ export class TaskManager implements OnInit {
 
   private afterSaveError(message: string): void {
     this.error = message;
+    this.cdr.detectChanges();
   }
 
   private buildSaveError(error: unknown, fallback: string): string {
@@ -772,6 +780,10 @@ export class TaskManager implements OnInit {
 
       const apiMessage = String(error.error?.message || error.error?.title || '').trim();
       const normalizedMessage = apiMessage.toLowerCase();
+
+      if (normalizedMessage.includes('only when it is pending') || normalizedMessage.includes('delete a task only when it is pending')) {
+        return 'You can delete a task only when it is pending ';
+      }
 
       if (error.status === 409 || normalizedMessage.includes('already exists') || normalizedMessage.includes('already exist')) {
         return 'Task already exists in this sprint.';

@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="LdU0vBzq-CpmZhxiRkWu">
-    <mxGraphModel dx="1795" dy="629" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1843" dy="612" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -91,7 +91,7 @@
         <mxCell id="k30wX7ti6zBrQKLy0i19-4" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
           <mxGeometry height="700" width="10" x="85" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="k30wX7ti6zBrQKLy0i19-5" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;align=center;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;span&gt;Saisir (title,description,&lt;/span&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;complexité,dates,sprint,&lt;/span&gt;&lt;div&gt;userStory,assigned employee )&lt;/div&gt;">
+        <mxCell id="k30wX7ti6zBrQKLy0i19-5" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;align=center;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;span&gt;Saisir (title,description,&lt;/span&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;complexité,dates,sprint,&lt;/span&gt;&lt;div&gt;assigned employee )&lt;/div&gt;">
           <mxGeometry relative="1" width="80" as="geometry">
             <mxPoint x="95" y="620" as="sourcePoint" />
             <mxPoint x="350" y="620" as="targetPoint" />
@@ -150,19 +150,19 @@
             <mxPoint x="1577.3199999999997" y="1028.1999999999998" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="k30wX7ti6zBrQKLy0i19-19" parent="1" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=#6c8ebf;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;fontSize=15;fillColor=#dae8fc;" value="[Si les dates ne respectent pas la periode du sprint ]" vertex="1">
+        <mxCell id="k30wX7ti6zBrQKLy0i19-19" parent="1" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=#6c8ebf;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;fontSize=15;fillColor=#dae8fc;" value="[titre deja existe ]" vertex="1">
           <mxGeometry height="26" width="410" x="440" y="940" as="geometry" />
         </mxCell>
         <mxCell id="k30wX7ti6zBrQKLy0i19-20" parent="1" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=#6c8ebf;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;fontSize=15;fillColor=#dae8fc;" value="[else]" vertex="1">
           <mxGeometry height="26" width="80" x="250" y="1030" as="geometry" />
         </mxCell>
-        <mxCell id="k30wX7ti6zBrQKLy0i19-21" edge="1" parent="1" source="k30wX7ti6zBrQKLy0i19-8" style="html=1;verticalAlign=bottom;endArrow=classic;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=0.452;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.743;entryDx=0;entryDy=0;entryPerimeter=0;endFill=1;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" target="EcAngxDz3j2OgGnYXpdC-13" value="Afficher (&quot;Tasks dates must be within the sprint perio">
+        <mxCell id="k30wX7ti6zBrQKLy0i19-21" edge="1" parent="1" source="k30wX7ti6zBrQKLy0i19-8" style="html=1;verticalAlign=bottom;endArrow=classic;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=0.452;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.743;entryDx=0;entryDy=0;entryPerimeter=0;endFill=1;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" target="EcAngxDz3j2OgGnYXpdC-13" value="Afficher (&quot;task already existe in this sprint&quot;)">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="590" y="1000" as="sourcePoint" />
             <mxPoint x="510" y="1000" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="k30wX7ti6zBrQKLy0i19-22" edge="1" parent="1" source="k30wX7ti6zBrQKLy0i19-8" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;font&gt;Saisir (title,description,&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;complexité,dates,sprint,&lt;/span&gt;&lt;/font&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;userStory,assigned employee )&lt;/span&gt;">
+        <mxCell id="k30wX7ti6zBrQKLy0i19-22" edge="1" parent="1" source="k30wX7ti6zBrQKLy0i19-8" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;fontSize=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;font&gt;Saisir (title,description,&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;complexité,dates,sprint,&lt;/span&gt;&lt;/font&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;assigned employee )&lt;/span&gt;">
           <mxGeometry relative="1" width="80" as="geometry">
             <mxPoint x="1340" y="1070" as="sourcePoint" />
             <mxPoint x="1460" y="1070" as="targetPoint" />
