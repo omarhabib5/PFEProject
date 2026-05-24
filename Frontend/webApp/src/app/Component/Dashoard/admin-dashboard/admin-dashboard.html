@@ -301,7 +301,7 @@
                 <div class="calendar-grid">
                     <div class="day calendar-day" *ngFor="let cell of calendarCells" [class.outside]="!cell.inCurrentMonth" [class.project-end-day]="hasProjectEndingOnDate(cell.date)" [class.today]="cell.isToday">
                         <div class="calendar-day-head">
-                            <span class="calendar-day-number">{{ cell.date.getDate() }}</span>
+                            <span class="calendar-day-number">{{ cell.date.getDate() }}</span> 
                             <small class="calendar-day-count" *ngIf="getProjectsOnDate(cell.date).length > 0">{{ getProjectsOnDate(cell.date).length }}</small>
                         </div>
 

@@ -975,13 +975,6 @@ private adminNotificationsSubscription: Subscription | null = null;
 
   private toUiProjectCard(item: project): UiProjectCard {
     const state = Number(item.projectState);
-    const progressMap: Record<number, number> = {
-      [State.pending]: 10,
-      [State.todo]: 30,
-      [State.inProgress]: 60,
-      [State.done]: 100,
-      [State.validated]: 100
-    };
 
     const stateLabelMap: Record<number, string> = {
       [State.pending]: 'Pending',
@@ -1003,7 +996,7 @@ private adminNotificationsSubscription: Subscription | null = null;
       id: item.id ?? 0,
       name: item.name,
       description: item.description || 'No description',
-      progress: progressMap[state] ?? 0,
+      progress: this.getProjectProgressPercent(item),
       statusLabel: stateLabelMap[state] ?? 'Unknown',
       statusClass: stateClassMap[state] ?? 'pending',
       dueDate: this.formatDate(item.endDate),
@@ -1241,14 +1234,52 @@ private adminNotificationsSubscription: Subscription | null = null;
   private getProjectProgressCounts(): { veryLow: number; low: number; medium: number; high: number } {
     const counts = { veryLow: 0, low: 0, medium: 0, high: 0 };
 
-    this.projectCards.forEach((item) => {
-      if (item.progress <= 25) counts.veryLow += 1;
-      else if (item.progress <= 50) counts.low += 1;
-      else if (item.progress <= 75) counts.medium += 1;
+    this.projects.forEach((item) => {
+      const progress = this.getProjectProgressPercent(item);
+
+      if (progress <= 25) counts.veryLow += 1;
+      else if (progress <= 50) counts.low += 1;
+      else if (progress <= 75) counts.medium += 1;
       else counts.high += 1;
     });
 
     return counts;
+  }
+
+  private getProjectProgressPercent(projectItem: project): number {
+    const projectId = Number(projectItem.id ?? 0);
+    const projectStories = this.userStories.filter((story) => Number((story as any)?.projectId ?? 0) === projectId);
+    const projectStoryIds = new Set(
+      projectStories
+        .map((story) => Number((story as any)?.numericId ?? story.id ?? 0))
+        .filter((id) => id > 0)
+    );
+    const projectTasks = this.tasks.filter((task) => projectStoryIds.has(Number(task.userStoryId ?? 0)));
+
+    if (projectTasks.length > 0) {
+      const completedTasks = projectTasks.filter((task) => {
+        const state = this.normalizeStatus(task.status);
+        return state === 'done' || state === 'validated';
+      }).length;
+
+      return Math.round((completedTasks / projectTasks.length) * 100);
+    }
+
+    if (projectStories.length > 0) {
+      const completedStories = projectStories.filter((story) => {
+        const statusText = String(story?.status ?? '').toLowerCase();
+        const stateValue = Number((story as any)?.userStoryState ?? -1);
+        return statusText.includes('done') || stateValue === 3 || stateValue === 4;
+      }).length;
+
+      return Math.round((completedStories / projectStories.length) * 100);
+    }
+
+    const state = Number(projectItem.projectState);
+    if (state === State.done || state === State.validated) return 100;
+    if (state === State.inProgress) return 65;
+    if (state === State.todo) return 30;
+    return 10;
   }
 
   private isProjectDelayed(item: project): boolean {
