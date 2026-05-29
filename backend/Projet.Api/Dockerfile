@@ -16,5 +16,6 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 443
+ENV ASPNETCORE_URLS="https://+:443;http://+:8080"
 ENTRYPOINT ["dotnet", "Projet.Api.dll"]

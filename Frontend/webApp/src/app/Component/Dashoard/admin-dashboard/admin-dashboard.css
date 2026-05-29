@@ -67,7 +67,7 @@
   flex-direction: column;
   gap: 8px;
   box-shadow: var(--shadow-2);
-  position: fixed; /* keep sidebar visible */
+  position: fixed;
   left: 0;
   top: 5;
   height: 103vh;

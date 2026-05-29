@@ -84,7 +84,7 @@ namespace Projet.Api.Controller
                 }
                 catch
                 {
-                    // Notification failure should not block sprint creation.
+                    
                 }
 
                 return CreatedAtAction(nameof(GetById), new { id = sprintId }, new { message = "Sprint created", id = sprintId });

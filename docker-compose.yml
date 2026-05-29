@@ -23,12 +23,23 @@ services:
     container_name: pfe-backend
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
-      ASPNETCORE_URLS: http://+:8080
-      UseHttpsRedirection: "false"
+      ASPNETCORE_URLS: "https://+:443;http://+:8080"
+      UseHttpsRedirection: "true"
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetcert.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${ASPNETCORE_Kestrel__Certificates__Default__Password:-changeme}
       ConnectionStrings__DefaultConnection: Server=db;Database=${MSSQL_DB:-ProjetPFE};User Id=sa;Password=${SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True;
+      EmailSettings__SmtpHost: smtp.gmail.com
+      EmailSettings__SmtpPort: 587
+      EmailSettings__FromEmail: zegnanirayen09@gmail.com
+      EmailSettings__FromName: Company HR Department
+      EmailSettings__Username: zegnanirayen09@gmail.com
+      EmailSettings__Password: "cbma zokx wjfp rsuk"
 
     ports:
-      - "${BACKEND_PORT:-7219}:8080"
+      - "${BACKEND_PORT:-5046}:8080"
+      - "${BACKEND_HTTPS_PORT:-7443}:443"
+    volumes:
+      - ./certs:/https:ro
     depends_on:
       db:
         condition: service_healthy

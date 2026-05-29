@@ -828,7 +828,7 @@ export class TaskManager implements OnInit {
     if (normalized === 'in-progress' || normalized === 'inprogress') return 'inProgress';
     if (normalized === 'done') return 'done';
     if (normalized === 'validated') return 'validated';
-    return 'pending';
+    return 'todo';
   }
 
   private getEmptyForm(): CreateTaskRequest {
@@ -837,7 +837,7 @@ export class TaskManager implements OnInit {
       title: '',
       description: '',
       estimatedHours: 1,
-      status: 'pending',
+      status: 'todo',
       complexity: 1,
       startDate: today,
       endDate: today,

@@ -107,17 +107,17 @@ export class ObserverDashboard implements OnInit {
   tasks: TaskDto[] = [];
   private availableTeams: Team[] = [];
 
-  // ✅ FIX: Getters pour passer les bons inputs au KanbanComponent sans null projectId
+
   get kanbanProjectId(): number | null {
     return this.selectedProjectId === 'all' ? null : Number(this.selectedProjectId);
   }
 
   get kanbanAllowedProjectIds(): number[] {
-    // Si un projet spécifique est sélectionné, on passe [] car projectId suffit
+    
     if (this.selectedProjectId !== 'all') {
       return [];
     }
-    // Si "all", on passe tous les projectIds de l'observer
+    
     return this.observerProjectIds;
   }
 
