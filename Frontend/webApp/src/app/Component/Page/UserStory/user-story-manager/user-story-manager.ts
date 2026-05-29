@@ -8,6 +8,7 @@ import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { TokenService } from '../../../Auth/Service/token.service';
 import { AppRole } from '../../../Auth/model/auth.model';
+import { Sprint, SprintService } from '../../Sprint/Service/SprintService';
 
 @Component({
   selector: 'app-user-story-manager',
@@ -19,6 +20,8 @@ import { AppRole } from '../../../Auth/model/auth.model';
 export class UserStoryManagerComponent implements OnInit {
   userStories: UserStoryDto[] = [];
   sprintId: number | null = null;
+  sprint: Sprint | null = null;
+  projectId: number | null = null;
   loading: boolean = false;
   error: string = '';
   showCreateForm = false;
@@ -44,6 +47,7 @@ export class UserStoryManagerComponent implements OnInit {
 
   constructor(
     private userStoryService: UserStoryService,
+    private sprintService: SprintService,
     private route: Router,
     private activatedRoute: ActivatedRoute,
     private tokenService: TokenService,
@@ -62,12 +66,37 @@ export class UserStoryManagerComponent implements OnInit {
       this.sprintId = Number.isFinite(sprintIdParam) && sprintIdParam > 0 ? sprintIdParam : null;
       if (this.sprintId !== null) {
         this.createForm.sprintId = this.sprintId;
-        this.loadUserStories();
+        this.loadSprintContext();
       } else {
         this.loading = false;
         this.error = 'Sprint invalide pour charger les user stories';
       }
     });
+  }
+
+  private loadSprintContext(): void {
+    if (this.sprintId === null) {
+      this.error = 'Sprint invalide pour charger les user stories';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    this.sprintService.getSprintById(this.sprintId)
+      .pipe(timeout(10000))
+      .subscribe({
+        next: (sprint) => {
+          this.sprint = sprint;
+          this.projectId = Number((sprint as any)?.projectId ?? (sprint as any)?.ProjectId ?? 0) || null;
+          this.loadUserStories();
+        },
+        error: (err: unknown) => {
+          this.loading = false;
+          this.error = this.extractErrorMessage(err, 'Erreur lors du chargement du sprint');
+          console.error(err);
+        }
+      });
   }
 
   loadUserStories(): void {
@@ -243,7 +272,7 @@ export class UserStoryManagerComponent implements OnInit {
       endDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
       estimatedDuration: 1,
       userStoryState: 1,
-      projectId: 0,
+      projectId: this.projectId ?? 0,
       sprintId: this.sprintId,
     };
 
@@ -322,7 +351,7 @@ export class UserStoryManagerComponent implements OnInit {
 
       estimatedDuration: Number(story.estimatedDuration ?? 1),
       userStoryState: Number(story.userStoryState ?? 1),
-      projectId: 0,
+      projectId: this.projectId ?? Number((story as any)?.projectId ?? 0),
       sprintId: Number(story.sprintId ?? this.sprintId ?? 0),
       acceptanceCriteria,
       storyPoints,

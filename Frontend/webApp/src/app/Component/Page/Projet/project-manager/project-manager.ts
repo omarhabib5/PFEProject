@@ -77,7 +77,19 @@ export class ProjectManager implements OnInit {
 
   get canManageUserStories(): boolean {
     const role = this.tokenService.getUserRole();
-    return role === AppRole.Admin || role === AppRole.ProjectManager;
+    if (role === AppRole.Admin || role === AppRole.ProjectManager) {
+      return true;
+    }
+
+    const rawRole = this.tokenService.getUserData()?.role;
+    const normalized = String(rawRole ?? '').trim().toLowerCase();
+    return normalized === 'admin'
+      || normalized === 'administrator'
+      || normalized === 'projectmanager'
+      || normalized === 'project manager'
+      || normalized === 'project-manager'
+      || normalized === 'chefprojet'
+      || normalized === 'chefdeprojet';
   }
 
  
@@ -131,6 +143,9 @@ export class ProjectManager implements OnInit {
   newDetailUserStory: any = {
     name: '',
     description: '',
+    acceptanceCriteria: '',
+    storyPoints: 1,
+    priority: 3,
     startDate: this.formatDateForInput(new Date()),
     endDate: this.formatDateForInput(new Date(Date.now() + 24 * 60 * 60 * 1000)),
     estimatedDuration: 1,
@@ -414,6 +429,7 @@ if (nameConflict) {
     this.detailTab = 'overview';
     this.resetDetailForms();
     this.loadSelectedProjectMembers(project);
+    this.syncProjectContextToUrl(project.id ?? null, this.detailTab);
     if (project.id) {
       this.loadProjectSprints(project.id);
       this.loadProjectUserStories(project.id);
@@ -473,6 +489,7 @@ if (nameConflict) {
     this.projectSprints = [];
     this.projectUserStories = [];
     this.resetDetailForms();
+    this.syncProjectContextToUrl(null, 'overview');
     this.applyServiceFilter();
   }
 
@@ -485,6 +502,8 @@ if (nameConflict) {
     if (!this.selectedProject?.id) {
       return;
     }
+
+    this.syncProjectContextToUrl(this.selectedProject.id, tab);
 
     if (tab === 'sprints') {
       this.loadProjectSprints(this.selectedProject.id);
@@ -949,6 +968,9 @@ if (nameConflict) {
     this.newDetailUserStory = {
       name: story.name || story.title || '',
       description: story.description || '',
+      acceptanceCriteria: story.acceptanceCriteria || '',
+      storyPoints: Number(story.storyPoints ?? 1),
+      priority: Number((story as any)?.priority ?? 3),
       startDate: rawStartDate ? this.formatDateForInput(new Date(rawStartDate)) : this.newDetailUserStory.startDate,
       endDate: rawEndDate ? this.formatDateForInput(new Date(rawEndDate)) : this.newDetailUserStory.endDate,
 
@@ -985,10 +1007,15 @@ if (nameConflict) {
     const request: CreateUserStoryRequest = {
       name: this.newDetailUserStory.name,
       description: this.newDetailUserStory.description,
+      title: this.newDetailUserStory.name,
+      acceptanceCriteria: String(this.newDetailUserStory.acceptanceCriteria ?? '').trim(),
+      storyPoints: Math.max(1, Number(this.newDetailUserStory.storyPoints ?? 1)),
+      priority: Math.min(5, Math.max(1, Number(this.newDetailUserStory.priority ?? 3))),
       startDate: new Date(this.newDetailUserStory.startDate),
       endDate: new Date(this.newDetailUserStory.endDate),
       estimatedDuration: Math.max(1, Number(this.newDetailUserStory.estimatedDuration)),
       userStoryState: Number(this.newDetailUserStory.userStoryState),
+      status: this.mapStatusToState(this.newDetailUserStory.userStoryState),
       projectId: this.selectedProject.id,
       sprintId: Number(this.newDetailUserStory.sprintId),
     };
@@ -1038,10 +1065,13 @@ if (nameConflict) {
       id: Number(this.editingUserStoryDetailId),
       name: this.newDetailUserStory.name,
       description: this.newDetailUserStory.description,
-      
-    
+      title: this.newDetailUserStory.name,
+      acceptanceCriteria: String(this.newDetailUserStory.acceptanceCriteria ?? '').trim(),
+      storyPoints: Math.max(1, Number(this.newDetailUserStory.storyPoints ?? 1)),
+      priority: Math.min(5, Math.max(1, Number(this.newDetailUserStory.priority ?? 3))),
       estimatedDuration: Math.max(1, Number(this.newDetailUserStory.estimatedDuration)),
       userStoryState: Number(this.newDetailUserStory.userStoryState),
+      status: this.mapStatusToState(this.newDetailUserStory.userStoryState),
       projectId: this.selectedProject.id,
       sprintId: Number(this.newDetailUserStory.sprintId),
     };
@@ -1230,6 +1260,20 @@ if (nameConflict) {
     });
   }
 
+  private syncProjectContextToUrl(projectId: number | null, detailTab: 'overview' | 'stories' | 'sprints'): void {
+    const queryParams: Record<string, string | number | null> = {
+      serviceId: this.selectedServiceFilter,
+      projectId,
+      detailTab: projectId ? detailTab : null
+    };
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      replaceUrl: true
+    });
+  }
+
   private validateDetailSprintForm(): boolean {
     if (!this.newDetailSprint.name || this.newDetailSprint.name.trim() === '') {
       this.error = 'Sprint name is required';
@@ -1350,6 +1394,9 @@ if (nameConflict) {
     this.newDetailUserStory = {
       name: '',
       description: '',
+      acceptanceCriteria: '',
+      storyPoints: 1,
+      priority: 3,
       startDate: this.formatDateForInput(new Date()),
       endDate: this.formatDateForInput(new Date(Date.now() + 24 * 60 * 60 * 1000)),
       estimatedDuration: 1,
@@ -1371,11 +1418,11 @@ if (nameConflict) {
       name: request.name,
       title: request.name,
       description: request.description,
- 
+      acceptanceCriteria: request.acceptanceCriteria || '',
+      storyPoints: Number(request.storyPoints ?? 0),
       estimatedDuration: request.estimatedDuration,
       userStoryState: request.userStoryState,
-      acceptanceCriteria: '',
-      storyPoints: 0,
+      priority: Number(request.priority ?? 3),
   
       status: State.todo,
       sprintId: String(request.sprintId),

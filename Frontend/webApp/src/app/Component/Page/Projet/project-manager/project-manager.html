@@ -398,12 +398,41 @@
                 [disabled]="loading"></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
+            <div class="mb-4">
+              <label for="storyAcceptanceCriteria" class="block mb-2 text-gray-700 font-medium">Acceptance Criteria</label>
+              <textarea
+                id="storyAcceptanceCriteria"
+                [(ngModel)]="newDetailUserStory.acceptanceCriteria"
+                name="storyAcceptanceCriteria"
+                rows="3"
+                class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                [disabled]="loading"></textarea>
+            </div>
 
-              
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="mb-4">
+                <label for="storyPoints" class="block mb-2 text-gray-700 font-medium">Story Points</label>
+                <input
+                  type="number"
+                  id="storyPoints"
+                  [(ngModel)]="newDetailUserStory.storyPoints"
+                  name="storyPoints"
+                  min="1"
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  [disabled]="loading">
+              </div>
 
-       
+              <div class="mb-4">
+                <label for="storyPriority" class="block mb-2 text-gray-700 font-medium">Priority</label>
+                <select
+                  id="storyPriority"
+                  [(ngModel)]="newDetailUserStory.priority"
+                  name="storyPriority"
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  [disabled]="loading">
+                  <option *ngFor="let priority of userStoryPriorityOptions" [ngValue]="priority">{{ priority }}</option>
+                </select>
+              </div>
 
               <div class="mb-4">
                 <label for="storyStatus" class="block mb-2 text-gray-700 font-medium">Status</label>
@@ -440,6 +469,7 @@
             <div class="flex items-center gap-3">
               <p class="font-semibold text-slate-900 text-lg leading-none">{{ story.name || story.title }}</p>
               <span class="px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="getUserStoryStatusBadgeClasses(story)">{{ getUserStoryStatusDisplay(story) }}</span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">P{{ story.priority ?? 0 }}</span>
             </div>
 
             <div class="relative user-story-actions-menu">

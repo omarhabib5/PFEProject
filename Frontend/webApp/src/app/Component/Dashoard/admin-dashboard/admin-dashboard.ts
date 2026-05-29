@@ -580,7 +580,9 @@ private adminNotificationsSubscription: Subscription | null = null;
   }
 
   goToProjectsByService(serviceId: number | 'all'): void {
-    const queryParams = serviceId === 'all' ? {} : { serviceId };
+    const queryParams = serviceId === 'all'
+      ? { detailTab: 'stories' }
+      : { serviceId, detailTab: 'stories' };
     this.router.navigate(['/ProjectManage'], { queryParams });
   }
 
@@ -593,12 +595,18 @@ private adminNotificationsSubscription: Subscription | null = null;
     this.router.navigate(['/']);
   }
 
-  goToProjectManager(): void {
-    this.router.navigate(['/ProjectManage']);
+  goToProjectManager(projectId?: number): void {
+    const queryParams: { detailTab: 'stories'; projectId?: number } = { detailTab: 'stories' };
+
+    if (projectId != null) {
+      queryParams.projectId = projectId;
+    }
+
+    this.router.navigate(['/ProjectManage'], { queryParams });
   }
 
   viewProject(id: number): void {
-    this.router.navigate(['/ProjectView'], { queryParams: { id } });
+    this.router.navigate(['/ProjectManage'], { queryParams: { projectId: id, detailTab: 'stories' } });
   }
 
   exportProjects(): void {

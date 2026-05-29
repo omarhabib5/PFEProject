@@ -120,7 +120,8 @@ const userStoryServiceMock = {
 };
 
 const tokenServiceMock = {
-  getUserRole: vi.fn().mockReturnValue(3),
+  getUserRole: vi.fn().mockReturnValue('admin'),
+  getUserData: vi.fn().mockReturnValue({ role: 'admin' }),
 };
 
 
@@ -174,10 +175,9 @@ describe('ProjectManager Component', () => {
       expect(tokenServiceMock.getUserRole).toHaveBeenCalled();
     });
 
-    it('TC04 – devrait avoir un rôle utilisateur égal à 3 (Chef de projet)', () => {
+    it('TC04 – devrait autoriser l admin à gérer les user stories', () => {
       fixture.detectChanges();
-      const role = tokenServiceMock.getUserRole();
-      expect(role).toBe(3);
+      expect(component.canManageUserStories).toBe(true);
     });
 
   });
